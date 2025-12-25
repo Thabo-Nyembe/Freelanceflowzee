@@ -3,7 +3,15 @@ import { useState, useMemo } from 'react'
 import { useDocuments, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
@@ -22,7 +30,8 @@ import {
   Tag, PenTool, Paperclip, FileUp, CloudUpload, HardDrive, CheckCircle2,
   AlertCircle, FileCheck, FileX, FileLock, FileSearch, FolderTree,
   FolderInput, FolderOutput, Timer, TrendingUp, Activity, Zap, Shield,
-  ExternalLink, RefreshCw, MoreVertical, Layers, Move, ArrowUpRight
+  ExternalLink, RefreshCw, MoreVertical, Layers, Move, ArrowUpRight,
+  Key, Webhook, Mail, Bell, AlertOctagon, Palette, Database, GitBranch
 } from 'lucide-react'
 
 // ============================================================================
@@ -286,6 +295,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { documents, loading, error } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
 
@@ -812,101 +822,626 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
           </TabsContent>
 
           {/* Settings Tab */}
+          {/* Settings Tab - Google Docs Level with 6 Sub-tabs */}
           <TabsContent value="settings">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Default Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Auto-save documents', desc: 'Save changes automatically', enabled: true },
-                    { label: 'Version history', desc: 'Keep track of all document changes', enabled: true },
-                    { label: 'Offline access', desc: 'Access documents without internet', enabled: false },
-                    { label: 'Share notifications', desc: 'Get notified when documents are shared', enabled: true },
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div>
-                        <p className="font-medium">{setting.label}</p>
-                        <p className="text-sm text-gray-500">{setting.desc}</p>
-                      </div>
-                      <Switch defaultChecked={setting.enabled} />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+            <div className="flex gap-6">
+              {/* Settings Sidebar */}
+              <div className="w-64 shrink-0">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 px-3">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'storage', icon: HardDrive, label: 'Storage' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'sharing', icon: Share2, label: 'Sharing' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations' },
+                      { id: 'advanced', icon: Lock, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Storage Management</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold">Pro Plan</span>
-                      <Badge className="bg-white/20 text-white border-0">Active</Badge>
-                    </div>
-                    <p className="text-sm text-white/80">15 GB storage • Unlimited documents</p>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Storage Used</span>
-                      <span>{formatBytes(storageInfo.used)} / {formatBytes(storageInfo.total)}</span>
-                    </div>
-                    <Progress value={(storageInfo.used / storageInfo.total) * 100} className="h-2" />
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Clear Trash
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Integrations</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    { name: 'Google Drive', connected: true },
-                    { name: 'Dropbox', connected: false },
-                    { name: 'OneDrive', connected: true },
-                  ].map((integration, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.connected ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'}`}>
-                          <HardDrive className="h-5 w-5" />
+              {/* Settings Content */}
+              <div className="flex-1 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Document Settings</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure document preferences</p>
+                          </div>
                         </div>
-                        <span className="font-medium">{integration.name}</span>
-                      </div>
-                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
-                        {integration.connected ? 'Disconnect' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-save Documents</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Save changes automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Version History</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep track of all document changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Offline Access</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Access documents without internet</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Save Interval</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How often to save changes</p>
+                          </div>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">Every 10 sec</SelectItem>
+                              <SelectItem value="30">Every 30 sec</SelectItem>
+                              <SelectItem value="60">Every minute</SelectItem>
+                              <SelectItem value="300">Every 5 min</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Export & Backup</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export All Documents
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Archive className="h-4 w-4 mr-2" />
-                    Download Backup
-                  </Button>
-                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                    <p className="text-sm text-amber-800 dark:text-amber-400">
-                      Last backup: {new Date().toLocaleDateString()}
-                    </p>
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Palette className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Display Settings</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Customize document appearance</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default View</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default document list view</p>
+                          </div>
+                          <Select defaultValue="grid">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="grid">Grid View</SelectItem>
+                              <SelectItem value="list">List View</SelectItem>
+                              <SelectItem value="compact">Compact</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Show File Extensions</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display file extensions in names</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Show Thumbnails</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display document previews</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {/* Storage Settings */}
+                {settingsTab === 'storage' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                            <HardDrive className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Storage Usage</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage your storage space</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg text-white">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold">Pro Plan</span>
+                            <Badge className="bg-white/20 text-white border-0">Active</Badge>
+                          </div>
+                          <p className="text-sm text-white/80">15 GB storage • Unlimited documents</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-gray-900 dark:text-white font-medium">Storage Used</span>
+                            <span className="text-gray-600 dark:text-gray-400">{formatBytes(storageInfo.used)} / {formatBytes(storageInfo.total)}</span>
+                          </div>
+                          <Progress value={(storageInfo.used / storageInfo.total) * 100} className="h-2" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-500">Documents</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">4.2 GB</p>
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-500">Images</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">2.8 GB</p>
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-500">Trash</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">512 MB</p>
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-500">Other</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">1.5 GB</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <Archive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Backup & Export</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Export and backup your documents</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Backup</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically backup documents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Backup Frequency</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How often to backup</p>
+                          </div>
+                          <Select defaultValue="daily">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                          <p className="text-sm text-amber-800 dark:text-amber-400">
+                            Last backup: {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export All
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Archive className="h-4 w-4 mr-2" />
+                            Download Backup
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Email Notifications</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure email alerts</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Share Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when documents are shared</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Comment Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified on new comments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Edit Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when documents are edited</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Weekly Summary</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly summary of document activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Webhook className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Push Notifications</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Real-time alerts</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Desktop Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show browser notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Mobile Push</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send to mobile device</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send notifications to Slack</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Sharing Settings */}
+                {settingsTab === 'sharing' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Share2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Default Sharing</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default sharing preferences</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default Visibility</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default visibility for new documents</p>
+                          </div>
+                          <Select defaultValue="private">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="private">Private</SelectItem>
+                              <SelectItem value="team">Team</SelectItem>
+                              <SelectItem value="organization">Organization</SelectItem>
+                              <SelectItem value="public">Public</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Allow Copy Link</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers copy document links</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Allow Download</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers download documents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Allow Print</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers print documents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <Link2 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Link Settings</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure shared link behavior</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Link Expiration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default expiration for shared links</p>
+                          </div>
+                          <Select defaultValue="never">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1day">1 Day</SelectItem>
+                              <SelectItem value="7days">7 Days</SelectItem>
+                              <SelectItem value="30days">30 Days</SelectItem>
+                              <SelectItem value="never">Never</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Require Password</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require password for shared links</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <HardDrive className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Cloud Storage</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Connect cloud storage services</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {[
+                          { name: 'Google Drive', connected: true },
+                          { name: 'Dropbox', connected: false },
+                          { name: 'OneDrive', connected: true },
+                          { name: 'Box', connected: false },
+                        ].map((integration, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.connected ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                <HardDrive className="h-5 w-5" />
+                              </div>
+                              <span className="font-medium text-gray-900 dark:text-white">{integration.name}</span>
+                            </div>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                              {integration.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                            <Key className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div>
+                            <CardTitle>API Access</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage API tokens</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono">
+                            doc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate Token
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <Database className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Data Management</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage your document data</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Version Retention</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep old versions</p>
+                          </div>
+                          <Select defaultValue="forever">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Archive</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Archive inactive documents</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Compress Images</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically compress uploaded images</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <Shield className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Security</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Security and privacy settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Two-Factor Auth</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for document access</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Watermark Documents</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Add watermark to shared documents</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <div className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                          <p className="text-sm text-red-600/70 dark:text-red-400/70">Destructive actions</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Clear Trash</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Permanently delete all trashed documents</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Clear Trash
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Delete All Documents</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all documents</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
