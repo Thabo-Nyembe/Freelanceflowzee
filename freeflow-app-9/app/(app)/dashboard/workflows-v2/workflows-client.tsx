@@ -10,6 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -67,7 +69,18 @@ import {
   Repeat,
   Shuffle,
   Split,
-  Combine
+  Combine,
+  Key,
+  Lock,
+  Bell,
+  AlertOctagon,
+  Palette,
+  Shield,
+  Sliders,
+  HardDrive,
+  Cpu,
+  Archive,
+  Download
 } from 'lucide-react'
 
 // ============================================================================
@@ -376,6 +389,7 @@ export default function WorkflowsClient() {
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [folderFilter, setFolderFilter] = useState<string>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -836,44 +850,714 @@ export default function WorkflowsClient() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Zapier-level configuration */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Workflow Settings</CardTitle>
-                <CardDescription>Configure default behaviors</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-muted-foreground">Receive alerts for workflow errors</p>
-                  </div>
-                  <Switch checked={true} />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Auto-retry Failed Runs</p>
-                    <p className="text-sm text-muted-foreground">Automatically retry failed workflow runs</p>
-                  </div>
-                  <Switch checked={true} />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Run History Retention</p>
-                    <p className="text-sm text-muted-foreground">Keep run logs for 30 days</p>
-                  </div>
-                  <Button variant="outline" size="sm">Configure</Button>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Webhook Secret</p>
-                    <p className="text-sm text-muted-foreground">Secure your incoming webhooks</p>
-                  </div>
-                  <Button variant="outline" size="sm">Regenerate</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Sliders, label: 'General' },
+                        { id: 'triggers', icon: Zap, label: 'Triggers' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'connections', icon: Link2, label: 'Connections' },
+                        { id: 'execution', icon: Cpu, label: 'Execution' },
+                        { id: 'advanced', icon: Lock, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-orange-500" />
+                          General Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="iso">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="iso">ISO 8601</SelectItem>
+                                <SelectItem value="us">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="eu">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="unix">Unix Timestamp</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Auto-retry Failed Runs</p>
+                              <p className="text-sm text-muted-foreground">Automatically retry failed workflow runs</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Enable Workflow Versioning</p>
+                              <p className="text-sm text-muted-foreground">Keep history of workflow changes</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Pause on Error</p>
+                              <p className="text-sm text-muted-foreground">Pause workflow after consecutive errors</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Repeat className="w-5 h-5 text-blue-500" />
+                          Retry Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Max Retry Attempts</Label>
+                            <Input type="number" defaultValue="3" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Retry Delay (seconds)</Label>
+                            <Input type="number" defaultValue="60" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Backoff Strategy</Label>
+                            <Select defaultValue="exponential">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="linear">Linear</SelectItem>
+                                <SelectItem value="exponential">Exponential</SelectItem>
+                                <SelectItem value="fixed">Fixed</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Backoff (seconds)</Label>
+                            <Input type="number" defaultValue="3600" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'triggers' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-500" />
+                          Webhook Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook Base URL</Label>
+                          <div className="flex gap-2">
+                            <Input value="https://hooks.freeflow.io/wf/" readOnly className="font-mono" />
+                            <Button variant="outline" size="icon">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook Secret</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="whsec_••••••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Validate Signatures</p>
+                            <p className="text-sm text-muted-foreground">Require HMAC signature validation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Allow Test Webhooks</p>
+                            <p className="text-sm text-muted-foreground">Enable test mode for debugging</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-green-500" />
+                          Schedule Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Schedules</p>
+                            <p className="text-sm text-muted-foreground">Allow scheduled workflow triggers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Minimum Interval</Label>
+                          <Select defaultValue="1m">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1m">1 Minute</SelectItem>
+                              <SelectItem value="5m">5 Minutes</SelectItem>
+                              <SelectItem value="15m">15 Minutes</SelectItem>
+                              <SelectItem value="1h">1 Hour</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Catch-up Missed Runs</p>
+                            <p className="text-sm text-muted-foreground">Run missed scheduled executions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-blue-500" />
+                          Polling Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Polling Interval</Label>
+                          <Select defaultValue="5m">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1m">Every Minute</SelectItem>
+                              <SelectItem value="5m">Every 5 Minutes</SelectItem>
+                              <SelectItem value="15m">Every 15 Minutes</SelectItem>
+                              <SelectItem value="1h">Every Hour</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Smart Polling</p>
+                            <p className="text-sm text-muted-foreground">Adjust interval based on data frequency</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Workflow Errors</p>
+                            <p className="text-sm text-muted-foreground">Alert when workflows fail</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Run Completions</p>
+                            <p className="text-sm text-muted-foreground">Notify on successful runs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Weekly Summary</p>
+                            <p className="text-sm text-muted-foreground">Weekly workflow performance report</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Notification Email</Label>
+                          <Input defaultValue="workflows@freeflow.io" type="email" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquare className="w-5 h-5 text-purple-500" />
+                          Slack Integration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Slack Notifications</p>
+                            <p className="text-sm text-muted-foreground">Send alerts to Slack</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Channel</Label>
+                          <Input defaultValue="#workflow-alerts" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Include Run Details</p>
+                            <p className="text-sm text-muted-foreground">Add workflow run data to messages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-red-500" />
+                          Error Thresholds
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Error Count Threshold</Label>
+                            <Input type="number" defaultValue="5" />
+                            <p className="text-xs text-muted-foreground">Alert after this many errors</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Window (minutes)</Label>
+                            <Input type="number" defaultValue="60" />
+                            <p className="text-xs text-muted-foreground">Within this time period</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-pause on Threshold</p>
+                            <p className="text-sm text-muted-foreground">Pause workflow when threshold reached</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'connections' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Link2 className="w-5 h-5 text-blue-500" />
+                          Connected Apps
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Gmail', description: 'Google Workspace', connected: true, icon: '📧' },
+                            { name: 'Slack', description: 'Team communication', connected: true, icon: '💬' },
+                            { name: 'Stripe', description: 'Payment processing', connected: true, icon: '💳' },
+                            { name: 'Salesforce', description: 'CRM', connected: false, icon: '☁️' },
+                            { name: 'HubSpot', description: 'Marketing automation', connected: false, icon: '🔶' }
+                          ].map(app => (
+                            <div key={app.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl">{app.icon}</span>
+                                <div>
+                                  <p className="font-medium">{app.name}</p>
+                                  <p className="text-sm text-muted-foreground">{app.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={app.connected ? 'default' : 'secondary'}>
+                                {app.connected ? 'Connected' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add New Connection
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-yellow-500" />
+                          API Credentials
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'OpenAI API', expires: 'Never', status: 'active' },
+                            { name: 'Twilio API', expires: 'Dec 2025', status: 'active' },
+                            { name: 'SendGrid API', expires: 'Jan 2025', status: 'expiring' }
+                          ].map(cred => (
+                            <div key={cred.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Key className="w-4 h-4 text-muted-foreground" />
+                                <div>
+                                  <p className="font-medium">{cred.name}</p>
+                                  <p className="text-sm text-muted-foreground">Expires: {cred.expires}</p>
+                                </div>
+                              </div>
+                              <Badge variant={cred.status === 'expiring' ? 'destructive' : 'secondary'}>
+                                {cred.status}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-500" />
+                          OAuth Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-refresh Tokens</p>
+                            <p className="text-sm text-muted-foreground">Automatically refresh expired tokens</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Require Re-auth on Failure</p>
+                            <p className="text-sm text-muted-foreground">Prompt to reconnect on auth errors</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'execution' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cpu className="w-5 h-5 text-purple-500" />
+                          Execution Limits
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Max Concurrent Runs</Label>
+                            <Input type="number" defaultValue="10" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Run Timeout (seconds)</Label>
+                            <Input type="number" defaultValue="300" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Steps per Run</Label>
+                            <Input type="number" defaultValue="100" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Data Size (MB)</Label>
+                            <Input type="number" defaultValue="50" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Timer className="w-5 h-5 text-blue-500" />
+                          Rate Limiting
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Runs per Minute</Label>
+                            <Input type="number" defaultValue="60" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Runs per Hour</Label>
+                            <Input type="number" defaultValue="1000" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Queue Overflow Runs</p>
+                            <p className="text-sm text-muted-foreground">Queue runs when limit reached</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Archive className="w-5 h-5 text-orange-500" />
+                          History & Storage
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Run History Retention (days)</Label>
+                            <Input type="number" defaultValue="30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Log Retention (days)</Label>
+                            <Input type="number" defaultValue="7" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Store Input/Output Data</p>
+                            <p className="text-sm text-muted-foreground">Keep step data for debugging</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Compress Old Runs</p>
+                            <p className="text-sm text-muted-foreground">Compress runs older than 7 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-blue-500" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="wf_api_••••••••••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline" size="icon">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable API Access</p>
+                            <p className="text-sm text-muted-foreground">Allow API triggers and management</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Rate Limit</p>
+                            <p className="text-sm text-muted-foreground">Requests per minute</p>
+                          </div>
+                          <Input type="number" defaultValue="100" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="w-5 h-5 text-green-500" />
+                          Debug & Logging
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-muted-foreground">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Log Sensitive Data</p>
+                            <p className="text-sm text-muted-foreground">Include data in logs (dev only)</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Log Level</Label>
+                          <Select defaultValue="info">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="debug">Debug</SelectItem>
+                              <SelectItem value="info">Info</SelectItem>
+                              <SelectItem value="warn">Warning</SelectItem>
+                              <SelectItem value="error">Error Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-purple-500" />
+                          Security
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">IP Whitelisting</p>
+                            <p className="text-sm text-muted-foreground">Restrict webhook sources</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Encrypt Stored Data</p>
+                            <p className="text-sm text-muted-foreground">Encrypt run data at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-muted-foreground">Log all workflow changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Delete All Runs</p>
+                            <p className="text-sm text-muted-foreground">Permanently delete run history</p>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Reset All Settings</p>
+                            <p className="text-sm text-muted-foreground">Reset to default configuration</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Export All Workflows</p>
+                            <p className="text-sm text-muted-foreground">Download all workflow configurations</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
