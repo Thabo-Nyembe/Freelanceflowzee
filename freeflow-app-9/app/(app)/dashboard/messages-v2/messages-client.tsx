@@ -24,8 +24,10 @@ import {
   Link2, Calendar, AlertCircle, ArrowUpRight, ArrowDownRight, TrendingUp,
   FolderOpen, Files, Sparkles, Globe, Moon, Sun, Palette, Shield, Key,
   RefreshCw, Megaphone, PhoneCall, PhoneOff, ScreenShare, Layers, PlayCircle,
-  PauseCircle, StopCircle, Radio, Voicemail, BookOpen, HelpCircle, Cog
+  PauseCircle, StopCircle, Radio, Voicemail, BookOpen, HelpCircle, Cog,
+  Webhook, HardDrive, AlertOctagon, CreditCard, Sliders
 } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // Types
 type ChannelType = 'public' | 'private' | 'direct' | 'group'
@@ -232,6 +234,7 @@ export default function MessagesClient() {
     messagePreview: true,
     autoMarkRead: true
   })
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats = useMemo(() => {
@@ -929,141 +932,643 @@ export default function MessagesClient() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Slack Level */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Push Notifications</Label>
-                      <p className="text-xs text-gray-500">Receive notifications for new messages</p>
-                    </div>
-                    <Switch checked={settings.notifications} onCheckedChange={(checked) => setSettings({ ...settings, notifications: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Sound Alerts</Label>
-                      <p className="text-xs text-gray-500">Play sounds for notifications</p>
-                    </div>
-                    <Switch checked={settings.sounds} onCheckedChange={(checked) => setSettings({ ...settings, sounds: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Desktop Notifications</Label>
-                      <p className="text-xs text-gray-500">Show desktop notification popups</p>
-                    </div>
-                    <Switch checked={settings.desktopNotifications} onCheckedChange={(checked) => setSettings({ ...settings, desktopNotifications: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Email Digest</Label>
-                      <p className="text-xs text-gray-500">Receive daily email summaries</p>
-                    </div>
-                    <Switch checked={settings.emailDigest} onCheckedChange={(checked) => setSettings({ ...settings, emailDigest: checked })} />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'appearance', label: 'Appearance', icon: Palette },
+                        { id: 'privacy', label: 'Privacy', icon: Shield },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Palette className="w-5 h-5" />
-                    Appearance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {settings.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                      <div>
-                        <Label className="font-medium">Dark Mode</Label>
-                        <p className="text-xs text-gray-500">Use dark theme</p>
+                {/* Messaging Stats Sidebar */}
+                <Card className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white border-0">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium opacity-90">Workspace Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold">{stats.totalMessages.toLocaleString()}</div>
+                      <div className="text-xs opacity-80">Total Messages</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">{stats.totalChannels}</div>
+                        <div className="text-xs opacity-80">Channels</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">{stats.onlineMembers}</div>
+                        <div className="text-xs opacity-80">Online</div>
                       </div>
                     </div>
-                    <Switch checked={settings.darkMode} onCheckedChange={(checked) => setSettings({ ...settings, darkMode: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
                     <div>
-                      <Label className="font-medium">Compact Mode</Label>
-                      <p className="text-xs text-gray-500">Reduce spacing in messages</p>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Storage Used</span>
+                        <span>18.5 GB</span>
+                      </div>
+                      <Progress value={62} className="h-2 bg-white/20" />
                     </div>
-                    <Switch checked={settings.compactMode} onCheckedChange={(checked) => setSettings({ ...settings, compactMode: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Message Preview</Label>
-                      <p className="text-xs text-gray-500">Show message previews in sidebar</p>
-                    </div>
-                    <Switch checked={settings.messagePreview} onCheckedChange={(checked) => setSettings({ ...settings, messagePreview: checked })} />
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Eye className="w-5 h-5" />
-                    Privacy
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Show Typing Indicators</Label>
-                      <p className="text-xs text-gray-500">Let others see when you're typing</p>
-                    </div>
-                    <Switch checked={settings.showTypingIndicators} onCheckedChange={(checked) => setSettings({ ...settings, showTypingIndicators: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Show Online Status</Label>
-                      <p className="text-xs text-gray-500">Let others see your status</p>
-                    </div>
-                    <Switch checked={settings.showOnlineStatus} onCheckedChange={(checked) => setSettings({ ...settings, showOnlineStatus: checked })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Auto Mark as Read</Label>
-                      <p className="text-xs text-gray-500">Automatically mark messages as read</p>
-                    </div>
-                    <Switch checked={settings.autoMarkRead} onCheckedChange={(checked) => setSettings({ ...settings, autoMarkRead: checked })} />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-purple-600" />
+                          Workspace Settings
+                        </CardTitle>
+                        <CardDescription>Configure your workspace preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Workspace Name</Label>
+                            <Input defaultValue="FreeFlow Team" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Workspace URL</Label>
+                            <Input defaultValue="freeflow.slack.com" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="pst">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Allow Message Editing</div>
+                            <div className="text-sm text-gray-500">Members can edit messages after sending</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Allow Message Deletion</div>
+                            <div className="text-sm text-gray-500">Members can delete their messages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HelpCircle className="w-5 h-5" />
-                    Help & Support
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Documentation
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Contact Support
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Zap className="w-4 h-4 mr-2" />
-                    Keyboard Shortcuts
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Check for Updates
-                  </Button>
-                </CardContent>
-              </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-blue-600" />
+                          Profile Settings
+                        </CardTitle>
+                        <CardDescription>Manage your profile information</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Display Name</Label>
+                            <Input defaultValue={currentUser.displayName} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Title</Label>
+                            <Input defaultValue={currentUser.title} />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Status Message</Label>
+                          <Input placeholder="What's your status?" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Set Status Automatically</div>
+                            <div className="text-sm text-gray-500">Update status based on calendar</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-600" />
+                          Notification Preferences
+                        </CardTitle>
+                        <CardDescription>Control how you receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Push Notifications</div>
+                            <div className="text-sm text-gray-500">Receive notifications for new messages</div>
+                          </div>
+                          <Switch checked={settings.notifications} onCheckedChange={(checked) => setSettings({ ...settings, notifications: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Sound Alerts</div>
+                            <div className="text-sm text-gray-500">Play sounds for notifications</div>
+                          </div>
+                          <Switch checked={settings.sounds} onCheckedChange={(checked) => setSettings({ ...settings, sounds: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Desktop Notifications</div>
+                            <div className="text-sm text-gray-500">Show desktop notification popups</div>
+                          </div>
+                          <Switch checked={settings.desktopNotifications} onCheckedChange={(checked) => setSettings({ ...settings, desktopNotifications: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Email Digest</div>
+                            <div className="text-sm text-gray-500">Receive daily email summaries</div>
+                          </div>
+                          <Switch checked={settings.emailDigest} onCheckedChange={(checked) => setSettings({ ...settings, emailDigest: checked })} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-blue-600" />
+                          Do Not Disturb
+                        </CardTitle>
+                        <CardDescription>Set quiet hours</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable DND Schedule</div>
+                            <div className="text-sm text-gray-500">Automatically mute notifications</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Start Time</Label>
+                            <Select defaultValue="22">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="20">8:00 PM</SelectItem>
+                                <SelectItem value="21">9:00 PM</SelectItem>
+                                <SelectItem value="22">10:00 PM</SelectItem>
+                                <SelectItem value="23">11:00 PM</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>End Time</Label>
+                            <Select defaultValue="8">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="6">6:00 AM</SelectItem>
+                                <SelectItem value="7">7:00 AM</SelectItem>
+                                <SelectItem value="8">8:00 AM</SelectItem>
+                                <SelectItem value="9">9:00 AM</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'appearance' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-pink-600" />
+                          Theme Settings
+                        </CardTitle>
+                        <CardDescription>Customize the look and feel</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-2">
+                            {settings.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                            <div>
+                              <div className="font-medium">Dark Mode</div>
+                              <div className="text-sm text-gray-500">Use dark theme</div>
+                            </div>
+                          </div>
+                          <Switch checked={settings.darkMode} onCheckedChange={(checked) => setSettings({ ...settings, darkMode: checked })} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Sidebar Theme</Label>
+                          <div className="flex gap-2">
+                            {['#4a154b', '#1264a3', '#2eb67d', '#e01e5a', '#36c5f0', '#ecb22e'].map(color => (
+                              <button
+                                key={color}
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Compact Mode</div>
+                            <div className="text-sm text-gray-500">Reduce spacing in messages</div>
+                          </div>
+                          <Switch checked={settings.compactMode} onCheckedChange={(checked) => setSettings({ ...settings, compactMode: checked })} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquare className="w-5 h-5 text-indigo-600" />
+                          Message Display
+                        </CardTitle>
+                        <CardDescription>Customize message appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Message Preview</div>
+                            <div className="text-sm text-gray-500">Show message previews in sidebar</div>
+                          </div>
+                          <Switch checked={settings.messagePreview} onCheckedChange={(checked) => setSettings({ ...settings, messagePreview: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Timestamps</div>
+                            <div className="text-sm text-gray-500">Display timestamps on all messages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Full Names</div>
+                            <div className="text-sm text-gray-500">Display full names instead of usernames</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Font Size</Label>
+                          <Select defaultValue="medium">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">Small</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="large">Large</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'privacy' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Privacy Settings
+                        </CardTitle>
+                        <CardDescription>Control your privacy and visibility</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Typing Indicators</div>
+                            <div className="text-sm text-gray-500">Let others see when you're typing</div>
+                          </div>
+                          <Switch checked={settings.showTypingIndicators} onCheckedChange={(checked) => setSettings({ ...settings, showTypingIndicators: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Online Status</div>
+                            <div className="text-sm text-gray-500">Let others see your status</div>
+                          </div>
+                          <Switch checked={settings.showOnlineStatus} onCheckedChange={(checked) => setSettings({ ...settings, showOnlineStatus: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto Mark as Read</div>
+                            <div className="text-sm text-gray-500">Automatically mark messages as read</div>
+                          </div>
+                          <Switch checked={settings.autoMarkRead} onCheckedChange={(checked) => setSettings({ ...settings, autoMarkRead: checked })} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Read Receipts</div>
+                            <div className="text-sm text-gray-500">Show when you've read messages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          Security
+                        </CardTitle>
+                        <CardDescription>Manage your security settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Two-Factor Authentication</div>
+                            <div className="text-sm text-gray-500">Add an extra layer of security</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Session Timeout</div>
+                            <div className="text-sm text-gray-500">Auto logout after inactivity</div>
+                          </div>
+                          <Select defaultValue="1h">
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30m">30 minutes</SelectItem>
+                              <SelectItem value="1h">1 hour</SelectItem>
+                              <SelectItem value="4h">4 hours</SelectItem>
+                              <SelectItem value="never">Never</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Key className="w-4 h-4 mr-2" />
+                          Manage Active Sessions
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-indigo-600" />
+                          Connected Apps
+                        </CardTitle>
+                        <CardDescription>Manage third-party integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#2684FF] flex items-center justify-center">
+                              <span className="text-white font-bold">J</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Jira</div>
+                              <div className="text-sm text-gray-500">Project tracking integration</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center">
+                              <span className="text-white font-bold">GH</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">GitHub</div>
+                              <div className="text-sm text-gray-500">Code notifications</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                              <span className="text-white font-bold">G</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Google Calendar</div>
+                              <div className="text-sm text-gray-500">Meeting reminders</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                              <span className="text-white font-bold">Z</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Zoom</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bot className="w-5 h-5 text-purple-600" />
+                          Bots & Workflows
+                        </CardTitle>
+                        <CardDescription>Manage automation and bots</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <Bot className="w-5 h-5 text-green-600" />
+                            <div>
+                              <div className="font-medium">Slackbot</div>
+                              <div className="text-sm text-gray-500">Built-in assistant</div>
+                            </div>
+                          </div>
+                          <Badge>Active</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <Workflow className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium">Custom Workflows</div>
+                              <div className="text-sm text-gray-500">3 active workflows</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Manage</Button>
+                        </div>
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add App
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-gray-600" />
+                          Data & Storage
+                        </CardTitle>
+                        <CardDescription>Manage your data and storage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Message Retention</Label>
+                          <Select defaultValue="forever">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="730">2 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Archive className="w-4 h-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HelpCircle className="w-5 h-5 text-blue-600" />
+                          Help & Support
+                        </CardTitle>
+                        <CardDescription>Get help and support resources</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Button variant="outline" className="w-full justify-start">
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Documentation
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Contact Support
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <Zap className="w-4 h-4 mr-2" />
+                          Keyboard Shortcuts
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Check for Updates
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Leave Workspace</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Remove yourself from this workspace</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Leave
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Delete All Messages</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all your messages</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
