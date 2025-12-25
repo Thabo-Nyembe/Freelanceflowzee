@@ -249,6 +249,35 @@ interface Activity {
   timestamp: string
 }
 
+interface Template {
+  id: string
+  name: string
+  description: string
+  category: 'project' | 'meeting' | 'brainstorm' | 'planning' | 'design' | 'agile'
+  preview: string
+  usageCount: number
+  createdBy: string
+  isOfficial: boolean
+}
+
+interface Integration {
+  id: string
+  name: string
+  type: 'calendar' | 'storage' | 'communication' | 'productivity' | 'development'
+  status: 'connected' | 'disconnected' | 'error'
+  icon: string
+  lastSync: string
+}
+
+interface Automation {
+  id: string
+  name: string
+  trigger: string
+  actions: string[]
+  isActive: boolean
+  lastTriggered?: string
+}
+
 // Mock Data
 const mockMembers: TeamMember[] = [
   { id: '1', name: 'Sarah Chen', email: 'sarah@example.com', role: 'admin', presence: 'online', cursorColor: '#3B82F6', lastActive: '2024-01-15T14:30:00Z', department: 'Product', title: 'Product Manager' },
@@ -311,6 +340,35 @@ const mockActivities: Activity[] = [
   { id: 'a5', type: 'member', user: mockMembers[0], action: 'invited', description: 'Invited Jordan Lee', resourceId: '5', resourceName: 'Jordan Lee', timestamp: '2024-01-14T16:00:00Z' }
 ]
 
+const mockTemplates: Template[] = [
+  { id: 'tmp1', name: 'Sprint Planning Board', description: 'Kanban board for sprint planning with backlog and status columns', category: 'agile', preview: '/templates/sprint.png', usageCount: 1245, createdBy: 'Collaboration Team', isOfficial: true },
+  { id: 'tmp2', name: 'Design Brainstorm', description: 'Visual brainstorming canvas with sticky notes and mood boards', category: 'brainstorm', preview: '/templates/brainstorm.png', usageCount: 892, createdBy: 'Design Team', isOfficial: true },
+  { id: 'tmp3', name: 'Weekly Standup', description: 'Meeting template for weekly team standups with agenda sections', category: 'meeting', preview: '/templates/standup.png', usageCount: 2156, createdBy: 'Collaboration Team', isOfficial: true },
+  { id: 'tmp4', name: 'Product Roadmap', description: 'Timeline-based roadmap for product planning and releases', category: 'planning', preview: '/templates/roadmap.png', usageCount: 1567, createdBy: 'Product Team', isOfficial: true },
+  { id: 'tmp5', name: 'User Flow Diagram', description: 'Template for mapping user journeys and application flows', category: 'design', preview: '/templates/userflow.png', usageCount: 734, createdBy: 'Design Team', isOfficial: true },
+  { id: 'tmp6', name: 'Project Kickoff', description: 'Comprehensive template for new project kickoff meetings', category: 'project', preview: '/templates/kickoff.png', usageCount: 1089, createdBy: 'Collaboration Team', isOfficial: true }
+]
+
+const mockIntegrations: Integration[] = [
+  { id: 'int1', name: 'Google Calendar', type: 'calendar', status: 'connected', icon: 'calendar', lastSync: '2024-01-15T14:00:00Z' },
+  { id: 'int2', name: 'Slack', type: 'communication', status: 'connected', icon: 'slack', lastSync: '2024-01-15T14:30:00Z' },
+  { id: 'int3', name: 'Google Drive', type: 'storage', status: 'connected', icon: 'drive', lastSync: '2024-01-15T13:00:00Z' },
+  { id: 'int4', name: 'Jira', type: 'productivity', status: 'connected', icon: 'jira', lastSync: '2024-01-15T12:00:00Z' },
+  { id: 'int5', name: 'GitHub', type: 'development', status: 'disconnected', icon: 'github', lastSync: '2024-01-10T09:00:00Z' },
+  { id: 'int6', name: 'Figma', type: 'productivity', status: 'connected', icon: 'figma', lastSync: '2024-01-15T14:15:00Z' },
+  { id: 'int7', name: 'Dropbox', type: 'storage', status: 'error', icon: 'dropbox', lastSync: '2024-01-14T16:00:00Z' },
+  { id: 'int8', name: 'Microsoft Teams', type: 'communication', status: 'disconnected', icon: 'teams', lastSync: '2024-01-05T10:00:00Z' }
+]
+
+const mockAutomations: Automation[] = [
+  { id: 'aut1', name: 'Auto-assign new tasks', trigger: 'When task is created', actions: ['Assign to project lead', 'Notify team channel'], isActive: true, lastTriggered: '2024-01-15T14:30:00Z' },
+  { id: 'aut2', name: 'Meeting reminder', trigger: '15 minutes before meeting', actions: ['Send desktop notification', 'Post in meeting channel'], isActive: true, lastTriggered: '2024-01-15T09:45:00Z' },
+  { id: 'aut3', name: 'Weekly digest', trigger: 'Every Monday at 9:00 AM', actions: ['Generate activity report', 'Send email to team'], isActive: true, lastTriggered: '2024-01-15T09:00:00Z' },
+  { id: 'aut4', name: 'File backup', trigger: 'When file is uploaded', actions: ['Sync to Google Drive', 'Create version history'], isActive: false },
+  { id: 'aut5', name: 'Sprint completion', trigger: 'When sprint ends', actions: ['Generate sprint report', 'Create retrospective board', 'Notify stakeholders'], isActive: true, lastTriggered: '2024-01-12T18:00:00Z' },
+  { id: 'aut6', name: 'Overdue task alert', trigger: 'Daily at 10:00 AM', actions: ['Check for overdue tasks', 'Send reminder to assignees', 'Update manager'], isActive: true, lastTriggered: '2024-01-15T10:00:00Z' }
+]
+
 export default function CollaborationClient() {
   const [activeTab, setActiveTab] = useState('boards')
   const [searchQuery, setSearchQuery] = useState('')
@@ -321,6 +379,10 @@ export default function CollaborationClient() {
   const [showNewMeeting, setShowNewMeeting] = useState(false)
   const [showNewChannel, setShowNewChannel] = useState(false)
   const [messageInput, setMessageInput] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false)
 
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
@@ -802,38 +864,280 @@ export default function CollaborationClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Notifications</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Desktop Notifications</p><p className="text-sm text-gray-500">Show desktop notifications</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Sound Alerts</p><p className="text-sm text-gray-500">Play sound for notifications</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Email Digest</p><p className="text-sm text-gray-500">Daily email summary</p></div><Switch /></div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Meeting Defaults</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Camera On</p><p className="text-sm text-gray-500">Start with camera enabled</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Microphone On</p><p className="text-sm text-gray-500">Start with mic enabled</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-Record</p><p className="text-sm text-gray-500">Record meetings automatically</p></div><Switch /></div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Privacy</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Presence</p><p className="text-sm text-gray-500">Let others see your status</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Read Receipts</p><p className="text-sm text-gray-500">Show when messages are read</p></div><Switch defaultChecked /></div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Compact Mode</p><p className="text-sm text-gray-500">Reduce message spacing</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Avatars</p><p className="text-sm text-gray-500">Display user avatars</p></div><Switch defaultChecked /></div>
-                </CardContent>
-              </Card>
-            </div>
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="general"><Settings2 className="h-4 w-4 mr-2" />General</TabsTrigger>
+                <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-2" />Notifications</TabsTrigger>
+                <TabsTrigger value="integrations"><Link2 className="h-4 w-4 mr-2" />Integrations</TabsTrigger>
+                <TabsTrigger value="automations"><Zap className="h-4 w-4 mr-2" />Automations</TabsTrigger>
+                <TabsTrigger value="privacy"><Lock className="h-4 w-4 mr-2" />Privacy</TabsTrigger>
+                <TabsTrigger value="appearance"><Palette className="h-4 w-4 mr-2" />Appearance</TabsTrigger>
+              </TabsList>
+
+              {/* General Settings */}
+              <TabsContent value="general">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Workspace Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>Workspace Name</Label><Input defaultValue="My Workspace" className="mt-1" /></div>
+                      <div><Label>Workspace URL</Label><Input defaultValue="my-workspace" className="mt-1" /></div>
+                      <div><Label>Default Language</Label>
+                        <Select defaultValue="en"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="en">English</SelectItem><SelectItem value="es">Spanish</SelectItem><SelectItem value="fr">French</SelectItem><SelectItem value="de">German</SelectItem></SelectContent></Select>
+                      </div>
+                      <div><Label>Timezone</Label>
+                        <Select defaultValue="utc"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="utc">UTC</SelectItem><SelectItem value="est">Eastern Time</SelectItem><SelectItem value="pst">Pacific Time</SelectItem><SelectItem value="gmt">GMT</SelectItem></SelectContent></Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Meeting Defaults</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Camera On</p><p className="text-sm text-gray-500">Start with camera enabled</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Microphone On</p><p className="text-sm text-gray-500">Start with mic enabled</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Auto-Record</p><p className="text-sm text-gray-500">Record meetings automatically</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable Transcription</p><p className="text-sm text-gray-500">Auto-transcribe meetings</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700 col-span-2">
+                    <CardHeader><CardTitle>Templates</CardTitle>
+                      <Button size="sm" onClick={() => setShowTemplateDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-3 gap-4">
+                        {mockTemplates.map(template => (
+                          <div key={template.id} className="p-4 border rounded-lg hover:border-blue-500 cursor-pointer">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                                <LayoutTemplate className="h-5 w-5 text-white" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-medium">{template.name}</h4>
+                                  {template.isOfficial && <Crown className="h-4 w-4 text-amber-500" />}
+                                </div>
+                                <Badge variant="outline" className="text-xs capitalize">{template.category}</Badge>
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-500 mb-2">{template.description}</p>
+                            <div className="flex items-center justify-between text-xs text-gray-400">
+                              <span>{template.usageCount} uses</span>
+                              <span>{template.createdBy}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Notifications Settings */}
+              <TabsContent value="notifications">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Desktop Notifications</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">All Notifications</p><p className="text-sm text-gray-500">Enable desktop notifications</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Direct Messages</p><p className="text-sm text-gray-500">Notify for DMs</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Mentions</p><p className="text-sm text-gray-500">Notify when mentioned</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Channel Messages</p><p className="text-sm text-gray-500">Notify for channel activity</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Sound & Alerts</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Sound Alerts</p><p className="text-sm text-gray-500">Play sound for notifications</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Meeting Reminders</p><p className="text-sm text-gray-500">Sound for meeting alerts</p></div><Switch defaultChecked /></div>
+                      <div><Label>Notification Sound</Label>
+                        <Select defaultValue="chime"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="chime">Chime</SelectItem><SelectItem value="pop">Pop</SelectItem><SelectItem value="ding">Ding</SelectItem><SelectItem value="none">None</SelectItem></SelectContent></Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Email Notifications</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Daily Digest</p><p className="text-sm text-gray-500">Summary of daily activity</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly activity report</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Meeting Invites</p><p className="text-sm text-gray-500">Email for meeting invites</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Do Not Disturb</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Schedule DND</p><p className="text-sm text-gray-500">Auto-enable outside work hours</p></div><Switch /></div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><Label>Start Time</Label><Input type="time" defaultValue="18:00" className="mt-1" /></div>
+                        <div><Label>End Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
+                      </div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Weekend DND</p><p className="text-sm text-gray-500">Auto DND on weekends</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Integrations Settings */}
+              <TabsContent value="integrations">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Connected Services</CardTitle>
+                      <Button size="sm" onClick={() => setShowIntegrationDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Integration</Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mockIntegrations.map(integration => (
+                        <div key={integration.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900' : integration.status === 'error' ? 'bg-red-100 dark:bg-red-900' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                            <Globe className={`h-6 w-6 ${integration.status === 'connected' ? 'text-green-600' : integration.status === 'error' ? 'text-red-600' : 'text-gray-500'}`} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{integration.name}</h4>
+                              <Badge variant="outline" className="text-xs capitalize">{integration.type}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-500">Last synced: {formatTimeAgo(integration.lastSync)}</p>
+                          </div>
+                          <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : integration.status === 'error' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}>
+                            {integration.status === 'connected' && <CheckCircle className="h-3 w-3 mr-1" />}
+                            {integration.status === 'error' && <AlertCircle className="h-3 w-3 mr-1" />}
+                            {integration.status}
+                          </Badge>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">{integration.status === 'connected' ? 'Configure' : 'Connect'}</Button>
+                            {integration.status === 'connected' && <Button variant="ghost" size="sm" className="text-red-600">Disconnect</Button>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Automations Settings */}
+              <TabsContent value="automations">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Workflow Automations</CardTitle>
+                      <Button size="sm" onClick={() => setShowAutomationDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mockAutomations.map(automation => (
+                        <div key={automation.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${automation.isActive ? 'bg-purple-100 dark:bg-purple-900' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                            <Zap className={`h-6 w-6 ${automation.isActive ? 'text-purple-600' : 'text-gray-500'}`} />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{automation.name}</h4>
+                            <p className="text-sm text-gray-500">Trigger: {automation.trigger}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              {automation.actions.slice(0, 2).map((action, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{action}</Badge>
+                              ))}
+                              {automation.actions.length > 2 && <Badge variant="outline" className="text-xs">+{automation.actions.length - 2} more</Badge>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {automation.lastTriggered && <p className="text-xs text-gray-500">Last run: {formatTimeAgo(automation.lastTriggered)}</p>}
+                          </div>
+                          <Switch checked={automation.isActive} />
+                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Privacy Settings */}
+              <TabsContent value="privacy">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Presence & Status</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Online Status</p><p className="text-sm text-gray-500">Let others see when you're online</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Typing Indicator</p><p className="text-sm text-gray-500">Show when you're typing</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Activity Status</p><p className="text-sm text-gray-500">Show what you're working on</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Message Privacy</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Read Receipts</p><p className="text-sm text-gray-500">Show when you've read messages</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Message Previews</p><p className="text-sm text-gray-500">Show message content in notifications</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Allow DMs</p><p className="text-sm text-gray-500">Allow direct messages from anyone</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Profile Visibility</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Public Profile</p><p className="text-sm text-gray-500">Make profile visible to everyone</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Email</p><p className="text-sm text-gray-500">Display email on profile</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Department</p><p className="text-sm text-gray-500">Display department info</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Data & Security</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Require 2FA for login</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Session Timeout</p><p className="text-sm text-gray-500">Auto-logout after inactivity</p></div><Switch /></div>
+                      <Button variant="outline" className="w-full"><Download className="h-4 w-4 mr-2" />Export My Data</Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Appearance Settings */}
+              <TabsContent value="appearance">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Theme</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>Color Theme</Label>
+                        <Select defaultValue="system"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="light">Light</SelectItem><SelectItem value="dark">Dark</SelectItem><SelectItem value="system">System</SelectItem></SelectContent></Select>
+                      </div>
+                      <div><Label>Accent Color</Label>
+                        <div className="flex gap-2 mt-2">
+                          {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
+                            <button key={color} className="w-8 h-8 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Display</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Compact Mode</p><p className="text-sm text-gray-500">Reduce spacing in messages</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Avatars</p><p className="text-sm text-gray-500">Display user avatars</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Timestamps</p><p className="text-sm text-gray-500">Display message times</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Sidebar</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Collapsed Sidebar</p><p className="text-sm text-gray-500">Start with sidebar collapsed</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Show Channel Icons</p><p className="text-sm text-gray-500">Display icons for channels</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Sort Channels</p><p className="text-sm text-gray-500">Alphabetically sort channels</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Accessibility</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Reduce Motion</p><p className="text-sm text-gray-500">Minimize animations</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">High Contrast</p><p className="text-sm text-gray-500">Increase color contrast</p></div><Switch /></div>
+                      <div><Label>Font Size</Label>
+                        <Select defaultValue="medium"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="small">Small</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="large">Large</SelectItem></SelectContent></Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
 
@@ -854,6 +1158,143 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewMeeting(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700">Schedule Meeting</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Template</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Template Name</Label><Input placeholder="My Template" /></div>
+              <div><Label>Description</Label><Textarea placeholder="What is this template for?" rows={3} /></div>
+              <div><Label>Category</Label>
+                <Select><SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger><SelectContent>
+                  <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="meeting">Meeting</SelectItem>
+                  <SelectItem value="brainstorm">Brainstorm</SelectItem>
+                  <SelectItem value="planning">Planning</SelectItem>
+                  <SelectItem value="design">Design</SelectItem>
+                  <SelectItem value="agile">Agile</SelectItem>
+                </SelectContent></Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-gray-500" /><span className="text-sm">Make template public</span></div>
+                <Switch />
+              </div>
+              <div className="p-4 border-2 border-dashed rounded-lg text-center">
+                <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Upload preview image</p>
+                <p className="text-xs text-gray-400">PNG, JPG up to 2MB</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">Create Template</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Add Integration</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <Input placeholder="Search integrations..." className="mb-4" />
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: 'Google Calendar', type: 'calendar', description: 'Sync meetings and events' },
+                  { name: 'Slack', type: 'communication', description: 'Send notifications to Slack' },
+                  { name: 'Google Drive', type: 'storage', description: 'Access and share files' },
+                  { name: 'Dropbox', type: 'storage', description: 'Cloud storage integration' },
+                  { name: 'Jira', type: 'productivity', description: 'Sync tasks and issues' },
+                  { name: 'GitHub', type: 'development', description: 'Link code repositories' },
+                  { name: 'Figma', type: 'productivity', description: 'Embed design files' },
+                  { name: 'Zoom', type: 'communication', description: 'Video conferencing' },
+                ].map((integration, i) => (
+                  <div key={i} className="flex items-center gap-3 p-4 border rounded-lg hover:border-blue-500 cursor-pointer">
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <Globe className="h-5 w-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{integration.name}</h4>
+                      <p className="text-sm text-gray-500">{integration.description}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs capitalize">{integration.type}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Automation Dialog */}
+        <Dialog open={showAutomationDialog} onOpenChange={setShowAutomationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Automation</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Automation Name</Label><Input placeholder="My Automation" /></div>
+              <div><Label>Trigger</Label>
+                <Select><SelectTrigger><SelectValue placeholder="When should this run?" /></SelectTrigger><SelectContent>
+                  <SelectItem value="task_created">When task is created</SelectItem>
+                  <SelectItem value="task_completed">When task is completed</SelectItem>
+                  <SelectItem value="meeting_starts">When meeting starts</SelectItem>
+                  <SelectItem value="file_uploaded">When file is uploaded</SelectItem>
+                  <SelectItem value="member_joins">When member joins</SelectItem>
+                  <SelectItem value="daily">Daily at specific time</SelectItem>
+                  <SelectItem value="weekly">Weekly on specific day</SelectItem>
+                </SelectContent></Select>
+              </div>
+              <div><Label>Actions</Label>
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <Zap className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm">Send notification</span>
+                    <Button variant="ghost" size="sm" className="ml-auto"><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Action</Button>
+                </div>
+              </div>
+              <div><Label>Conditions (Optional)</Label>
+                <Textarea placeholder="Add conditions for when this automation should run..." rows={2} />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /><span className="text-sm">Enable automation immediately</span></div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700">Create Automation</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Channel Dialog */}
+        <Dialog open={showNewChannel} onOpenChange={setShowNewChannel}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Channel</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Channel Name</Label><Input placeholder="project-updates" /></div>
+              <div><Label>Description</Label><Textarea placeholder="What's this channel about?" rows={2} /></div>
+              <div><Label>Channel Type</Label>
+                <Select defaultValue="public"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+                  <SelectItem value="public">Public - Anyone can join</SelectItem>
+                  <SelectItem value="private">Private - Invite only</SelectItem>
+                </SelectContent></Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2"><Bell className="h-4 w-4 text-gray-500" /><span className="text-sm">Post announcement when created</span></div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewChannel(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">Create Channel</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
