@@ -5,289 +5,406 @@ import {
   ChevronRight, ChevronDown, Calendar, BarChart3, Settings, RefreshCw, Download,
   CheckCircle, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye, EyeOff,
   Zap, Package, TrendingUp, TrendingDown, ExternalLink, Copy, MoreHorizontal,
-  Building, User, Mail, Phone, Globe, Shield, Lock, CreditCard as CardIcon
+  Building, User, Mail, Phone, Globe, Shield, Lock, CreditCard as CardIcon,
+  Tag, Percent, RotateCcw, Webhook, FileText, Filter, Search, Star, Gift,
+  BadgePercent, Wallet, Banknote, PiggyBank, Activity, ArrowRight, Timer,
+  CheckCircle2, XCircle, History, Bell, Link2
 } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useBilling, type BillingTransaction, type BillingStatus } from '@/lib/hooks/use-billing'
 
 interface Subscription {
   id: string
-  customerId: string
-  customerName: string
-  customerEmail: string
+  customer_id: string
+  customer_name: string
+  customer_email: string
   plan: string
-  status: 'active' | 'past_due' | 'canceled' | 'trialing' | 'paused'
+  status: 'active' | 'past_due' | 'canceled' | 'trialing' | 'paused' | 'incomplete'
   amount: number
-  interval: 'month' | 'year'
-  currentPeriodStart: string
-  currentPeriodEnd: string
-  cancelAtPeriodEnd: boolean
-  paymentMethod?: PaymentMethod
+  interval: 'month' | 'year' | 'week'
+  current_period_start: string
+  current_period_end: string
+  cancel_at_period_end: boolean
+  trial_end: string | null
+  payment_method?: PaymentMethod
+  metadata: Record<string, string>
+  created_at: string
 }
 
 interface PaymentMethod {
   id: string
-  type: 'card' | 'bank_account' | 'sepa_debit'
+  type: 'card' | 'bank_account' | 'sepa_debit' | 'us_bank_account'
   brand?: string
   last4: string
-  expMonth?: number
-  expYear?: number
-  isDefault: boolean
+  exp_month?: number
+  exp_year?: number
+  is_default: boolean
+  fingerprint: string
 }
 
 interface Invoice {
   id: string
   number: string
-  customerId: string
-  customerName: string
+  customer_id: string
+  customer_name: string
+  customer_email: string
   status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+  amount_due: number
+  amount_paid: number
+  amount_remaining: number
+  subtotal: number
+  tax: number
+  total: number
+  due_date: string
+  created_at: string
+  paid_at?: string
+  hosted_invoice_url?: string
+  pdf_url?: string
+  line_items: InvoiceLineItem[]
+  discount?: { coupon_id: string; amount_off: number }
+}
+
+interface InvoiceLineItem {
+  id: string
+  description: string
+  quantity: number
+  unit_amount: number
   amount: number
-  amountPaid: number
-  amountRemaining: number
-  dueDate: string
-  createdAt: string
-  paidAt?: string
-  lineItems: { description: string; quantity: number; unitPrice: number }[]
+  period: { start: string; end: string }
+}
+
+interface Coupon {
+  id: string
+  name: string
+  code: string
+  type: 'percent_off' | 'amount_off'
+  value: number
+  currency?: string
+  duration: 'once' | 'repeating' | 'forever'
+  duration_in_months?: number
+  max_redemptions?: number
+  times_redeemed: number
+  valid: boolean
+  expires_at?: string
+  created_at: string
+}
+
+interface TaxRate {
+  id: string
+  name: string
+  percentage: number
+  jurisdiction: string
+  country: string
+  state?: string
+  inclusive: boolean
+  active: boolean
+}
+
+interface Refund {
+  id: string
+  payment_id: string
+  amount: number
+  currency: string
+  status: 'pending' | 'succeeded' | 'failed' | 'canceled'
+  reason: 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'expired_uncaptured_charge'
+  created_at: string
+  metadata?: Record<string, string>
 }
 
 interface UsageRecord {
   id: string
-  subscriptionId: string
-  customerId: string
-  customerName: string
+  subscription_id: string
+  customer_id: string
+  customer_name: string
   quantity: number
   timestamp: string
-  unitPrice: number
+  unit_price: number
   total: number
+  action: 'set' | 'increment'
+}
+
+interface WebhookEndpoint {
+  id: string
+  url: string
+  events: string[]
+  status: 'enabled' | 'disabled'
+  secret: string
+  created_at: string
+  last_delivery: string | null
+  success_rate: number
+}
+
+interface PricingPlan {
+  id: string
+  name: string
+  description: string
+  amount: number
+  currency: string
+  interval: 'month' | 'year' | 'week'
+  features: string[]
+  is_active: boolean
+  trial_days: number
+  subscribers: number
 }
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
-  const [activeView, setActiveView] = useState<'overview' | 'subscriptions' | 'invoices' | 'payments' | 'usage'>('overview')
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<BillingStatus | 'all'>('all')
   const [showNewSubscriptionModal, setShowNewSubscriptionModal] = useState(false)
-  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false)
+  const [showNewCouponModal, setShowNewCouponModal] = useState(false)
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null)
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
 
   const { transactions, loading, error } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
 
   // Mock subscriptions data
-  const [subscriptions] = useState<Subscription[]>([
-    { id: '1', customerId: 'cus_1', customerName: 'Acme Corp', customerEmail: 'billing@acme.com', plan: 'Pro Monthly', status: 'active', amount: 99, interval: 'month', currentPeriodStart: '2024-12-01', currentPeriodEnd: '2025-01-01', cancelAtPeriodEnd: false, paymentMethod: { id: 'pm_1', type: 'card', brand: 'visa', last4: '4242', expMonth: 12, expYear: 2025, isDefault: true } },
-    { id: '2', customerId: 'cus_2', customerName: 'TechStart Inc', customerEmail: 'finance@techstart.io', plan: 'Enterprise Annual', status: 'active', amount: 999, interval: 'year', currentPeriodStart: '2024-01-15', currentPeriodEnd: '2025-01-15', cancelAtPeriodEnd: false, paymentMethod: { id: 'pm_2', type: 'card', brand: 'mastercard', last4: '5555', expMonth: 3, expYear: 2026, isDefault: true } },
-    { id: '3', customerId: 'cus_3', customerName: 'Startup Labs', customerEmail: 'billing@startuplabs.co', plan: 'Pro Monthly', status: 'past_due', amount: 99, interval: 'month', currentPeriodStart: '2024-11-15', currentPeriodEnd: '2024-12-15', cancelAtPeriodEnd: false, paymentMethod: { id: 'pm_3', type: 'card', brand: 'visa', last4: '1234', expMonth: 1, expYear: 2024, isDefault: true } },
-    { id: '4', customerId: 'cus_4', customerName: 'Creative Agency', customerEmail: 'accounts@creative.agency', plan: 'Team Monthly', status: 'trialing', amount: 49, interval: 'month', currentPeriodStart: '2024-12-10', currentPeriodEnd: '2025-01-10', cancelAtPeriodEnd: false },
-    { id: '5', customerId: 'cus_5', customerName: 'Global Industries', customerEmail: 'ap@global-ind.com', plan: 'Enterprise Annual', status: 'canceled', amount: 999, interval: 'year', currentPeriodStart: '2024-06-01', currentPeriodEnd: '2024-12-01', cancelAtPeriodEnd: true },
-  ])
+  const subscriptions: Subscription[] = [
+    { id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
+      plan: 'Pro Monthly', status: 'active', amount: 99, interval: 'month',
+      current_period_start: '2024-12-01', current_period_end: '2025-01-01', cancel_at_period_end: false, trial_end: null,
+      payment_method: { id: 'pm_1', type: 'card', brand: 'visa', last4: '4242', exp_month: 12, exp_year: 2025, is_default: true, fingerprint: 'abc123' },
+      metadata: { company_size: '50-100' }, created_at: '2024-06-15' },
+    { id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', customer_email: 'finance@techstart.io',
+      plan: 'Enterprise Annual', status: 'active', amount: 999, interval: 'year',
+      current_period_start: '2024-01-15', current_period_end: '2025-01-15', cancel_at_period_end: false, trial_end: null,
+      payment_method: { id: 'pm_2', type: 'card', brand: 'mastercard', last4: '5555', exp_month: 3, exp_year: 2026, is_default: true, fingerprint: 'def456' },
+      metadata: { company_size: '100-500' }, created_at: '2024-01-15' },
+    { id: 'sub_3', customer_id: 'cus_3', customer_name: 'Startup Labs', customer_email: 'billing@startuplabs.co',
+      plan: 'Pro Monthly', status: 'past_due', amount: 99, interval: 'month',
+      current_period_start: '2024-11-15', current_period_end: '2024-12-15', cancel_at_period_end: false, trial_end: null,
+      payment_method: { id: 'pm_3', type: 'card', brand: 'visa', last4: '1234', exp_month: 1, exp_year: 2024, is_default: true, fingerprint: 'ghi789' },
+      metadata: {}, created_at: '2024-05-01' },
+    { id: 'sub_4', customer_id: 'cus_4', customer_name: 'Creative Agency', customer_email: 'accounts@creative.agency',
+      plan: 'Team Monthly', status: 'trialing', amount: 49, interval: 'month',
+      current_period_start: '2024-12-10', current_period_end: '2025-01-10', cancel_at_period_end: false, trial_end: '2024-12-24',
+      metadata: { referral: 'partner_123' }, created_at: '2024-12-10' },
+    { id: 'sub_5', customer_id: 'cus_5', customer_name: 'Global Industries', customer_email: 'ap@global-ind.com',
+      plan: 'Enterprise Annual', status: 'canceled', amount: 999, interval: 'year',
+      current_period_start: '2024-06-01', current_period_end: '2024-12-01', cancel_at_period_end: true, trial_end: null,
+      payment_method: { id: 'pm_5', type: 'card', brand: 'amex', last4: '1111', exp_month: 8, exp_year: 2025, is_default: true, fingerprint: 'jkl012' },
+      metadata: { cancel_reason: 'budget_constraints' }, created_at: '2023-06-01' }
+  ]
 
   // Mock invoices data
-  const [invoices] = useState<Invoice[]>([
-    { id: 'inv_1', number: 'INV-2024-001', customerId: 'cus_1', customerName: 'Acme Corp', status: 'paid', amount: 99, amountPaid: 99, amountRemaining: 0, dueDate: '2024-12-15', createdAt: '2024-12-01', paidAt: '2024-12-03', lineItems: [{ description: 'Pro Monthly Plan', quantity: 1, unitPrice: 99 }] },
-    { id: 'inv_2', number: 'INV-2024-002', customerId: 'cus_2', customerName: 'TechStart Inc', status: 'paid', amount: 999, amountPaid: 999, amountRemaining: 0, dueDate: '2024-12-20', createdAt: '2024-12-05', paidAt: '2024-12-05', lineItems: [{ description: 'Enterprise Annual Plan', quantity: 1, unitPrice: 999 }] },
-    { id: 'inv_3', number: 'INV-2024-003', customerId: 'cus_3', customerName: 'Startup Labs', status: 'open', amount: 99, amountPaid: 0, amountRemaining: 99, dueDate: '2024-12-25', createdAt: '2024-12-10', lineItems: [{ description: 'Pro Monthly Plan', quantity: 1, unitPrice: 99 }] },
-    { id: 'inv_4', number: 'INV-2024-004', customerId: 'cus_4', customerName: 'Creative Agency', status: 'draft', amount: 49, amountPaid: 0, amountRemaining: 49, dueDate: '2025-01-10', createdAt: '2024-12-20', lineItems: [{ description: 'Team Monthly Plan', quantity: 1, unitPrice: 49 }] },
-  ])
+  const invoices: Invoice[] = [
+    { id: 'inv_1', number: 'INV-2024-001', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
+      status: 'paid', amount_due: 99, amount_paid: 99, amount_remaining: 0, subtotal: 99, tax: 0, total: 99,
+      due_date: '2024-12-15', created_at: '2024-12-01', paid_at: '2024-12-03', hosted_invoice_url: 'https://pay.stripe.com/inv_1',
+      line_items: [{ id: 'li_1', description: 'Pro Monthly Plan - Dec 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-12-01', end: '2025-01-01' } }] },
+    { id: 'inv_2', number: 'INV-2024-002', customer_id: 'cus_2', customer_name: 'TechStart Inc', customer_email: 'finance@techstart.io',
+      status: 'paid', amount_due: 999, amount_paid: 999, amount_remaining: 0, subtotal: 999, tax: 0, total: 999,
+      due_date: '2024-12-20', created_at: '2024-12-05', paid_at: '2024-12-05', hosted_invoice_url: 'https://pay.stripe.com/inv_2',
+      line_items: [{ id: 'li_2', description: 'Enterprise Annual Plan - 2024', quantity: 1, unit_amount: 999, amount: 999, period: { start: '2024-01-15', end: '2025-01-15' } }] },
+    { id: 'inv_3', number: 'INV-2024-003', customer_id: 'cus_3', customer_name: 'Startup Labs', customer_email: 'billing@startuplabs.co',
+      status: 'open', amount_due: 99, amount_paid: 0, amount_remaining: 99, subtotal: 99, tax: 0, total: 99,
+      due_date: '2024-12-25', created_at: '2024-12-10', hosted_invoice_url: 'https://pay.stripe.com/inv_3',
+      line_items: [{ id: 'li_3', description: 'Pro Monthly Plan - Dec 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-11-15', end: '2024-12-15' } }] },
+    { id: 'inv_4', number: 'INV-2024-004', customer_id: 'cus_4', customer_name: 'Creative Agency', customer_email: 'accounts@creative.agency',
+      status: 'draft', amount_due: 49, amount_paid: 0, amount_remaining: 49, subtotal: 49, tax: 0, total: 49,
+      due_date: '2025-01-10', created_at: '2024-12-20', line_items: [{ id: 'li_4', description: 'Team Monthly Plan - Jan 2025', quantity: 1, unit_amount: 49, amount: 49, period: { start: '2024-12-10', end: '2025-01-10' } }] },
+    { id: 'inv_5', number: 'INV-2024-005', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
+      status: 'paid', amount_due: 89.10, amount_paid: 89.10, amount_remaining: 0, subtotal: 99, tax: 0, total: 89.10,
+      due_date: '2024-11-15', created_at: '2024-11-01', paid_at: '2024-11-02', discount: { coupon_id: 'coup_1', amount_off: 9.90 },
+      line_items: [{ id: 'li_5', description: 'Pro Monthly Plan - Nov 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-11-01', end: '2024-12-01' } }] }
+  ]
+
+  // Mock coupons
+  const coupons: Coupon[] = [
+    { id: 'coup_1', name: 'First Month 10% Off', code: 'WELCOME10', type: 'percent_off', value: 10, duration: 'once',
+      max_redemptions: 100, times_redeemed: 47, valid: true, expires_at: '2025-03-31', created_at: '2024-01-01' },
+    { id: 'coup_2', name: 'Annual Discount', code: 'ANNUAL20', type: 'percent_off', value: 20, duration: 'forever',
+      times_redeemed: 23, valid: true, created_at: '2024-02-15' },
+    { id: 'coup_3', name: 'Partner Referral', code: 'PARTNER50', type: 'amount_off', value: 50, currency: 'USD', duration: 'once',
+      max_redemptions: 50, times_redeemed: 12, valid: true, created_at: '2024-03-01' },
+    { id: 'coup_4', name: 'Summer Sale', code: 'SUMMER25', type: 'percent_off', value: 25, duration: 'repeating', duration_in_months: 3,
+      max_redemptions: 200, times_redeemed: 189, valid: false, expires_at: '2024-09-30', created_at: '2024-06-01' }
+  ]
+
+  // Mock tax rates
+  const taxRates: TaxRate[] = [
+    { id: 'txr_1', name: 'US Sales Tax', percentage: 8.25, jurisdiction: 'California', country: 'US', state: 'CA', inclusive: false, active: true },
+    { id: 'txr_2', name: 'EU VAT', percentage: 20, jurisdiction: 'European Union', country: 'EU', inclusive: true, active: true },
+    { id: 'txr_3', name: 'UK VAT', percentage: 20, jurisdiction: 'United Kingdom', country: 'GB', inclusive: true, active: true }
+  ]
+
+  // Mock refunds
+  const refunds: Refund[] = [
+    { id: 'ref_1', payment_id: 'pay_123', amount: 99, currency: 'USD', status: 'succeeded', reason: 'requested_by_customer', created_at: '2024-12-20' },
+    { id: 'ref_2', payment_id: 'pay_456', amount: 49, currency: 'USD', status: 'pending', reason: 'duplicate', created_at: '2024-12-22' }
+  ]
 
   // Mock usage records
-  const [usageRecords] = useState<UsageRecord[]>([
-    { id: 'use_1', subscriptionId: 'sub_1', customerId: 'cus_1', customerName: 'Acme Corp', quantity: 15000, timestamp: '2024-12-23', unitPrice: 0.001, total: 15 },
-    { id: 'use_2', subscriptionId: 'sub_1', customerId: 'cus_1', customerName: 'Acme Corp', quantity: 12000, timestamp: '2024-12-22', unitPrice: 0.001, total: 12 },
-    { id: 'use_3', subscriptionId: 'sub_2', customerId: 'cus_2', customerName: 'TechStart Inc', quantity: 45000, timestamp: '2024-12-23', unitPrice: 0.001, total: 45 },
-    { id: 'use_4', subscriptionId: 'sub_2', customerId: 'cus_2', customerName: 'TechStart Inc', quantity: 38000, timestamp: '2024-12-22', unitPrice: 0.001, total: 38 },
-  ])
+  const usageRecords: UsageRecord[] = [
+    { id: 'use_1', subscription_id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', quantity: 15000, timestamp: '2024-12-23', unit_price: 0.001, total: 15, action: 'set' },
+    { id: 'use_2', subscription_id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', quantity: 12000, timestamp: '2024-12-22', unit_price: 0.001, total: 12, action: 'increment' },
+    { id: 'use_3', subscription_id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', quantity: 45000, timestamp: '2024-12-23', unit_price: 0.001, total: 45, action: 'set' },
+    { id: 'use_4', subscription_id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', quantity: 38000, timestamp: '2024-12-22', unit_price: 0.001, total: 38, action: 'increment' }
+  ]
+
+  // Mock webhooks
+  const webhooks: WebhookEndpoint[] = [
+    { id: 'we_1', url: 'https://api.yourapp.com/webhooks/stripe', events: ['invoice.paid', 'invoice.payment_failed', 'customer.subscription.updated'],
+      status: 'enabled', secret: 'whsec_xxxxx', created_at: '2024-01-01', last_delivery: '2024-12-23T15:30:00Z', success_rate: 99.8 },
+    { id: 'we_2', url: 'https://slack.yourapp.com/billing-alerts', events: ['invoice.payment_failed', 'customer.subscription.deleted'],
+      status: 'enabled', secret: 'whsec_yyyyy', created_at: '2024-03-15', last_delivery: '2024-12-20T10:00:00Z', success_rate: 100 }
+  ]
+
+  // Mock pricing plans
+  const pricingPlans: PricingPlan[] = [
+    { id: 'plan_1', name: 'Starter', description: 'For individuals and small teams', amount: 0, currency: 'USD', interval: 'month',
+      features: ['Up to 3 users', '1GB storage', 'Basic support'], is_active: true, trial_days: 0, subscribers: 156 },
+    { id: 'plan_2', name: 'Team', description: 'For growing teams', amount: 49, currency: 'USD', interval: 'month',
+      features: ['Up to 10 users', '10GB storage', 'Priority support', 'API access'], is_active: true, trial_days: 14, subscribers: 89 },
+    { id: 'plan_3', name: 'Pro', description: 'For professionals', amount: 99, currency: 'USD', interval: 'month',
+      features: ['Unlimited users', '100GB storage', 'Premium support', 'API access', 'Custom integrations'], is_active: true, trial_days: 14, subscribers: 234 },
+    { id: 'plan_4', name: 'Enterprise', description: 'For large organizations', amount: 999, currency: 'USD', interval: 'year',
+      features: ['Unlimited everything', 'Dedicated support', 'Custom contracts', 'SLA guarantee', 'SSO'], is_active: true, trial_days: 30, subscribers: 45 }
+  ]
 
   const stats = useMemo(() => {
-    const mrr = subscriptions.filter(s => s.status === 'active').reduce((sum, s) => sum + (s.interval === 'month' ? s.amount : s.amount / 12), 0)
+    const mrr = subscriptions.filter(s => s.status === 'active').reduce((sum, s) => sum + (s.interval === 'month' ? s.amount : s.interval === 'year' ? s.amount / 12 : s.amount * 4), 0)
     const arr = mrr * 12
     const activeSubscriptions = subscriptions.filter(s => s.status === 'active').length
     const pastDue = subscriptions.filter(s => s.status === 'past_due').length
+    const trialing = subscriptions.filter(s => s.status === 'trialing').length
+    const churnedThisMonth = subscriptions.filter(s => s.status === 'canceled').length
     const openInvoices = invoices.filter(i => i.status === 'open').length
-    const openAmount = invoices.filter(i => i.status === 'open').reduce((sum, i) => sum + i.amountRemaining, 0)
-    const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amountPaid, 0)
+    const openAmount = invoices.filter(i => i.status === 'open').reduce((sum, i) => sum + i.amount_remaining, 0)
+    const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount_paid, 0)
     const totalUsage = usageRecords.reduce((sum, u) => sum + u.total, 0)
+    const totalRefunds = refunds.filter(r => r.status === 'succeeded').reduce((sum, r) => sum + r.amount, 0)
+    const activeCoupons = coupons.filter(c => c.valid).length
+    return { mrr, arr, activeSubscriptions, pastDue, trialing, churnedThisMonth, openInvoices, openAmount, totalRevenue, totalUsage, totalRefunds, activeCoupons }
+  }, [subscriptions, invoices, usageRecords, refunds, coupons])
 
-    return { mrr, arr, activeSubscriptions, pastDue, openInvoices, openAmount, totalRevenue, totalUsage }
-  }, [subscriptions, invoices, usageRecords])
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(amount)
 
-  const views = [
-    { id: 'overview' as const, name: 'Overview', icon: BarChart3 },
-    { id: 'subscriptions' as const, name: 'Subscriptions', icon: RefreshCw },
-    { id: 'invoices' as const, name: 'Invoices', icon: Receipt },
-    { id: 'payments' as const, name: 'Payments', icon: CreditCard },
-    { id: 'usage' as const, name: 'Usage', icon: Zap },
-  ]
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-      case 'paid':
-      case 'succeeded': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'past_due':
-      case 'open':
-      case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      case 'canceled':
-      case 'void':
-      case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      case 'trialing': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+  const getStatusColor = (status: string): string => {
+    const colors: Record<string, string> = {
+      active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      succeeded: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      past_due: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      open: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      canceled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      void: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      trialing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      paused: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-400',
+      incomplete: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      enabled: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      disabled: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
     }
+    return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    }).format(amount)
-  }
-
-  if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
+  if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 dark:bg-none dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl">
-                <CreditCard className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 dark:bg-none dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl">
+                <CreditCard className="h-8 w-8" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Billing</h1>
-              <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
-                Stripe Level
-              </Badge>
+              <div>
+                <h1 className="text-3xl font-bold">Billing & Subscriptions</h1>
+                <p className="text-indigo-100">Stripe-level billing and revenue management</p>
+              </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">Manage subscriptions, invoices, and payments</p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                <Shield className="h-4 w-4" />
+                <span className="text-sm">PCI Compliant</span>
+              </div>
+              <Button onClick={() => setShowNewSubscriptionModal(true)} className="bg-white text-indigo-600 hover:bg-indigo-50">
+                <Plus className="h-4 w-4 mr-2" />
+                New Subscription
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Dialog open={showNewSubscriptionModal} onOpenChange={setShowNewSubscriptionModal}>
-              <DialogTrigger asChild>
-                <Button className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700">
-                  <Plus className="w-4 h-4" />
-                  New Subscription
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Create Subscription</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Customer Email</label>
-                    <Input type="email" placeholder="customer@example.com" />
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {[
+              { label: 'MRR', value: formatCurrency(stats.mrr), icon: TrendingUp, color: 'from-green-500 to-emerald-500', subtitle: '+12% this month' },
+              { label: 'ARR', value: formatCurrency(stats.arr), icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
+              { label: 'Active', value: stats.activeSubscriptions.toString(), icon: Users, color: 'from-indigo-500 to-purple-500' },
+              { label: 'Trialing', value: stats.trialing.toString(), icon: Timer, color: 'from-cyan-500 to-blue-500' },
+              { label: 'Past Due', value: stats.pastDue.toString(), icon: AlertCircle, color: 'from-yellow-500 to-orange-500' },
+              { label: 'Open', value: formatCurrency(stats.openAmount), icon: Receipt, color: 'from-orange-500 to-red-500' },
+              { label: 'Usage', value: formatCurrency(stats.totalUsage), icon: Zap, color: 'from-purple-500 to-pink-500' },
+              { label: 'Coupons', value: stats.activeCoupons.toString(), icon: Tag, color: 'from-pink-500 to-rose-500' }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`p-1.5 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                    <stat.icon className="h-3 w-3 text-white" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Plan</label>
-                    <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                      <option value="team">Team ($49/mo)</option>
-                      <option value="pro">Pro ($99/mo)</option>
-                      <option value="enterprise">Enterprise ($999/yr)</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Trial Period</label>
-                    <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                      <option value="0">No trial</option>
-                      <option value="7">7 days</option>
-                      <option value="14">14 days</option>
-                      <option value="30">30 days</option>
-                    </select>
-                  </div>
+                  <span className="text-indigo-200 text-xs">{stat.label}</span>
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowNewSubscriptionModal(false)}>Cancel</Button>
-                  <Button>Create Subscription</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                {stat.subtitle && <div className="text-xs text-green-300 mt-1">{stat.subtitle}</div>}
+              </div>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm col-span-2">
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm mb-1">
-              <TrendingUp className="w-4 h-4 text-green-500" />
-              MRR
-            </div>
-            <div className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(stats.mrr)}</div>
-            <div className="text-xs text-green-600 mt-1">+12% from last month</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm col-span-2">
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm mb-1">
-              <DollarSign className="w-4 h-4 text-blue-500" />
-              ARR
-            </div>
-            <div className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(stats.arr)}</div>
-            <div className="text-xs text-gray-500 mt-1">Annual recurring revenue</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-xs mb-1">
-              <Users className="w-4 h-4" />
-              Active
-            </div>
-            <div className="text-2xl font-bold text-green-600">{stats.activeSubscriptions}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-xs mb-1">
-              <AlertCircle className="w-4 h-4 text-yellow-500" />
-              Past Due
-            </div>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pastDue}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-xs mb-1">
-              <Receipt className="w-4 h-4" />
-              Open
-            </div>
-            <div className="text-2xl font-bold text-blue-600">{stats.openInvoices}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-xs mb-1">
-              <Zap className="w-4 h-4 text-purple-500" />
-              Usage
-            </div>
-            <div className="text-2xl font-bold text-purple-600">{formatCurrency(stats.totalUsage)}</div>
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+              <TabsTrigger value="invoices">Invoices</TabsTrigger>
+              <TabsTrigger value="coupons">Coupons</TabsTrigger>
+              <TabsTrigger value="usage">Usage</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-        {/* Navigation Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex gap-1 p-2">
-              {views.map(view => (
-                <button
-                  key={view.id}
-                  onClick={() => setActiveView(view.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeView === view.id
-                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <view.icon className="w-4 h-4" />
-                  {view.name}
-                </button>
-              ))}
-            </nav>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 w-64" />
+              </div>
+            </div>
           </div>
 
-          {/* Overview */}
-          {activeView === 'overview' && (
-            <div className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Revenue Chart */}
-                <div className="border rounded-xl dark:border-gray-700 p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-indigo-500" />
+          {loading && (
+            <div className="text-center py-8">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
+            </div>
+          )}
+
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Revenue Chart */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-indigo-600" />
                     Revenue Trend
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="grid grid-cols-6 gap-2">
                     {['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => {
                       const revenue = [8500, 9200, 10100, 11500, 12800, stats.mrr * 1.1][idx]
@@ -296,41 +413,61 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                       return (
                         <div key={month} className="text-center">
                           <div className="h-32 flex items-end justify-center mb-2">
-                            <div
-                              className={`w-full rounded-t-lg ${idx === 5 ? 'bg-indigo-500' : 'bg-gray-200 dark:bg-gray-600'}`}
-                              style={{ height: `${height}%` }}
-                            />
+                            <div className={`w-full rounded-t-lg ${idx === 5 ? 'bg-gradient-to-t from-indigo-600 to-violet-500' : 'bg-gray-200 dark:bg-gray-700'}`} style={{ height: `${height}%` }} />
                           </div>
                           <div className="text-xs text-gray-500">{month}</div>
-                          <div className="text-sm font-medium">${(revenue / 1000).toFixed(1)}k</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">${(revenue / 1000).toFixed(1)}k</div>
                         </div>
                       )
                     })}
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Recent Activity */}
-                <div className="border rounded-xl dark:border-gray-700 p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-blue-500" />
+              {/* Key Metrics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-indigo-600" />
+                    Key Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { label: 'Churn Rate', value: '2.1%', color: 'text-green-600', trend: 'down' },
+                    { label: 'ARPU', value: formatCurrency(stats.mrr / (stats.activeSubscriptions || 1)), color: 'text-blue-600' },
+                    { label: 'LTV', value: '$2,847', color: 'text-purple-600' },
+                    { label: 'Collection Rate', value: '98.5%', color: 'text-indigo-600' }
+                  ].map((metric, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{metric.label}</span>
+                      <span className={`text-lg font-bold ${metric.color}`}>{metric.value}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-indigo-600" />
                     Recent Activity
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-3">
                     {[
-                      { type: 'payment', message: 'Acme Corp paid $99.00', time: '2 hours ago' },
-                      { type: 'subscription', message: 'Creative Agency started trial', time: '5 hours ago' },
-                      { type: 'invoice', message: 'Invoice #2024-003 sent', time: '1 day ago' },
-                      { type: 'payment', message: 'TechStart Inc paid $999.00', time: '2 days ago' },
+                      { type: 'payment', message: 'Acme Corp paid $99.00', time: '2 hours ago', icon: DollarSign, color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
+                      { type: 'subscription', message: 'Creative Agency started trial', time: '5 hours ago', icon: RefreshCw, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
+                      { type: 'invoice', message: 'Invoice #2024-003 sent', time: '1 day ago', icon: Receipt, color: 'bg-gray-100 dark:bg-gray-700 text-gray-600' },
+                      { type: 'refund', message: 'Refund $99.00 processed', time: '2 days ago', icon: RotateCcw, color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' }
                     ].map((activity, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          activity.type === 'payment' ? 'bg-green-100 dark:bg-green-900/30' :
-                          activity.type === 'subscription' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                          'bg-gray-100 dark:bg-gray-700'
-                        }`}>
-                          {activity.type === 'payment' ? <DollarSign className="w-4 h-4 text-green-600" /> :
-                           activity.type === 'subscription' ? <RefreshCw className="w-4 h-4 text-blue-600" /> :
-                           <Receipt className="w-4 h-4 text-gray-600" />}
+                      <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.color}`}>
+                          <activity.icon className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.message}</p>
@@ -339,101 +476,59 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                       </div>
                     ))}
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Plans Distribution */}
-                <div className="border rounded-xl dark:border-gray-700 p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Package className="w-5 h-5 text-purple-500" />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-indigo-600" />
                     Plan Distribution
-                  </h3>
-                  <div className="space-y-4">
-                    {[
-                      { plan: 'Enterprise', count: 2, revenue: 1998, color: 'indigo' },
-                      { plan: 'Pro', count: 2, revenue: 198, color: 'blue' },
-                      { plan: 'Team', count: 1, revenue: 49, color: 'green' },
-                    ].map(p => (
-                      <div key={p.plan} className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">{p.plan}</span>
-                          <span className="text-gray-500">{p.count} customers • {formatCurrency(p.revenue)}/mo</span>
-                        </div>
-                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full bg-${p.color}-500 rounded-full`}
-                            style={{ width: `${(p.count / 5) * 100}%` }}
-                          />
-                        </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {pricingPlans.filter(p => p.amount > 0).map(plan => (
+                    <div key={plan.id} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium text-gray-900 dark:text-white">{plan.name}</span>
+                        <span className="text-gray-500">{plan.subscribers} subscribers • {formatCurrency(plan.amount * plan.subscribers)}/mo</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="border rounded-xl dark:border-gray-700 p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                    Key Metrics
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="text-xs text-gray-500 mb-1">Churn Rate</div>
-                      <div className="text-xl font-bold text-green-600">2.1%</div>
+                      <Progress value={(plan.subscribers / 250) * 100} className="h-2" />
                     </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="text-xs text-gray-500 mb-1">ARPU</div>
-                      <div className="text-xl font-bold text-blue-600">{formatCurrency(stats.mrr / stats.activeSubscriptions || 0)}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="text-xs text-gray-500 mb-1">LTV</div>
-                      <div className="text-xl font-bold text-purple-600">$2,847</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="text-xs text-gray-500 mb-1">Collection Rate</div>
-                      <div className="text-xl font-bold text-indigo-600">98.5%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
-          )}
+          </TabsContent>
 
-          {/* Subscriptions */}
-          {activeView === 'subscriptions' && (
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="past_due">Past Due</option>
-                    <option value="trialing">Trialing</option>
-                    <option value="canceled">Canceled</option>
-                  </select>
-                </div>
-                <Button variant="outline" className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Export
+          {/* Subscriptions Tab */}
+          <TabsContent value="subscriptions" className="space-y-6">
+            <div className="flex items-center gap-4 mb-4">
+              {['all', 'active', 'trialing', 'past_due', 'canceled'].map(filter => (
+                <Button key={filter} variant={statusFilter === filter ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(filter as any)}>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1).replace('_', ' ')}
                 </Button>
-              </div>
+              ))}
+            </div>
 
-              <div className="space-y-3">
-                {subscriptions.map(sub => (
-                  <div key={sub.id} className="p-4 border rounded-xl dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+            <div className="space-y-4">
+              {subscriptions.map(sub => (
+                <Card key={sub.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedSubscription(sub)}>
+                  <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold">
-                          {sub.customerName.charAt(0)}
-                        </div>
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-violet-500 text-white font-bold">
+                            {sub.customer_name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">{sub.customerName}</h3>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{sub.customer_name}</h3>
                             <Badge className={getStatusColor(sub.status)}>{sub.status}</Badge>
-                            {sub.cancelAtPeriodEnd && (
-                              <Badge variant="outline" className="text-red-600">Cancels at period end</Badge>
-                            )}
+                            {sub.cancel_at_period_end && <Badge variant="outline" className="text-red-600">Cancels at period end</Badge>}
                           </div>
-                          <div className="text-sm text-gray-500">{sub.customerEmail}</div>
+                          <div className="text-sm text-gray-500">{sub.customer_email}</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">
@@ -443,186 +538,190 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         </div>
                         <div className="text-right text-sm text-gray-500">
                           <div>{sub.plan}</div>
-                          <div>Renews {new Date(sub.currentPeriodEnd).toLocaleDateString()}</div>
+                          <div>Renews {new Date(sub.current_period_end).toLocaleDateString()}</div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="ghost">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    {sub.paymentMethod && (
-                      <div className="mt-3 pt-3 border-t dark:border-gray-700 flex items-center gap-2">
-                        <CardIcon className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-500 capitalize">
-                          {sub.paymentMethod.brand} •••• {sub.paymentMethod.last4}
-                        </span>
-                        {sub.paymentMethod.expMonth && (
-                          <span className="text-sm text-gray-500">
-                            Exp {sub.paymentMethod.expMonth}/{sub.paymentMethod.expYear}
-                          </span>
+                        {sub.payment_method && (
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <CardIcon className="w-4 h-4" />
+                            <span className="capitalize">{sub.payment_method.brand} •••• {sub.payment_method.last4}</span>
+                          </div>
                         )}
                       </div>
+                    </div>
+                    {sub.trial_end && new Date(sub.trial_end) > new Date() && (
+                      <div className="mt-3 pt-3 border-t dark:border-gray-700">
+                        <div className="flex items-center gap-2 text-sm text-blue-600">
+                          <Timer className="h-4 w-4" />
+                          Trial ends {new Date(sub.trial_end).toLocaleDateString()}
+                        </div>
+                      </div>
                     )}
-                  </div>
-                ))}
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          )}
+          </TabsContent>
 
-          {/* Invoices */}
-          {activeView === 'invoices' && (
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                    <option value="all">All Status</option>
-                    <option value="draft">Draft</option>
-                    <option value="open">Open</option>
-                    <option value="paid">Paid</option>
-                    <option value="void">Void</option>
-                  </select>
-                </div>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
+          {/* Invoices Tab */}
+          <TabsContent value="invoices" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Invoices</CardTitle>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
                   Create Invoice
                 </Button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b dark:border-gray-700">
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Invoice</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Customer</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Amount</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Due Date</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoices.map(inv => (
-                      <tr key={inv.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-indigo-600">{inv.number}</div>
-                          <div className="text-xs text-gray-500">Created {new Date(inv.createdAt).toLocaleDateString()}</div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-gray-900 dark:text-white">{inv.customerName}</div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge className={getStatusColor(inv.status)}>{inv.status}</Badge>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-gray-900 dark:text-white">{formatCurrency(inv.amount)}</div>
-                          {inv.amountRemaining > 0 && inv.status !== 'draft' && (
-                            <div className="text-xs text-red-600">{formatCurrency(inv.amountRemaining)} due</div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(inv.dueDate).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" variant="ghost">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost">
-                              <Download className="w-4 h-4" />
-                            </Button>
-                            {inv.status === 'open' && (
-                              <Button size="sm" variant="outline">
-                                Send Reminder
-                              </Button>
-                            )}
-                          </div>
-                        </td>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b dark:border-gray-700">
+                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Invoice</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Customer</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Status</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Amount</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Due</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Payments */}
-          {activeView === 'payments' && (
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
-                    className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="succeeded">Succeeded</option>
-                    <option value="pending">Pending</option>
-                    <option value="failed">Failed</option>
-                  </select>
+                    </thead>
+                    <tbody>
+                      {invoices.map(inv => (
+                        <tr key={inv.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="py-3 px-4">
+                            <div className="font-medium text-indigo-600">{inv.number}</div>
+                            <div className="text-xs text-gray-500">{new Date(inv.created_at).toLocaleDateString()}</div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-medium text-gray-900 dark:text-white">{inv.customer_name}</div>
+                            <div className="text-xs text-gray-500">{inv.customer_email}</div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge className={getStatusColor(inv.status)}>{inv.status}</Badge>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-semibold text-gray-900 dark:text-white">{formatCurrency(inv.total)}</div>
+                            {inv.amount_remaining > 0 && inv.status !== 'draft' && (
+                              <div className="text-xs text-red-600">{formatCurrency(inv.amount_remaining)} due</div>
+                            )}
+                            {inv.discount && <div className="text-xs text-green-600">-{formatCurrency(inv.discount.amount_off)} discount</div>}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                            {new Date(inv.due_date).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
+                              <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>
+                              {inv.status === 'open' && (
+                                <Button size="sm" variant="outline">Send Reminder</Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <Button variant="outline" className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Export
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Coupons Tab */}
+          <TabsContent value="coupons" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Tag className="h-5 w-5 text-indigo-600" />
+                  Coupons & Promotions
+                </CardTitle>
+                <Button onClick={() => setShowNewCouponModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Coupon
                 </Button>
-              </div>
-
-              {loading ? (
-                <div className="text-center py-12">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {display.filter(t => statusFilter === 'all' || t.status === statusFilter).map(transaction => (
-                    <div key={transaction.id} className="p-4 border rounded-xl dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            transaction.status === 'succeeded' ? 'bg-green-100 dark:bg-green-900/30' :
-                            transaction.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
-                            'bg-yellow-100 dark:bg-yellow-900/30'
-                          }`}>
-                            {transaction.status === 'succeeded' ? <CheckCircle className="w-5 h-5 text-green-600" /> :
-                             transaction.status === 'failed' ? <AlertCircle className="w-5 h-5 text-red-600" /> :
-                             <Clock className="w-5 h-5 text-yellow-600" />}
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {coupons.map(coupon => (
+                    <div key={coupon.id} className={`p-4 border rounded-xl ${coupon.valid ? 'border-gray-200 dark:border-gray-700' : 'border-gray-100 dark:border-gray-800 opacity-60'}`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${coupon.type === 'percent_off' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
+                            <Percent className={`h-5 w-5 ${coupon.type === 'percent_off' ? 'text-green-600' : 'text-blue-600'}`} />
                           </div>
                           <div>
-                            <div className="font-medium text-gray-900 dark:text-white capitalize">{transaction.transaction_type}</div>
-                            <div className="text-sm text-gray-500">{transaction.description}</div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{coupon.name}</h4>
+                            <code className="text-sm text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">{coupon.code}</code>
                           </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <Badge className={getStatusColor(transaction.status)}>{transaction.status}</Badge>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(transaction.amount)}</div>
-                            <div className="text-xs text-gray-500">{transaction.payment_method}</div>
-                          </div>
+                        <Badge className={coupon.valid ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                          {coupon.valid ? 'Active' : 'Expired'}
+                        </Badge>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Discount</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {coupon.type === 'percent_off' ? `${coupon.value}% off` : formatCurrency(coupon.value)}
+                          </span>
                         </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Duration</span>
+                          <span className="font-medium text-gray-900 dark:text-white capitalize">{coupon.duration}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Redeemed</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {coupon.times_redeemed}{coupon.max_redemptions ? ` / ${coupon.max_redemptions}` : ''}
+                          </span>
+                        </div>
+                        {coupon.expires_at && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Expires</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{new Date(coupon.expires_at).toLocaleDateString()}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          )}
+              </CardContent>
+            </Card>
 
-          {/* Usage */}
-          {activeView === 'usage' && (
-            <div className="p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Usage-Based Billing</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Track metered usage for your customers</p>
-              </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Tax Rates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {taxRates.map(tax => (
+                    <div key={tax.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">{tax.name}</h4>
+                          <p className="text-sm text-gray-500">{tax.jurisdiction} • {tax.country}{tax.state ? `, ${tax.state}` : ''}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="font-semibold text-gray-900 dark:text-white">{tax.percentage}%</span>
+                        <Badge className={tax.inclusive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>
+                          {tax.inclusive ? 'Inclusive' : 'Exclusive'}
+                        </Badge>
+                        <Switch checked={tax.active} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div className="p-4 border rounded-xl dark:border-gray-700 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+          {/* Usage Tab */}
+          <TabsContent value="usage" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-0">
+                <CardContent className="p-6">
                   <div className="flex items-center gap-2 text-purple-700 dark:text-purple-400 mb-2">
                     <Zap className="w-5 h-5" />
                     <span className="font-medium">Total Usage This Period</span>
@@ -633,24 +732,31 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                   <div className="text-sm text-purple-600 dark:text-purple-500 mt-1">
                     {formatCurrency(stats.totalUsage)} billable
                   </div>
-                </div>
-                <div className="p-4 border rounded-xl dark:border-gray-700">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Unit Price</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">$0.001</div>
-                  <div className="text-sm text-gray-500">per unit</div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Pricing</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">$0.001 <span className="text-sm font-normal">per unit</span></div>
+                  <div className="text-sm text-gray-500 mt-1">Metered billing enabled</div>
+                </CardContent>
+              </Card>
+            </div>
 
-              <div className="space-y-3">
-                {usageRecords.map(record => (
-                  <div key={record.id} className="p-4 border rounded-lg dark:border-gray-700">
-                    <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader>
+                <CardTitle>Usage Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {usageRecords.map(record => (
+                    <div key={record.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                           <Zap className="w-5 h-5 text-purple-600" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">{record.customerName}</div>
+                          <div className="font-medium text-gray-900 dark:text-white">{record.customer_name}</div>
                           <div className="text-sm text-gray-500">{new Date(record.timestamp).toLocaleDateString()}</div>
                         </div>
                       </div>
@@ -659,13 +765,238 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <div className="text-sm text-purple-600">{formatCurrency(record.total)}</div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Auto-retry Failed Payments</p>
+                      <p className="text-sm text-gray-500">Retry failed charges up to 4 times</p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">3D Secure</p>
+                      <p className="text-sm text-gray-500">Require 3D Secure for all cards</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Customer Portal</p>
+                      <p className="text-sm text-gray-500">Allow customers to manage subscriptions</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Invoice Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Auto-finalize Drafts</p>
+                      <p className="text-sm text-gray-500">Automatically finalize invoices after 1 hour</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Email Invoices</p>
+                      <p className="text-sm text-gray-500">Send invoices via email automatically</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Invoice Footer</label>
+                    <Input placeholder="Thank you for your business!" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Webhook className="h-5 w-5 text-indigo-600" />
+                    Webhooks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {webhooks.map(wh => (
+                      <div key={wh.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <Badge className={getStatusColor(wh.status)}>{wh.status}</Badge>
+                            <code className="text-sm text-gray-600 dark:text-gray-400 truncate">{wh.url}</code>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {wh.events.length} events • {wh.success_rate}% success rate
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Endpoint
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notifications</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Payment Received</p>
+                      <p className="text-sm text-gray-500">Notify when payment succeeds</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Payment Failed</p>
+                      <p className="text-sm text-gray-500">Alert on failed payments</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Subscription Canceled</p>
+                      <p className="text-sm text-gray-500">Notify on cancellations</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Trial Ending</p>
+                      <p className="text-sm text-gray-500">Remind 3 days before trial ends</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* New Subscription Modal */}
+      <Dialog open={showNewSubscriptionModal} onOpenChange={setShowNewSubscriptionModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-lg">
+                <Plus className="h-5 w-5 text-white" />
+              </div>
+              Create Subscription
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Email</label>
+              <Input type="email" placeholder="customer@example.com" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Plan</label>
+              <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                {pricingPlans.filter(p => p.is_active && p.amount > 0).map(plan => (
+                  <option key={plan.id} value={plan.id}>{plan.name} ({formatCurrency(plan.amount)}/{plan.interval})</option>
                 ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trial Period</label>
+              <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <option value="0">No trial</option>
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coupon Code (optional)</label>
+              <Input placeholder="WELCOME10" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewSubscriptionModal(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-indigo-600 to-violet-600">Create Subscription</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Coupon Modal */}
+      <Dialog open={showNewCouponModal} onOpenChange={setShowNewCouponModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
+                <Tag className="h-5 w-5 text-white" />
+              </div>
+              Create Coupon
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coupon Name</label>
+              <Input placeholder="Summer Sale" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Code</label>
+              <Input placeholder="SUMMER25" className="uppercase" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Type</label>
+                <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="percent_off">Percentage</option>
+                  <option value="amount_off">Fixed Amount</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Value</label>
+                <Input type="number" placeholder="25" />
               </div>
             </div>
-          )}
-        </div>
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration</label>
+              <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <option value="once">Once</option>
+                <option value="repeating">Multiple months</option>
+                <option value="forever">Forever</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Redemptions (optional)</label>
+              <Input type="number" placeholder="100" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCouponModal(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Create Coupon</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
