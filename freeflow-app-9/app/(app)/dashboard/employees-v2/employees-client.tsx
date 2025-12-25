@@ -786,131 +786,783 @@ export default function EmployeesClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <div className="flex gap-6">
-              <Card className="w-64 h-fit border-gray-200 dark:border-gray-700">
-                <CardContent className="p-2">
-                  <nav className="space-y-1">
-                    {[
-                      { id: 'general', icon: Settings, label: 'General' },
-                      { id: 'notifications', icon: Bell, label: 'Notifications' },
-                      { id: 'permissions', icon: Shield, label: 'Permissions' },
-                      { id: 'integrations', icon: Zap, label: 'Integrations' },
-                      { id: 'documents', icon: FileText, label: 'Documents' },
-                      { id: 'surveys', icon: Clipboard, label: 'Surveys' }
-                    ].map(item => (
-                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                        <item.icon className="h-4 w-4" />{item.label}
-                      </button>
-                    ))}
-                  </nav>
-                </CardContent>
-              </Card>
-              <div className="flex-1 space-y-6">
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">HR Settings</h2>
+                <p className="text-sm text-gray-500">Configure your HR platform preferences</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'permissions', icon: Shield, label: 'Permissions' },
+                        { id: 'integrations', icon: Zap, label: 'Integrations' },
+                        { id: 'documents', icon: FileText, label: 'Documents' },
+                        { id: 'advanced', icon: Lock, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
                 {settingsTab === 'general' && (
                   <>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Organization Settings</CardTitle></CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Company Name</Label><Input defaultValue="Acme Corp" className="mt-1" /></div><div><Label>Industry</Label><Select defaultValue="tech"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="tech">Technology</SelectItem><SelectItem value="finance">Finance</SelectItem><SelectItem value="healthcare">Healthcare</SelectItem></SelectContent></Select></div></div>
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Fiscal Year Start</Label><Select defaultValue="january"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="january">January</SelectItem><SelectItem value="april">April</SelectItem><SelectItem value="july">July</SelectItem></SelectContent></Select></div><div><Label>Time Zone</Label><Select defaultValue="pst"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pst">Pacific Time</SelectItem><SelectItem value="est">Eastern Time</SelectItem><SelectItem value="utc">UTC</SelectItem></SelectContent></Select></div></div>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5" />
+                          Organization Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Company Name</Label>
+                            <Input defaultValue="Acme Corp" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Industry</Label>
+                            <Select defaultValue="tech">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="tech">Technology</SelectItem>
+                                <SelectItem value="finance">Finance</SelectItem>
+                                <SelectItem value="healthcare">Healthcare</SelectItem>
+                                <SelectItem value="retail">Retail</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Fiscal Year Start</Label>
+                            <Select defaultValue="january">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="january">January</SelectItem>
+                                <SelectItem value="april">April</SelectItem>
+                                <SelectItem value="july">July</SelectItem>
+                                <SelectItem value="october">October</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="pst">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time (PT)</SelectItem>
+                                <SelectItem value="est">Eastern Time (ET)</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="cet">Central European Time (CET)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Multi-location Support</div>
+                            <div className="text-sm text-gray-500">Enable multiple office locations</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
                       </CardContent>
                     </Card>
+
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Time Off Policies</CardTitle></CardHeader>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Umbrella className="h-5 w-5" />
+                          Time Off Policies
+                        </CardTitle>
+                      </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Accrual Based PTO</p><p className="text-sm text-gray-500">Employees accrue time off monthly</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Unlimited PTO</p><p className="text-sm text-gray-500">No set limit on time off</p></div><Switch /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Carryover Policy</p><p className="text-sm text-gray-500">Allow unused PTO to carry over</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Accrual Based PTO</div>
+                            <div className="text-sm text-gray-500">Employees accrue time off monthly</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Unlimited PTO</div>
+                            <div className="text-sm text-gray-500">No set limit on time off</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Carryover Policy</div>
+                            <div className="text-sm text-gray-500">Allow unused PTO to carry over</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Annual PTO Days</Label>
+                            <Select defaultValue="20">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15">15 days</SelectItem>
+                                <SelectItem value="20">20 days</SelectItem>
+                                <SelectItem value="25">25 days</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Carryover</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">None</SelectItem>
+                                <SelectItem value="5">5 days</SelectItem>
+                                <SelectItem value="10">10 days</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-5 w-5" />
+                          Performance Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Review Cycle</Label>
+                            <Select defaultValue="quarterly">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                <SelectItem value="biannual">Bi-Annual</SelectItem>
+                                <SelectItem value="annual">Annual</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Rating Scale</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3">3-Point Scale</SelectItem>
+                                <SelectItem value="5">5-Point Scale</SelectItem>
+                                <SelectItem value="10">10-Point Scale</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Self-Reviews</div>
+                            <div className="text-sm text-gray-500">Include employee self-assessments</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">360 Feedback</div>
+                            <div className="text-sm text-gray-500">Enable peer feedback collection</div>
+                          </div>
+                          <Switch />
+                        </div>
                       </CardContent>
                     </Card>
                   </>
                 )}
+
+                {/* Notifications Settings */}
                 {settingsTab === 'notifications' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Notification Preferences</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Time Off Requests</p><p className="text-sm text-gray-500">Get notified of new requests</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Performance Reviews</p><p className="text-sm text-gray-500">Review cycle reminders</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Onboarding Tasks</p><p className="text-sm text-gray-500">New hire task notifications</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Work Anniversaries</p><p className="text-sm text-gray-500">Employee milestone alerts</p></div><Switch /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Birthday Reminders</p><p className="text-sm text-gray-500">Get reminded of birthdays</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Document Expiry</p><p className="text-sm text-gray-500">Alert when documents expire</p></div><Switch defaultChecked /></div>
-                    </CardContent>
-                  </Card>
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="h-5 w-5" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Time Off Requests</div>
+                            <div className="text-sm text-gray-500">Get notified of new requests</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Performance Reviews</div>
+                            <div className="text-sm text-gray-500">Review cycle reminders</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Onboarding Tasks</div>
+                            <div className="text-sm text-gray-500">New hire task notifications</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Document Expiry</div>
+                            <div className="text-sm text-gray-500">Alert when documents expire</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cake className="h-5 w-5" />
+                          Employee Events
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Work Anniversaries</div>
+                            <div className="text-sm text-gray-500">Employee milestone alerts</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Birthday Reminders</div>
+                            <div className="text-sm text-gray-500">Get reminded of birthdays</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">New Hire Announcements</div>
+                            <div className="text-sm text-gray-500">Announce new team members</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Departure Notifications</div>
+                            <div className="text-sm text-gray-500">Notify about employee departures</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageCircle className="h-5 w-5" />
+                          Communication Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Digest Frequency</Label>
+                            <Select defaultValue="daily">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="realtime">Real-time</SelectItem>
+                                <SelectItem value="daily">Daily Digest</SelectItem>
+                                <SelectItem value="weekly">Weekly Digest</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Preferred Channel</Label>
+                            <Select defaultValue="email">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="slack">Slack</SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
+
+                {/* Permissions Settings */}
                 {settingsTab === 'permissions' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Privacy & Access Controls</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Salary Visibility</p><p className="text-sm text-gray-500">Who can view compensation data</p></div><Select defaultValue="managers"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Everyone</SelectItem><SelectItem value="managers">Managers</SelectItem><SelectItem value="hr">HR Only</SelectItem></SelectContent></Select></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Performance Data</p><p className="text-sm text-gray-500">Review visibility settings</p></div><Select defaultValue="managers"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Everyone</SelectItem><SelectItem value="managers">Managers</SelectItem><SelectItem value="hr">HR Only</SelectItem></SelectContent></Select></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Directory Access</p><p className="text-sm text-gray-500">Employee directory visibility</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Org Chart Access</p><p className="text-sm text-gray-500">Who can view org structure</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Self-Service Portal</p><p className="text-sm text-gray-500">Allow employees to update their info</p></div><Switch defaultChecked /></div>
-                    </CardContent>
-                  </Card>
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="h-5 w-5" />
+                          Data Visibility
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Salary Visibility</div>
+                            <div className="text-sm text-gray-500">Who can view compensation data</div>
+                          </div>
+                          <Select defaultValue="managers">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Everyone</SelectItem>
+                              <SelectItem value="managers">Managers</SelectItem>
+                              <SelectItem value="hr">HR Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Performance Data</div>
+                            <div className="text-sm text-gray-500">Review visibility settings</div>
+                          </div>
+                          <Select defaultValue="managers">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Everyone</SelectItem>
+                              <SelectItem value="managers">Managers</SelectItem>
+                              <SelectItem value="hr">HR Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Personal Information</div>
+                            <div className="text-sm text-gray-500">Contact details, emergency contacts</div>
+                          </div>
+                          <Select defaultValue="self">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="self">Self Only</SelectItem>
+                              <SelectItem value="managers">+ Managers</SelectItem>
+                              <SelectItem value="hr">+ HR</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Access Controls
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Directory Access</div>
+                            <div className="text-sm text-gray-500">Employee directory visibility</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Org Chart Access</div>
+                            <div className="text-sm text-gray-500">Who can view org structure</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Self-Service Portal</div>
+                            <div className="text-sm text-gray-500">Allow employees to update their info</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Team Analytics</div>
+                            <div className="text-sm text-gray-500">Managers can view team metrics</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5" />
+                          Role Permissions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Approve Time Off</div>
+                            <div className="text-sm text-gray-500">Who can approve PTO requests</div>
+                          </div>
+                          <Select defaultValue="managers">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hr">HR Only</SelectItem>
+                              <SelectItem value="managers">Managers</SelectItem>
+                              <SelectItem value="auto">Auto-Approve</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Edit Employee Records</div>
+                            <div className="text-sm text-gray-500">Who can modify employee data</div>
+                          </div>
+                          <Select defaultValue="hr">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hr">HR Only</SelectItem>
+                              <SelectItem value="managers">+ Managers</SelectItem>
+                              <SelectItem value="admin">Admins Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
+
+                {/* Integrations Settings */}
                 {settingsTab === 'integrations' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Connected Integrations</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Integration</Button></CardHeader>
-                    <CardContent className="space-y-4">
-                      {mockIntegrations.map(integration => (
-                        <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                              {integration.type === 'payroll' && <DollarSign className="h-5 w-5 text-green-600" />}
-                              {integration.type === 'benefits' && <Heart className="h-5 w-5 text-pink-600" />}
-                              {integration.type === 'ats' && <Users className="h-5 w-5 text-blue-600" />}
-                              {integration.type === 'background' && <Shield className="h-5 w-5 text-purple-600" />}
-                              {integration.type === 'identity' && <Key className="h-5 w-5 text-amber-600" />}
-                              {integration.type === 'communication' && <MessageCircle className="h-5 w-5 text-indigo-600" />}
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="h-5 w-5" />
+                          Connected Integrations
+                        </CardTitle>
+                        <Button size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Integration
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockIntegrations.map(integration => (
+                          <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                                {integration.type === 'payroll' && <DollarSign className="h-5 w-5 text-green-600" />}
+                                {integration.type === 'benefits' && <Heart className="h-5 w-5 text-pink-600" />}
+                                {integration.type === 'ats' && <Users className="h-5 w-5 text-blue-600" />}
+                                {integration.type === 'background' && <Shield className="h-5 w-5 text-purple-600" />}
+                                {integration.type === 'identity' && <Key className="h-5 w-5 text-amber-600" />}
+                                {integration.type === 'communication' && <MessageCircle className="h-5 w-5 text-indigo-600" />}
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{integration.name}</h4>
+                                <p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p>
+                              </div>
                             </div>
-                            <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
+                            <div className="flex items-center gap-3">
+                              <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
+                              <Button variant="ghost" size="sm">Configure</Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3"><Badge className={getStatusColor(integration.status)}>{integration.status}</Badge><Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button></div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-                {settingsTab === 'documents' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Document Templates</CardTitle><Button onClick={() => setShowDocumentDialog(true)}><Upload className="h-4 w-4 mr-2" />Upload Template</Button></CardHeader>
-                    <CardContent className="space-y-4">
-                      {mockDocuments.map(doc => (
-                        <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center"><FileText className="h-5 w-5 text-blue-600" /></div>
-                            <div><h4 className="font-medium">{doc.name}</h4><p className="text-sm text-gray-500">{doc.type} • {doc.size} • Uploaded {doc.uploadedAt}</p></div>
-                          </div>
-                          <div className="flex items-center gap-3"><Badge className={getStatusColor(doc.status)}>{doc.status.replace('_', ' ')}</Badge><Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button></div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-                {settingsTab === 'surveys' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Employee Surveys</CardTitle><Button onClick={() => setShowSurveyDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Survey</Button></CardHeader>
-                    <CardContent className="space-y-4">
-                      {mockSurveys.map(survey => (
-                        <div key={survey.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
-                            <div><h4 className="font-medium">{survey.title}</h4><p className="text-sm text-gray-500">{survey.type} • Closes: {survey.closesAt}</p></div>
-                            <Badge className={getStatusColor(survey.status)}>{survey.status}</Badge>
+                            <div className="font-medium">API Key</div>
+                            <Button variant="outline" size="sm">
+                              <Activity className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </Button>
                           </div>
-                          {survey.status !== 'draft' && (
-                            <div className="grid grid-cols-3 gap-4 mt-3">
-                              <div className="text-center p-2 bg-white dark:bg-gray-700 rounded"><p className="text-xl font-bold text-blue-600">{survey.responseRate}%</p><p className="text-xs text-gray-500">Response Rate</p></div>
-                              <div className="text-center p-2 bg-white dark:bg-gray-700 rounded"><p className="text-xl font-bold text-green-600">{survey.avgScore}/5</p><p className="text-xs text-gray-500">Avg Score</p></div>
-                              <div className="text-center p-2 bg-white dark:bg-gray-700 rounded"><p className="text-xl font-bold">{survey.responses}/{survey.totalInvited}</p><p className="text-xs text-gray-500">Responses</p></div>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
+                              hr_live_•••••••••••••••••••••••
+                            </code>
+                            <Button variant="outline" size="sm">Copy</Button>
+                          </div>
                         </div>
-                      ))}
-                    </CardContent>
-                  </Card>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="text-2xl font-bold">8,456</div>
+                            <div className="text-sm text-gray-500">API Calls (30 days)</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="text-2xl font-bold">45ms</div>
+                            <div className="text-sm text-gray-500">Avg Response Time</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Documents Settings */}
+                {settingsTab === 'documents' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Document Templates
+                        </CardTitle>
+                        <Button size="sm" onClick={() => setShowDocumentDialog(true)}>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Template
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockDocuments.map(doc => (
+                          <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{doc.name}</h4>
+                                <p className="text-sm text-gray-500">{doc.type} • {doc.size} • Uploaded {doc.uploadedAt}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge className={getStatusColor(doc.status)}>{doc.status.replace('_', ' ')}</Badge>
+                              <Button variant="ghost" size="icon">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="text-red-500">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clipboard className="h-5 w-5" />
+                          Document Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">E-Signature Required</div>
+                            <div className="text-sm text-gray-500">Require digital signatures for all documents</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-Archive</div>
+                            <div className="text-sm text-gray-500">Archive documents older than 5 years</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Version Control</div>
+                            <div className="text-sm text-gray-500">Keep history of document changes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Document Retention</Label>
+                          <Select defaultValue="7years">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3years">3 Years</SelectItem>
+                              <SelectItem value="5years">5 Years</SelectItem>
+                              <SelectItem value="7years">7 Years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockEmployees.length}</div>
+                            <div className="text-sm text-gray-500">Employees</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockDocuments.length}</div>
+                            <div className="text-sm text-gray-500">Documents</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">24.5 MB</div>
+                            <div className="text-sm text-gray-500">Storage</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Import Data
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5" />
+                          Audit & Compliance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Audit Logging</div>
+                            <div className="text-sm text-gray-500">Track all HR system changes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">GDPR Compliance Mode</div>
+                            <div className="text-sm text-gray-500">Enable EU data protection features</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Data Encryption</div>
+                            <div className="text-sm text-gray-500">Encrypt sensitive employee data</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <FileCheck className="h-4 w-4 mr-2" />
+                          Generate Compliance Report
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700 border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <Trash2 className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Archive All Terminated</div>
+                            <div className="text-sm text-gray-500">Archive all terminated employee records</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            Archive
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Delete All Data</div>
+                            <div className="text-sm text-gray-500">Permanently delete all HR data</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Reset to Defaults</div>
+                            <div className="text-sm text-gray-500">Reset all HR settings to defaults</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
               </div>
             </div>
