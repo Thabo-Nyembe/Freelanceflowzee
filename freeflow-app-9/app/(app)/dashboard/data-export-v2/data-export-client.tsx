@@ -93,6 +93,40 @@ interface SchemaMapping {
   isNullable: boolean
 }
 
+interface Destination {
+  id: string
+  name: string
+  type: 'warehouse' | 'lake' | 'api' | 'file' | 'stream'
+  platform: 'snowflake' | 'bigquery' | 'redshift' | 's3' | 'gcs' | 'kafka' | 'webhook'
+  status: 'active' | 'inactive' | 'error'
+  host: string
+  lastWrite: string
+  recordsWritten: number
+  dataVolume: string
+  icon: string
+}
+
+interface AuditLog {
+  id: string
+  action: 'create' | 'update' | 'delete' | 'run' | 'error' | 'connect'
+  resource: string
+  resourceType: 'pipeline' | 'source' | 'destination' | 'job'
+  user: string
+  timestamp: string
+  details: string
+  status: 'success' | 'failed'
+}
+
+interface Integration {
+  id: string
+  name: string
+  category: 'analytics' | 'marketing' | 'crm' | 'support' | 'advertising' | 'product'
+  status: 'enabled' | 'disabled' | 'pending'
+  eventsTracked: number
+  lastEvent: string
+  icon: string
+}
+
 // Mock data sources
 const mockDataSources: DataSource[] = [
   {
@@ -280,6 +314,65 @@ const mockSchemaMappings: SchemaMapping[] = [
   { sourceColumn: 'status', destinationType: 'VARCHAR(50)', destinationColumn: 'account_status', isPrimaryKey: false, isNullable: false }
 ]
 
+// Mock destinations
+const mockDestinations: Destination[] = [
+  { id: 'dest1', name: 'Analytics Warehouse', type: 'warehouse', platform: 'snowflake', status: 'active', host: 'company.snowflakecomputing.com', lastWrite: '2024-12-25T10:30:00Z', recordsWritten: 45000000, dataVolume: '2.4 TB', icon: '❄️' },
+  { id: 'dest2', name: 'Sales Analytics', type: 'warehouse', platform: 'bigquery', status: 'active', host: 'bigquery.googleapis.com/company-project', lastWrite: '2024-12-25T10:28:00Z', recordsWritten: 12000000, dataVolume: '850 GB', icon: '📊' },
+  { id: 'dest3', name: 'Marketing Lake', type: 'lake', platform: 's3', status: 'active', host: 's3://company-marketing-lake', lastWrite: '2024-12-24T00:00:00Z', recordsWritten: 8500000, dataVolume: '320 GB', icon: '📦' },
+  { id: 'dest4', name: 'Real-time Events', type: 'stream', platform: 'kafka', status: 'active', host: 'kafka.company.com:9092', lastWrite: '2024-12-25T10:30:00Z', recordsWritten: 125000000, dataVolume: '1.2 TB', icon: '⚡' },
+  { id: 'dest5', name: 'BI Webhook', type: 'api', platform: 'webhook', status: 'inactive', host: 'https://bi.company.com/webhook', lastWrite: '2024-12-23T18:00:00Z', recordsWritten: 500000, dataVolume: '45 GB', icon: '🔗' },
+  { id: 'dest6', name: 'Archive Storage', type: 'file', platform: 'gcs', status: 'active', host: 'gs://company-archive', lastWrite: '2024-12-25T06:00:00Z', recordsWritten: 250000000, dataVolume: '5.8 TB', icon: '🗄️' }
+]
+
+// Mock audit logs
+const mockAuditLogs: AuditLog[] = [
+  { id: 'audit1', action: 'run', resource: 'Customer 360 Sync', resourceType: 'pipeline', user: 'system', timestamp: '2024-12-25T10:00:00Z', details: 'Scheduled run completed successfully', status: 'success' },
+  { id: 'audit2', action: 'error', resource: 'Marketing Attribution', resourceType: 'pipeline', user: 'system', timestamp: '2024-12-25T00:00:00Z', details: 'Connection timeout to HubSpot API', status: 'failed' },
+  { id: 'audit3', action: 'update', resource: 'Production PostgreSQL', resourceType: 'source', user: 'admin@company.com', timestamp: '2024-12-24T15:30:00Z', details: 'Updated connection credentials', status: 'success' },
+  { id: 'audit4', action: 'create', resource: 'Q4 Financial Report', resourceType: 'job', user: 'finance@company.com', timestamp: '2024-12-25T08:00:00Z', details: 'Created new export job', status: 'success' },
+  { id: 'audit5', action: 'connect', resource: 'AWS S3 Data Lake', resourceType: 'source', user: 'data-eng@company.com', timestamp: '2024-12-24T10:00:00Z', details: 'Successfully connected to S3 bucket', status: 'success' },
+  { id: 'audit6', action: 'delete', resource: 'Old Test Pipeline', resourceType: 'pipeline', user: 'admin@company.com', timestamp: '2024-12-23T14:00:00Z', details: 'Deleted unused test pipeline', status: 'success' }
+]
+
+// Mock integrations (Segment-style)
+const mockIntegrations: Integration[] = [
+  { id: 'int1', name: 'Google Analytics 4', category: 'analytics', status: 'enabled', eventsTracked: 2500000, lastEvent: '2024-12-25T10:30:00Z', icon: '📈' },
+  { id: 'int2', name: 'Mixpanel', category: 'analytics', status: 'enabled', eventsTracked: 1800000, lastEvent: '2024-12-25T10:29:00Z', icon: '📊' },
+  { id: 'int3', name: 'Amplitude', category: 'product', status: 'enabled', eventsTracked: 3200000, lastEvent: '2024-12-25T10:30:00Z', icon: '📉' },
+  { id: 'int4', name: 'Intercom', category: 'support', status: 'enabled', eventsTracked: 450000, lastEvent: '2024-12-25T10:25:00Z', icon: '💬' },
+  { id: 'int5', name: 'HubSpot', category: 'marketing', status: 'pending', eventsTracked: 0, lastEvent: '', icon: '🔶' },
+  { id: 'int6', name: 'Salesforce', category: 'crm', status: 'enabled', eventsTracked: 890000, lastEvent: '2024-12-25T10:28:00Z', icon: '☁️' },
+  { id: 'int7', name: 'Facebook Ads', category: 'advertising', status: 'enabled', eventsTracked: 1200000, lastEvent: '2024-12-25T10:30:00Z', icon: '📱' },
+  { id: 'int8', name: 'Google Ads', category: 'advertising', status: 'enabled', eventsTracked: 980000, lastEvent: '2024-12-25T10:30:00Z', icon: '🎯' }
+]
+
+const getDestinationStatusColor = (status: Destination['status']) => {
+  switch (status) {
+    case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    case 'inactive': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+    case 'error': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  }
+}
+
+const getAuditActionColor = (action: AuditLog['action']) => {
+  switch (action) {
+    case 'create': return 'bg-green-100 text-green-700'
+    case 'update': return 'bg-blue-100 text-blue-700'
+    case 'delete': return 'bg-red-100 text-red-700'
+    case 'run': return 'bg-purple-100 text-purple-700'
+    case 'error': return 'bg-red-100 text-red-700'
+    case 'connect': return 'bg-cyan-100 text-cyan-700'
+  }
+}
+
+const getIntegrationStatusColor = (status: Integration['status']) => {
+  switch (status) {
+    case 'enabled': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    case 'disabled': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+    case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+  }
+}
+
 export default function DataExportClient() {
   const [activeTab, setActiveTab] = useState('pipelines')
   const [searchQuery, setSearchQuery] = useState('')
@@ -287,6 +380,7 @@ export default function DataExportClient() {
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | null>(null)
   const [showNewPipelineDialog, setShowNewPipelineDialog] = useState(false)
   const [showSchemaDialog, setShowSchemaDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const getSourceStatusColor = (status: DataSource['status']) => {
     switch (status) {
@@ -449,6 +543,14 @@ export default function DataExportClient() {
             <TabsTrigger value="monitoring" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Monitoring
+            </TabsTrigger>
+            <TabsTrigger value="destinations" className="flex items-center gap-2">
+              <Cloud className="w-4 h-4" />
+              Destinations
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -946,6 +1048,355 @@ export default function DataExportClient() {
                 </div>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Destinations Tab */}
+          <TabsContent value="destinations" className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">Data Destinations</h2>
+                <p className="text-sm text-gray-500">Configure where your data flows to</p>
+              </div>
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Destination
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {mockDestinations.map(dest => (
+                <Card key={dest.id} className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">{dest.icon}</div>
+                      <div>
+                        <h3 className="font-semibold">{dest.name}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{dest.platform}</p>
+                      </div>
+                    </div>
+                    <Badge className={getDestinationStatusColor(dest.status)}>
+                      {dest.status}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Globe className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600 dark:text-gray-400 truncate">{dest.host}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Database className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600 dark:text-gray-400">
+                        {(dest.recordsWritten / 1000000).toFixed(1)}M records
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <HardDrive className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600 dark:text-gray-400">{dest.dataVolume}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center justify-between text-sm mb-3">
+                      <span className="text-gray-500">Last write</span>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {new Date(dest.lastWrite).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Configure
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Integrations Section - Segment Style */}
+            <Card className="p-6 mt-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="font-semibold text-lg">Integrations Catalog</h3>
+                  <p className="text-sm text-gray-500">Send data to your favorite tools</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <Filter className="w-4 h-4 mr-2" />
+                    Filter
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                {mockIntegrations.map(integration => (
+                  <div key={integration.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{integration.icon}</span>
+                        <span className="font-medium">{integration.name}</span>
+                      </div>
+                      <Badge className={getIntegrationStatusColor(integration.status)}>
+                        {integration.status}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      <p className="capitalize">{integration.category}</p>
+                      {integration.eventsTracked > 0 && (
+                        <p className="mt-1">{(integration.eventsTracked / 1000000).toFixed(1)}M events</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Audit Log Section */}
+            <Card className="p-6 mt-6">
+              <h3 className="font-semibold text-lg mb-4">Activity Log</h3>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {mockAuditLogs.map(log => (
+                    <div key={log.id} className="flex items-start gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <Badge className={getAuditActionColor(log.action)}>
+                        {log.action}
+                      </Badge>
+                      <div className="flex-1">
+                        <p className="font-medium">{log.resource}</p>
+                        <p className="text-sm text-gray-500">{log.details}</p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
+                          <span>{log.user}</span>
+                          <span>{new Date(log.timestamp).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className={log.status === 'success' ? 'text-green-600' : 'text-red-600'}>
+                        {log.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-white dark:bg-gray-800">
+              <div className="flex border-b border-gray-200 dark:border-gray-700">
+                {['general', 'security', 'notifications', 'api', 'billing'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setSettingsTab(tab)}
+                    className={`px-6 py-4 text-sm font-medium capitalize ${
+                      settingsTab === tab
+                        ? 'border-b-2 border-green-600 text-green-600'
+                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-6">
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">General Settings</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Default Time Zone</p>
+                          <p className="text-sm text-gray-500">Set timezone for all pipeline schedules</p>
+                        </div>
+                        <Badge variant="outline">UTC</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Data Retention</p>
+                          <p className="text-sm text-gray-500">How long to keep job history and logs</p>
+                        </div>
+                        <Badge variant="outline">90 days</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Concurrent Jobs</p>
+                          <p className="text-sm text-gray-500">Maximum parallel export jobs</p>
+                        </div>
+                        <Badge variant="outline">10</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-retry Failed Jobs</p>
+                          <p className="text-sm text-gray-500">Automatically retry failed pipelines</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Security Settings</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Encryption at Rest</p>
+                          <p className="text-sm text-gray-500">AES-256 encryption for stored data</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Encryption in Transit</p>
+                          <p className="text-sm text-gray-500">TLS 1.3 for all connections</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
+                          <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                          <p className="text-sm text-gray-500">Log all data access and changes</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Notification Settings</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Pipeline Failures</p>
+                          <p className="text-sm text-gray-500">Get notified when pipelines fail</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Email + Slack</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Schema Changes</p>
+                          <p className="text-sm text-gray-500">Notify when source schema changes</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Email</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">High Latency Alerts</p>
+                          <p className="text-sm text-gray-500">Alert when pipelines run slowly</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Slack</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Daily Summary</p>
+                          <p className="text-sm text-gray-500">Receive daily pipeline summary</p>
+                        </div>
+                        <Badge className="bg-gray-100 text-gray-700">Disabled</Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'api' && (
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">API Configuration</h4>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-medium text-gray-900 dark:text-white">API Key</p>
+                          <Button variant="outline" size="sm">
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copy
+                          </Button>
+                        </div>
+                        <code className="text-sm bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                          dp_live_•••••••••••••••••••••••••••
+                        </code>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Rate Limit</p>
+                          <p className="text-sm text-gray-500">API requests per minute</p>
+                        </div>
+                        <Badge variant="outline">1000/min</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Webhook URL</p>
+                          <p className="text-sm text-gray-500">Receive pipeline events</p>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">API Version</p>
+                          <p className="text-sm text-gray-500">Current API version</p>
+                        </div>
+                        <Badge variant="outline">v2</Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'billing' && (
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Usage & Billing</h4>
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Current Plan</p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">Enterprise</p>
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Data Synced (MTD)</p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">3.4 TB</p>
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Rows Synced (MTD)</p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">45.2M</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Active Sources</p>
+                          <p className="text-sm text-gray-500">Connected data sources</p>
+                        </div>
+                        <span className="text-gray-900 dark:text-white">5 / Unlimited</span>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Active Destinations</p>
+                          <p className="text-sm text-gray-500">Configured destinations</p>
+                        </div>
+                        <span className="text-gray-900 dark:text-white">6 / Unlimited</span>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Next Billing Date</p>
+                          <p className="text-sm text-gray-500">Monthly billing cycle</p>
+                        </div>
+                        <span className="text-gray-900 dark:text-white">Jan 1, 2025</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
