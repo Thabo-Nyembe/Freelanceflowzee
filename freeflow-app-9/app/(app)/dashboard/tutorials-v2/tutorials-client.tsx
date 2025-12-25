@@ -17,6 +17,8 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DialogFooter } from '@/components/ui/dialog'
+import { CardDescription } from '@/components/ui/card'
+import { Webhook, HardDrive, AlertOctagon, Key, Sliders } from 'lucide-react'
 
 // Pluralsight/Udemy Level Types
 interface Course {
@@ -806,116 +808,661 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Udemy Level */}
           <TabsContent value="settings" className="space-y-6">
-            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="general"><Settings className="w-4 h-4 mr-2" />General</TabsTrigger>
-                <TabsTrigger value="notifications"><Bell className="w-4 h-4 mr-2" />Notifications</TabsTrigger>
-                <TabsTrigger value="subscription"><CreditCard className="w-4 h-4 mr-2" />Subscription</TabsTrigger>
-                <TabsTrigger value="privacy"><Shield className="w-4 h-4 mr-2" />Privacy</TabsTrigger>
-                <TabsTrigger value="appearance"><Palette className="w-4 h-4 mr-2" />Appearance</TabsTrigger>
-                <TabsTrigger value="learning"><GraduationCap className="w-4 h-4 mr-2" />Learning</TabsTrigger>
-              </TabsList>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'subscription', label: 'Subscription', icon: CreditCard },
+                        { id: 'learning', label: 'Learning', icon: GraduationCap },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
 
-              {/* General Settings */}
-              <TabsContent value="general">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Profile</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center gap-4"><Avatar className="w-16 h-16"><AvatarFallback className="text-xl">JD</AvatarFallback></Avatar><Button variant="outline">Change Photo</Button></div>
-                    <div><Label>Display Name</Label><Input defaultValue="John Doe" className="mt-1" /></div>
-                    <div><Label>Email</Label><Input defaultValue="john@example.com" className="mt-1" /></div>
-                    <div><Label>Bio</Label><Input defaultValue="Passionate learner" className="mt-1" /></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Preferences</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div><Label>Language</Label><Select defaultValue="en"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="en">English</SelectItem><SelectItem value="es">Spanish</SelectItem><SelectItem value="fr">French</SelectItem></SelectContent></Select></div>
-                    <div><Label>Timezone</Label><Select defaultValue="utc"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="utc">UTC</SelectItem><SelectItem value="est">Eastern Time</SelectItem><SelectItem value="pst">Pacific Time</SelectItem></SelectContent></Select></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Profile Publicly</p><p className="text-sm text-gray-500">Others can view your profile</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-
-              {/* Notifications Settings */}
-              <TabsContent value="notifications">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Email Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Course Updates</p><p className="text-sm text-gray-500">New content in enrolled courses</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Digest</p><p className="text-sm text-gray-500">Summary of your learning</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Promotions</p><p className="text-sm text-gray-500">Sales and special offers</p></div><Switch /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Instructor Messages</p><p className="text-sm text-gray-500">Messages from instructors</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Push Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Learning Reminders</p><p className="text-sm text-gray-500">Daily study reminders</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Achievement Alerts</p><p className="text-sm text-gray-500">When you earn badges</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Live Sessions</p><p className="text-sm text-gray-500">Upcoming live events</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-
-              {/* Subscription Settings */}
-              <TabsContent value="subscription">
-                <Card><CardHeader><CardTitle>Your Plan</CardTitle></CardHeader><CardContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    {mockSubscriptions.map(sub => (
-                      <div key={sub.id} className={`p-4 border rounded-lg ${sub.isCurrent ? 'border-rose-500 bg-rose-50' : ''}`}>
-                        <div className="flex items-center justify-between mb-2"><h4 className="font-semibold text-lg">{sub.name}</h4>{sub.isCurrent && <Badge className="bg-rose-600">Current</Badge>}</div>
-                        <div className="text-2xl font-bold mb-2">${sub.price}<span className="text-sm text-gray-500 font-normal">/{sub.interval}</span></div>
-                        <p className="text-sm text-gray-500 mb-3">{sub.coursesIncluded === 'unlimited' ? 'Unlimited courses' : `${sub.coursesIncluded} courses`}</p>
-                        <ul className="space-y-1 mb-4">{sub.features.map((f, i) => (<li key={i} className="text-sm flex items-center gap-2"><Check className="w-4 h-4 text-green-500" />{f}</li>))}</ul>
-                        {!sub.isCurrent && <Button variant="outline" className="w-full">Upgrade</Button>}
+                {/* Learning Stats Sidebar */}
+                <Card className="bg-gradient-to-br from-rose-500 to-pink-600 text-white border-0">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium opacity-90">Learning Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold">156h</div>
+                      <div className="text-xs opacity-80">Total Watch Time</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">12</div>
+                        <div className="text-xs opacity-80">Completed</div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent></Card>
-              </TabsContent>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">5</div>
+                        <div className="text-xs opacity-80">Day Streak</div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Monthly Goal</span>
+                        <span>18/30 hours</span>
+                      </div>
+                      <Progress value={60} className="h-2 bg-white/20" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Privacy Settings */}
-              <TabsContent value="privacy">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Profile Privacy</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Progress</p><p className="text-sm text-gray-500">Display learning progress publicly</p></div><Switch /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Certificates</p><p className="text-sm text-gray-500">Display earned certificates</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Achievements</p><p className="text-sm text-gray-500">Display badges on profile</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Data & Security</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Extra security for login</p></div><Switch /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Login Alerts</p><p className="text-sm text-gray-500">Email on new login</p></div><Switch defaultChecked /></div>
-                    <Button variant="outline" className="w-full"><Download className="w-4 h-4 mr-2" />Download My Data</Button>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-rose-600" />
+                          Profile Settings
+                        </CardTitle>
+                        <CardDescription>Manage your profile information</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="w-20 h-20"><AvatarFallback className="text-2xl">JD</AvatarFallback></Avatar>
+                          <div className="space-y-2">
+                            <Button variant="outline">Change Photo</Button>
+                            <p className="text-xs text-gray-500">JPG, PNG. Max 2MB</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Display Name</Label>
+                            <Input defaultValue="John Doe" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input defaultValue="john@example.com" type="email" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Headline</Label>
+                            <Input placeholder="Software Developer" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Website</Label>
+                            <Input placeholder="https://yoursite.com" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Bio</Label>
+                          <Input defaultValue="Passionate learner and developer" />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Appearance Settings */}
-              <TabsContent value="appearance">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Theme</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div><Label>Color Theme</Label><Select defaultValue="system"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="light">Light</SelectItem><SelectItem value="dark">Dark</SelectItem><SelectItem value="system">System</SelectItem></SelectContent></Select></div>
-                    <div><Label>Accent Color</Label><div className="flex gap-2 mt-2">{['#F43F5E', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: c }} />))}</div></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Display</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Compact Mode</p><p className="text-sm text-gray-500">Reduce spacing</p></div><Switch /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Animations</p><p className="text-sm text-gray-500">Enable animations</p></div><Switch defaultChecked /></div>
-                    <div><Label>Font Size</Label><Select defaultValue="medium"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="small">Small</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="large">Large</SelectItem></SelectContent></Select></div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Preferences
+                        </CardTitle>
+                        <CardDescription>Configure your account preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="pst">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Profile Publicly</div>
+                            <div className="text-sm text-gray-500">Let others find and view your profile</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Courses on Profile</div>
+                            <div className="text-sm text-gray-500">Display enrolled courses publicly</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
 
-              {/* Learning Settings */}
-              <TabsContent value="learning">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Video Preferences</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div><Label>Default Quality</Label><Select defaultValue="auto"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="auto">Auto</SelectItem><SelectItem value="1080p">1080p</SelectItem><SelectItem value="720p">720p</SelectItem><SelectItem value="480p">480p</SelectItem></SelectContent></Select></div>
-                    <div><Label>Playback Speed</Label><Select defaultValue="1x"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0.5x">0.5x</SelectItem><SelectItem value="1x">1x</SelectItem><SelectItem value="1.5x">1.5x</SelectItem><SelectItem value="2x">2x</SelectItem></SelectContent></Select></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Autoplay</p><p className="text-sm text-gray-500">Auto-play next lesson</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Learning Goals</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div><Label>Daily Goal</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem><SelectItem value="60">1 hour</SelectItem><SelectItem value="120">2 hours</SelectItem></SelectContent></Select></div>
-                    <div><Label>Reminder Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Weekend Reminders</p><p className="text-sm text-gray-500">Remind on weekends</p></div><Switch /></div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-            </Tabs>
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Control email notification preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Course Updates</div>
+                            <div className="text-sm text-gray-500">New content in enrolled courses</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Weekly Digest</div>
+                            <div className="text-sm text-gray-500">Summary of your learning progress</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Promotions & Sales</div>
+                            <div className="text-sm text-gray-500">Special offers and discounts</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Instructor Messages</div>
+                            <div className="text-sm text-gray-500">Direct messages from instructors</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Smartphone className="w-5 h-5 text-purple-600" />
+                          Push Notifications
+                        </CardTitle>
+                        <CardDescription>Mobile and browser notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Learning Reminders</div>
+                            <div className="text-sm text-gray-500">Daily study reminders</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Achievement Alerts</div>
+                            <div className="text-sm text-gray-500">When you earn badges</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Live Session Reminders</div>
+                            <div className="text-sm text-gray-500">Upcoming live events</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Streak Reminders</div>
+                            <div className="text-sm text-gray-500">Don't break your streak!</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'subscription' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-green-600" />
+                          Your Plan
+                        </CardTitle>
+                        <CardDescription>Manage your subscription</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-4">
+                          {mockSubscriptions.map(sub => (
+                            <div key={sub.id} className={`p-4 border rounded-lg ${sub.isCurrent ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'dark:border-gray-700'}`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-lg">{sub.name}</h4>
+                                {sub.isCurrent && <Badge className="bg-rose-600">Current</Badge>}
+                              </div>
+                              <div className="text-2xl font-bold mb-2">
+                                ${sub.price}
+                                <span className="text-sm text-gray-500 font-normal">/{sub.interval}</span>
+                              </div>
+                              <p className="text-sm text-gray-500 mb-3">
+                                {sub.coursesIncluded === 'unlimited' ? 'Unlimited courses' : `${sub.coursesIncluded} courses`}
+                              </p>
+                              <ul className="space-y-1 mb-4">
+                                {sub.features.map((f, i) => (
+                                  <li key={i} className="text-sm flex items-center gap-2">
+                                    <Check className="w-4 h-4 text-green-500" />{f}
+                                  </li>
+                                ))}
+                              </ul>
+                              {!sub.isCurrent && <Button variant="outline" className="w-full">Upgrade</Button>}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-blue-600" />
+                          Payment Methods
+                        </CardTitle>
+                        <CardDescription>Manage your payment options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">VISA</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">•••• •••• •••• 4242</div>
+                              <div className="text-sm text-gray-500">Expires 12/25</div>
+                            </div>
+                          </div>
+                          <Badge variant="outline">Default</Badge>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Payment Method
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'learning' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Video className="w-5 h-5 text-rose-600" />
+                          Video Preferences
+                        </CardTitle>
+                        <CardDescription>Customize your video experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Quality</Label>
+                            <Select defaultValue="auto">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="auto">Auto</SelectItem>
+                                <SelectItem value="1080p">1080p HD</SelectItem>
+                                <SelectItem value="720p">720p</SelectItem>
+                                <SelectItem value="480p">480p</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Playback Speed</Label>
+                            <Select defaultValue="1x">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0.5x">0.5x</SelectItem>
+                                <SelectItem value="0.75x">0.75x</SelectItem>
+                                <SelectItem value="1x">1x (Normal)</SelectItem>
+                                <SelectItem value="1.25x">1.25x</SelectItem>
+                                <SelectItem value="1.5x">1.5x</SelectItem>
+                                <SelectItem value="2x">2x</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Autoplay Next Lesson</div>
+                            <div className="text-sm text-gray-500">Automatically play the next lesson</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Captions</div>
+                            <div className="text-sm text-gray-500">Display subtitles when available</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Download for Offline</div>
+                            <div className="text-sm text-gray-500">Enable offline viewing (Pro plan)</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5 text-blue-600" />
+                          Learning Goals
+                        </CardTitle>
+                        <CardDescription>Set and track your learning goals</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Daily Goal</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                                <SelectItem value="120">2 hours</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Reminder Time</Label>
+                            <Input type="time" defaultValue="09:00" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Weekend Reminders</div>
+                            <div className="text-sm text-gray-500">Send reminders on weekends</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Streak Protection</div>
+                            <div className="text-sm text-gray-500">Freeze streaks on rest days</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-indigo-600" />
+                          Connected Services
+                        </CardTitle>
+                        <CardDescription>Manage third-party integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center">
+                              <span className="text-white font-bold">G</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Google Calendar</div>
+                              <div className="text-sm text-gray-500">Sync learning schedule</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                              <span className="text-white font-bold">L</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">LinkedIn</div>
+                              <div className="text-sm text-gray-500">Share certificates</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#4A154B] flex items-center justify-center">
+                              <span className="text-white font-bold">S</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Slack</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                              <span className="text-white font-bold">Z</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Zoom</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API credentials</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="learn_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable API Access</div>
+                            <div className="text-sm text-gray-500">Allow third-party apps to access your data</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-pink-600" />
+                          Appearance
+                        </CardTitle>
+                        <CardDescription>Customize the look and feel</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Color Theme</Label>
+                          <Select defaultValue="system">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="light">Light</SelectItem>
+                              <SelectItem value="dark">Dark</SelectItem>
+                              <SelectItem value="system">System</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Accent Color</Label>
+                          <div className="flex gap-2">
+                            {['#F43F5E', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'].map(color => (
+                              <button key={color} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: color }} />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Compact Mode</div>
+                            <div className="text-sm text-gray-500">Reduce spacing throughout</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Animations</div>
+                            <div className="text-sm text-gray-500">Enable smooth animations</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Privacy & Security
+                        </CardTitle>
+                        <CardDescription>Manage your privacy settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Two-Factor Authentication</div>
+                            <div className="text-sm text-gray-500">Add extra security to your account</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Login Alerts</div>
+                            <div className="text-sm text-gray-500">Email me when there's a new login</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Progress Publicly</div>
+                            <div className="text-sm text-gray-500">Display learning progress on profile</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Download My Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <HardDrive className="w-4 h-4 mr-2" />
+                            Clear Watch History
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Reset Progress</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Clear all course progress and history</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Delete Account</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete your account and data</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
