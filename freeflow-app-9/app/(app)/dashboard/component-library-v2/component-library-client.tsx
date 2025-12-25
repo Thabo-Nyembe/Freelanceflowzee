@@ -17,7 +17,9 @@ import {
   Monitor, Moon, Sun, Play, Pause, RotateCcw, Download, Heart, MessageSquare,
   GitBranch, FileCode, Zap, Shield, Puzzle, BookOpen, Terminal, Figma,
   Github, Plus, Filter, CheckCircle, AlertTriangle, XCircle, Paintbrush,
-  Type, Image, LayoutGrid, History, RefreshCw, Package, Sparkles, FileText
+  Type, Image, LayoutGrid, History, RefreshCw, Package, Sparkles, FileText,
+  Key, Webhook, Database, Trash2, Lock, Bell, Mail, Globe, Link2,
+  Upload, AlertOctagon
 } from 'lucide-react'
 
 // Type definitions
@@ -333,6 +335,7 @@ export default function ComponentLibraryClient() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [tokenCategory, setTokenCategory] = useState<string>('all')
   const [iconSearch, setIconSearch] = useState('')
+  const [settingsTab, setSettingsTab] = useState('display')
 
   const filteredComponents = useMemo(() => {
     let filtered = [...mockComponents]
@@ -784,112 +787,922 @@ export default function App() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Display Preferences</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Dark Mode</Label>
-                      <p className="text-sm text-gray-500">Enable dark theme</p>
-                    </div>
-                    <Switch checked={darkMode} onCheckedChange={setDarkMode} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Compact View</Label>
-                      <p className="text-sm text-gray-500">Reduce spacing in components</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Show Accessibility Info</Label>
-                      <p className="text-sm text-gray-500">Display a11y badges</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="grid w-full grid-cols-6 mb-6">
+                <TabsTrigger value="display" className="gap-2">
+                  <Palette className="w-4 h-4" />
+                  Display
+                </TabsTrigger>
+                <TabsTrigger value="components" className="gap-2">
+                  <Puzzle className="w-4 h-4" />
+                  Components
+                </TabsTrigger>
+                <TabsTrigger value="code" className="gap-2">
+                  <Code2 className="w-4 h-4" />
+                  Code
+                </TabsTrigger>
+                <TabsTrigger value="integrations" className="gap-2">
+                  <Link2 className="w-4 h-4" />
+                  Integrations
+                </TabsTrigger>
+                <TabsTrigger value="publishing" className="gap-2">
+                  <Upload className="w-4 h-4" />
+                  Publishing
+                </TabsTrigger>
+                <TabsTrigger value="advanced" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  Advanced
+                </TabsTrigger>
+              </TabsList>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Code Preferences</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Default Language</Label>
-                    <Select defaultValue="tsx">
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tsx">TypeScript (TSX)</SelectItem>
-                        <SelectItem value="jsx">JavaScript (JSX)</SelectItem>
-                        <SelectItem value="html">HTML</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Show Line Numbers</Label>
-                      <p className="text-sm text-gray-500">In code examples</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Syntax Highlighting</Label>
-                      <p className="text-sm text-gray-500">Colorize code blocks</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Display Settings */}
+              <TabsContent value="display" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Palette className="h-5 w-5 text-violet-600" />
+                        Theme Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Dark Mode</Label>
+                          <p className="text-sm text-gray-500">Enable dark theme</p>
+                        </div>
+                        <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">System Theme</Label>
+                          <p className="text-sm text-gray-500">Follow system preference</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Accent Color</Label>
+                        <div className="flex gap-2">
+                          {['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'].map((color) => (
+                            <button
+                              key={color}
+                              className="w-8 h-8 rounded-full border-2 border-white shadow-md"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Font Size</Label>
+                        <Select defaultValue="medium">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="small">Small</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="large">Large</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>NPM Package</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm mb-4">
-                    <code>npm install @kazi/ui-components@latest</code>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copy
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View on NPM
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <LayoutGrid className="h-5 w-5 text-violet-600" />
+                        UI Preferences
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Compact View</Label>
+                          <p className="text-sm text-gray-500">Reduce spacing in components</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Accessibility Info</Label>
+                          <p className="text-sm text-gray-500">Display a11y badges on components</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Status Badges</Label>
+                          <p className="text-sm text-gray-500">Display stable/beta/experimental</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Animations</Label>
+                          <p className="text-sm text-gray-500">Enable UI animations</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Default View Mode</Label>
+                        <Select defaultValue="grid">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="grid">Grid View</SelectItem>
+                            <SelectItem value="list">List View</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Export</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Tokens as CSS
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Tokens as JSON
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Icons as SVG
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Eye className="h-5 w-5 text-violet-600" />
+                        Preview Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Auto-preview on Hover</Label>
+                          <p className="text-sm text-gray-500">Show component preview</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Props Panel</Label>
+                          <p className="text-sm text-gray-500">Display editable props</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Preview Background</Label>
+                        <Select defaultValue="checkered">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="checkered">Checkered</SelectItem>
+                            <SelectItem value="white">White</SelectItem>
+                            <SelectItem value="dark">Dark</SelectItem>
+                            <SelectItem value="transparent">Transparent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Monitor className="h-5 w-5 text-violet-600" />
+                        Responsive Preview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Device Frames</Label>
+                          <p className="text-sm text-gray-500">Display device mockups</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Default Viewport</Label>
+                        <Select defaultValue="desktop">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mobile">Mobile (375px)</SelectItem>
+                            <SelectItem value="tablet">Tablet (768px)</SelectItem>
+                            <SelectItem value="desktop">Desktop (1280px)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Breakpoints</Label>
+                          <p className="text-sm text-gray-500">Display breakpoint indicators</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Components Settings */}
+              <TabsContent value="components" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Puzzle className="h-5 w-5 text-violet-600" />
+                        Component Defaults
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="font-medium">Default Button Variant</Label>
+                        <Select defaultValue="primary">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="primary">Primary</SelectItem>
+                            <SelectItem value="secondary">Secondary</SelectItem>
+                            <SelectItem value="outline">Outline</SelectItem>
+                            <SelectItem value="ghost">Ghost</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Default Size</Label>
+                        <Select defaultValue="md">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sm">Small</SelectItem>
+                            <SelectItem value="md">Medium</SelectItem>
+                            <SelectItem value="lg">Large</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Enable Loading States</Label>
+                          <p className="text-sm text-gray-500">Show loading spinners</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Auto-focus First Input</Label>
+                          <p className="text-sm text-gray-500">Focus forms automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Accessibility className="h-5 w-5 text-violet-600" />
+                        Accessibility
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Focus Indicators</Label>
+                          <p className="text-sm text-gray-500">Enhanced focus rings</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Reduce Motion</Label>
+                          <p className="text-sm text-gray-500">Minimize animations</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">High Contrast</Label>
+                          <p className="text-sm text-gray-500">Increase color contrast</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">WCAG Target</Label>
+                        <Select defaultValue="aa">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="a">Level A</SelectItem>
+                            <SelectItem value="aa">Level AA (Recommended)</SelectItem>
+                            <SelectItem value="aaa">Level AAA</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Layers className="h-5 w-5 text-violet-600" />
+                        Variants & States
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show All Variants</Label>
+                          <p className="text-sm text-gray-500">Display every variant</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show State Examples</Label>
+                          <p className="text-sm text-gray-500">Hover, focus, disabled states</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Interactive States</Label>
+                          <p className="text-sm text-gray-500">Enable state interaction</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Paintbrush className="h-5 w-5 text-violet-600" />
+                        Design Tokens
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Token Names</Label>
+                          <p className="text-sm text-gray-500">Display CSS variable names</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Raw Values</Label>
+                          <p className="text-sm text-gray-500">Display computed values</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Token Format</Label>
+                        <Select defaultValue="css">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="css">CSS Variables</SelectItem>
+                            <SelectItem value="scss">SCSS Variables</SelectItem>
+                            <SelectItem value="js">JavaScript</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Code Settings */}
+              <TabsContent value="code" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Code2 className="h-5 w-5 text-violet-600" />
+                        Code Display
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="font-medium">Default Language</Label>
+                        <Select defaultValue="tsx">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tsx">TypeScript (TSX)</SelectItem>
+                            <SelectItem value="jsx">JavaScript (JSX)</SelectItem>
+                            <SelectItem value="html">HTML</SelectItem>
+                            <SelectItem value="vue">Vue</SelectItem>
+                            <SelectItem value="svelte">Svelte</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Line Numbers</Label>
+                          <p className="text-sm text-gray-500">In code examples</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Syntax Highlighting</Label>
+                          <p className="text-sm text-gray-500">Colorize code blocks</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Word Wrap</Label>
+                          <p className="text-sm text-gray-500">Wrap long lines</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Terminal className="h-5 w-5 text-violet-600" />
+                        Editor Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="font-medium">Theme</Label>
+                        <Select defaultValue="dark">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="dark">Dark (Monokai)</SelectItem>
+                            <SelectItem value="light">Light</SelectItem>
+                            <SelectItem value="github">GitHub</SelectItem>
+                            <SelectItem value="dracula">Dracula</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Font Family</Label>
+                        <Select defaultValue="fira">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="fira">Fira Code</SelectItem>
+                            <SelectItem value="jetbrains">JetBrains Mono</SelectItem>
+                            <SelectItem value="source">Source Code Pro</SelectItem>
+                            <SelectItem value="monaco">Monaco</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Font Size</Label>
+                        <Select defaultValue="14">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="12">12px</SelectItem>
+                            <SelectItem value="14">14px</SelectItem>
+                            <SelectItem value="16">16px</SelectItem>
+                            <SelectItem value="18">18px</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileCode className="h-5 w-5 text-violet-600" />
+                        Code Generation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Include Imports</Label>
+                          <p className="text-sm text-gray-500">Add import statements</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Include Types</Label>
+                          <p className="text-sm text-gray-500">Add TypeScript types</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Minify Output</Label>
+                          <p className="text-sm text-gray-500">Compact code output</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Quote Style</Label>
+                        <Select defaultValue="single">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="single">Single quotes</SelectItem>
+                            <SelectItem value="double">Double quotes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Copy className="h-5 w-5 text-violet-600" />
+                        Clipboard
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Copy on Click</Label>
+                          <p className="text-sm text-gray-500">Click code to copy</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Show Copy Feedback</Label>
+                          <p className="text-sm text-gray-500">Animate copy button</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Copy Notification</Label>
+                          <p className="text-sm text-gray-500">Toast on successful copy</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Integrations Settings */}
+              <TabsContent value="integrations" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Link2 className="h-5 w-5 text-violet-600" />
+                        Connected Tools
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[
+                          { name: 'Figma', status: 'connected', icon: '🎨', desc: 'Design system sync' },
+                          { name: 'GitHub', status: 'connected', icon: '🐙', desc: 'Repository integration' },
+                          { name: 'Storybook', status: 'connected', icon: '📕', desc: 'Component docs' },
+                          { name: 'Chromatic', status: 'not_connected', icon: '🎭', desc: 'Visual testing' },
+                          { name: 'Slack', status: 'not_connected', icon: '#', desc: 'Team notifications' },
+                          { name: 'Jira', status: 'not_connected', icon: '📋', desc: 'Issue tracking' }
+                        ].map((tool, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xl">
+                                {tool.icon}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{tool.name}</p>
+                                <p className="text-xs text-gray-500">{tool.desc}</p>
+                              </div>
+                            </div>
+                            {tool.status === 'connected' ? (
+                              <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                            ) : (
+                              <Button variant="outline" size="sm">Connect</Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="h-5 w-5 text-violet-600" />
+                        Webhooks
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Component Update Webhook</span>
+                          <Badge className="bg-green-100 text-green-700">Active</Badge>
+                        </div>
+                        <code className="text-xs text-gray-500">https://api.yourapp.com/webhooks/components</code>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Webhook
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Key className="h-5 w-5 text-violet-600" />
+                        API Access
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="font-medium">API Key</Label>
+                        <div className="flex gap-2">
+                          <Input value="cl_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
+                          <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          Keep your API key secret. Never expose it in client-side code.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Regenerate API Key
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Publishing Settings */}
+              <TabsContent value="publishing" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5 text-violet-600" />
+                        NPM Package
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm">
+                        <code>npm install @kazi/ui-components@latest</code>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View on NPM
+                        </Button>
+                      </div>
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <p className="text-sm text-green-800 dark:text-green-200">
+                          <strong>Latest:</strong> v2.5.0 • Published 2 days ago
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <GitBranch className="h-5 w-5 text-violet-600" />
+                        Versioning
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="font-medium">Version Bump</Label>
+                        <Select defaultValue="minor">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="patch">Patch (x.x.1)</SelectItem>
+                            <SelectItem value="minor">Minor (x.1.0)</SelectItem>
+                            <SelectItem value="major">Major (1.0.0)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Auto-generate Changelog</Label>
+                          <p className="text-sm text-gray-500">From commits</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Pre-release Tags</Label>
+                          <p className="text-sm text-gray-500">Alpha/Beta releases</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Download className="h-5 w-5 text-violet-600" />
+                        Export Options
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Button variant="outline" className="h-24 flex-col gap-2">
+                          <Download className="h-6 w-6" />
+                          <span>Export Tokens as CSS</span>
+                        </Button>
+                        <Button variant="outline" className="h-24 flex-col gap-2">
+                          <Download className="h-6 w-6" />
+                          <span>Export Tokens as JSON</span>
+                        </Button>
+                        <Button variant="outline" className="h-24 flex-col gap-2">
+                          <Download className="h-6 w-6" />
+                          <span>Export Icons as SVG</span>
+                        </Button>
+                        <Button variant="outline" className="h-24 flex-col gap-2">
+                          <Download className="h-6 w-6" />
+                          <span>Export Components</span>
+                        </Button>
+                        <Button variant="outline" className="h-24 flex-col gap-2">
+                          <Download className="h-6 w-6" />
+                          <span>Export Documentation</span>
+                        </Button>
+                        <Button variant="outline" className="h-24 flex-col gap-2">
+                          <Download className="h-6 w-6" />
+                          <span>Export Full Library</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Advanced Settings */}
+              <TabsContent value="advanced" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5 text-violet-600" />
+                        Cache & Storage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Cache Size</span>
+                          <span className="text-sm text-gray-500">24.5 MB</span>
+                        </div>
+                        <Progress value={35} className="h-2" />
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Clear Cache
+                      </Button>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Enable Caching</Label>
+                          <p className="text-sm text-gray-500">Cache component data</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Cache Duration</Label>
+                        <Select defaultValue="1day">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1hour">1 hour</SelectItem>
+                            <SelectItem value="1day">1 day</SelectItem>
+                            <SelectItem value="1week">1 week</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="h-5 w-5 text-violet-600" />
+                        Notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Component Updates</Label>
+                          <p className="text-sm text-gray-500">When components are updated</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Breaking Changes</Label>
+                          <p className="text-sm text-gray-500">Alert on breaking changes</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">New Features</Label>
+                          <p className="text-sm text-gray-500">New component announcements</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">Weekly Digest</Label>
+                          <p className="text-sm text-gray-500">Weekly library summary</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-violet-600" />
+                        Security
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="font-medium">API Rate Limiting</Label>
+                          <p className="text-sm text-gray-500">Limit API requests</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Rate Limit</Label>
+                        <Select defaultValue="1000">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="100">100 requests/hour</SelectItem>
+                            <SelectItem value="500">500 requests/hour</SelectItem>
+                            <SelectItem value="1000">1000 requests/hour</SelectItem>
+                            <SelectItem value="unlimited">Unlimited</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <History className="h-4 w-4 mr-2" />
+                        View Access Logs
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-red-200 dark:border-red-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-red-600">
+                        <AlertOctagon className="h-5 w-5" />
+                        Danger Zone
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-sm text-red-800 dark:text-red-200">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete All Components
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Reset All Settings
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Lock className="h-4 w-4 mr-2" />
+                        Disable Component Library
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
 
