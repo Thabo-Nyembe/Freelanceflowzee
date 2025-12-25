@@ -10,6 +10,9 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Settings,
   User,
@@ -73,7 +76,18 @@ import {
   Calendar,
   Activity,
   Wifi,
-  ExternalLink
+  ExternalLink,
+  AlertOctagon,
+  Copy,
+  Terminal,
+  Code,
+  Cpu,
+  Server,
+  Archive,
+  Trash,
+  ShieldCheck,
+  Ban,
+  BookOpen
 } from 'lucide-react'
 
 // Types
@@ -389,6 +403,10 @@ export default function SettingsClient() {
             <TabsTrigger value="appearance" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />
               Appearance
+            </TabsTrigger>
+            <TabsTrigger value="advanced" className="flex items-center gap-2">
+              <Terminal className="w-4 h-4" />
+              Advanced
             </TabsTrigger>
           </TabsList>
 
@@ -1034,6 +1052,453 @@ export default function SettingsClient() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Advanced Tab - System Preferences level */}
+          <TabsContent value="advanced" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                {/* Developer Settings */}
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Code className="w-5 h-5 text-blue-500" />
+                      Developer Settings
+                    </CardTitle>
+                    <CardDescription>Configure developer tools and API access</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label>API Key</Label>
+                      <div className="flex gap-2">
+                        <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
+                        <Button variant="outline" size="icon">
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">Regenerate</Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Never share your API key publicly</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Webhook URL</Label>
+                      <Input placeholder="https://your-app.com/webhooks" />
+                    </div>
+
+                    <div className="border-t pt-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Enable API Access</p>
+                          <p className="text-sm text-muted-foreground">Allow programmatic access to your account</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Developer Mode</p>
+                          <p className="text-sm text-muted-foreground">Show additional debugging info</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Verbose Logging</p>
+                          <p className="text-sm text-muted-foreground">Enable detailed activity logs</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Data Management */}
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-green-500" />
+                      Data Management
+                    </CardTitle>
+                    <CardDescription>Control your data and storage settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Data Retention Period</Label>
+                        <Select defaultValue="90">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="30">30 Days</SelectItem>
+                            <SelectItem value="60">60 Days</SelectItem>
+                            <SelectItem value="90">90 Days</SelectItem>
+                            <SelectItem value="180">180 Days</SelectItem>
+                            <SelectItem value="365">1 Year</SelectItem>
+                            <SelectItem value="forever">Forever</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Backup Frequency</Label>
+                        <Select defaultValue="daily">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="realtime">Real-time</SelectItem>
+                            <SelectItem value="hourly">Hourly</SelectItem>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Auto-archive Old Data</p>
+                          <p className="text-sm text-muted-foreground">Move old data to cold storage</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Compress Backups</p>
+                          <p className="text-sm text-muted-foreground">Reduce backup storage size</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button variant="outline" className="flex-1">
+                        <Download className="w-4 h-4 mr-2" />
+                        Export All Data
+                      </Button>
+                      <Button variant="outline" className="flex-1">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Import Data
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Performance Settings */}
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Cpu className="w-5 h-5 text-purple-500" />
+                      Performance Settings
+                    </CardTitle>
+                    <CardDescription>Optimize application performance</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Enable Caching</p>
+                        <p className="text-sm text-muted-foreground">Cache data for faster loading</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Prefetch Resources</p>
+                        <p className="text-sm text-muted-foreground">Preload content for instant access</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Hardware Acceleration</p>
+                        <p className="text-sm text-muted-foreground">Use GPU for rendering</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Background Sync</p>
+                        <p className="text-sm text-muted-foreground">Sync data in background</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Cache Size Limit (MB)</Label>
+                      <div className="flex items-center gap-4">
+                        <Input type="range" min="100" max="1000" defaultValue="500" className="flex-1" />
+                        <span className="text-sm font-medium w-16">500 MB</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Experimental Features */}
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-yellow-500" />
+                      Experimental Features
+                    </CardTitle>
+                    <CardDescription>Try out new features before they're released</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-900">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-yellow-800 dark:text-yellow-200">Warning</p>
+                          <p className="text-sm text-yellow-700 dark:text-yellow-300">Experimental features may be unstable</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {[
+                        { name: 'AI Assistant', description: 'Use AI to help with tasks', beta: true },
+                        { name: 'New Dashboard', description: 'Redesigned dashboard layout', beta: true },
+                        { name: 'Voice Commands', description: 'Control with voice', alpha: true },
+                        { name: 'Collaborative Editing', description: 'Real-time collaboration', beta: true }
+                      ].map(feature => (
+                        <div key={feature.name} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{feature.name}</p>
+                                <Badge variant="secondary" className="text-xs">
+                                  {feature.alpha ? 'Alpha' : 'Beta'}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{feature.description}</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Privacy & Security Advanced */}
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-green-500" />
+                      Advanced Privacy
+                    </CardTitle>
+                    <CardDescription>Enhanced privacy and security settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">End-to-End Encryption</p>
+                        <p className="text-sm text-muted-foreground">Encrypt all data transfers</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Anonymous Analytics</p>
+                        <p className="text-sm text-muted-foreground">Share anonymous usage data</p>
+                      </div>
+                      <Switch />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Telemetry</p>
+                        <p className="text-sm text-muted-foreground">Send crash reports</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Cookie Preferences</p>
+                        <p className="text-sm text-muted-foreground">Manage cookie consent</p>
+                      </div>
+                      <Button variant="outline" size="sm">Configure</Button>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Session Timeout (minutes)</Label>
+                      <Select defaultValue="30">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 Minutes</SelectItem>
+                          <SelectItem value="30">30 Minutes</SelectItem>
+                          <SelectItem value="60">1 Hour</SelectItem>
+                          <SelectItem value="240">4 Hours</SelectItem>
+                          <SelectItem value="never">Never</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Danger Zone */}
+                <Card className="border-red-200 dark:border-red-900 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-red-600">
+                      <AlertOctagon className="w-5 h-5" />
+                      Danger Zone
+                    </CardTitle>
+                    <CardDescription className="text-red-600/70">Irreversible and destructive actions</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                      <div>
+                        <p className="font-medium text-red-600">Clear All Caches</p>
+                        <p className="text-sm text-muted-foreground">Remove all cached data</p>
+                      </div>
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                        <Trash className="w-4 h-4 mr-2" />
+                        Clear
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                      <div>
+                        <p className="font-medium text-red-600">Reset All Settings</p>
+                        <p className="text-sm text-muted-foreground">Restore default settings</p>
+                      </div>
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Reset
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                      <div>
+                        <p className="font-medium text-red-600">Deactivate Account</p>
+                        <p className="text-sm text-muted-foreground">Temporarily disable your account</p>
+                      </div>
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                        <Ban className="w-4 h-4 mr-2" />
+                        Deactivate
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg bg-red-50 dark:bg-red-900/10">
+                      <div>
+                        <p className="font-medium text-red-600">Delete Account</p>
+                        <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
+                      </div>
+                      <Button variant="destructive">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Server className="w-5 h-5" />
+                      System Info
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { label: 'Version', value: 'v2.4.1' },
+                      { label: 'Build', value: '2024.12.25-stable' },
+                      { label: 'Environment', value: 'Production' },
+                      { label: 'Region', value: 'US-East-1' },
+                      { label: 'Last Updated', value: 'Dec 25, 2024' }
+                    ].map(item => (
+                      <div key={item.label} className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-mono">{item.value}</span>
+                      </div>
+                    ))}
+                    <div className="pt-3 border-t">
+                      <Button variant="outline" size="sm" className="w-full">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Changelog
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5" />
+                      Resource Usage
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Storage Used</span>
+                        <span className="font-medium">2.4 GB / 10 GB</span>
+                      </div>
+                      <Progress value={24} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>API Calls</span>
+                        <span className="font-medium">8,420 / 10,000</span>
+                      </div>
+                      <Progress value={84} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Bandwidth</span>
+                        <span className="font-medium">45 GB / 100 GB</span>
+                      </div>
+                      <Progress value={45} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5" />
+                      Documentation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {[
+                      { label: 'API Reference', href: '#' },
+                      { label: 'Developer Guide', href: '#' },
+                      { label: 'Webhook Documentation', href: '#' },
+                      { label: 'Security Best Practices', href: '#' }
+                    ].map(link => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm transition-colors"
+                      >
+                        <span>{link.label}</span>
+                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                      </a>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <History className="w-5 h-5" />
+                      Recent Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { action: 'API key regenerated', time: '2 hours ago' },
+                      { action: 'Settings updated', time: '1 day ago' },
+                      { action: 'Backup created', time: '3 days ago' },
+                      { action: 'Cache cleared', time: '1 week ago' }
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm">
+                        <span>{item.action}</span>
+                        <span className="text-muted-foreground">{item.time}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
