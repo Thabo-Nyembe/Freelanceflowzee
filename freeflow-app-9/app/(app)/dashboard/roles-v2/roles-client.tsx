@@ -1,565 +1,935 @@
 'use client'
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
+import { useState, useMemo } from 'react'
 import {
-  Shield, Users, Lock, TrendingUp, Plus,
-  Copy, Eye, Download, RefreshCw, Settings,
-  CheckCircle, AlertCircle, Crown, UserCheck,
-  Trash2, RotateCw, Power, PowerOff
+  Shield, Users, Lock, Key, Crown, UserCheck, UserX, Plus,
+  Search, Filter, Download, RefreshCw, Settings, Eye, Copy,
+  Trash2, Power, PowerOff, CheckCircle, AlertCircle, XCircle,
+  Building2, Globe, Clock, Calendar, TrendingUp, BarChart3,
+  FileText, AlertTriangle, ShieldCheck, ShieldAlert, Fingerprint,
+  UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell
 } from 'lucide-react'
-import { useRoles, UserRole, RoleStats } from '@/lib/hooks/use-roles'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
 
-type RoleStatus = 'active' | 'inactive' | 'deprecated'
-type RoleType = 'admin' | 'user' | 'manager' | 'viewer' | 'custom'
-type AccessLevel = 'full' | 'write' | 'read' | 'restricted'
+// Types
+type RoleStatus = 'active' | 'inactive' | 'deprecated' | 'pending'
+type RoleType = 'admin' | 'user' | 'manager' | 'viewer' | 'custom' | 'service'
+type AccessLevel = 'full' | 'write' | 'read' | 'restricted' | 'none'
+type PolicyType = 'allow' | 'deny' | 'conditional'
 
-interface RolesClientProps {
-  initialRoles: UserRole[]
-  initialStats: RoleStats
+interface Role {
+  id: string
+  name: string
+  description: string
+  roleCode: string
+  type: RoleType
+  status: RoleStatus
+  accessLevel: AccessLevel
+  permissions: Permission[]
+  totalUsers: number
+  activeUsers: number
+  isSystem: boolean
+  isDefault: boolean
+  canDelegate: boolean
+  expiresAt?: string
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+  tags: string[]
+  hierarchy: number
+  parentRole?: string
+  childRoles: string[]
+  groups: string[]
 }
 
-export default function RolesClient({ initialRoles, initialStats }: RolesClientProps) {
-  const [viewMode, setViewMode] = useState<'all' | 'active' | 'system' | 'custom'>('all')
+interface Permission {
+  id: string
+  name: string
+  code: string
+  description: string
+  category: string
+  resource: string
+  actions: string[]
+  conditions?: PermissionCondition[]
+  isGranted: boolean
+}
 
-  const {
-    roles,
-    loading,
-    createRole,
-    updateRole,
-    deleteRole,
-    activateRole,
-    deactivateRole,
-    setAsDefault,
-    cloneRole,
-    getStats
-  } = useRoles()
+interface PermissionCondition {
+  type: 'time' | 'ip' | 'mfa' | 'location' | 'device'
+  operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'between'
+  value: string | string[]
+}
 
-  // Use real-time data if available, otherwise use initial data
-  const displayRoles = roles.length > 0 ? roles : initialRoles
-  const stats = roles.length > 0 ? getStats() : initialStats
+interface UserAssignment {
+  id: string
+  userId: string
+  userName: string
+  email: string
+  avatar?: string
+  roleId: string
+  roleName: string
+  assignedAt: string
+  assignedBy: string
+  expiresAt?: string
+  status: 'active' | 'expired' | 'suspended'
+  lastAccess?: string
+}
 
-  const filteredRoles = displayRoles.filter(role => {
-    if (viewMode === 'all') return true
-    if (viewMode === 'active') return role.status === 'active'
-    if (viewMode === 'system') return role.is_system
-    if (viewMode === 'custom') return !role.is_system && role.type === 'custom'
-    return true
-  })
+interface AccessPolicy {
+  id: string
+  name: string
+  description: string
+  type: PolicyType
+  priority: number
+  roles: string[]
+  permissions: string[]
+  conditions: PolicyCondition[]
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
 
-  const getStatusColor = (status: RoleStatus) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-700 border-green-200'
-      case 'inactive': return 'bg-gray-100 text-gray-700 border-gray-200'
-      case 'deprecated': return 'bg-red-100 text-red-700 border-red-200'
-      default: return 'bg-gray-100 text-gray-700 border-gray-200'
+interface PolicyCondition {
+  field: string
+  operator: string
+  value: string
+}
+
+interface AuditLog {
+  id: string
+  action: string
+  actor: string
+  target: string
+  targetType: 'role' | 'user' | 'permission' | 'policy'
+  details: string
+  timestamp: string
+  ipAddress: string
+  success: boolean
+}
+
+// Mock Data
+const mockRoles: Role[] = [
+  {
+    id: '1',
+    name: 'Super Administrator',
+    description: 'Full system access with all permissions. Reserved for system administrators.',
+    roleCode: 'SUPER_ADMIN',
+    type: 'admin',
+    status: 'active',
+    accessLevel: 'full',
+    permissions: [],
+    totalUsers: 3,
+    activeUsers: 3,
+    isSystem: true,
+    isDefault: false,
+    canDelegate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-12-20T10:00:00Z',
+    createdBy: 'System',
+    tags: ['system', 'security-critical'],
+    hierarchy: 1,
+    childRoles: ['admin', 'manager'],
+    groups: ['administrators']
+  },
+  {
+    id: '2',
+    name: 'Administrator',
+    description: 'Administrative access for managing users, roles, and system settings.',
+    roleCode: 'ADMIN',
+    type: 'admin',
+    status: 'active',
+    accessLevel: 'full',
+    permissions: [],
+    totalUsers: 12,
+    activeUsers: 10,
+    isSystem: true,
+    isDefault: false,
+    canDelegate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-12-18T15:30:00Z',
+    createdBy: 'System',
+    tags: ['system', 'management'],
+    hierarchy: 2,
+    parentRole: 'SUPER_ADMIN',
+    childRoles: ['manager'],
+    groups: ['administrators', 'staff']
+  },
+  {
+    id: '3',
+    name: 'Manager',
+    description: 'Team management access including user oversight and reporting capabilities.',
+    roleCode: 'MANAGER',
+    type: 'manager',
+    status: 'active',
+    accessLevel: 'write',
+    permissions: [],
+    totalUsers: 45,
+    activeUsers: 38,
+    isSystem: true,
+    isDefault: false,
+    canDelegate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-12-15T09:00:00Z',
+    createdBy: 'System',
+    tags: ['system', 'team-lead'],
+    hierarchy: 3,
+    parentRole: 'ADMIN',
+    childRoles: ['user'],
+    groups: ['managers', 'staff']
+  },
+  {
+    id: '4',
+    name: 'Standard User',
+    description: 'Default role for regular platform users with standard access permissions.',
+    roleCode: 'USER',
+    type: 'user',
+    status: 'active',
+    accessLevel: 'write',
+    permissions: [],
+    totalUsers: 1250,
+    activeUsers: 980,
+    isSystem: true,
+    isDefault: true,
+    canDelegate: false,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-12-10T14:00:00Z',
+    createdBy: 'System',
+    tags: ['system', 'default'],
+    hierarchy: 4,
+    parentRole: 'MANAGER',
+    childRoles: ['viewer'],
+    groups: ['users']
+  },
+  {
+    id: '5',
+    name: 'Viewer',
+    description: 'Read-only access for viewing content without modification privileges.',
+    roleCode: 'VIEWER',
+    type: 'viewer',
+    status: 'active',
+    accessLevel: 'read',
+    permissions: [],
+    totalUsers: 320,
+    activeUsers: 245,
+    isSystem: true,
+    isDefault: false,
+    canDelegate: false,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-12-05T11:00:00Z',
+    createdBy: 'System',
+    tags: ['system', 'read-only'],
+    hierarchy: 5,
+    parentRole: 'USER',
+    childRoles: [],
+    groups: ['viewers', 'guests']
+  },
+  {
+    id: '6',
+    name: 'Finance Team',
+    description: 'Custom role for finance department with billing and reporting access.',
+    roleCode: 'FINANCE',
+    type: 'custom',
+    status: 'active',
+    accessLevel: 'write',
+    permissions: [],
+    totalUsers: 18,
+    activeUsers: 16,
+    isSystem: false,
+    isDefault: false,
+    canDelegate: false,
+    createdAt: '2024-03-15T10:00:00Z',
+    updatedAt: '2024-12-20T16:00:00Z',
+    createdBy: 'admin@company.com',
+    tags: ['finance', 'billing', 'reports'],
+    hierarchy: 4,
+    parentRole: 'MANAGER',
+    childRoles: [],
+    groups: ['finance-team']
+  },
+  {
+    id: '7',
+    name: 'API Service Account',
+    description: 'Service account for API integrations with limited scope.',
+    roleCode: 'API_SERVICE',
+    type: 'service',
+    status: 'active',
+    accessLevel: 'restricted',
+    permissions: [],
+    totalUsers: 8,
+    activeUsers: 8,
+    isSystem: false,
+    isDefault: false,
+    canDelegate: false,
+    expiresAt: '2025-12-31T23:59:59Z',
+    createdAt: '2024-06-01T09:00:00Z',
+    updatedAt: '2024-12-01T12:00:00Z',
+    createdBy: 'admin@company.com',
+    tags: ['service', 'api', 'integration'],
+    hierarchy: 5,
+    childRoles: [],
+    groups: ['service-accounts']
+  }
+]
+
+const mockPermissions: Permission[] = [
+  { id: '1', name: 'View Users', code: 'users:read', description: 'View user profiles and lists', category: 'Users', resource: 'users', actions: ['read'], isGranted: true },
+  { id: '2', name: 'Create Users', code: 'users:create', description: 'Create new user accounts', category: 'Users', resource: 'users', actions: ['create'], isGranted: true },
+  { id: '3', name: 'Edit Users', code: 'users:update', description: 'Modify user information', category: 'Users', resource: 'users', actions: ['update'], isGranted: true },
+  { id: '4', name: 'Delete Users', code: 'users:delete', description: 'Remove user accounts', category: 'Users', resource: 'users', actions: ['delete'], isGranted: false },
+  { id: '5', name: 'View Roles', code: 'roles:read', description: 'View role definitions', category: 'Roles', resource: 'roles', actions: ['read'], isGranted: true },
+  { id: '6', name: 'Manage Roles', code: 'roles:manage', description: 'Create and modify roles', category: 'Roles', resource: 'roles', actions: ['create', 'update', 'delete'], isGranted: false },
+  { id: '7', name: 'View Reports', code: 'reports:read', description: 'Access analytics and reports', category: 'Reports', resource: 'reports', actions: ['read'], isGranted: true },
+  { id: '8', name: 'Export Data', code: 'data:export', description: 'Export data from the system', category: 'Data', resource: 'data', actions: ['export'], isGranted: true },
+  { id: '9', name: 'System Settings', code: 'settings:manage', description: 'Configure system settings', category: 'Settings', resource: 'settings', actions: ['read', 'update'], isGranted: false },
+  { id: '10', name: 'Billing Access', code: 'billing:manage', description: 'Access billing and payments', category: 'Billing', resource: 'billing', actions: ['read', 'update'], isGranted: false }
+]
+
+const mockUserAssignments: UserAssignment[] = [
+  { id: '1', userId: 'u1', userName: 'John Smith', email: 'john@company.com', roleId: '1', roleName: 'Super Administrator', assignedAt: '2024-01-15T10:00:00Z', assignedBy: 'System', status: 'active', lastAccess: '2024-12-25T08:30:00Z' },
+  { id: '2', userId: 'u2', userName: 'Sarah Johnson', email: 'sarah@company.com', roleId: '2', roleName: 'Administrator', assignedAt: '2024-02-01T09:00:00Z', assignedBy: 'john@company.com', status: 'active', lastAccess: '2024-12-24T16:45:00Z' },
+  { id: '3', userId: 'u3', userName: 'Mike Wilson', email: 'mike@company.com', roleId: '3', roleName: 'Manager', assignedAt: '2024-03-10T14:00:00Z', assignedBy: 'sarah@company.com', status: 'active', lastAccess: '2024-12-25T09:15:00Z' },
+  { id: '4', userId: 'u4', userName: 'Emily Brown', email: 'emily@company.com', roleId: '4', roleName: 'Standard User', assignedAt: '2024-04-20T11:00:00Z', assignedBy: 'mike@company.com', status: 'active', lastAccess: '2024-12-23T12:00:00Z' },
+  { id: '5', userId: 'u5', userName: 'David Lee', email: 'david@company.com', roleId: '4', roleName: 'Standard User', assignedAt: '2024-05-15T10:30:00Z', assignedBy: 'sarah@company.com', status: 'active', lastAccess: '2024-12-22T18:30:00Z' },
+  { id: '6', userId: 'u6', userName: 'Lisa Chen', email: 'lisa@company.com', roleId: '6', roleName: 'Finance Team', assignedAt: '2024-06-01T09:00:00Z', assignedBy: 'john@company.com', status: 'active', lastAccess: '2024-12-24T14:20:00Z' }
+]
+
+const mockPolicies: AccessPolicy[] = [
+  { id: '1', name: 'Admin MFA Required', description: 'Require MFA for all admin role access', type: 'conditional', priority: 1, roles: ['SUPER_ADMIN', 'ADMIN'], permissions: ['*'], conditions: [{ field: 'mfa', operator: 'equals', value: 'true' }], active: true, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-01T00:00:00Z' },
+  { id: '2', name: 'Office Hours Only', description: 'Restrict access to office hours for certain roles', type: 'conditional', priority: 2, roles: ['USER', 'VIEWER'], permissions: ['data:export'], conditions: [{ field: 'time', operator: 'between', value: '09:00-18:00' }], active: true, createdAt: '2024-02-15T00:00:00Z', updatedAt: '2024-11-15T00:00:00Z' },
+  { id: '3', name: 'Block External IPs', description: 'Deny admin access from external networks', type: 'deny', priority: 1, roles: ['ADMIN'], permissions: ['settings:manage'], conditions: [{ field: 'ip', operator: 'not_in', value: '10.0.0.0/8' }], active: true, createdAt: '2024-03-01T00:00:00Z', updatedAt: '2024-10-20T00:00:00Z' },
+  { id: '4', name: 'Allow API Access', description: 'Allow API service accounts full API access', type: 'allow', priority: 3, roles: ['API_SERVICE'], permissions: ['api:*'], conditions: [], active: true, createdAt: '2024-06-01T00:00:00Z', updatedAt: '2024-12-01T00:00:00Z' }
+]
+
+const mockAuditLogs: AuditLog[] = [
+  { id: '1', action: 'role.assigned', actor: 'sarah@company.com', target: 'emily@company.com', targetType: 'user', details: 'Assigned role: Standard User', timestamp: '2024-12-25T10:30:00Z', ipAddress: '10.0.1.50', success: true },
+  { id: '2', action: 'role.updated', actor: 'john@company.com', target: 'Finance Team', targetType: 'role', details: 'Added permission: reports:read', timestamp: '2024-12-24T15:45:00Z', ipAddress: '10.0.1.10', success: true },
+  { id: '3', action: 'permission.denied', actor: 'mike@company.com', target: 'settings:manage', targetType: 'permission', details: 'Attempted access denied by policy', timestamp: '2024-12-24T14:20:00Z', ipAddress: '192.168.1.100', success: false },
+  { id: '4', action: 'role.created', actor: 'sarah@company.com', target: 'Marketing Team', targetType: 'role', details: 'New custom role created', timestamp: '2024-12-23T11:00:00Z', ipAddress: '10.0.1.25', success: true },
+  { id: '5', action: 'policy.updated', actor: 'john@company.com', target: 'Admin MFA Required', targetType: 'policy', details: 'Modified condition parameters', timestamp: '2024-12-22T09:30:00Z', ipAddress: '10.0.1.10', success: true }
+]
+
+// Helper functions
+const getStatusColor = (status: RoleStatus): string => {
+  const colors: Record<RoleStatus, string> = {
+    active: 'bg-green-100 text-green-700 border-green-200',
+    inactive: 'bg-gray-100 text-gray-700 border-gray-200',
+    deprecated: 'bg-red-100 text-red-700 border-red-200',
+    pending: 'bg-yellow-100 text-yellow-700 border-yellow-200'
+  }
+  return colors[status]
+}
+
+const getTypeColor = (type: RoleType): string => {
+  const colors: Record<RoleType, string> = {
+    admin: 'bg-red-100 text-red-700',
+    manager: 'bg-purple-100 text-purple-700',
+    user: 'bg-blue-100 text-blue-700',
+    viewer: 'bg-green-100 text-green-700',
+    custom: 'bg-indigo-100 text-indigo-700',
+    service: 'bg-orange-100 text-orange-700'
+  }
+  return colors[type]
+}
+
+const getAccessLevelColor = (level: AccessLevel): string => {
+  const colors: Record<AccessLevel, string> = {
+    full: 'bg-red-100 text-red-700',
+    write: 'bg-blue-100 text-blue-700',
+    read: 'bg-green-100 text-green-700',
+    restricted: 'bg-yellow-100 text-yellow-700',
+    none: 'bg-gray-100 text-gray-700'
+  }
+  return colors[level]
+}
+
+const getPolicyTypeColor = (type: PolicyType): string => {
+  const colors: Record<PolicyType, string> = {
+    allow: 'bg-green-100 text-green-700',
+    deny: 'bg-red-100 text-red-700',
+    conditional: 'bg-blue-100 text-blue-700'
+  }
+  return colors[type]
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const formatDateTime = (date: string) => {
+  return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+export default function RolesClient() {
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null)
+  const [typeFilter, setTypeFilter] = useState<RoleType | 'all'>('all')
+
+  // Computed stats
+  const stats = useMemo(() => {
+    const totalUsers = mockRoles.reduce((sum, r) => sum + r.totalUsers, 0)
+    const activeUsers = mockRoles.reduce((sum, r) => sum + r.activeUsers, 0)
+    const systemRoles = mockRoles.filter(r => r.isSystem).length
+    const customRoles = mockRoles.filter(r => !r.isSystem).length
+    const activeRoles = mockRoles.filter(r => r.status === 'active').length
+    const activePolicies = mockPolicies.filter(p => p.active).length
+
+    return {
+      totalRoles: mockRoles.length,
+      activeRoles,
+      systemRoles,
+      customRoles,
+      totalUsers,
+      activeUsers,
+      totalPermissions: mockPermissions.length,
+      activePolicies
     }
-  }
+  }, [])
 
-  const getStatusIcon = (status: RoleStatus) => {
-    switch (status) {
-      case 'active': return <CheckCircle className="w-3 h-3" />
-      case 'inactive': return <AlertCircle className="w-3 h-3" />
-      case 'deprecated': return <AlertCircle className="w-3 h-3" />
-      default: return <Shield className="w-3 h-3" />
-    }
-  }
-
-  const getTypeColor = (type: RoleType) => {
-    switch (type) {
-      case 'admin': return 'bg-red-50 text-red-600 border-red-100'
-      case 'manager': return 'bg-purple-50 text-purple-600 border-purple-100'
-      case 'user': return 'bg-blue-50 text-blue-600 border-blue-100'
-      case 'viewer': return 'bg-green-50 text-green-600 border-green-100'
-      case 'custom': return 'bg-indigo-50 text-indigo-600 border-indigo-100'
-      default: return 'bg-gray-50 text-gray-600 border-gray-100'
-    }
-  }
-
-  const getAccessLevelColor = (level: AccessLevel) => {
-    switch (level) {
-      case 'full': return 'bg-red-50 text-red-600 border-red-100'
-      case 'write': return 'bg-blue-50 text-blue-600 border-blue-100'
-      case 'read': return 'bg-green-50 text-green-600 border-green-100'
-      case 'restricted': return 'bg-gray-50 text-gray-600 border-gray-100'
-      default: return 'bg-gray-50 text-gray-600 border-gray-100'
-    }
-  }
-
-  const getTypeGradient = (type: RoleType) => {
-    switch (type) {
-      case 'admin': return 'from-red-500 to-orange-600'
-      case 'manager': return 'from-purple-500 to-pink-600'
-      case 'user': return 'from-blue-500 to-cyan-600'
-      case 'viewer': return 'from-green-500 to-emerald-600'
-      case 'custom': return 'from-indigo-500 to-purple-600'
-      default: return 'from-gray-500 to-gray-600'
-    }
-  }
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
-
-  const calculateActiveRate = (active: number, total: number) => {
-    if (total === 0) return 0
-    return Math.round((active / total) * 100)
-  }
-
-  const handleCreateRole = async () => {
-    await createRole({
-      name: 'New Custom Role',
-      description: 'A new custom role with configurable permissions',
-      type: 'custom',
-      access_level: 'read',
-      permissions: []
+  // Filtered roles
+  const filteredRoles = useMemo(() => {
+    return mockRoles.filter(role => {
+      const matchesSearch = searchQuery === '' ||
+        role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        role.roleCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        role.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesType = typeFilter === 'all' || role.type === typeFilter
+      return matchesSearch && matchesType
     })
-  }
+  }, [searchQuery, typeFilter])
 
-  const handleCloneRole = async (roleId: string, roleName: string) => {
-    await cloneRole(roleId, `${roleName} (Copy)`)
-  }
+  // Grouped permissions by category
+  const permissionsByCategory = useMemo(() => {
+    const grouped: Record<string, Permission[]> = {}
+    mockPermissions.forEach(perm => {
+      if (!grouped[perm.category]) {
+        grouped[perm.category] = []
+      }
+      grouped[perm.category].push(perm)
+    })
+    return grouped
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Roles & Permissions
-            </h1>
-            <p className="text-gray-600 mt-2">Manage user roles and access control</p>
-          </div>
-          <button
-            onClick={handleCreateRole}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Create Role
-          </button>
-        </div>
-
-        {/* Stats */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Total Roles',
-              value: stats.totalRoles.toString(),
-              icon: Shield,
-              trend: { value: 8.5, isPositive: true },
-              color: 'purple'
-            },
-            {
-              label: 'Active Users',
-              value: stats.activeAssignments.toLocaleString(),
-              icon: Users,
-              trend: { value: 15.3, isPositive: true },
-              color: 'blue'
-            },
-            {
-              label: 'Custom Roles',
-              value: stats.customRoles.toString(),
-              icon: Settings,
-              trend: { value: 12.5, isPositive: true },
-              color: 'indigo'
-            },
-            {
-              label: 'Total Permissions',
-              value: stats.totalPermissions.toString(),
-              icon: Lock,
-              trend: { value: 3.2, isPositive: true },
-              color: 'green'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">Quick Actions</h2>
-          <BentoQuickAction
-            actions={[
-              {
-                title: 'Create Role',
-                description: 'Add new role',
-                icon: Plus,
-                gradient: 'from-blue-500 to-cyan-600',
-                onClick: handleCreateRole
-              },
-              {
-                title: 'Clone Role',
-                description: 'Duplicate existing',
-                icon: Copy,
-                gradient: 'from-green-500 to-emerald-600',
-                onClick: () => console.log('Clone')
-              },
-              {
-                title: 'View Details',
-                description: 'Inspect role',
-                icon: Eye,
-                gradient: 'from-purple-500 to-indigo-600',
-                onClick: () => console.log('View')
-              },
-              {
-                title: 'Export Roles',
-                description: 'Download config',
-                icon: Download,
-                gradient: 'from-orange-500 to-red-600',
-                onClick: () => console.log('Export')
-              },
-              {
-                title: 'Manage Permissions',
-                description: 'Edit access',
-                icon: Lock,
-                gradient: 'from-cyan-500 to-blue-600',
-                onClick: () => console.log('Permissions')
-              },
-              {
-                title: 'Assign Users',
-                description: 'Add members',
-                icon: UserCheck,
-                gradient: 'from-pink-500 to-rose-600',
-                onClick: () => console.log('Assign')
-              },
-              {
-                title: 'Role Settings',
-                description: 'Configure',
-                icon: Settings,
-                gradient: 'from-indigo-500 to-purple-600',
-                onClick: () => console.log('Settings')
-              },
-              {
-                title: 'Refresh',
-                description: 'Sync data',
-                icon: RefreshCw,
-                gradient: 'from-red-500 to-pink-600',
-                onClick: () => window.location.reload()
-              }
-            ]}
-          />
-        </div>
-
-        {/* Filter Pills */}
-        <div className="flex gap-3 flex-wrap">
-          <PillButton
-            label="All Roles"
-            isActive={viewMode === 'all'}
-            onClick={() => setViewMode('all')}
-          />
-          <PillButton
-            label="Active"
-            isActive={viewMode === 'active'}
-            onClick={() => setViewMode('active')}
-          />
-          <PillButton
-            label="System Roles"
-            isActive={viewMode === 'system'}
-            onClick={() => setViewMode('system')}
-          />
-          <PillButton
-            label="Custom Roles"
-            isActive={viewMode === 'custom'}
-            onClick={() => setViewMode('custom')}
-          />
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Roles List */}
-          <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {viewMode === 'all' && 'All Roles'}
-              {viewMode === 'active' && 'Active Roles'}
-              {viewMode === 'system' && 'System Roles'}
-              {viewMode === 'custom' && 'Custom Roles'}
-              <span className="text-sm font-normal text-gray-500 ml-2">
-                ({filteredRoles.length} total)
-              </span>
-            </h2>
-
-            {loading && displayRoles.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
-                <RotateCw className="w-8 h-8 animate-spin mx-auto text-purple-500 mb-4" />
-                <p className="text-gray-600">Loading roles...</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900">
+      <div className="p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+                <Shield className="w-8 h-8 text-white" />
               </div>
-            ) : filteredRoles.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
-                <Shield className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No roles found</h3>
-                <p className="text-gray-600 mb-4">Create your first role to get started</p>
-                <button
-                  onClick={handleCreateRole}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
-                >
-                  Create Role
-                </button>
-              </div>
-            ) : (
-              filteredRoles.map((role) => (
-                <div
-                  key={role.id}
-                  className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all border border-gray-100"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(role.status)} flex items-center gap-1`}>
-                          {getStatusIcon(role.status)}
-                          {role.status}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(role.type)}`}>
-                          {role.type}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getAccessLevelColor(role.access_level)}`}>
-                          {role.access_level}
-                        </span>
-                        {role.is_default && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium border bg-yellow-50 text-yellow-600 border-yellow-100">
-                            Default
-                          </span>
-                        )}
-                        {role.is_system && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium border bg-purple-50 text-purple-600 border-purple-100 flex items-center gap-1">
-                            <Crown className="w-3 h-3" />
-                            System
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        {role.name}
-                      </h3>
-                      <p className="text-sm text-gray-700 mb-3">
-                        {role.description}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {role.role_code || role.id.slice(0, 8)} • Created {formatDate(role.created_at)}
-                      </p>
-                    </div>
-                    <button className={`px-4 py-2 bg-gradient-to-r ${getTypeGradient(role.type)} text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all flex items-center gap-2`}>
-                      <Eye className="w-4 h-4" />
-                      View
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Total Users</p>
-                      <p className="text-sm font-semibold text-gray-900">{role.total_users.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Active Users</p>
-                      <p className="text-sm font-semibold text-gray-900">{role.active_users.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Permissions</p>
-                      <p className="text-sm font-semibold text-gray-900">{role.permissions.length}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Last Modified</p>
-                      <p className="text-sm font-semibold text-gray-900">{formatDate(role.updated_at)}</p>
-                    </div>
-                  </div>
-
-                  {/* Active Rate Progress */}
-                  {role.total_users > 0 && (
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs text-gray-600 mb-1">
-                        <span>Active User Rate</span>
-                        <span>{calculateActiveRate(role.active_users, role.total_users)}%</span>
-                      </div>
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full bg-gradient-to-r ${getTypeGradient(role.type)} rounded-full transition-all`}
-                          style={{ width: `${calculateActiveRate(role.active_users, role.total_users)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Permissions */}
-                  <div className="mb-4">
-                    <p className="text-xs text-gray-500 mb-2">Permissions ({role.permissions.length})</p>
-                    <div className="flex flex-wrap gap-2">
-                      {role.permissions.slice(0, 6).map((permission, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-blue-50 text-blue-700 rounded font-mono text-xs border border-blue-100"
-                        >
-                          {permission}
-                        </span>
-                      ))}
-                      {role.permissions.length > 6 && (
-                        <span className="px-3 py-1 bg-gray-50 text-gray-700 rounded-full text-xs font-medium border border-gray-100">
-                          +{role.permissions.length - 6} more
-                        </span>
-                      )}
-                      {role.permissions.length === 0 && (
-                        <span className="text-xs text-gray-400">No permissions assigned</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Additional Flags */}
-                  <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
-                    {role.can_delegate && (
-                      <div className="flex items-center gap-1">
-                        <UserCheck className="w-4 h-4 text-green-600" />
-                        <span>Can Delegate</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {role.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-4 border-t border-gray-100">
-                    <button
-                      onClick={() => handleCloneRole(role.id, role.name)}
-                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all flex items-center gap-1"
-                    >
-                      <Copy className="w-4 h-4" />
-                      Clone
-                    </button>
-                    {!role.is_default && !role.is_system && (
-                      <button
-                        onClick={() => setAsDefault(role.id)}
-                        className="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-all flex items-center gap-1"
-                      >
-                        <Crown className="w-4 h-4" />
-                        Set Default
-                      </button>
-                    )}
-                    {role.status === 'active' && !role.is_system && (
-                      <button
-                        onClick={() => deactivateRole(role.id)}
-                        className="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium hover:bg-orange-200 transition-all flex items-center gap-1"
-                      >
-                        <PowerOff className="w-4 h-4" />
-                        Deactivate
-                      </button>
-                    )}
-                    {role.status === 'inactive' && (
-                      <button
-                        onClick={() => activateRole(role.id)}
-                        className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-all flex items-center gap-1"
-                      >
-                        <Power className="w-4 h-4" />
-                        Activate
-                      </button>
-                    )}
-                    {!role.is_system && (
-                      <button
-                        onClick={() => deleteRole(role.id)}
-                        className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-all flex items-center gap-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Role Type Distribution */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">Role Types</h3>
-              <div className="space-y-3">
-                {[
-                  { type: 'user' as RoleType, count: displayRoles.filter(r => r.type === 'user').length },
-                  { type: 'custom' as RoleType, count: displayRoles.filter(r => r.type === 'custom').length },
-                  { type: 'manager' as RoleType, count: displayRoles.filter(r => r.type === 'manager').length },
-                  { type: 'admin' as RoleType, count: displayRoles.filter(r => r.type === 'admin').length },
-                  { type: 'viewer' as RoleType, count: displayRoles.filter(r => r.type === 'viewer').length }
-                ].filter(item => item.count > 0).map((item) => {
-                  const percentage = displayRoles.length > 0
-                    ? Math.round((item.count / displayRoles.length) * 100)
-                    : 0
-                  return (
-                    <div key={item.type}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-700 capitalize">{item.type}</span>
-                        <span className="text-gray-900 font-semibold">{item.count}</span>
-                      </div>
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full bg-gradient-to-r ${getTypeGradient(item.type)} rounded-full`}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  Identity & Access Management
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Okta-level role-based access control and permissions
+                </p>
               </div>
             </div>
-
-            {/* Top Roles by Users */}
-            <RankingList
-              title="Most Assigned"
-              items={displayRoles
-                .sort((a, b) => b.total_users - a.total_users)
-                .slice(0, 5)
-                .map((role, idx) => ({
-                  label: role.name,
-                  value: `${role.total_users.toLocaleString()} users`,
-                  rank: idx + 1
-                }))}
-            />
-
-            {/* Recent Activity */}
-            <ActivityFeed
-              title="Recent Activity"
-              activities={displayRoles.slice(0, 5).map((role) => ({
-                id: role.id,
-                title: role.name,
-                description: `${role.total_users} users assigned`,
-                timestamp: formatDate(role.updated_at),
-                type: role.status === 'active' ? 'success' : 'info'
-              }))}
-            />
-
-            {/* Performance Metrics */}
-            <MiniKPI
-              label="Roles per User"
-              value="1.2"
-              icon={Users}
-              trend={{ value: 5.3, isPositive: false }}
-            />
-
-            <ProgressCard
-              title="Security Compliance"
-              progress={94}
-              subtitle="Based on role configuration"
-              color="purple"
-            />
-
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Export
+              </Button>
+              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Create Role
+              </Button>
+            </div>
           </div>
-        </div>
 
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {[
+              { label: 'Total Roles', value: stats.totalRoles.toString(), icon: Shield, gradient: 'from-purple-500 to-indigo-600' },
+              { label: 'Active Roles', value: stats.activeRoles.toString(), icon: CheckCircle, gradient: 'from-green-500 to-emerald-600' },
+              { label: 'System Roles', value: stats.systemRoles.toString(), icon: Crown, gradient: 'from-yellow-500 to-orange-600' },
+              { label: 'Custom Roles', value: stats.customRoles.toString(), icon: Layers, gradient: 'from-blue-500 to-cyan-600' },
+              { label: 'Total Users', value: stats.totalUsers.toLocaleString(), icon: Users, gradient: 'from-pink-500 to-rose-600' },
+              { label: 'Active Users', value: stats.activeUsers.toLocaleString(), icon: UserCheck, gradient: 'from-cyan-500 to-blue-600' },
+              { label: 'Permissions', value: stats.totalPermissions.toString(), icon: Key, gradient: 'from-orange-500 to-amber-600' },
+              { label: 'Policies', value: stats.activePolicies.toString(), icon: ShieldCheck, gradient: 'from-red-500 to-pink-600' }
+            ].map((stat, index) => (
+              <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-4">
+                  <div className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${stat.gradient} mb-3`}>
+                    <stat.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1 rounded-xl shadow-sm">
+              <TabsTrigger value="dashboard" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <Shield className="w-4 h-4 mr-2" />
+                Roles
+              </TabsTrigger>
+              <TabsTrigger value="permissions" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <Key className="w-4 h-4 mr-2" />
+                Permissions
+              </TabsTrigger>
+              <TabsTrigger value="assignments" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <UsersRound className="w-4 h-4 mr-2" />
+                Assignments
+              </TabsTrigger>
+              <TabsTrigger value="policies" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <FolderLock className="w-4 h-4 mr-2" />
+                Policies
+              </TabsTrigger>
+              <TabsTrigger value="audit" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <FileText className="w-4 h-4 mr-2" />
+                Audit Log
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Dashboard Tab */}
+            <TabsContent value="dashboard" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Role Distribution */}
+                <Card className="lg:col-span-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-purple-600" />
+                      Role Distribution
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mockRoles.slice(0, 5).map((role) => (
+                        <div key={role.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                              <Shield className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white">{role.name}</p>
+                              <p className="text-sm text-gray-500">{role.totalUsers.toLocaleString()} users assigned</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={getTypeColor(role.type)}>{role.type}</Badge>
+                            <div className="mt-2 w-32">
+                              <Progress value={(role.activeUsers / role.totalUsers) * 100} className="h-2" />
+                              <p className="text-xs text-gray-500 mt-1">{role.activeUsers} active</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Security Overview */}
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-green-600" />
+                      Security Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-green-700 dark:text-green-400">MFA Enabled</span>
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        </div>
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-400">94%</p>
+                        <p className="text-xs text-green-600">of admin accounts</p>
+                      </div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Active Sessions</span>
+                          <Users className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">1,245</p>
+                        <p className="text-xs text-blue-600">across all roles</p>
+                      </div>
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Pending Reviews</span>
+                          <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                        </div>
+                        <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">12</p>
+                        <p className="text-xs text-yellow-600">roles need review</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Recent Activity */}
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-indigo-600" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {mockAuditLogs.slice(0, 4).map((log) => (
+                      <div key={log.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${log.success ? 'bg-green-100' : 'bg-red-100'}`}>
+                            {log.success ? <CheckCircle className="w-4 h-4 text-green-600" /> : <XCircle className="w-4 h-4 text-red-600" />}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{log.action.replace('.', ' ').replace('_', ' ')}</p>
+                            <p className="text-sm text-gray-500">{log.actor} → {log.target}</p>
+                          </div>
+                        </div>
+                        <span className="text-xs text-gray-500">{formatDateTime(log.timestamp)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Roles Tab */}
+            <TabsContent value="roles" className="space-y-6">
+              {/* Search and Filter */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search roles by name or code..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {(['all', 'admin', 'manager', 'user', 'viewer', 'custom', 'service'] as const).map((type) => (
+                    <Button
+                      key={type}
+                      variant={typeFilter === type ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTypeFilter(type)}
+                      className={typeFilter === type ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : ''}
+                    >
+                      {type === 'all' ? 'All' : type}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Roles List */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredRoles.map((role) => (
+                  <Card key={role.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                            <Shield className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <CardTitle className="text-lg">{role.name}</CardTitle>
+                              {role.isSystem && <Crown className="w-4 h-4 text-yellow-500" />}
+                              {role.isDefault && <Badge className="bg-yellow-100 text-yellow-700">Default</Badge>}
+                            </div>
+                            <CardDescription className="mt-1">{role.roleCode}</CardDescription>
+                          </div>
+                        </div>
+                        <Badge className={getStatusColor(role.status)}>{role.status}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{role.description}</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <Badge className={getTypeColor(role.type)}>{role.type}</Badge>
+                        <Badge className={getAccessLevelColor(role.accessLevel)}>{role.accessLevel} access</Badge>
+                        {role.canDelegate && <Badge variant="outline">Can Delegate</Badge>}
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{role.totalUsers}</p>
+                          <p className="text-xs text-gray-500">Total Users</p>
+                        </div>
+                        <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{role.activeUsers}</p>
+                          <p className="text-xs text-gray-500">Active</p>
+                        </div>
+                        <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{role.hierarchy}</p>
+                          <p className="text-xs text-gray-500">Hierarchy</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {role.tags.map((tag, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">{tag}</Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Eye className="w-4 h-4 mr-1" /> View
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        {!role.isSystem && (
+                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Permissions Tab */}
+            <TabsContent value="permissions" className="space-y-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Key className="w-5 h-5 text-indigo-600" />
+                    Permission Matrix
+                  </CardTitle>
+                  <CardDescription>Manage granular permissions across the system</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-6">
+                      {Object.entries(permissionsByCategory).map(([category, permissions]) => (
+                        <div key={category}>
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <FolderLock className="w-4 h-4 text-purple-600" />
+                            {category}
+                          </h4>
+                          <div className="space-y-2">
+                            {permissions.map((perm) => (
+                              <div key={perm.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <div className={`p-2 rounded-lg ${perm.isGranted ? 'bg-green-100' : 'bg-gray-100'}`}>
+                                    <KeyRound className={`w-4 h-4 ${perm.isGranted ? 'text-green-600' : 'text-gray-400'}`} />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-900 dark:text-white">{perm.name}</p>
+                                    <p className="text-sm text-gray-500">{perm.code}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex gap-1">
+                                    {perm.actions.map((action, idx) => (
+                                      <Badge key={idx} variant="outline" className="text-xs">{action}</Badge>
+                                    ))}
+                                  </div>
+                                  <Switch checked={perm.isGranted} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Assignments Tab */}
+            <TabsContent value="assignments" className="space-y-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <UsersRound className="w-5 h-5 text-indigo-600" />
+                        User Assignments
+                      </CardTitle>
+                      <CardDescription>Manage role assignments for users</CardDescription>
+                    </div>
+                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Assign Role
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-4">
+                      {mockUserAssignments.map((assignment) => (
+                        <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <div className="flex items-center gap-4">
+                            <Avatar>
+                              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+                                {assignment.userName.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white">{assignment.userName}</p>
+                              <p className="text-sm text-gray-500">{assignment.email}</p>
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <Badge className="bg-purple-100 text-purple-700">{assignment.roleName}</Badge>
+                            <p className="text-xs text-gray-500 mt-1">Since {formatDate(assignment.assignedAt)}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={assignment.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {assignment.status}
+                            </Badge>
+                            {assignment.lastAccess && (
+                              <p className="text-xs text-gray-500 mt-1">Last: {formatDateTime(assignment.lastAccess)}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline">Edit</Button>
+                            <Button size="sm" variant="outline" className="text-red-600">
+                              <UserX className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Policies Tab */}
+            <TabsContent value="policies" className="space-y-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                        Access Policies
+                      </CardTitle>
+                      <CardDescription>Configure conditional access and security policies</CardDescription>
+                    </div>
+                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Policy
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockPolicies.map((policy) => (
+                      <div key={policy.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${policy.type === 'allow' ? 'bg-green-100' : policy.type === 'deny' ? 'bg-red-100' : 'bg-blue-100'}`}>
+                              <ShieldAlert className={`w-5 h-5 ${policy.type === 'allow' ? 'text-green-600' : policy.type === 'deny' ? 'text-red-600' : 'text-blue-600'}`} />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{policy.name}</h4>
+                              <p className="text-sm text-gray-500">{policy.description}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge className={getPolicyTypeColor(policy.type)}>{policy.type}</Badge>
+                            <Switch checked={policy.active} />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <span className="text-xs text-gray-500">Roles:</span>
+                          {policy.roles.map((role, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">{role}</Badge>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-xs text-gray-500">Conditions:</span>
+                          {policy.conditions.map((cond, idx) => (
+                            <Badge key={idx} className="bg-gray-100 text-gray-700 text-xs">
+                              {cond.field} {cond.operator} {cond.value}
+                            </Badge>
+                          ))}
+                          {policy.conditions.length === 0 && (
+                            <span className="text-xs text-gray-400">No conditions</span>
+                          )}
+                        </div>
+                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                          <span className="text-xs text-gray-500">Priority: {policy.priority}</span>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline">Edit</Button>
+                            <Button size="sm" variant="outline" className="text-red-600">Delete</Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Audit Log Tab */}
+            <TabsContent value="audit" className="space-y-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-indigo-600" />
+                    Audit Trail
+                  </CardTitle>
+                  <CardDescription>Complete history of role and permission changes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-3">
+                      {mockAuditLogs.map((log) => (
+                        <div key={log.id} className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <div className="flex items-start gap-4">
+                            <div className={`p-2 rounded-lg ${log.success ? 'bg-green-100' : 'bg-red-100'}`}>
+                              {log.success ? <CheckCircle className="w-5 h-5 text-green-600" /> : <XCircle className="w-5 h-5 text-red-600" />}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white capitalize">
+                                {log.action.replace('.', ' ').replace('_', ' ')}
+                              </p>
+                              <p className="text-sm text-gray-500">{log.details}</p>
+                              <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {log.actor}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Globe className="w-3 h-3" />
+                                  {log.ipAddress}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant="outline">{log.targetType}</Badge>
+                            <p className="text-xs text-gray-500 mt-1">{formatDateTime(log.timestamp)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   )
