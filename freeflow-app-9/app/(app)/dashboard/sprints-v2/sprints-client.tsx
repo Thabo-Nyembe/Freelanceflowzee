@@ -10,6 +10,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Zap, Calendar, Target, BarChart3, Clock, Users, Flag,
   Settings, Plus, Search, Filter, LayoutGrid, List, ChevronRight,
@@ -17,7 +21,8 @@ import {
   TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Timer,
   Layers, Hash, GitBranch, Bug, FileText, Lightbulb, MessageSquare,
   Activity, Eye, RefreshCw, Sparkles, Bell, Award, RotateCcw,
-  ArrowRight, GripVertical, MoreVertical, Flame, Coffee
+  ArrowRight, GripVertical, MoreVertical, Flame, Coffee, Webhook, Key, Shield,
+  HardDrive, AlertOctagon, CreditCard, Sliders, Mail, Globe, Download, Copy
 } from 'lucide-react'
 
 // ============================================================================
@@ -354,6 +359,7 @@ export default function SprintsClient() {
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<SprintStatus | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -869,61 +875,724 @@ export default function SprintsClient() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Jira Level */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>Sprint Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <nav className="space-y-1">
                   {[
-                    { label: 'Default sprint duration', value: '2 weeks', icon: Calendar },
-                    { label: 'Story points scale', value: 'Fibonacci', icon: Hash },
-                    { label: 'Velocity calculation', value: 'Last 5 sprints', icon: BarChart3 },
-                    { label: 'Auto-close completed tasks', value: 'Enabled', icon: CheckCircle2 },
-                  ].map((setting, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-                          <setting.icon className="w-4 h-4 text-teal-600" />
-                        </div>
-                        <span className="text-sm text-slate-700 dark:text-slate-300">{setting.label}</span>
-                      </div>
-                      <span className="font-medium text-slate-900 dark:text-white">{setting.value}</span>
-                    </div>
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'sprints', label: 'Sprint Defaults', icon: Zap },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'team', label: 'Team Settings', icon: Users },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSettingsTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                        settingsTab === item.id
+                          ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </button>
                   ))}
-                </CardContent>
-              </Card>
+                </nav>
 
-              <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Sprint start/end reminders', enabled: true },
-                    { label: 'Daily standup reminders', enabled: true },
-                    { label: 'Blocked task alerts', enabled: true },
-                    { label: 'Velocity changes', enabled: false },
-                    { label: 'Retrospective reminders', enabled: true },
-                  ].map((setting, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <div className="flex items-center gap-3">
-                        <Bell className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-700 dark:text-slate-300">{setting.label}</span>
-                      </div>
-                      <div className={`w-10 h-6 rounded-full transition-colors ${
-                        setting.enabled ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-600'
-                      } relative cursor-pointer`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                          setting.enabled ? 'right-1' : 'left-1'
-                        }`} />
-                      </div>
+                {/* Sprint Stats */}
+                <Card className="mt-6 border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Sprint Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Avg Velocity</span>
+                      <Badge variant="secondary">{Math.round(stats.avgVelocity)}</Badge>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Completion Rate</span>
+                      <span className="text-sm font-medium text-teal-600">{Math.round(stats.completionRate)}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Active Sprints</span>
+                      <span className="text-sm font-medium">{stats.active}</span>
+                    </div>
+                    <Progress value={stats.completionRate} className="h-2 mt-2" />
+                    <p className="text-xs text-gray-500 mt-1">Overall completion rate</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-teal-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure your sprint workspace settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Project Name</Label>
+                            <Input defaultValue="Platform Team" />
+                            <p className="text-xs text-gray-500">Name visible to team members</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Project Key</Label>
+                            <Input defaultValue="PROJ" />
+                            <p className="text-xs text-gray-500">Used in issue keys (e.g., PROJ-101)</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Working Days</Label>
+                            <Select defaultValue="weekdays">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="weekdays">Mon - Fri</SelectItem>
+                                <SelectItem value="all">All Days</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Public Board</p>
+                            <p className="text-sm text-gray-500">Allow anyone to view the board</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-assign Reporter</p>
+                            <p className="text-sm text-gray-500">Set task creator as reporter automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Board Configuration
+                        </CardTitle>
+                        <CardDescription>Customize your Kanban board</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Subtasks</p>
+                            <p className="text-sm text-gray-500">Display subtasks on the board</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Card Colors by Priority</p>
+                            <p className="text-sm text-gray-500">Color-code cards by priority level</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Swimlanes</p>
+                            <p className="text-sm text-gray-500">Group tasks by assignee or epic</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Sprint Defaults Settings */}
+                {settingsTab === 'sprints' && (
+                  <div className="space-y-6">
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-teal-600" />
+                          Sprint Configuration
+                        </CardTitle>
+                        <CardDescription>Configure default sprint settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Sprint Duration</Label>
+                            <Select defaultValue="2w">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1w">1 Week</SelectItem>
+                                <SelectItem value="2w">2 Weeks</SelectItem>
+                                <SelectItem value="3w">3 Weeks</SelectItem>
+                                <SelectItem value="4w">4 Weeks</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Story Points Scale</Label>
+                            <Select defaultValue="fib">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="fib">Fibonacci (1,2,3,5,8,13,21)</SelectItem>
+                                <SelectItem value="linear">Linear (1-10)</SelectItem>
+                                <SelectItem value="tshirt">T-Shirt (XS,S,M,L,XL)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-start Next Sprint</p>
+                            <p className="text-sm text-gray-500">Automatically start next sprint when current ends</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Carry Over Incomplete Tasks</p>
+                            <p className="text-sm text-gray-500">Move incomplete tasks to next sprint</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Sprint Goal</p>
+                            <p className="text-sm text-gray-500">Mandate sprint goal before starting</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-purple-600" />
+                          Velocity Settings
+                        </CardTitle>
+                        <CardDescription>Configure velocity calculation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Velocity Calculation</Label>
+                          <Select defaultValue="5">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">Last 3 sprints</SelectItem>
+                              <SelectItem value="5">Last 5 sprints</SelectItem>
+                              <SelectItem value="10">Last 10 sprints</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500">Number of sprints to average</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Velocity Trend</p>
+                            <p className="text-sm text-gray-500">Display velocity trend on dashboard</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Commitment Warning</p>
+                            <p className="text-sm text-gray-500">Warn when committing above average velocity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-amber-500" />
+                          Sprint Notifications
+                        </CardTitle>
+                        <CardDescription>Configure sprint-related alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sprint Start Reminder</p>
+                            <p className="text-sm text-gray-500">Notify 1 day before sprint starts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sprint End Reminder</p>
+                            <p className="text-sm text-gray-500">Notify 2 days before sprint ends</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Daily Standup Reminder</p>
+                            <p className="text-sm text-gray-500">Daily notification at standup time</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Retrospective Reminder</p>
+                            <p className="text-sm text-gray-500">Notify to schedule retrospective</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Standup Time</Label>
+                          <Input type="time" defaultValue="09:30" />
+                          <p className="text-xs text-gray-500">When to send daily standup reminder</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5 text-red-600" />
+                          Issue Alerts
+                        </CardTitle>
+                        <CardDescription>Notifications about task issues</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Blocked Task Alert</p>
+                            <p className="text-sm text-gray-500">Notify when tasks become blocked</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Overdue Task Alert</p>
+                            <p className="text-sm text-gray-500">Notify when tasks pass due date</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Scope Creep Warning</p>
+                            <p className="text-sm text-gray-500">Alert when new tasks added mid-sprint</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Burndown Off-Track Alert</p>
+                            <p className="text-sm text-gray-500">Notify when burndown deviates from ideal</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Team Settings */}
+                {settingsTab === 'team' && (
+                  <div className="space-y-6">
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-blue-600" />
+                          Team Configuration
+                        </CardTitle>
+                        <CardDescription>Manage team capacity and settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Capacity (hours/sprint)</Label>
+                            <Input type="number" defaultValue="80" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Focus Factor</Label>
+                            <Select defaultValue="0.8">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0.6">60% - High meetings</SelectItem>
+                                <SelectItem value="0.7">70% - Moderate</SelectItem>
+                                <SelectItem value="0.8">80% - Focused</SelectItem>
+                                <SelectItem value="0.9">90% - Very focused</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Self-Assignment</p>
+                            <p className="text-sm text-gray-500">Team members can assign tasks to themselves</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Reviewer</p>
+                            <p className="text-sm text-gray-500">Tasks need reviewer before done</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="w-5 h-5 text-purple-600" />
+                          Roles & Permissions
+                        </CardTitle>
+                        <CardDescription>Configure team roles</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { role: 'Scrum Master', desc: 'Can manage sprints and facilitate ceremonies', color: 'text-teal-600' },
+                          { role: 'Product Owner', desc: 'Can prioritize backlog and accept stories', color: 'text-blue-600' },
+                          { role: 'Developer', desc: 'Can update tasks and log work', color: 'text-green-600' },
+                          { role: 'QA', desc: 'Can move tasks to review and verify', color: 'text-amber-600' }
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Shield className={`w-5 h-5 ${item.color}`} />
+                              <div>
+                                <p className="font-medium">{item.role}</p>
+                                <p className="text-sm text-gray-500">{item.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Configure</Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-orange-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Send sprint events to external services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-service.com/webhook" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-sprint" defaultChecked />
+                            <Label htmlFor="wh-sprint">Sprint Events</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-task" defaultChecked />
+                            <Label htmlFor="wh-task">Task Updates</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-comment" />
+                            <Label htmlFor="wh-comment">Comments</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-blocked" defaultChecked />
+                            <Label htmlFor="wh-blocked">Blockers</Label>
+                          </div>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-violet-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys for integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="sprint_xxxxxxxxxxxxxxxxxxxxx" readOnly />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500">Enable external API access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <GitBranch className="w-5 h-5 text-gray-600" />
+                          Git Integration
+                        </CardTitle>
+                        <CardDescription>Connect with version control</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-link Commits</p>
+                            <p className="text-sm text-gray-500">Link commits by task key (e.g., PROJ-101)</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Smart Transitions</p>
+                            <p className="text-sm text-gray-500">Auto-move tasks based on branch activity</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">PR Status Updates</p>
+                            <p className="text-sm text-gray-500">Show PR status on task cards</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Project security configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require 2FA</p>
+                            <p className="text-sm text-gray-500">Enforce 2FA for all team members</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all changes to sprints and tasks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Allowlist</p>
+                            <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Sprint data and exports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Data Retention</Label>
+                          <Select defaultValue="forever">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1y">1 Year</SelectItem>
+                              <SelectItem value="2y">2 Years</SelectItem>
+                              <SelectItem value="5y">5 Years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export Sprint Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-indigo-600" />
+                          Subscription
+                        </CardTitle>
+                        <CardDescription>Plan and billing information</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-teal-800 dark:text-teal-400">Professional Plan</p>
+                            <p className="text-sm text-teal-600 dark:text-teal-500">Unlimited sprints • Advanced analytics</p>
+                          </div>
+                          <Badge className="bg-teal-600">Active</Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-teal-600">{stats.total}</p>
+                            <p className="text-xs text-gray-500">Total Sprints</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">{stats.totalTasks}</p>
+                            <p className="text-xs text-gray-500">Tasks</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-purple-600">{mockTeamMembers.length}</p>
+                            <p className="text-xs text-gray-500">Team Members</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            Manage Subscription
+                          </Button>
+                          <Button className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600">
+                            Upgrade Plan
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Archive All Sprints</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Archive all completed sprints</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Archive</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Velocity Data</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Clear all velocity history</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
