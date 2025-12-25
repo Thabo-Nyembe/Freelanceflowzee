@@ -6,18 +6,29 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Users,
   Plus,
   MessageSquare,
   FileText,
   Video,
+  VideoOff,
+  Mic,
+  MicOff,
+  Phone,
+  PhoneOff,
+  Monitor,
   Calendar,
   CheckCircle,
+  CheckCircle2,
   Clock,
   TrendingUp,
   Share2,
@@ -64,34 +75,63 @@ import {
   Pause,
   Timer,
   Presentation,
-  Monitor,
   Smartphone,
   Tablet,
   ExternalLink,
   FolderOpen,
+  Folder,
+  File,
+  FileVideo,
+  FileImage,
+  FileAudio,
   Home,
   ChevronRight,
   LayoutTemplate,
   Sparkles,
   Wand2,
-  Crown
+  Crown,
+  Send,
+  Smile,
+  Paperclip,
+  ScreenShare,
+  ScreenShareOff,
+  Hash,
+  Bell,
+  BellOff,
+  Pin,
+  Reply,
+  Forward,
+  Bookmark,
+  MoreVertical,
+  UserPlus,
+  UserMinus,
+  Settings2,
+  Zap,
+  Globe,
+  AlertCircle,
+  Info
 } from 'lucide-react'
 
 // Types
 type BoardType = 'whiteboard' | 'flowchart' | 'mindmap' | 'wireframe' | 'kanban' | 'brainstorm' | 'retrospective'
 type BoardStatus = 'active' | 'archived' | 'template'
 type AccessLevel = 'view' | 'comment' | 'edit' | 'admin'
-type ElementType = 'shape' | 'sticky' | 'text' | 'image' | 'frame' | 'connector' | 'drawing'
+type MeetingStatus = 'scheduled' | 'live' | 'ended' | 'cancelled'
+type ChannelType = 'public' | 'private' | 'direct'
+type FileType = 'document' | 'image' | 'video' | 'audio' | 'spreadsheet' | 'presentation' | 'other'
+type PresenceStatus = 'online' | 'away' | 'busy' | 'offline' | 'dnd'
 
-interface BoardMember {
+interface TeamMember {
   id: string
   name: string
   email: string
   avatar?: string
-  role: AccessLevel
-  isOnline: boolean
+  role: 'owner' | 'admin' | 'member' | 'guest'
+  presence: PresenceStatus
   cursorColor: string
   lastActive: string
+  department?: string
+  title?: string
 }
 
 interface Board {
@@ -100,11 +140,10 @@ interface Board {
   description?: string
   type: BoardType
   status: BoardStatus
-  thumbnail?: string
   createdAt: string
   updatedAt: string
-  createdBy: BoardMember
-  members: BoardMember[]
+  createdBy: TeamMember
+  members: TeamMember[]
   isStarred: boolean
   isLocked: boolean
   isPublic: boolean
@@ -115,248 +154,202 @@ interface Board {
   tags: string[]
   teamId?: string
   teamName?: string
+  channelId?: string
 }
 
-interface Template {
+interface Channel {
   id: string
   name: string
-  description: string
-  category: string
-  type: BoardType
-  thumbnail: string
-  usageCount: number
-  rating: number
-  isPremium: boolean
-  author: string
+  type: ChannelType
+  description?: string
+  memberCount: number
+  unreadCount: number
+  isPinned: boolean
+  isMuted: boolean
+  lastMessage?: Message
+  createdAt: string
+}
+
+interface Message {
+  id: string
+  channelId: string
+  author: TeamMember
+  content: string
+  timestamp: string
+  isEdited: boolean
+  isPinned: boolean
+  reactions: { emoji: string; count: number; users: string[] }[]
+  replyTo?: string
+  attachments: Attachment[]
+  mentions: string[]
+}
+
+interface Meeting {
+  id: string
+  title: string
+  description?: string
+  status: MeetingStatus
+  startTime: string
+  endTime?: string
+  duration: number
+  organizer: TeamMember
+  participants: TeamMember[]
+  isRecurring: boolean
+  recurrence?: string
+  hasRecording: boolean
+  recordingUrl?: string
+  meetingUrl: string
+  channelId?: string
+}
+
+interface SharedFile {
+  id: string
+  name: string
+  type: FileType
+  size: number
+  uploadedBy: TeamMember
+  uploadedAt: string
+  modifiedAt: string
+  sharedWith: string[]
+  channelId?: string
+  downloadCount: number
+  version: number
+  isStarred: boolean
+}
+
+interface Attachment {
+  id: string
+  name: string
+  type: FileType
+  size: number
+  url: string
 }
 
 interface Team {
   id: string
   name: string
+  description?: string
   avatar?: string
   memberCount: number
   boardCount: number
+  channelCount: number
   plan: 'free' | 'starter' | 'business' | 'enterprise'
   role: 'owner' | 'admin' | 'member' | 'guest'
-}
-
-interface Comment {
-  id: string
-  boardId: string
-  author: BoardMember
-  content: string
   createdAt: string
-  resolved: boolean
-  replies: Comment[]
-  position: { x: number; y: number }
-  elementId?: string
 }
 
 interface Activity {
   id: string
-  boardId: string
-  user: BoardMember
-  action: 'created' | 'edited' | 'commented' | 'shared' | 'archived' | 'restored' | 'deleted'
+  type: 'board' | 'meeting' | 'file' | 'message' | 'member'
+  user: TeamMember
+  action: string
   description: string
+  resourceId: string
+  resourceName: string
   timestamp: string
 }
 
 // Mock Data
-const mockMembers: BoardMember[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@example.com', avatar: '', role: 'admin', isOnline: true, cursorColor: '#3B82F6', lastActive: '2024-01-15T14:30:00Z' },
-  { id: '2', name: 'Mike Johnson', email: 'mike@example.com', avatar: '', role: 'edit', isOnline: true, cursorColor: '#10B981', lastActive: '2024-01-15T14:28:00Z' },
-  { id: '3', name: 'Emily Davis', email: 'emily@example.com', avatar: '', role: 'edit', isOnline: false, cursorColor: '#F59E0B', lastActive: '2024-01-15T12:00:00Z' },
-  { id: '4', name: 'Alex Kim', email: 'alex@example.com', avatar: '', role: 'comment', isOnline: true, cursorColor: '#EF4444', lastActive: '2024-01-15T14:25:00Z' }
+const mockMembers: TeamMember[] = [
+  { id: '1', name: 'Sarah Chen', email: 'sarah@example.com', role: 'admin', presence: 'online', cursorColor: '#3B82F6', lastActive: '2024-01-15T14:30:00Z', department: 'Product', title: 'Product Manager' },
+  { id: '2', name: 'Mike Johnson', email: 'mike@example.com', role: 'member', presence: 'online', cursorColor: '#10B981', lastActive: '2024-01-15T14:28:00Z', department: 'Engineering', title: 'Senior Developer' },
+  { id: '3', name: 'Emily Davis', email: 'emily@example.com', role: 'member', presence: 'away', cursorColor: '#F59E0B', lastActive: '2024-01-15T12:00:00Z', department: 'Design', title: 'UX Designer' },
+  { id: '4', name: 'Alex Kim', email: 'alex@example.com', role: 'member', presence: 'busy', cursorColor: '#EF4444', lastActive: '2024-01-15T14:25:00Z', department: 'Engineering', title: 'Developer' },
+  { id: '5', name: 'Jordan Lee', email: 'jordan@example.com', role: 'guest', presence: 'offline', cursorColor: '#8B5CF6', lastActive: '2024-01-14T18:00:00Z', department: 'Marketing', title: 'Marketing Lead' }
 ]
 
 const mockBoards: Board[] = [
-  {
-    id: '1',
-    name: 'Product Roadmap 2024',
-    description: 'Strategic planning and feature prioritization for Q1-Q4',
-    type: 'kanban',
-    status: 'active',
-    createdAt: '2024-01-10T10:00:00Z',
-    updatedAt: '2024-01-15T14:30:00Z',
-    createdBy: mockMembers[0],
-    members: mockMembers,
-    isStarred: true,
-    isLocked: false,
-    isPublic: false,
-    viewCount: 245,
-    commentCount: 32,
-    elementCount: 156,
-    version: 47,
-    tags: ['roadmap', 'planning', 'product'],
-    teamId: 't1',
-    teamName: 'Product Team'
-  },
-  {
-    id: '2',
-    name: 'User Flow Diagrams',
-    description: 'Main user journeys and interaction flows',
-    type: 'flowchart',
-    status: 'active',
-    createdAt: '2024-01-08T09:00:00Z',
-    updatedAt: '2024-01-15T11:20:00Z',
-    createdBy: mockMembers[1],
-    members: [mockMembers[0], mockMembers[1], mockMembers[2]],
-    isStarred: true,
-    isLocked: false,
-    isPublic: true,
-    viewCount: 189,
-    commentCount: 18,
-    elementCount: 89,
-    version: 23,
-    tags: ['ux', 'flows', 'design'],
-    teamId: 't2',
-    teamName: 'Design Team'
-  },
-  {
-    id: '3',
-    name: 'Sprint Retrospective',
-    description: 'Team reflection on Sprint 24',
-    type: 'retrospective',
-    status: 'active',
-    createdAt: '2024-01-14T15:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
-    createdBy: mockMembers[2],
-    members: mockMembers,
-    isStarred: false,
-    isLocked: false,
-    isPublic: false,
-    viewCount: 56,
-    commentCount: 45,
-    elementCount: 67,
-    version: 12,
-    tags: ['agile', 'retro', 'team'],
-    teamId: 't1',
-    teamName: 'Product Team'
-  },
-  {
-    id: '4',
-    name: 'Brainstorm: New Features',
-    description: 'Ideation session for Q2 feature set',
-    type: 'brainstorm',
-    status: 'active',
-    createdAt: '2024-01-12T14:00:00Z',
-    updatedAt: '2024-01-15T09:30:00Z',
-    createdBy: mockMembers[0],
-    members: [mockMembers[0], mockMembers[1]],
-    isStarred: false,
-    isLocked: false,
-    isPublic: false,
-    viewCount: 78,
-    commentCount: 23,
-    elementCount: 134,
-    version: 18,
-    tags: ['ideation', 'features', 'brainstorm'],
-    teamId: 't1',
-    teamName: 'Product Team'
-  },
-  {
-    id: '5',
-    name: 'System Architecture',
-    description: 'Technical architecture and infrastructure diagrams',
-    type: 'flowchart',
-    status: 'archived',
-    createdAt: '2023-12-01T10:00:00Z',
-    updatedAt: '2024-01-05T16:00:00Z',
-    createdBy: mockMembers[3],
-    members: [mockMembers[2], mockMembers[3]],
-    isStarred: false,
-    isLocked: true,
-    isPublic: false,
-    viewCount: 312,
-    commentCount: 56,
-    elementCount: 198,
-    version: 89,
-    tags: ['architecture', 'technical', 'infrastructure'],
-    teamId: 't3',
-    teamName: 'Engineering'
-  }
+  { id: '1', name: 'Product Roadmap 2024', description: 'Strategic planning and feature prioritization', type: 'kanban', status: 'active', createdAt: '2024-01-10T10:00:00Z', updatedAt: '2024-01-15T14:30:00Z', createdBy: mockMembers[0], members: mockMembers.slice(0, 4), isStarred: true, isLocked: false, isPublic: false, viewCount: 245, commentCount: 32, elementCount: 156, version: 47, tags: ['roadmap', 'planning'], teamId: 't1', teamName: 'Product Team', channelId: 'c1' },
+  { id: '2', name: 'User Flow Diagrams', description: 'Main user journeys and flows', type: 'flowchart', status: 'active', createdAt: '2024-01-08T09:00:00Z', updatedAt: '2024-01-15T11:20:00Z', createdBy: mockMembers[2], members: mockMembers.slice(0, 3), isStarred: true, isLocked: false, isPublic: true, viewCount: 189, commentCount: 18, elementCount: 89, version: 23, tags: ['ux', 'design'], teamId: 't2', teamName: 'Design Team', channelId: 'c2' },
+  { id: '3', name: 'Sprint Retrospective', description: 'Team reflection on Sprint 24', type: 'retrospective', status: 'active', createdAt: '2024-01-14T15:00:00Z', updatedAt: '2024-01-15T10:00:00Z', createdBy: mockMembers[1], members: mockMembers, isStarred: false, isLocked: false, isPublic: false, viewCount: 56, commentCount: 45, elementCount: 67, version: 12, tags: ['agile', 'retro'], teamId: 't1', teamName: 'Product Team', channelId: 'c1' },
+  { id: '4', name: 'Architecture Diagram', description: 'System architecture overview', type: 'flowchart', status: 'active', createdAt: '2024-01-05T10:00:00Z', updatedAt: '2024-01-14T16:00:00Z', createdBy: mockMembers[3], members: mockMembers.slice(1, 4), isStarred: false, isLocked: true, isPublic: false, viewCount: 312, commentCount: 23, elementCount: 198, version: 56, tags: ['architecture', 'technical'], teamId: 't3', teamName: 'Engineering', channelId: 'c3' }
 ]
 
-const mockTemplates: Template[] = [
-  { id: 't1', name: 'Product Roadmap', description: 'Timeline-based product planning', category: 'Strategy', type: 'kanban', thumbnail: '', usageCount: 12500, rating: 4.8, isPremium: false, author: 'Miro' },
-  { id: 't2', name: 'User Story Map', description: 'Map user journeys and stories', category: 'Agile', type: 'whiteboard', thumbnail: '', usageCount: 8900, rating: 4.7, isPremium: false, author: 'Miro' },
-  { id: 't3', name: 'Sprint Retrospective', description: '4Ls retrospective format', category: 'Agile', type: 'retrospective', thumbnail: '', usageCount: 15200, rating: 4.9, isPremium: false, author: 'Miro' },
-  { id: 't4', name: 'Mind Map', description: 'Organize ideas visually', category: 'Brainstorming', type: 'mindmap', thumbnail: '', usageCount: 22100, rating: 4.6, isPremium: false, author: 'Miro' },
-  { id: 't5', name: 'Customer Journey Map', description: 'End-to-end customer experience', category: 'UX Research', type: 'flowchart', thumbnail: '', usageCount: 9800, rating: 4.8, isPremium: true, author: 'Miro' },
-  { id: 't6', name: 'Wireframe Kit', description: 'Low-fidelity UI components', category: 'Design', type: 'wireframe', thumbnail: '', usageCount: 18400, rating: 4.7, isPremium: true, author: 'Miro' }
+const mockChannels: Channel[] = [
+  { id: 'c1', name: 'general', type: 'public', description: 'General team discussions', memberCount: 45, unreadCount: 12, isPinned: true, isMuted: false, createdAt: '2024-01-01', lastMessage: { id: 'm1', channelId: 'c1', author: mockMembers[0], content: 'Great work on the release everyone!', timestamp: '2024-01-15T14:30:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '🎉', count: 5, users: ['1', '2', '3', '4', '5'] }], attachments: [], mentions: [] } },
+  { id: 'c2', name: 'design-team', type: 'private', description: 'Design discussions and reviews', memberCount: 8, unreadCount: 3, isPinned: false, isMuted: false, createdAt: '2024-01-05', lastMessage: { id: 'm2', channelId: 'c2', author: mockMembers[2], content: 'New mockups are ready for review', timestamp: '2024-01-15T12:00:00Z', isEdited: false, isPinned: true, reactions: [], attachments: [], mentions: ['1'] } },
+  { id: 'c3', name: 'engineering', type: 'private', description: 'Engineering team channel', memberCount: 25, unreadCount: 0, isPinned: true, isMuted: false, createdAt: '2024-01-02' },
+  { id: 'c4', name: 'random', type: 'public', description: 'Off-topic fun', memberCount: 40, unreadCount: 8, isPinned: false, isMuted: true, createdAt: '2024-01-01' },
+  { id: 'c5', name: 'announcements', type: 'public', description: 'Company-wide announcements', memberCount: 120, unreadCount: 1, isPinned: true, isMuted: false, createdAt: '2024-01-01' }
+]
+
+const mockMessages: Message[] = [
+  { id: 'm1', channelId: 'c1', author: mockMembers[0], content: 'Hey team! Just pushed the latest updates to the roadmap board. Please review when you get a chance.', timestamp: '2024-01-15T14:30:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '👍', count: 3, users: ['2', '3', '4'] }], attachments: [], mentions: [] },
+  { id: 'm2', channelId: 'c1', author: mockMembers[1], content: 'Looks great @Sarah! I have a few suggestions for the Q2 timeline.', timestamp: '2024-01-15T14:32:00Z', isEdited: false, isPinned: false, reactions: [], attachments: [], mentions: ['1'] },
+  { id: 'm3', channelId: 'c1', author: mockMembers[2], content: 'I\'ve attached the updated wireframes for the new feature.', timestamp: '2024-01-15T14:35:00Z', isEdited: false, isPinned: true, reactions: [{ emoji: '🎨', count: 2, users: ['1', '3'] }], attachments: [{ id: 'a1', name: 'wireframes-v2.fig', type: 'document', size: 2456000, url: '#' }], mentions: [] },
+  { id: 'm4', channelId: 'c1', author: mockMembers[3], content: 'Sprint planning meeting in 30 minutes. Don\'t forget!', timestamp: '2024-01-15T14:40:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '⏰', count: 4, users: ['1', '2', '3', '4'] }], attachments: [], mentions: [] },
+  { id: 'm5', channelId: 'c1', author: mockMembers[0], content: 'Great work on the release everyone! 🎉', timestamp: '2024-01-15T15:00:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '🎉', count: 5, users: ['1', '2', '3', '4', '5'] }, { emoji: '🚀', count: 3, users: ['1', '2', '4'] }], attachments: [], mentions: [] }
+]
+
+const mockMeetings: Meeting[] = [
+  { id: 'mt1', title: 'Sprint Planning', description: 'Plan Sprint 25 backlog', status: 'scheduled', startTime: '2024-01-16T10:00:00Z', duration: 60, organizer: mockMembers[0], participants: mockMembers.slice(0, 4), isRecurring: true, recurrence: 'Every 2 weeks', hasRecording: false, meetingUrl: 'https://meet.example.com/sprint-planning', channelId: 'c1' },
+  { id: 'mt2', title: 'Design Review', description: 'Review new feature designs', status: 'live', startTime: '2024-01-15T14:00:00Z', duration: 45, organizer: mockMembers[2], participants: mockMembers.slice(0, 3), isRecurring: false, hasRecording: true, meetingUrl: 'https://meet.example.com/design-review' },
+  { id: 'mt3', title: 'Team Standup', description: 'Daily standup meeting', status: 'ended', startTime: '2024-01-15T09:00:00Z', endTime: '2024-01-15T09:15:00Z', duration: 15, organizer: mockMembers[1], participants: mockMembers, isRecurring: true, recurrence: 'Every weekday', hasRecording: true, recordingUrl: '#', meetingUrl: 'https://meet.example.com/standup', channelId: 'c3' },
+  { id: 'mt4', title: 'Product Demo', description: 'Demo new features to stakeholders', status: 'scheduled', startTime: '2024-01-17T15:00:00Z', duration: 90, organizer: mockMembers[0], participants: mockMembers, isRecurring: false, hasRecording: false, meetingUrl: 'https://meet.example.com/product-demo' }
+]
+
+const mockFiles: SharedFile[] = [
+  { id: 'f1', name: 'Product Roadmap 2024.pdf', type: 'document', size: 2456000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-10T10:00:00Z', modifiedAt: '2024-01-15T14:00:00Z', sharedWith: ['c1'], downloadCount: 45, version: 3, isStarred: true },
+  { id: 'f2', name: 'Design System.fig', type: 'document', size: 15678000, uploadedBy: mockMembers[2], uploadedAt: '2024-01-08T09:00:00Z', modifiedAt: '2024-01-14T16:00:00Z', sharedWith: ['c2'], downloadCount: 28, version: 12, isStarred: true },
+  { id: 'f3', name: 'Sprint Review Recording.mp4', type: 'video', size: 156780000, uploadedBy: mockMembers[1], uploadedAt: '2024-01-12T15:00:00Z', modifiedAt: '2024-01-12T15:00:00Z', sharedWith: ['c1', 'c3'], downloadCount: 12, version: 1, isStarred: false },
+  { id: 'f4', name: 'Q1 Budget.xlsx', type: 'spreadsheet', size: 345000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-05T10:00:00Z', modifiedAt: '2024-01-10T11:00:00Z', sharedWith: ['c1'], downloadCount: 8, version: 2, isStarred: false },
+  { id: 'f5', name: 'Brand Guidelines.pdf', type: 'document', size: 8900000, uploadedBy: mockMembers[2], uploadedAt: '2024-01-02T14:00:00Z', modifiedAt: '2024-01-02T14:00:00Z', sharedWith: ['c1', 'c2'], downloadCount: 67, version: 1, isStarred: true },
+  { id: 'f6', name: 'Product Demo.pptx', type: 'presentation', size: 12340000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-14T09:00:00Z', modifiedAt: '2024-01-15T10:00:00Z', sharedWith: ['c1'], downloadCount: 23, version: 4, isStarred: false }
 ]
 
 const mockTeams: Team[] = [
-  { id: 't1', name: 'Product Team', memberCount: 12, boardCount: 24, plan: 'business', role: 'admin' },
-  { id: 't2', name: 'Design Team', memberCount: 8, boardCount: 18, plan: 'business', role: 'member' },
-  { id: 't3', name: 'Engineering', memberCount: 25, boardCount: 42, plan: 'enterprise', role: 'member' }
+  { id: 't1', name: 'Product Team', description: 'Product management and strategy', memberCount: 12, boardCount: 24, channelCount: 5, plan: 'business', role: 'admin', createdAt: '2023-06-01' },
+  { id: 't2', name: 'Design Team', description: 'UX and visual design', memberCount: 8, boardCount: 18, channelCount: 3, plan: 'business', role: 'member', createdAt: '2023-06-01' },
+  { id: 't3', name: 'Engineering', description: 'Development and infrastructure', memberCount: 25, boardCount: 42, channelCount: 8, plan: 'enterprise', role: 'member', createdAt: '2023-01-15' }
 ]
 
 const mockActivities: Activity[] = [
-  { id: 'a1', boardId: '1', user: mockMembers[0], action: 'edited', description: 'Updated roadmap timeline', timestamp: '2024-01-15T14:30:00Z' },
-  { id: 'a2', boardId: '1', user: mockMembers[1], action: 'commented', description: 'Added feedback on Q2 priorities', timestamp: '2024-01-15T14:25:00Z' },
-  { id: 'a3', boardId: '2', user: mockMembers[2], action: 'shared', description: 'Shared with external stakeholders', timestamp: '2024-01-15T11:20:00Z' },
-  { id: 'a4', boardId: '3', user: mockMembers[0], action: 'created', description: 'Created new retrospective board', timestamp: '2024-01-14T15:00:00Z' },
-  { id: 'a5', boardId: '4', user: mockMembers[1], action: 'edited', description: 'Added new feature ideas', timestamp: '2024-01-15T09:30:00Z' }
+  { id: 'a1', type: 'board', user: mockMembers[0], action: 'updated', description: 'Updated roadmap timeline', resourceId: '1', resourceName: 'Product Roadmap 2024', timestamp: '2024-01-15T14:30:00Z' },
+  { id: 'a2', type: 'message', user: mockMembers[1], action: 'sent', description: 'Sent a message', resourceId: 'c1', resourceName: '#general', timestamp: '2024-01-15T14:32:00Z' },
+  { id: 'a3', type: 'file', user: mockMembers[2], action: 'uploaded', description: 'Uploaded wireframes', resourceId: 'f2', resourceName: 'Design System.fig', timestamp: '2024-01-15T12:00:00Z' },
+  { id: 'a4', type: 'meeting', user: mockMembers[0], action: 'scheduled', description: 'Scheduled a meeting', resourceId: 'mt4', resourceName: 'Product Demo', timestamp: '2024-01-15T11:00:00Z' },
+  { id: 'a5', type: 'member', user: mockMembers[0], action: 'invited', description: 'Invited Jordan Lee', resourceId: '5', resourceName: 'Jordan Lee', timestamp: '2024-01-14T16:00:00Z' }
 ]
 
 export default function CollaborationClient() {
   const [activeTab, setActiveTab] = useState('boards')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [statusFilter, setStatusFilter] = useState<BoardStatus | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<BoardType | 'all'>('all')
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
+  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
+  const [showNewMeeting, setShowNewMeeting] = useState(false)
+  const [showNewChannel, setShowNewChannel] = useState(false)
+  const [messageInput, setMessageInput] = useState('')
 
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
-      const matchesSearch = board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           board.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           board.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      const matchesStatus = statusFilter === 'all' || board.status === statusFilter
-      const matchesType = typeFilter === 'all' || board.type === typeFilter
-      return matchesSearch && matchesStatus && matchesType
+      return board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             board.description?.toLowerCase().includes(searchQuery.toLowerCase())
     })
-  }, [searchQuery, statusFilter, typeFilter])
+  }, [searchQuery])
 
-  const starredBoards = filteredBoards.filter(b => b.isStarred)
-  const recentBoards = filteredBoards.slice(0, 4)
+  const stats = useMemo(() => ({
+    totalBoards: mockBoards.length,
+    activeBoards: mockBoards.filter(b => b.status === 'active').length,
+    totalMembers: mockMembers.length,
+    onlineNow: mockMembers.filter(m => m.presence === 'online').length,
+    totalChannels: mockChannels.length,
+    unreadMessages: mockChannels.reduce((sum, c) => sum + c.unreadCount, 0),
+    scheduledMeetings: mockMeetings.filter(m => m.status === 'scheduled').length,
+    sharedFiles: mockFiles.length
+  }), [])
 
-  const getBoardTypeIcon = (type: BoardType) => {
-    switch (type) {
-      case 'whiteboard': return <Square className="w-4 h-4" />
-      case 'flowchart': return <GitBranch className="w-4 h-4" />
-      case 'mindmap': return <Sparkles className="w-4 h-4" />
-      case 'wireframe': return <Layout className="w-4 h-4" />
-      case 'kanban': return <Layers className="w-4 h-4" />
-      case 'brainstorm': return <Wand2 className="w-4 h-4" />
-      case 'retrospective': return <MessageCircle className="w-4 h-4" />
-      default: return <Square className="w-4 h-4" />
-    }
-  }
-
-  const getBoardTypeColor = (type: BoardType) => {
-    switch (type) {
-      case 'whiteboard': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'flowchart': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-      case 'mindmap': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'wireframe': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-      case 'kanban': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-      case 'brainstorm': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      case 'retrospective': return 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-    }
-  }
-
-  const getStatusColor = (status: BoardStatus) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'archived': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-      case 'template': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-    }
-  }
+  const statsCards = [
+    { label: 'Boards', value: stats.totalBoards.toString(), icon: Layout, color: 'from-blue-500 to-blue-600' },
+    { label: 'Online', value: stats.onlineNow.toString(), icon: Users, color: 'from-green-500 to-green-600' },
+    { label: 'Channels', value: stats.totalChannels.toString(), icon: Hash, color: 'from-purple-500 to-purple-600' },
+    { label: 'Unread', value: stats.unreadMessages.toString(), icon: MessageSquare, color: 'from-amber-500 to-amber-600' },
+    { label: 'Meetings', value: stats.scheduledMeetings.toString(), icon: Video, color: 'from-cyan-500 to-cyan-600' },
+    { label: 'Files', value: stats.sharedFiles.toString(), icon: FileText, color: 'from-rose-500 to-rose-600' },
+    { label: 'Teams', value: mockTeams.length.toString(), icon: Users, color: 'from-indigo-500 to-indigo-600' },
+    { label: 'Activity', value: mockActivities.length.toString(), icon: TrendingUp, color: 'from-teal-500 to-teal-600' }
+  ]
 
   const formatTimeAgo = (date: string) => {
     const now = new Date()
@@ -365,341 +358,380 @@ export default function CollaborationClient() {
     const diffMins = Math.floor(diffMs / 60000)
     const diffHours = Math.floor(diffMins / 60)
     const diffDays = Math.floor(diffHours / 24)
-
     if (diffMins < 1) return 'Just now'
     if (diffMins < 60) return `${diffMins}m ago`
     if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return then.toLocaleDateString()
+    return `${diffDays}d ago`
   }
 
-  const stats = {
-    totalBoards: mockBoards.length,
-    activeBoards: mockBoards.filter(b => b.status === 'active').length,
-    totalMembers: new Set(mockBoards.flatMap(b => b.members.map(m => m.id))).size,
-    onlineNow: mockMembers.filter(m => m.isOnline).length
+  const formatSize = (bytes: number) => {
+    if (bytes >= 1073741824) return `${(bytes / 1073741824).toFixed(1)} GB`
+    if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`
+    if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${bytes} B`
+  }
+
+  const getPresenceColor = (presence: PresenceStatus): string => {
+    const colors: Record<PresenceStatus, string> = {
+      'online': 'bg-green-500',
+      'away': 'bg-amber-500',
+      'busy': 'bg-red-500',
+      'dnd': 'bg-red-600',
+      'offline': 'bg-gray-400'
+    }
+    return colors[presence]
+  }
+
+  const getMeetingStatusColor = (status: MeetingStatus): string => {
+    const colors: Record<MeetingStatus, string> = {
+      'scheduled': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      'live': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      'ended': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      'cancelled': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+    }
+    return colors[status]
+  }
+
+  const getFileIcon = (type: FileType) => {
+    const icons: Record<FileType, any> = {
+      'document': FileText,
+      'image': FileImage,
+      'video': FileVideo,
+      'audio': FileAudio,
+      'spreadsheet': FileText,
+      'presentation': Presentation,
+      'other': File
+    }
+    return icons[type] || File
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Users className="w-8 h-8" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold">Collaboration Hub</h1>
-                <p className="text-white/80">Visual collaboration for teams</p>
-              </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+              <Users className="h-6 w-6 text-white" />
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
-                <Upload className="w-4 h-4 mr-2" />
-                Import
-              </Button>
-              <Button className="bg-white text-indigo-700 hover:bg-white/90">
-                <Plus className="w-4 h-4 mr-2" />
-                New Board
-              </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Collaboration Hub</h1>
+              <p className="text-gray-500 dark:text-gray-400">Microsoft Teams level workspace</p>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white/10 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/70 mb-1">
-                <Layout className="w-4 h-4" />
-                <span className="text-sm">Total Boards</span>
-              </div>
-              <p className="text-2xl font-bold">{stats.totalBoards}</p>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input placeholder="Search everything..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <div className="bg-white/10 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/70 mb-1">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm">Active</span>
-              </div>
-              <p className="text-2xl font-bold text-green-300">{stats.activeBoards}</p>
-            </div>
-            <div className="bg-white/10 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/70 mb-1">
-                <Users className="w-4 h-4" />
-                <span className="text-sm">Team Members</span>
-              </div>
-              <p className="text-2xl font-bold">{stats.totalMembers}</p>
-            </div>
-            <div className="bg-white/10 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/70 mb-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-sm">Online Now</span>
-              </div>
-              <p className="text-2xl font-bold text-green-300">{stats.onlineNow}</p>
-            </div>
+            <Button variant="outline" onClick={() => setShowNewMeeting(true)}><Video className="h-4 w-4 mr-2" />New Meeting</Button>
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600"><Plus className="h-4 w-4 mr-2" />New Board</Button>
           </div>
         </div>
 
-        {/* Online Members */}
-        <Card>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {statsCards.map((stat, i) => (
+            <Card key={i} className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Online Members Bar */}
+        <Card className="border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <span className="text-sm font-medium">Online now:</span>
                 <div className="flex -space-x-2">
-                  {mockMembers.filter(m => m.isOnline).map(member => (
-                    <Avatar key={member.id} className="w-8 h-8 border-2 border-white">
-                      <AvatarFallback style={{ backgroundColor: member.cursorColor }} className="text-white text-xs">
-                        {member.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
+                  {mockMembers.filter(m => m.presence === 'online').map(member => (
+                    <div key={member.id} className="relative">
+                      <Avatar className="w-8 h-8 border-2 border-white">
+                        <AvatarFallback style={{ backgroundColor: member.cursorColor }} className="text-white text-xs">
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getPresenceColor(member.presence)}`} />
+                    </div>
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {mockMembers.filter(m => m.isOnline).length} collaborating
-                </span>
+                <span className="text-sm text-gray-500">{mockMembers.filter(m => m.presence === 'online').length} collaborating</span>
               </div>
-              <Button variant="outline" size="sm">
-                <Video className="w-4 h-4 mr-2" />
-                Start Video Call
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm"><Video className="h-4 w-4 mr-2" />Start Meeting</Button>
+                <Button variant="outline" size="sm"><ScreenShare className="h-4 w-4 mr-2" />Share Screen</Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Tabs */}
+        {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm">
-            <TabsTrigger value="boards" className="rounded-lg">
-              <Layout className="w-4 h-4 mr-2" />
-              Boards
-            </TabsTrigger>
-            <TabsTrigger value="templates" className="rounded-lg">
-              <LayoutTemplate className="w-4 h-4 mr-2" />
-              Templates
-            </TabsTrigger>
-            <TabsTrigger value="teams" className="rounded-lg">
-              <Users className="w-4 h-4 mr-2" />
-              Teams
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="rounded-lg">
-              <History className="w-4 h-4 mr-2" />
-              Activity
-            </TabsTrigger>
+          <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
+            <TabsTrigger value="boards" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><Layout className="h-4 w-4 mr-2" />Boards</TabsTrigger>
+            <TabsTrigger value="chat" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><MessageSquare className="h-4 w-4 mr-2" />Chat{stats.unreadMessages > 0 && <Badge className="ml-2 bg-red-500">{stats.unreadMessages}</Badge>}</TabsTrigger>
+            <TabsTrigger value="meetings" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><Video className="h-4 w-4 mr-2" />Meetings</TabsTrigger>
+            <TabsTrigger value="files" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><FileText className="h-4 w-4 mr-2" />Files</TabsTrigger>
+            <TabsTrigger value="teams" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><Users className="h-4 w-4 mr-2" />Teams</TabsTrigger>
+            <TabsTrigger value="channels" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><Hash className="h-4 w-4 mr-2" />Channels</TabsTrigger>
+            <TabsTrigger value="activity" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><History className="h-4 w-4 mr-2" />Activity</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><Settings className="h-4 w-4 mr-2" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Boards Tab */}
-          <TabsContent value="boards" className="space-y-6">
-            {/* Filters */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      placeholder="Search boards..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
-                    />
+          <TabsContent value="boards" className="mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('grid')}><Grid className="h-4 w-4" /></Button>
+              <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}><List className="h-4 w-4" /></Button>
+            </div>
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-3'}>
+              {filteredBoards.map(board => (
+                <Card key={board.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg cursor-pointer" onClick={() => setSelectedBoard(board)}>
+                  <CardContent className="p-0">
+                    <div className="h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-t-lg flex items-center justify-center relative">
+                      <Layout className="h-8 w-8 text-gray-400" />
+                      {board.isStarred && <Star className="absolute top-2 right-2 h-4 w-4 text-amber-500 fill-amber-500" />}
+                      {board.isLocked && <Lock className="absolute top-2 left-2 h-4 w-4 text-gray-400" />}
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-1">{board.name}</h4>
+                      <p className="text-sm text-gray-500 mb-2 truncate">{board.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex -space-x-2">
+                          {board.members.slice(0, 3).map(m => (
+                            <Avatar key={m.id} className="w-6 h-6 border-2 border-white">
+                              <AvatarFallback style={{ backgroundColor: m.cursorColor }} className="text-white text-xs">{m.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                          ))}
+                          {board.members.length > 3 && <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">+{board.members.length - 3}</div>}
+                        </div>
+                        <span className="text-xs text-gray-500">{formatTimeAgo(board.updatedAt)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Chat Tab */}
+          <TabsContent value="chat" className="mt-6">
+            <div className="grid grid-cols-12 gap-6 h-[600px]">
+              {/* Channels Sidebar */}
+              <Card className="col-span-3 border-gray-200 dark:border-gray-700">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Channels</CardTitle>
+                    <Button size="sm" variant="ghost" onClick={() => setShowNewChannel(true)}><Plus className="h-4 w-4" /></Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={viewMode === 'grid' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <Grid className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === 'list' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('list')}
-                    >
-                      <List className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Type:</span>
-                    <select
-                      className="text-sm border rounded-md px-2 py-1 bg-background"
-                      value={typeFilter}
-                      onChange={(e) => setTypeFilter(e.target.value as BoardType | 'all')}
-                    >
-                      <option value="all">All Types</option>
-                      <option value="whiteboard">Whiteboard</option>
-                      <option value="flowchart">Flowchart</option>
-                      <option value="mindmap">Mind Map</option>
-                      <option value="wireframe">Wireframe</option>
-                      <option value="kanban">Kanban</option>
-                      <option value="brainstorm">Brainstorm</option>
-                      <option value="retrospective">Retrospective</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Status:</span>
-                    {(['all', 'active', 'archived'] as const).map(status => (
-                      <Button
-                        key={status}
-                        variant={statusFilter === status ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setStatusFilter(status)}
-                      >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </Button>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <ScrollArea className="h-[500px]">
+                    {mockChannels.map(channel => (
+                      <div key={channel.id} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${selectedChannel?.id === channel.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`} onClick={() => setSelectedChannel(channel)}>
+                        <div className="relative">
+                          {channel.type === 'private' ? <Lock className="h-4 w-4 text-gray-400" /> : <Hash className="h-4 w-4 text-gray-400" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm truncate">{channel.name}</span>
+                            {channel.isPinned && <Pin className="h-3 w-3 text-gray-400" />}
+                          </div>
+                          {channel.lastMessage && <p className="text-xs text-gray-500 truncate">{channel.lastMessage.content}</p>}
+                        </div>
+                        {channel.unreadCount > 0 && <Badge className="bg-red-500 text-white">{channel.unreadCount}</Badge>}
+                      </div>
                     ))}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+              {/* Messages */}
+              <Card className="col-span-9 border-gray-200 dark:border-gray-700 flex flex-col">
+                <CardHeader className="pb-2 border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Hash className="h-5 w-5" />
+                      <CardTitle>{selectedChannel?.name || 'general'}</CardTitle>
+                      <Badge variant="outline">{selectedChannel?.memberCount || 45} members</Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon"><Pin className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon"><Search className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                    </div>
                   </div>
+                </CardHeader>
+                <CardContent className="flex-1 p-4 overflow-hidden">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {mockMessages.map(message => (
+                        <div key={message.id} className="flex gap-3 group">
+                          <Avatar className="w-9 h-9">
+                            <AvatarFallback style={{ backgroundColor: message.author.cursorColor }} className="text-white text-xs">{message.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-sm">{message.author.name}</span>
+                              <span className="text-xs text-gray-500">{formatTimeAgo(message.timestamp)}</span>
+                              {message.isPinned && <Pin className="h-3 w-3 text-amber-500" />}
+                            </div>
+                            <p className="text-sm">{message.content}</p>
+                            {message.attachments.length > 0 && (
+                              <div className="mt-2 flex gap-2">
+                                {message.attachments.map(att => (
+                                  <div key={att.id} className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                    <FileText className="h-4 w-4 text-gray-500" />
+                                    <span className="text-sm">{att.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {message.reactions.length > 0 && (
+                              <div className="mt-2 flex gap-1">
+                                {message.reactions.map((r, i) => (
+                                  <Badge key={i} variant="outline" className="text-xs cursor-pointer hover:bg-gray-100">{r.emoji} {r.count}</Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
+                            <Button variant="ghost" size="icon" className="h-7 w-7"><Smile className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7"><Reply className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+                <div className="p-4 border-t">
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon"><Paperclip className="h-4 w-4" /></Button>
+                    <Input placeholder="Type a message..." className="flex-1" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} />
+                    <Button variant="ghost" size="icon"><Smile className="h-4 w-4" /></Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700"><Send className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Meetings Tab */}
+          <TabsContent value="meetings" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setShowNewMeeting(true)}><Plus className="h-4 w-4 mr-2" />Schedule Meeting</Button>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              {mockMeetings.map(meeting => (
+                <Card key={meeting.id} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${meeting.status === 'live' ? 'bg-green-100' : 'bg-blue-100'}`}>
+                          <Video className={`h-6 w-6 ${meeting.status === 'live' ? 'text-green-600' : 'text-blue-600'}`} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{meeting.title}</h3>
+                          <p className="text-sm text-gray-500">{meeting.description}</p>
+                        </div>
+                      </div>
+                      <Badge className={getMeetingStatusColor(meeting.status)}>{meeting.status === 'live' && <span className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />}{meeting.status}</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                      <div><span className="text-gray-500">Date:</span> <span className="font-medium">{new Date(meeting.startTime).toLocaleDateString()}</span></div>
+                      <div><span className="text-gray-500">Time:</span> <span className="font-medium">{new Date(meeting.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+                      <div><span className="text-gray-500">Duration:</span> <span className="font-medium">{meeting.duration} min</span></div>
+                      <div><span className="text-gray-500">Organizer:</span> <span className="font-medium">{meeting.organizer.name}</span></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex -space-x-2">
+                        {meeting.participants.slice(0, 4).map(p => (
+                          <Avatar key={p.id} className="w-8 h-8 border-2 border-white">
+                            <AvatarFallback style={{ backgroundColor: p.cursorColor }} className="text-white text-xs">{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                        ))}
+                        {meeting.participants.length > 4 && <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">+{meeting.participants.length - 4}</div>}
+                      </div>
+                      <div className="flex gap-2">
+                        {meeting.hasRecording && <Button variant="outline" size="sm"><Play className="h-4 w-4 mr-1" />Recording</Button>}
+                        {meeting.status === 'live' && <Button className="bg-green-600 hover:bg-green-700"><Video className="h-4 w-4 mr-2" />Join</Button>}
+                        {meeting.status === 'scheduled' && <Button variant="outline"><Calendar className="h-4 w-4 mr-2" />Add to Calendar</Button>}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Files Tab */}
+          <TabsContent value="files" className="mt-6">
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {mockFiles.map(file => {
+                    const FileIcon = getFileIcon(file.type)
+                    return (
+                      <div key={file.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                          <FileIcon className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{file.name}</h4>
+                            {file.isStarred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                          </div>
+                          <p className="text-sm text-gray-500">{formatSize(file.size)} • v{file.version} • {file.downloadCount} downloads</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{file.uploadedBy.name}</p>
+                          <p className="text-xs text-gray-500">{formatTimeAgo(file.modifiedAt)}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon"><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </CardContent>
             </Card>
-
-            {/* Starred Boards */}
-            {starredBoards.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                  Starred Boards
-                </h3>
-                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-3'}>
-                  {starredBoards.map(board => (
-                    <BoardCard key={board.id} board={board} viewMode={viewMode} onSelect={setSelectedBoard} formatTimeAgo={formatTimeAgo} getBoardTypeIcon={getBoardTypeIcon} getBoardTypeColor={getBoardTypeColor} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* All Boards */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">All Boards</h3>
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-3'}>
-                {filteredBoards.map(board => (
-                  <BoardCard key={board.id} board={board} viewMode={viewMode} onSelect={setSelectedBoard} formatTimeAgo={formatTimeAgo} getBoardTypeIcon={getBoardTypeIcon} getBoardTypeColor={getBoardTypeColor} />
-                ))}
-              </div>
-
-              {filteredBoards.length === 0 && (
-                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
-                  <Layout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No boards found</h3>
-                  <p className="text-muted-foreground mb-4">Create your first collaboration board</p>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Board
-                  </Button>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Templates Gallery</h3>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Category:</span>
-                <select className="text-sm border rounded-md px-2 py-1 bg-background">
-                  <option>All Categories</option>
-                  <option>Strategy</option>
-                  <option>Agile</option>
-                  <option>Brainstorming</option>
-                  <option>UX Research</option>
-                  <option>Design</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockTemplates.map(template => (
-                <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardContent className="p-0">
-                    <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-t-lg flex items-center justify-center relative">
-                      {getBoardTypeIcon(template.type)}
-                      {template.isPremium && (
-                        <Badge className="absolute top-2 right-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-                          <Crown className="w-3 h-3 mr-1" />
-                          Premium
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold">{template.name}</h4>
-                          <p className="text-sm text-muted-foreground">{template.category}</p>
-                        </div>
-                        <Badge variant="outline">{template.type}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {template.usageCount.toLocaleString()} uses
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-                          {template.rating}
-                        </span>
-                      </div>
-                      <Button className="w-full mt-3 opacity-0 group-hover:opacity-100 transition-opacity" size="sm">
-                        Use Template
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </TabsContent>
 
           {/* Teams Tab */}
-          <TabsContent value="teams" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Your Teams</h3>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Team
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <TabsContent value="teams" className="mt-6">
+            <div className="grid grid-cols-3 gap-6">
               {mockTeams.map(team => (
-                <Card key={team.id} className="hover:shadow-md transition-shadow">
+                <Card key={team.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
-                    <div className="flex items-start gap-4 mb-4">
+                    <div className="flex items-center gap-4 mb-4">
                       <Avatar className="w-12 h-12">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-                          {team.name.split(' ').map(w => w[0]).join('')}
-                        </AvatarFallback>
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">{team.name.split(' ').map(w => w[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <h4 className="font-semibold">{team.name}</h4>
+                        <h3 className="font-semibold">{team.name}</h3>
                         <Badge variant="outline" className="text-xs capitalize">{team.role}</Badge>
                       </div>
-                      <Badge className={
-                        team.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' :
-                        team.plan === 'business' ? 'bg-blue-100 text-blue-700' :
-                        team.plan === 'starter' ? 'bg-green-100 text-green-700' :
-                        'bg-gray-100 text-gray-700'
-                      }>
-                        {team.plan}
-                      </Badge>
+                      <Badge className={team.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}>{team.plan}</Badge>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold">{team.memberCount}</p>
-                        <p className="text-muted-foreground">Members</p>
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold">{team.boardCount}</p>
-                        <p className="text-muted-foreground">Boards</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <FolderOpen className="w-4 h-4 mr-1" />
-                        Open
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Settings className="w-4 h-4" />
-                      </Button>
+                    <p className="text-sm text-gray-500 mb-4">{team.description}</p>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{team.memberCount}</p><p className="text-xs text-gray-500">Members</p></div>
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{team.boardCount}</p><p className="text-xs text-gray-500">Boards</p></div>
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{team.channelCount}</p><p className="text-xs text-gray-500">Channels</p></div>
                     </div>
                   </CardContent>
                 </Card>
@@ -707,44 +739,59 @@ export default function CollaborationClient() {
             </div>
           </TabsContent>
 
+          {/* Channels Tab */}
+          <TabsContent value="channels" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setShowNewChannel(true)}><Plus className="h-4 w-4 mr-2" />Create Channel</Button>
+            </div>
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {mockChannels.map(channel => (
+                    <div key={channel.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        {channel.type === 'private' ? <Lock className="h-5 w-5 text-gray-600" /> : <Hash className="h-5 w-5 text-gray-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">{channel.name}</h4>
+                          {channel.isPinned && <Pin className="h-4 w-4 text-amber-500" />}
+                          {channel.isMuted && <BellOff className="h-4 w-4 text-gray-400" />}
+                        </div>
+                        <p className="text-sm text-gray-500">{channel.description}</p>
+                      </div>
+                      <Badge variant="outline">{channel.memberCount} members</Badge>
+                      {channel.unreadCount > 0 && <Badge className="bg-red-500">{channel.unreadCount}</Badge>}
+                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
+          <TabsContent value="activity" className="mt-6">
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
               <CardContent>
                 <ScrollArea className="h-[500px]">
                   <div className="space-y-4">
                     {mockActivities.map(activity => (
                       <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <Avatar className="w-10 h-10">
-                          <AvatarFallback style={{ backgroundColor: activity.user.cursorColor }} className="text-white text-xs">
-                            {activity.user.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
+                          <AvatarFallback style={{ backgroundColor: activity.user.cursorColor }} className="text-white text-xs">{activity.user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-medium">{activity.user.name}</span>
-                            <span className="text-muted-foreground">
-                              {activity.action === 'created' && 'created'}
-                              {activity.action === 'edited' && 'edited'}
-                              {activity.action === 'commented' && 'commented on'}
-                              {activity.action === 'shared' && 'shared'}
-                              {activity.action === 'archived' && 'archived'}
-                              {activity.action === 'restored' && 'restored'}
-                              {activity.action === 'deleted' && 'deleted'}
-                            </span>
-                            <span className="font-medium text-blue-600">
-                              {mockBoards.find(b => b.id === activity.boardId)?.name}
-                            </span>
+                            <span className="text-gray-500">{activity.action}</span>
+                            <span className="font-medium text-blue-600">{activity.resourceName}</span>
                           </div>
-                          <p className="text-sm text-muted-foreground">{activity.description}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{formatTimeAgo(activity.timestamp)}</p>
+                          <p className="text-sm text-gray-500">{activity.description}</p>
+                          <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.timestamp)}</p>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
+                        <Button variant="ghost" size="sm"><ExternalLink className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -752,114 +799,65 @@ export default function CollaborationClient() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Notifications</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Desktop Notifications</p><p className="text-sm text-gray-500">Show desktop notifications</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Sound Alerts</p><p className="text-sm text-gray-500">Play sound for notifications</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Email Digest</p><p className="text-sm text-gray-500">Daily email summary</p></div><Switch /></div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Meeting Defaults</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Camera On</p><p className="text-sm text-gray-500">Start with camera enabled</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Microphone On</p><p className="text-sm text-gray-500">Start with mic enabled</p></div><Switch /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-Record</p><p className="text-sm text-gray-500">Record meetings automatically</p></div><Switch /></div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Privacy</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Presence</p><p className="text-sm text-gray-500">Let others see your status</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Read Receipts</p><p className="text-sm text-gray-500">Show when messages are read</p></div><Switch defaultChecked /></div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Compact Mode</p><p className="text-sm text-gray-500">Reduce message spacing</p></div><Switch /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Avatars</p><p className="text-sm text-gray-500">Display user avatars</p></div><Switch defaultChecked /></div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
+
+        {/* New Meeting Dialog */}
+        <Dialog open={showNewMeeting} onOpenChange={setShowNewMeeting}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Schedule Meeting</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Meeting Title</Label><Input placeholder="Sprint Planning" /></div>
+              <div><Label>Description</Label><Textarea placeholder="Meeting agenda..." rows={2} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Date</Label><Input type="date" /></div>
+                <div><Label>Time</Label><Input type="time" /></div>
+              </div>
+              <div><Label>Duration</Label><Select><SelectTrigger><SelectValue placeholder="Select duration" /></SelectTrigger><SelectContent><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem><SelectItem value="45">45 minutes</SelectItem><SelectItem value="60">1 hour</SelectItem><SelectItem value="90">1.5 hours</SelectItem></SelectContent></Select></div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-2"><Video className="h-4 w-4 text-gray-500" /><span className="text-sm">Enable Recording</span></div><Switch /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewMeeting(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">Schedule Meeting</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
-  )
-}
-
-// Board Card Component
-function BoardCard({
-  board,
-  viewMode,
-  onSelect,
-  formatTimeAgo,
-  getBoardTypeIcon,
-  getBoardTypeColor
-}: {
-  board: Board
-  viewMode: 'grid' | 'list'
-  onSelect: (board: Board) => void
-  formatTimeAgo: (date: string) => string
-  getBoardTypeIcon: (type: BoardType) => JSX.Element
-  getBoardTypeColor: (type: BoardType) => string
-}) {
-  if (viewMode === 'list') {
-    return (
-      <Card className="hover:shadow-md transition-shadow">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
-              {getBoardTypeIcon(board.type)}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                {board.isStarred && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
-                <h4 className="font-semibold">{board.name}</h4>
-                <Badge className={getBoardTypeColor(board.type)}>{board.type}</Badge>
-                {board.isLocked && <Lock className="w-3 h-3 text-gray-400" />}
-                {board.isPublic && <Eye className="w-3 h-3 text-gray-400" />}
-              </div>
-              <p className="text-sm text-muted-foreground line-clamp-1">{board.description}</p>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <div className="flex -space-x-2">
-                {board.members.slice(0, 3).map(member => (
-                  <Avatar key={member.id} className="w-6 h-6 border-2 border-white">
-                    <AvatarFallback style={{ backgroundColor: member.cursorColor }} className="text-white text-xs">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {board.members.length > 3 && (
-                  <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs">
-                    +{board.members.length - 3}
-                  </div>
-                )}
-              </div>
-              <span>{formatTimeAgo(board.updatedAt)}</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => onSelect(board)}>
-              Open
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => onSelect(board)}>
-      <CardContent className="p-0">
-        <div className="h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-t-lg flex items-center justify-center relative">
-          {getBoardTypeIcon(board.type)}
-          <div className="absolute top-2 right-2 flex items-center gap-1">
-            {board.isStarred && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
-            {board.isLocked && <Lock className="w-3 h-3 text-gray-400" />}
-          </div>
-          {board.members.some(m => m.isOnline) && (
-            <div className="absolute bottom-2 left-2 flex -space-x-1">
-              {board.members.filter(m => m.isOnline).slice(0, 3).map(member => (
-                <div key={member.id} className="w-2 h-2 rounded-full border border-white" style={{ backgroundColor: member.cursorColor }} />
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h4 className="font-semibold line-clamp-1">{board.name}</h4>
-              <Badge className={`text-xs ${getBoardTypeColor(board.type)}`}>{board.type}</Badge>
-            </div>
-          </div>
-          {board.teamName && (
-            <p className="text-xs text-muted-foreground mb-2">{board.teamName}</p>
-          )}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {board.members.length}
-              </span>
-              <span className="flex items-center gap-1">
-                <MessageCircle className="w-3 h-3" />
-                {board.commentCount}
-              </span>
-            </div>
-            <span>{formatTimeAgo(board.updatedAt)}</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   )
 }
