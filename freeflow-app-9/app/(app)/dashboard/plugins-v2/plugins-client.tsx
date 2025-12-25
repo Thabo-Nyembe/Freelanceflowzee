@@ -1,523 +1,1339 @@
 'use client'
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
-import { usePlugins, Plugin, PluginStats } from '@/lib/hooks/use-plugins'
-import { createPlugin, updatePlugin, deletePlugin, activatePlugin, deactivatePlugin } from '@/app/actions/plugins'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import {
+  Puzzle,
+  Download,
+  Star,
+  Users,
+  Code,
+  Shield,
+  Zap,
+  Settings,
+  TrendingUp,
+  Activity,
+  Package,
+  Grid3X3,
+  List,
+  Search,
+  Filter,
+  Plus,
+  MoreHorizontal,
+  ExternalLink,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Clock,
+  RefreshCw,
+  Heart,
+  MessageSquare,
+  GitBranch,
+  Lock,
+  Unlock,
+  Play,
+  Pause,
+  Trash2,
+  Eye,
+  BarChart3,
+  Globe,
+  Layers,
+  Database,
+  Cpu,
+  Terminal,
+  Palette,
+  Mail,
+  Calendar,
+  FileText,
+  Image,
+  Video,
+  Music,
+  ShoppingCart,
+  CreditCard,
+  Map,
+  Phone,
+  Webhook,
+  Bot,
+  Sparkles,
+  Crown
+} from 'lucide-react'
 
-type PluginStatus = 'active' | 'inactive' | 'updating' | 'error' | 'disabled'
-type PluginCategory = 'productivity' | 'security' | 'analytics' | 'integration' | 'communication' | 'automation' | 'ui-enhancement' | 'developer-tools'
-type PluginType = 'core' | 'premium' | 'community' | 'enterprise' | 'beta'
+// Types
+type PluginStatus = 'active' | 'inactive' | 'updating' | 'error' | 'needs-update'
+type PluginCategory = 'productivity' | 'security' | 'analytics' | 'integration' | 'communication' | 'automation' | 'ui-enhancement' | 'developer-tools' | 'e-commerce' | 'seo' | 'social' | 'media'
+type PluginTier = 'free' | 'freemium' | 'premium' | 'enterprise'
 
-interface PluginsClientProps {
-  initialPlugins: Plugin[]
-  initialStats: PluginStats
+interface Plugin {
+  id: string
+  name: string
+  slug: string
+  description: string
+  shortDescription: string
+  version: string
+  latestVersion: string
+  author: {
+    name: string
+    avatar: string
+    verified: boolean
+    plugins: number
+  }
+  category: PluginCategory
+  tier: PluginTier
+  status: PluginStatus
+  icon: string
+  banner?: string
+  rating: number
+  reviewsCount: number
+  activeInstalls: number
+  totalDownloads: number
+  lastUpdated: string
+  testedUpTo: string
+  requiresVersion: string
+  requiresPHP: string
+  size: string
+  price?: number
+  features: string[]
+  tags: string[]
+  screenshots: string[]
+  changelog: { version: string; date: string; changes: string[] }[]
+  support: {
+    resolved: number
+    total: number
+  }
+  compatibility: number
+  performanceScore: number
+  securityScore: number
+  isInstalled: boolean
+  isActivated: boolean
+  autoUpdate: boolean
+  hasProVersion: boolean
 }
 
-export default function PluginsClient({ initialPlugins, initialStats }: PluginsClientProps) {
-  const { plugins, stats } = usePlugins(initialPlugins, initialStats)
-  const [statusFilter, setStatusFilter] = useState<PluginStatus | 'all'>('all')
-  const [categoryFilter, setCategoryFilter] = useState<PluginCategory | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<PluginType | 'all'>('all')
+interface Review {
+  id: string
+  pluginId: string
+  author: string
+  avatar: string
+  rating: number
+  title: string
+  content: string
+  date: string
+  helpful: number
+  verified: boolean
+}
+
+interface PluginCollection {
+  id: string
+  name: string
+  description: string
+  plugins: string[]
+  icon: string
+}
+
+// Mock data
+const mockPlugins: Plugin[] = [
+  {
+    id: '1',
+    name: 'WooCommerce',
+    slug: 'woocommerce',
+    description: 'WooCommerce is the world\'s most popular open-source eCommerce solution. Start a new business with WooCommerce or add it to your existing WordPress site.',
+    shortDescription: 'Build a beautiful, fully-functional eCommerce store',
+    version: '8.4.0',
+    latestVersion: '8.4.0',
+    author: { name: 'Automattic', avatar: '/avatars/automattic.png', verified: true, plugins: 47 },
+    category: 'e-commerce',
+    tier: 'free',
+    status: 'active',
+    icon: '🛒',
+    rating: 4.5,
+    reviewsCount: 4289,
+    activeInstalls: 5000000,
+    totalDownloads: 345000000,
+    lastUpdated: '2024-01-15',
+    testedUpTo: '6.4.2',
+    requiresVersion: '6.2',
+    requiresPHP: '7.4',
+    size: '12.4 MB',
+    features: ['Product Management', 'Payment Gateways', 'Shipping Options', 'Tax Calculation', 'Inventory Management', 'Analytics'],
+    tags: ['ecommerce', 'store', 'shop', 'payments', 'cart'],
+    screenshots: [],
+    changelog: [{ version: '8.4.0', date: '2024-01-15', changes: ['New block editor support', 'Performance improvements', 'Bug fixes'] }],
+    support: { resolved: 89, total: 100 },
+    compatibility: 98,
+    performanceScore: 92,
+    securityScore: 95,
+    isInstalled: true,
+    isActivated: true,
+    autoUpdate: true,
+    hasProVersion: true
+  },
+  {
+    id: '2',
+    name: 'Yoast SEO',
+    slug: 'yoast-seo',
+    description: 'The #1 WordPress SEO plugin. Improve your WordPress SEO: Write better content and have a fully optimized WordPress site using Yoast SEO plugin.',
+    shortDescription: 'Improve your WordPress SEO with the #1 plugin',
+    version: '21.7',
+    latestVersion: '21.8',
+    author: { name: 'Team Yoast', avatar: '/avatars/yoast.png', verified: true, plugins: 12 },
+    category: 'seo',
+    tier: 'freemium',
+    status: 'needs-update',
+    icon: '🎯',
+    rating: 4.8,
+    reviewsCount: 28456,
+    activeInstalls: 10000000,
+    totalDownloads: 450000000,
+    lastUpdated: '2024-01-10',
+    testedUpTo: '6.4.2',
+    requiresVersion: '6.0',
+    requiresPHP: '7.2.5',
+    size: '8.2 MB',
+    features: ['SEO Analysis', 'Readability Check', 'Schema Markup', 'XML Sitemaps', 'Social Previews', 'Redirect Manager'],
+    tags: ['seo', 'meta', 'sitemap', 'schema', 'optimization'],
+    screenshots: [],
+    changelog: [{ version: '21.8', date: '2024-01-18', changes: ['AI content analysis', 'New schema types', 'Performance boost'] }],
+    support: { resolved: 92, total: 100 },
+    compatibility: 99,
+    performanceScore: 88,
+    securityScore: 98,
+    isInstalled: true,
+    isActivated: true,
+    autoUpdate: false,
+    hasProVersion: true
+  },
+  {
+    id: '3',
+    name: 'Elementor',
+    slug: 'elementor',
+    description: 'The Elementor Website Builder has it all: drag and drop page builder, pixel perfect design, mobile responsive editing, and more.',
+    shortDescription: 'The leading WordPress website builder platform',
+    version: '3.18.3',
+    latestVersion: '3.18.3',
+    author: { name: 'Elementor.com', avatar: '/avatars/elementor.png', verified: true, plugins: 3 },
+    category: 'ui-enhancement',
+    tier: 'freemium',
+    status: 'active',
+    icon: '🎨',
+    rating: 4.6,
+    reviewsCount: 6789,
+    activeInstalls: 8000000,
+    totalDownloads: 280000000,
+    lastUpdated: '2024-01-12',
+    testedUpTo: '6.4.2',
+    requiresVersion: '6.0',
+    requiresPHP: '7.3',
+    size: '15.6 MB',
+    features: ['Drag & Drop Editor', '100+ Widgets', 'Theme Builder', 'Popup Builder', 'Form Builder', 'WooCommerce Builder'],
+    tags: ['page builder', 'editor', 'design', 'drag drop', 'widgets'],
+    screenshots: [],
+    changelog: [{ version: '3.18.3', date: '2024-01-12', changes: ['New AI features', 'Container improvements', 'Bug fixes'] }],
+    support: { resolved: 85, total: 100 },
+    compatibility: 96,
+    performanceScore: 78,
+    securityScore: 92,
+    isInstalled: true,
+    isActivated: true,
+    autoUpdate: true,
+    hasProVersion: true
+  },
+  {
+    id: '4',
+    name: 'Wordfence Security',
+    slug: 'wordfence',
+    description: 'Wordfence includes an endpoint firewall and malware scanner that were built from the ground up to protect WordPress.',
+    shortDescription: 'Firewall & Malware Scanner for WordPress',
+    version: '7.11.0',
+    latestVersion: '7.11.0',
+    author: { name: 'Wordfence', avatar: '/avatars/wordfence.png', verified: true, plugins: 2 },
+    category: 'security',
+    tier: 'freemium',
+    status: 'active',
+    icon: '🛡️',
+    rating: 4.7,
+    reviewsCount: 4123,
+    activeInstalls: 4000000,
+    totalDownloads: 220000000,
+    lastUpdated: '2024-01-08',
+    testedUpTo: '6.4.2',
+    requiresVersion: '5.5',
+    requiresPHP: '7.0',
+    size: '18.2 MB',
+    features: ['Firewall', 'Malware Scanner', 'Login Security', '2FA', 'Live Traffic', 'Country Blocking'],
+    tags: ['security', 'firewall', 'malware', 'login', 'protection'],
+    screenshots: [],
+    changelog: [{ version: '7.11.0', date: '2024-01-08', changes: ['New threat signatures', 'Performance improvements', 'UI updates'] }],
+    support: { resolved: 94, total: 100 },
+    compatibility: 97,
+    performanceScore: 82,
+    securityScore: 99,
+    isInstalled: true,
+    isActivated: true,
+    autoUpdate: true,
+    hasProVersion: true
+  },
+  {
+    id: '5',
+    name: 'Contact Form 7',
+    slug: 'contact-form-7',
+    description: 'Contact Form 7 can manage multiple contact forms, plus you can customize the form and the mail contents flexibly with simple markup.',
+    shortDescription: 'Just another contact form plugin. Simple but flexible.',
+    version: '5.8.6',
+    latestVersion: '5.8.6',
+    author: { name: 'Takayuki Miyoshi', avatar: '/avatars/cf7.png', verified: true, plugins: 3 },
+    category: 'communication',
+    tier: 'free',
+    status: 'active',
+    icon: '📧',
+    rating: 4.1,
+    reviewsCount: 2156,
+    activeInstalls: 5000000,
+    totalDownloads: 350000000,
+    lastUpdated: '2024-01-05',
+    testedUpTo: '6.4.2',
+    requiresVersion: '6.0',
+    requiresPHP: '7.4',
+    size: '2.1 MB',
+    features: ['Multiple Forms', 'AJAX Submission', 'CAPTCHA', 'Spam Filtering', 'Mail Templates', 'Custom Fields'],
+    tags: ['contact', 'form', 'email', 'feedback', 'submission'],
+    screenshots: [],
+    changelog: [{ version: '5.8.6', date: '2024-01-05', changes: ['Bug fixes', 'Translation updates'] }],
+    support: { resolved: 78, total: 100 },
+    compatibility: 100,
+    performanceScore: 95,
+    securityScore: 88,
+    isInstalled: true,
+    isActivated: false,
+    autoUpdate: false,
+    hasProVersion: false
+  },
+  {
+    id: '6',
+    name: 'Akismet Anti-Spam',
+    slug: 'akismet',
+    description: 'Akismet checks your comments and contact form submissions against our global database of spam to prevent malicious content.',
+    shortDescription: 'The best anti-spam protection for WordPress',
+    version: '5.3',
+    latestVersion: '5.3',
+    author: { name: 'Automattic', avatar: '/avatars/automattic.png', verified: true, plugins: 47 },
+    category: 'security',
+    tier: 'freemium',
+    status: 'inactive',
+    icon: '🚫',
+    rating: 4.4,
+    reviewsCount: 1089,
+    activeInstalls: 5000000,
+    totalDownloads: 250000000,
+    lastUpdated: '2024-01-02',
+    testedUpTo: '6.4.2',
+    requiresVersion: '5.8',
+    requiresPHP: '5.6.20',
+    size: '0.8 MB',
+    features: ['Comment Spam', 'Contact Form Spam', 'Registration Spam', 'Statistics', 'Discard Feature', 'Privacy Focused'],
+    tags: ['spam', 'anti-spam', 'comments', 'security', 'protection'],
+    screenshots: [],
+    changelog: [{ version: '5.3', date: '2024-01-02', changes: ['Performance improvements', 'API updates'] }],
+    support: { resolved: 90, total: 100 },
+    compatibility: 100,
+    performanceScore: 98,
+    securityScore: 96,
+    isInstalled: true,
+    isActivated: false,
+    autoUpdate: true,
+    hasProVersion: true
+  },
+  {
+    id: '7',
+    name: 'Jetpack',
+    slug: 'jetpack',
+    description: 'Security, performance, and site management: the best way to WordPress is with Jetpack. Complete WordPress security.',
+    shortDescription: 'Security, performance, and marketing tools',
+    version: '12.9',
+    latestVersion: '12.9',
+    author: { name: 'Automattic', avatar: '/avatars/automattic.png', verified: true, plugins: 47 },
+    category: 'productivity',
+    tier: 'freemium',
+    status: 'active',
+    icon: '🚀',
+    rating: 4.0,
+    reviewsCount: 1876,
+    activeInstalls: 5000000,
+    totalDownloads: 320000000,
+    lastUpdated: '2024-01-14',
+    testedUpTo: '6.4.2',
+    requiresVersion: '6.2',
+    requiresPHP: '7.0',
+    size: '24.5 MB',
+    features: ['Site Security', 'Performance', 'Backups', 'CDN', 'Social Sharing', 'Analytics'],
+    tags: ['security', 'backup', 'speed', 'social', 'jetpack'],
+    screenshots: [],
+    changelog: [{ version: '12.9', date: '2024-01-14', changes: ['AI assistant updates', 'Block improvements', 'Bug fixes'] }],
+    support: { resolved: 82, total: 100 },
+    compatibility: 95,
+    performanceScore: 75,
+    securityScore: 94,
+    isInstalled: false,
+    isActivated: false,
+    autoUpdate: false,
+    hasProVersion: true
+  },
+  {
+    id: '8',
+    name: 'MonsterInsights',
+    slug: 'monsterinsights',
+    description: 'MonsterInsights is the best Google Analytics plugin for WordPress. See how visitors find and use your website.',
+    shortDescription: 'Best Google Analytics Plugin for WordPress',
+    version: '8.22',
+    latestVersion: '8.22',
+    author: { name: 'MonsterInsights', avatar: '/avatars/mi.png', verified: true, plugins: 4 },
+    category: 'analytics',
+    tier: 'freemium',
+    status: 'active',
+    icon: '📊',
+    rating: 4.5,
+    reviewsCount: 2456,
+    activeInstalls: 3000000,
+    totalDownloads: 180000000,
+    lastUpdated: '2024-01-11',
+    testedUpTo: '6.4.2',
+    requiresVersion: '5.5',
+    requiresPHP: '7.2',
+    size: '5.8 MB',
+    features: ['Google Analytics 4', 'Real-time Stats', 'eCommerce Tracking', 'Custom Dimensions', 'Page Insights', 'Dashboard Reports'],
+    tags: ['analytics', 'google analytics', 'statistics', 'tracking', 'insights'],
+    screenshots: [],
+    changelog: [{ version: '8.22', date: '2024-01-11', changes: ['GA4 enhancements', 'New dashboard widgets', 'Performance updates'] }],
+    support: { resolved: 88, total: 100 },
+    compatibility: 98,
+    performanceScore: 90,
+    securityScore: 92,
+    isInstalled: false,
+    isActivated: false,
+    autoUpdate: false,
+    hasProVersion: true
+  }
+]
+
+const mockReviews: Review[] = [
+  { id: '1', pluginId: '1', author: 'John Developer', avatar: '/avatars/1.png', rating: 5, title: 'Best eCommerce solution!', content: 'WooCommerce has transformed my business. Easy to set up and incredibly powerful.', date: '2024-01-15', helpful: 234, verified: true },
+  { id: '2', pluginId: '1', author: 'Sarah Shop', avatar: '/avatars/2.png', rating: 4, title: 'Great but resource heavy', content: 'Excellent features but can slow down smaller hosting plans. Worth the investment though.', date: '2024-01-12', helpful: 156, verified: true },
+  { id: '3', pluginId: '2', author: 'Mike SEO', avatar: '/avatars/3.png', rating: 5, title: 'Essential for any WordPress site', content: 'Yoast SEO is indispensable. The readability and SEO analysis tools are top-notch.', date: '2024-01-10', helpful: 189, verified: true },
+  { id: '4', pluginId: '3', author: 'Designer Pro', avatar: '/avatars/4.png', rating: 5, title: 'Design without limits', content: 'Elementor has made web design accessible to everyone. The possibilities are endless.', date: '2024-01-08', helpful: 312, verified: true }
+]
+
+const mockCollections: PluginCollection[] = [
+  { id: '1', name: 'Essential Security', description: 'Must-have security plugins for any WordPress site', plugins: ['4', '6'], icon: '🛡️' },
+  { id: '2', name: 'eCommerce Starter', description: 'Everything you need to launch your online store', plugins: ['1', '8'], icon: '🛒' },
+  { id: '3', name: 'SEO & Marketing', description: 'Boost your search rankings and traffic', plugins: ['2', '7', '8'], icon: '📈' },
+  { id: '4', name: 'Design & Builder', description: 'Create stunning pages without code', plugins: ['3'], icon: '🎨' }
+]
+
+const categories = [
+  { id: 'all', name: 'All Plugins', icon: Package, count: 58347 },
+  { id: 'security', name: 'Security', icon: Shield, count: 1234 },
+  { id: 'e-commerce', name: 'E-Commerce', icon: ShoppingCart, count: 2156 },
+  { id: 'seo', name: 'SEO', icon: TrendingUp, count: 987 },
+  { id: 'analytics', name: 'Analytics', icon: BarChart3, count: 654 },
+  { id: 'productivity', name: 'Productivity', icon: Zap, count: 3421 },
+  { id: 'communication', name: 'Communication', icon: Mail, count: 1567 },
+  { id: 'ui-enhancement', name: 'Builders', icon: Palette, count: 2890 },
+  { id: 'integration', name: 'Integrations', icon: Webhook, count: 4123 },
+  { id: 'automation', name: 'Automation', icon: Bot, count: 876 },
+  { id: 'media', name: 'Media', icon: Image, count: 2345 },
+  { id: 'developer-tools', name: 'Developer', icon: Terminal, count: 1654 }
+]
+
+export default function PluginsClient() {
+  const [activeTab, setActiveTab] = useState('discover')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingPlugin, setEditingPlugin] = useState<Plugin | null>(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    version: '1.0.0',
-    author: '',
-    category: 'productivity' as PluginCategory,
-    plugin_type: 'community' as PluginType,
-    status: 'inactive' as PluginStatus,
-    compatibility: '',
-    permissions: [] as string[],
-    tags: [] as string[]
-  })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedTier, setSelectedTier] = useState<PluginTier | 'all'>('all')
+  const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null)
+  const [showInstallDialog, setShowInstallDialog] = useState(false)
+  const [installing, setInstalling] = useState<string | null>(null)
 
-  const filteredPlugins = plugins.filter(plugin => {
-    if (statusFilter !== 'all' && plugin.status !== statusFilter) return false
-    if (categoryFilter !== 'all' && plugin.category !== categoryFilter) return false
-    if (typeFilter !== 'all' && plugin.plugin_type !== typeFilter) return false
-    return true
-  })
-
-  const statsDisplay = [
-    { label: 'Total Plugins', value: stats.total.toString(), trend: '+12', trendLabel: 'this month' },
-    { label: 'Active Plugins', value: stats.active.toString(), trend: '+8', trendLabel: 'vs last week' },
-    { label: 'Total Installs', value: stats.totalInstalls.toLocaleString(), trend: '+28%', trendLabel: 'vs last month' },
-    { label: 'Avg Rating', value: `${stats.avgRating.toFixed(1)}/5`, trend: '+0.2', trendLabel: 'improvement' }
-  ]
-
-  const handleCreatePlugin = async () => {
-    try {
-      await createPlugin(formData)
-      setShowCreateModal(false)
-      resetForm()
-    } catch (error) {
-      console.error('Failed to create plugin:', error)
-    }
-  }
-
-  const handleUpdatePlugin = async () => {
-    if (!editingPlugin) return
-    try {
-      await updatePlugin(editingPlugin.id, formData)
-      setEditingPlugin(null)
-      resetForm()
-    } catch (error) {
-      console.error('Failed to update plugin:', error)
-    }
-  }
-
-  const handleDeletePlugin = async (id: string) => {
-    if (confirm('Are you sure you want to delete this plugin?')) {
-      try {
-        await deletePlugin(id)
-      } catch (error) {
-        console.error('Failed to delete plugin:', error)
-      }
-    }
-  }
-
-  const handleToggleStatus = async (plugin: Plugin) => {
-    try {
-      if (plugin.status === 'active') {
-        await deactivatePlugin(plugin.id)
-      } else {
-        await activatePlugin(plugin.id)
-      }
-    } catch (error) {
-      console.error('Failed to toggle plugin status:', error)
-    }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      version: '1.0.0',
-      author: '',
-      category: 'productivity',
-      plugin_type: 'community',
-      status: 'inactive',
-      compatibility: '',
-      permissions: [],
-      tags: []
+  // Filter plugins
+  const filteredPlugins = useMemo(() => {
+    return mockPlugins.filter(plugin => {
+      const matchesSearch = plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           plugin.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           plugin.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesCategory = selectedCategory === 'all' || plugin.category === selectedCategory
+      const matchesTier = selectedTier === 'all' || plugin.tier === selectedTier
+      return matchesSearch && matchesCategory && matchesTier
     })
-  }
+  }, [searchQuery, selectedCategory, selectedTier])
 
-  const openEditModal = (plugin: Plugin) => {
-    setEditingPlugin(plugin)
-    setFormData({
-      name: plugin.name,
-      description: plugin.description || '',
-      version: plugin.version,
-      author: plugin.author || '',
-      category: plugin.category,
-      plugin_type: plugin.plugin_type,
-      status: plugin.status,
-      compatibility: plugin.compatibility || '',
-      permissions: plugin.permissions || [],
-      tags: plugin.tags || []
-    })
-  }
+  const installedPlugins = mockPlugins.filter(p => p.isInstalled)
+  const activePlugins = installedPlugins.filter(p => p.isActivated)
+  const needsUpdatePlugins = installedPlugins.filter(p => p.status === 'needs-update')
 
-  const quickActions = [
-    { label: 'Browse Plugins', icon: '🔍', onClick: () => console.log('Browse Plugins') },
-    { label: 'Install Plugin', icon: '⬇️', onClick: () => setShowCreateModal(true) },
-    { label: 'My Plugins', icon: '📦', onClick: () => console.log('My Plugins') },
-    { label: 'Plugin Settings', icon: '⚙️', onClick: () => console.log('Plugin Settings') },
-    { label: 'Developer Docs', icon: '📚', onClick: () => console.log('Developer Docs') },
-    { label: 'API Reference', icon: '⚡', onClick: () => console.log('API Reference') },
-    { label: 'Create Plugin', icon: '✨', onClick: () => setShowCreateModal(true) },
-    { label: 'Support', icon: '💬', onClick: () => console.log('Support') }
+  // Stats
+  const stats = [
+    { label: 'Installed', value: installedPlugins.length.toString(), change: '+2', icon: Download, color: 'from-blue-500 to-blue-600' },
+    { label: 'Active', value: activePlugins.length.toString(), change: '+1', icon: CheckCircle2, color: 'from-green-500 to-green-600' },
+    { label: 'Updates Available', value: needsUpdatePlugins.length.toString(), change: '', icon: RefreshCw, color: 'from-amber-500 to-amber-600' },
+    { label: 'Total Downloads', value: '1.8B+', change: '+12%', icon: TrendingUp, color: 'from-purple-500 to-purple-600' },
+    { label: 'Security Score', value: '94%', change: '+3%', icon: Shield, color: 'from-cyan-500 to-cyan-600' },
+    { label: 'Performance', value: '87%', change: '+5%', icon: Zap, color: 'from-rose-500 to-rose-600' },
+    { label: 'Compatibility', value: '98%', change: '+1%', icon: CheckCircle2, color: 'from-emerald-500 to-emerald-600' },
+    { label: 'Auto-Updates', value: '4', change: '', icon: RefreshCw, color: 'from-indigo-500 to-indigo-600' }
   ]
 
-  const recentActivity = [
-    { label: 'Plugin updated to latest version', time: '5 min ago', type: 'update' },
-    { label: 'New plugin installed', time: '12 min ago', type: 'install' },
-    { label: 'Plugin reached 30K users', time: '25 min ago', type: 'milestone' },
-    { label: 'Permissions updated', time: '1 hour ago', type: 'security' },
-    { label: 'Plugin received 5-star review', time: '2 hours ago', type: 'review' }
-  ]
+  const getStatusColor = (status: PluginStatus): string => {
+    const colors: Record<PluginStatus, string> = {
+      'active': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      'inactive': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+      'updating': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      'error': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      'needs-update': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'
+    }
+    return colors[status]
+  }
 
-  const topPlugins = filteredPlugins
-    .sort((a, b) => (b.installs_count || 0) - (a.installs_count || 0))
-    .slice(0, 5)
-    .map((plugin, index) => ({
-      rank: index + 1,
-      label: plugin.name,
-      value: (plugin.installs_count || 0).toLocaleString(),
-      change: index === 0 ? '+34%' : index === 1 ? '+28%' : index === 2 ? '+22%' : index === 3 ? '+18%' : '+14%'
-    }))
+  const getTierColor = (tier: PluginTier): string => {
+    const colors: Record<PluginTier, string> = {
+      'free': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      'freemium': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      'premium': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      'enterprise': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'
+    }
+    return colors[tier]
+  }
 
-  const getStatusColor = (status: PluginStatus) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-700'
-      case 'inactive': return 'bg-gray-100 text-gray-700'
-      case 'updating': return 'bg-blue-100 text-blue-700'
-      case 'error': return 'bg-red-100 text-red-700'
-      case 'disabled': return 'bg-yellow-100 text-yellow-700'
-      default: return 'bg-gray-100 text-gray-700'
+  const getTierIcon = (tier: PluginTier) => {
+    switch (tier) {
+      case 'free': return null
+      case 'freemium': return <Sparkles className="h-3 w-3" />
+      case 'premium': return <Crown className="h-3 w-3" />
+      case 'enterprise': return <Shield className="h-3 w-3" />
     }
   }
 
-  const getCategoryColor = (category: PluginCategory) => {
-    switch (category) {
-      case 'productivity': return 'bg-purple-100 text-purple-700'
-      case 'security': return 'bg-red-100 text-red-700'
-      case 'analytics': return 'bg-blue-100 text-blue-700'
-      case 'integration': return 'bg-green-100 text-green-700'
-      case 'communication': return 'bg-pink-100 text-pink-700'
-      case 'automation': return 'bg-orange-100 text-orange-700'
-      case 'ui-enhancement': return 'bg-indigo-100 text-indigo-700'
-      case 'developer-tools': return 'bg-teal-100 text-teal-700'
-      default: return 'bg-gray-100 text-gray-700'
+  const getCategoryIcon = (category: PluginCategory) => {
+    const icons: Record<PluginCategory, any> = {
+      'productivity': Zap,
+      'security': Shield,
+      'analytics': BarChart3,
+      'integration': Webhook,
+      'communication': Mail,
+      'automation': Bot,
+      'ui-enhancement': Palette,
+      'developer-tools': Terminal,
+      'e-commerce': ShoppingCart,
+      'seo': TrendingUp,
+      'social': Users,
+      'media': Image
     }
+    const Icon = icons[category] || Package
+    return <Icon className="h-4 w-4" />
   }
 
-  const getTypeColor = (type: PluginType) => {
-    switch (type) {
-      case 'core': return 'bg-blue-100 text-blue-700'
-      case 'premium': return 'bg-purple-100 text-purple-700'
-      case 'community': return 'bg-green-100 text-green-700'
-      case 'enterprise': return 'bg-orange-100 text-orange-700'
-      case 'beta': return 'bg-yellow-100 text-yellow-700'
-      default: return 'bg-gray-100 text-gray-700'
-    }
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M+`
+    if (num >= 1000) return `${(num / 1000).toFixed(0)}K+`
+    return num.toString()
   }
+
+  const handleInstall = async (plugin: Plugin) => {
+    setInstalling(plugin.id)
+    // Simulate installation
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    setInstalling(null)
+    setShowInstallDialog(false)
+  }
+
+  const renderPluginCard = (plugin: Plugin) => (
+    <Card
+      key={plugin.id}
+      className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 dark:border-gray-700"
+      onClick={() => setSelectedPlugin(plugin)}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-2xl flex-shrink-0">
+            {plugin.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900 dark:text-white truncate">{plugin.name}</h3>
+              {plugin.author.verified && (
+                <CheckCircle2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
+              )}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">by {plugin.author.name}</p>
+          </div>
+          <Badge className={`${getTierColor(plugin.tier)} flex-shrink-0`}>
+            {getTierIcon(plugin.tier)}
+            <span className="ml-1 capitalize">{plugin.tier}</span>
+          </Badge>
+        </div>
+
+        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">
+          {plugin.shortDescription}
+        </p>
+
+        <div className="flex items-center gap-4 mb-3">
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+            <span className="text-sm font-medium">{plugin.rating}</span>
+            <span className="text-xs text-gray-500">({formatNumber(plugin.reviewsCount)})</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-500">
+            <Download className="h-4 w-4" />
+            <span className="text-sm">{formatNumber(plugin.activeInstalls)}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1 mb-3">
+          {plugin.tags.slice(0, 3).map((tag, i) => (
+            <Badge key={i} variant="outline" className="text-xs px-2 py-0">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+          {plugin.isInstalled ? (
+            <Badge className={getStatusColor(plugin.status)}>
+              {plugin.status === 'active' ? 'Active' : plugin.status === 'needs-update' ? 'Update Available' : 'Inactive'}
+            </Badge>
+          ) : (
+            <Button
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowInstallDialog(true)
+                setSelectedPlugin(plugin)
+              }}
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Install
+            </Button>
+          )}
+          <span className="text-xs text-gray-500">v{plugin.version}</span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  const renderInstalledPluginRow = (plugin: Plugin) => (
+    <div
+      key={plugin.id}
+      className="flex items-center gap-4 p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+      onClick={() => setSelectedPlugin(plugin)}
+    >
+      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-xl">
+        {plugin.icon}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-gray-900 dark:text-white">{plugin.name}</h3>
+          {plugin.author.verified && <CheckCircle2 className="h-4 w-4 text-blue-500" />}
+          <Badge className={getStatusColor(plugin.status)} variant="secondary">
+            {plugin.status}
+          </Badge>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{plugin.shortDescription}</p>
+      </div>
+
+      <div className="text-right">
+        <p className="text-sm font-medium">v{plugin.version}</p>
+        {plugin.status === 'needs-update' && (
+          <p className="text-xs text-amber-600">→ v{plugin.latestVersion}</p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch checked={plugin.isActivated} />
+        <Button variant="ghost" size="icon">
+          <Settings className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">
-            Plugins
-          </h1>
-          <p className="text-gray-600 mt-1">Manage and extend your platform with powerful plugins</p>
-        </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-6 py-2.5 bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-shadow"
-        >
-          Install New Plugin
-        </button>
-      </div>
-
-      {/* Stats Grid */}
-      <StatGrid stats={statsDisplay} />
-
-      {/* Quick Actions */}
-      <BentoQuickAction actions={quickActions} />
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="flex gap-2">
-          <PillButton active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>All Status</PillButton>
-          <PillButton active={statusFilter === 'active'} onClick={() => setStatusFilter('active')}>Active</PillButton>
-          <PillButton active={statusFilter === 'inactive'} onClick={() => setStatusFilter('inactive')}>Inactive</PillButton>
-          <PillButton active={statusFilter === 'updating'} onClick={() => setStatusFilter('updating')}>Updating</PillButton>
-        </div>
-        <div className="flex gap-2">
-          <PillButton active={categoryFilter === 'all'} onClick={() => setCategoryFilter('all')}>All Categories</PillButton>
-          <PillButton active={categoryFilter === 'security'} onClick={() => setCategoryFilter('security')}>Security</PillButton>
-          <PillButton active={categoryFilter === 'productivity'} onClick={() => setCategoryFilter('productivity')}>Productivity</PillButton>
-          <PillButton active={categoryFilter === 'analytics'} onClick={() => setCategoryFilter('analytics')}>Analytics</PillButton>
-        </div>
-        <div className="flex gap-2">
-          <PillButton active={typeFilter === 'all'} onClick={() => setTypeFilter('all')}>All Types</PillButton>
-          <PillButton active={typeFilter === 'premium'} onClick={() => setTypeFilter('premium')}>Premium</PillButton>
-          <PillButton active={typeFilter === 'enterprise'} onClick={() => setTypeFilter('enterprise')}>Enterprise</PillButton>
-          <PillButton active={typeFilter === 'community'} onClick={() => setTypeFilter('community')}>Community</PillButton>
-        </div>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Plugins List */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Installed Plugins ({filteredPlugins.length})</h2>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1 rounded ${viewMode === 'grid' ? 'bg-green-100 text-green-700' : 'bg-gray-100'}`}
-                >
-                  Grid
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-1 rounded ${viewMode === 'list' ? 'bg-green-100 text-green-700' : 'bg-gray-100'}`}
-                >
-                  List
-                </button>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50/30 to-emerald-50/20 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <Puzzle className="h-6 w-6 text-white" />
             </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Plugin Manager</h1>
+              <p className="text-gray-500 dark:text-gray-400">Extend your platform with powerful plugins</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search plugins..."
+                className="w-72 pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button variant="outline">
+              <Filter className="h-4 w-4 mr-2" />
+              Filters
+            </Button>
+            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Upload Plugin
+            </Button>
+          </div>
+        </div>
 
-            {filteredPlugins.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">No plugins found</p>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Install Your First Plugin
-                </button>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {stats.map((stat, i) => (
+            <Card key={i} className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  </div>
+                </div>
+                {stat.change && (
+                  <p className={`text-xs mt-2 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change} this month
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
+            <TabsTrigger value="discover" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Globe className="h-4 w-4 mr-2" />
+              Discover
+            </TabsTrigger>
+            <TabsTrigger value="installed" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Package className="h-4 w-4 mr-2" />
+              Installed ({installedPlugins.length})
+            </TabsTrigger>
+            <TabsTrigger value="updates" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Updates ({needsUpdatePlugins.length})
+            </TabsTrigger>
+            <TabsTrigger value="collections" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Layers className="h-4 w-4 mr-2" />
+              Collections
+            </TabsTrigger>
+            <TabsTrigger value="developer" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Terminal className="h-4 w-4 mr-2" />
+              Developer
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Discover Tab */}
+          <TabsContent value="discover" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Categories Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Categories</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="space-y-1">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                            selectedCategory === cat.id
+                              ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <cat.icon className="h-4 w-4" />
+                            <span>{cat.name}</span>
+                          </div>
+                          <span className="text-xs text-gray-500">{formatNumber(cat.count)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Featured Collection */}
+                <Card className="mt-6 border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Featured Collection</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg text-white">
+                      <div className="text-2xl mb-2">🛡️</div>
+                      <h3 className="font-semibold mb-1">Essential Security</h3>
+                      <p className="text-sm text-green-100 mb-3">Must-have security plugins for any site</p>
+                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                        View Collection
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            ) : (
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}>
-                {filteredPlugins.map(plugin => (
-                  <div key={plugin.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{plugin.name}</h3>
-                        <p className="text-xs text-gray-500 mb-2">v{plugin.version} • {plugin.size || 'N/A'} • By {plugin.author}</p>
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">{plugin.description}</p>
-                      </div>
-                    </div>
 
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(plugin.status)}`}>
-                        {plugin.status}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(plugin.category)}`}>
-                        {plugin.category}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getTypeColor(plugin.plugin_type)}`}>
-                        {plugin.plugin_type}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="text-xs">
-                        <div className="text-gray-500">Installs</div>
-                        <div className="font-semibold">{(plugin.installs_count || 0).toLocaleString()}</div>
-                      </div>
-                      <div className="text-xs">
-                        <div className="text-gray-500">Active Users</div>
-                        <div className="font-semibold">{(plugin.active_users_count || 0).toLocaleString()}</div>
-                      </div>
-                      <div className="text-xs">
-                        <div className="text-gray-500">Performance</div>
-                        <div className="font-semibold">{plugin.performance_score || 0}%</div>
-                      </div>
-                      <div className="text-xs">
-                        <div className="text-gray-500">API Calls</div>
-                        <div className="font-semibold">{(plugin.api_calls_count || 0).toLocaleString()}</div>
-                      </div>
-                    </div>
-
-                    <div className="mb-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-600">Performance Score</span>
-                        <span className="text-xs font-semibold">{plugin.performance_score || 0}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all"
-                          style={{ width: `${plugin.performance_score || 0}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs mb-3">
-                      <div className="flex items-center gap-1">
-                        <span className="text-yellow-500">★</span>
-                        <span className="font-semibold">{plugin.rating || 0}</span>
-                        <span className="text-gray-500">({plugin.reviews_count || 0})</span>
-                      </div>
-                      <span className="text-gray-500">{plugin.compatibility || 'All versions'}</span>
-                    </div>
-
-                    <div className="flex gap-2 pt-3 border-t">
-                      <button
-                        onClick={() => openEditModal(plugin)}
-                        className="flex-1 px-3 py-1.5 bg-green-50 text-green-700 rounded text-xs font-medium hover:bg-green-100"
+              {/* Plugin Grid */}
+              <div className="col-span-9">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={selectedTier === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedTier('all')}
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant={selectedTier === 'free' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedTier('free')}
+                    >
+                      Free
+                    </Button>
+                    <Button
+                      variant={selectedTier === 'freemium' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedTier('freemium')}
+                    >
+                      Freemium
+                    </Button>
+                    <Button
+                      variant={selectedTier === 'premium' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedTier('premium')}
+                    >
+                      Premium
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">{filteredPlugins.length} plugins</span>
+                    <div className="flex border rounded-lg overflow-hidden">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('grid')}
                       >
-                        Configure
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(plugin)}
-                        className={`flex-1 px-3 py-1.5 rounded text-xs font-medium ${
-                          plugin.status === 'active'
-                            ? 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                            : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                        }`}
+                        <Grid3X3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
                       >
-                        {plugin.status === 'active' ? 'Disable' : 'Enable'}
-                      </button>
-                      <button
-                        onClick={() => handleDeletePlugin(plugin.id)}
-                        className="px-3 py-1.5 bg-red-50 text-red-700 rounded text-xs font-medium hover:bg-red-100"
-                      >
-                        Remove
-                      </button>
+                        <List className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-4' : 'space-y-3'}>
+                  {filteredPlugins.map(plugin =>
+                    viewMode === 'grid'
+                      ? renderPluginCard(plugin)
+                      : renderInstalledPluginRow(plugin)
+                  )}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Installed Tab */}
+          <TabsContent value="installed" className="mt-6">
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Installed Plugins</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Check Updates
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Bulk Actions
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {installedPlugins.map(plugin => renderInstalledPluginRow(plugin))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Updates Tab */}
+          <TabsContent value="updates" className="mt-6">
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Available Updates</CardTitle>
+                    <p className="text-sm text-gray-500 mt-1">{needsUpdatePlugins.length} plugin(s) need updating</p>
+                  </div>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Update All
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {needsUpdatePlugins.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">All plugins are up to date!</h3>
+                    <p className="text-gray-500">Your plugins are running the latest versions.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {needsUpdatePlugins.map(plugin => (
+                      <div key={plugin.id} className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                        <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-2xl">
+                          {plugin.icon}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 dark:text-white">{plugin.name}</h3>
+                          <p className="text-sm text-gray-500">v{plugin.version} → v{plugin.latestVersion}</p>
+                        </div>
+                        <div className="text-right">
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                            Update Now
+                          </Button>
+                          <button className="block text-xs text-blue-600 hover:underline mt-1">View Changelog</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Collections Tab */}
+          <TabsContent value="collections" className="mt-6">
+            <div className="grid grid-cols-2 gap-6">
+              {mockCollections.map(collection => (
+                <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 flex items-center justify-center text-3xl">
+                        {collection.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{collection.name}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{collection.description}</p>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{collection.plugins.length} plugins</Badge>
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Collection
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Developer Tab */}
+          <TabsContent value="developer" className="mt-6">
+            <div className="grid grid-cols-3 gap-6">
+              <Card className="col-span-2 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Developer Tools</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                      <Terminal className="h-8 w-8 text-green-600 mb-3" />
+                      <h3 className="font-medium mb-1">Plugin Boilerplate</h3>
+                      <p className="text-sm text-gray-500">Generate a starter plugin template</p>
+                    </div>
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                      <Code className="h-8 w-8 text-blue-600 mb-3" />
+                      <h3 className="font-medium mb-1">API Documentation</h3>
+                      <p className="text-sm text-gray-500">Explore hooks, filters, and functions</p>
+                    </div>
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                      <Activity className="h-8 w-8 text-purple-600 mb-3" />
+                      <h3 className="font-medium mb-1">Debug Console</h3>
+                      <p className="text-sm text-gray-500">Monitor plugin performance and errors</p>
+                    </div>
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                      <Database className="h-8 w-8 text-amber-600 mb-3" />
+                      <h3 className="font-medium mb-1">Database Manager</h3>
+                      <p className="text-sm text-gray-500">Manage plugin database tables</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">API Calls Today</span>
+                    <span className="font-medium">12,456</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Webhook Events</span>
+                    <span className="font-medium">3,789</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Error Rate</span>
+                    <span className="font-medium text-green-600">0.02%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Avg Response Time</span>
+                    <span className="font-medium">124ms</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Auto-Update Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Enable Auto-Updates</p>
+                      <p className="text-sm text-gray-500">Automatically update plugins when new versions are available</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Update Notifications</p>
+                      <p className="text-sm text-gray-500">Receive email notifications about plugin updates</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Backup Before Update</p>
+                      <p className="text-sm text-gray-500">Create automatic backups before updating plugins</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Security Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Verify Plugin Integrity</p>
+                      <p className="text-sm text-gray-500">Check plugin files against known signatures</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Block Untrusted Sources</p>
+                      <p className="text-sm text-gray-500">Only allow plugins from verified developers</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Security Scanning</p>
+                      <p className="text-sm text-gray-500">Automatically scan plugins for vulnerabilities</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Plugin Detail Dialog */}
+        <Dialog open={!!selectedPlugin && !showInstallDialog} onOpenChange={() => setSelectedPlugin(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
+            <ScrollArea className="max-h-[80vh]">
+              {selectedPlugin && (
+                <div className="space-y-6">
+                  <DialogHeader>
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-3xl">
+                        {selectedPlugin.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <DialogTitle className="text-2xl">{selectedPlugin.name}</DialogTitle>
+                          {selectedPlugin.author.verified && (
+                            <CheckCircle2 className="h-5 w-5 text-blue-500" />
+                          )}
+                        </div>
+                        <p className="text-gray-500">by {selectedPlugin.author.name} • {selectedPlugin.author.plugins} plugins</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className={getTierColor(selectedPlugin.tier)} variant="secondary">
+                          {getTierIcon(selectedPlugin.tier)}
+                          <span className="ml-1 capitalize">{selectedPlugin.tier}</span>
+                        </Badge>
+                        <Badge className={getStatusColor(selectedPlugin.status)} variant="secondary">
+                          {selectedPlugin.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </DialogHeader>
+
+                  {/* Stats Row */}
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <div className="flex items-center justify-center gap-1 text-yellow-500 mb-1">
+                        <Star className="h-5 w-5 fill-current" />
+                        <span className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPlugin.rating}</span>
+                      </div>
+                      <p className="text-sm text-gray-500">{formatNumber(selectedPlugin.reviewsCount)} reviews</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(selectedPlugin.activeInstalls)}</p>
+                      <p className="text-sm text-gray-500">Active Installs</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPlugin.compatibility}%</p>
+                      <p className="text-sm text-gray-500">Compatibility</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPlugin.securityScore}%</p>
+                      <p className="text-sm text-gray-500">Security Score</p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Description</h3>
+                    <p className="text-gray-600 dark:text-gray-300">{selectedPlugin.description}</p>
+                  </div>
+
+                  {/* Features */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Features</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedPlugin.features.map((feature, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Technical Details */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Technical Details</h3>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Version</p>
+                        <p className="font-medium">{selectedPlugin.version}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Last Updated</p>
+                        <p className="font-medium">{selectedPlugin.lastUpdated}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Tested Up To</p>
+                        <p className="font-medium">{selectedPlugin.testedUpTo}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Requires Version</p>
+                        <p className="font-medium">{selectedPlugin.requiresVersion}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">PHP Version</p>
+                        <p className="font-medium">{selectedPlugin.requiresPHP}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Size</p>
+                        <p className="font-medium">{selectedPlugin.size}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Support Stats */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Support</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-500">Issues Resolved</span>
+                          <span className="text-sm font-medium">{selectedPlugin.support.resolved}%</span>
+                        </div>
+                        <Progress value={selectedPlugin.support.resolved} className="h-2" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-4 border-t">
+                    {selectedPlugin.isInstalled ? (
+                      <>
+                        <Button
+                          className={selectedPlugin.isActivated ? 'bg-gray-600 hover:bg-gray-700' : 'bg-green-600 hover:bg-green-700'}
+                          onClick={() => {}}
+                        >
+                          {selectedPlugin.isActivated ? (
+                            <>
+                              <Pause className="h-4 w-4 mr-2" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <Play className="h-4 w-4 mr-2" />
+                              Activate
+                            </>
+                          )}
+                        </Button>
+                        {selectedPlugin.status === 'needs-update' && (
+                          <Button className="bg-blue-600 hover:bg-blue-700">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Update to v{selectedPlugin.latestVersion}
+                          </Button>
+                        )}
+                        <Button variant="outline">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Settings
+                        </Button>
+                        <Button variant="outline" className="text-red-600 hover:text-red-700">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleInstall(selectedPlugin)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Install Now
+                        </Button>
+                        {selectedPlugin.hasProVersion && (
+                          <Button variant="outline" className="text-purple-600 border-purple-600">
+                            <Crown className="h-4 w-4 mr-2" />
+                            Get Pro Version
+                          </Button>
+                        )}
+                      </>
+                    )}
+                    <Button variant="ghost" className="ml-auto">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Install Confirmation Dialog */}
+        <Dialog open={showInstallDialog} onOpenChange={setShowInstallDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Install Plugin</DialogTitle>
+            </DialogHeader>
+            {selectedPlugin && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center text-2xl">
+                    {selectedPlugin.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedPlugin.name}</h3>
+                    <p className="text-sm text-gray-500">v{selectedPlugin.version} • {selectedPlugin.size}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-medium">This plugin will:</h4>
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      Access your site data
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      Add new features to your dashboard
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      Create database tables
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowInstallDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    disabled={installing === selectedPlugin.id}
+                    onClick={() => handleInstall(selectedPlugin)}
+                  >
+                    {installing === selectedPlugin.id ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Installing...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Install & Activate
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="font-semibold mb-4">Quick Stats</h3>
-            <div className="space-y-4">
-              <MiniKPI label="Active Plugins" value={stats.active.toString()} />
-              <MiniKPI label="Inactive" value={stats.inactive.toString()} />
-              <MiniKPI label="Core Plugins" value={stats.core.toString()} />
-              <MiniKPI label="Avg Performance" value={`${stats.avgPerformanceScore.toFixed(0)}%`} />
-            </div>
-          </div>
-
-          <RankingList title="Most Installed Plugins" items={topPlugins} />
-          <ActivityFeed title="Recent Activity" activities={recentActivity} />
-
-          <ProgressCard
-            title="Plugin Categories"
-            items={[
-              { label: 'Security', value: 24, color: 'from-red-400 to-red-600' },
-              { label: 'Productivity', value: 22, color: 'from-purple-400 to-purple-600' },
-              { label: 'Analytics', value: 18, color: 'from-blue-400 to-blue-600' },
-              { label: 'Integration', value: 16, color: 'from-green-400 to-green-600' },
-              { label: 'Automation', value: 12, color: 'from-orange-400 to-orange-600' }
-            ]}
-          />
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Create/Edit Modal */}
-      {(showCreateModal || editingPlugin) && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              {editingPlugin ? 'Edit Plugin' : 'Add Plugin'}
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="Plugin name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  rows={3}
-                  placeholder="Plugin description"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Version</label>
-                  <input
-                    type="text"
-                    value={formData.version}
-                    onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                    placeholder="1.0.0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Author</label>
-                  <input
-                    type="text"
-                    value={formData.author}
-                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                    placeholder="Author name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as PluginCategory })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                  >
-                    <option value="productivity">Productivity</option>
-                    <option value="security">Security</option>
-                    <option value="analytics">Analytics</option>
-                    <option value="integration">Integration</option>
-                    <option value="communication">Communication</option>
-                    <option value="automation">Automation</option>
-                    <option value="ui-enhancement">UI Enhancement</option>
-                    <option value="developer-tools">Developer Tools</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <select
-                    value={formData.plugin_type}
-                    onChange={(e) => setFormData({ ...formData, plugin_type: e.target.value as PluginType })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                  >
-                    <option value="core">Core</option>
-                    <option value="premium">Premium</option>
-                    <option value="community">Community</option>
-                    <option value="enterprise">Enterprise</option>
-                    <option value="beta">Beta</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Compatibility</label>
-                <input
-                  type="text"
-                  value={formData.compatibility}
-                  onChange={(e) => setFormData({ ...formData, compatibility: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  placeholder="e.g., v3.0+"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowCreateModal(false)
-                  setEditingPlugin(null)
-                  resetForm()
-                }}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={editingPlugin ? handleUpdatePlugin : handleCreatePlugin}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                {editingPlugin ? 'Update' : 'Add'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
