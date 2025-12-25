@@ -4,6 +4,31 @@ import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Settings,
+  Bell,
+  Mail,
+  Webhook,
+  Key,
+  Shield,
+  HardDrive,
+  AlertOctagon,
+  CreditCard,
+  Sliders,
+  Globe,
+  Copy,
+  RefreshCw,
+  Plus,
+  Download
+} from 'lucide-react'
 
 // Intercom / Customer.io / OneSignal level interfaces
 interface Campaign {
@@ -364,6 +389,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const [statusFilter, setStatusFilter] = useState<BroadcastStatus | 'all'>('all')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
   const { broadcasts, loading, error } = useBroadcasts({ broadcastType: broadcastTypeFilter, status: statusFilter })
   const displayBroadcasts = broadcasts.length > 0 ? broadcasts : initialBroadcasts
 
@@ -491,6 +517,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <TabsTrigger value="audience" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Audience</TabsTrigger>
               <TabsTrigger value="events" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Events</TabsTrigger>
               <TabsTrigger value="analytics" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Analytics</TabsTrigger>
+              <TabsTrigger value="settings" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Settings</TabsTrigger>
             </TabsList>
             <div className="flex gap-2">
               <select
@@ -1074,6 +1101,735 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Mailchimp Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <nav className="space-y-1">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'email', label: 'Email Settings', icon: Mail },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'deliverability', label: 'Deliverability', icon: Globe },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSettingsTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                        settingsTab === item.id
+                          ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+
+                {/* Broadcast Stats */}
+                <Card className="mt-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Broadcast Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Campaigns Sent</span>
+                      <Badge variant="secondary">{stats.sent}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Avg Open Rate</span>
+                      <span className="text-sm font-medium text-violet-600">{stats.avgOpenRate}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Total Revenue</span>
+                      <span className="text-sm font-medium text-emerald-600">${(stats.totalRevenue / 1000).toFixed(0)}K</span>
+                    </div>
+                    <Progress value={parseFloat(stats.avgOpenRate)} className="h-2 mt-2" />
+                    <p className="text-xs text-gray-500 mt-1">Overall open rate</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-violet-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure your broadcast workspace settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Organization Name</Label>
+                            <Input defaultValue="My Company" />
+                            <p className="text-xs text-gray-500">Displayed in email footers</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Time Zone</Label>
+                            <Select defaultValue="est">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Send Time</Label>
+                            <Input type="time" defaultValue="10:00" />
+                            <p className="text-xs text-gray-500">Optimal time for campaigns</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="mdy">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Double Opt-in</p>
+                            <p className="text-sm text-gray-500">Require confirmation for new subscribers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-archive Campaigns</p>
+                            <p className="text-sm text-gray-500">Archive campaigns after 90 days</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Brand Settings
+                        </CardTitle>
+                        <CardDescription>Customize your brand appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Brand Color</Label>
+                            <div className="flex gap-2">
+                              <Input type="color" defaultValue="#8b5cf6" className="w-16 h-10 p-1" />
+                              <Input defaultValue="#8b5cf6" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Link Color</Label>
+                            <div className="flex gap-2">
+                              <Input type="color" defaultValue="#3b82f6" className="w-16 h-10 p-1" />
+                              <Input defaultValue="#3b82f6" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Company Website</Label>
+                          <Input placeholder="https://yourcompany.com" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Email Settings */}
+                {settingsTab === 'email' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-violet-600" />
+                          Default Email Settings
+                        </CardTitle>
+                        <CardDescription>Configure default email behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default From Name</Label>
+                          <Input defaultValue="Your Company" />
+                          <p className="text-xs text-gray-500">Sender name shown in inbox</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Default From Email</Label>
+                          <Input type="email" defaultValue="hello@yourcompany.com" />
+                          <p className="text-xs text-gray-500">Verified sender email address</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Reply-To Email</Label>
+                          <Input type="email" defaultValue="support@yourcompany.com" />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Track Opens</p>
+                            <p className="text-sm text-gray-500">Enable open rate tracking</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Track Clicks</p>
+                            <p className="text-sm text-gray-500">Enable click tracking on links</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Plain Text Fallback</p>
+                            <p className="text-sm text-gray-500">Auto-generate plain text version</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-emerald-600" />
+                          Footer Settings
+                        </CardTitle>
+                        <CardDescription>Required footer information for compliance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Physical Address</Label>
+                          <Input placeholder="123 Main St, City, State 12345" />
+                          <p className="text-xs text-gray-500">Required by CAN-SPAM Act</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Unsubscribe Link</p>
+                            <p className="text-sm text-gray-500">Automatically add unsubscribe link</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Subscription Preferences</p>
+                            <p className="text-sm text-gray-500">Let users manage their preferences</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-amber-500" />
+                          Campaign Notifications
+                        </CardTitle>
+                        <CardDescription>Get notified about your campaigns</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Campaign Sent</p>
+                            <p className="text-sm text-gray-500">Notify when campaign is sent</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Daily Report</p>
+                            <p className="text-sm text-gray-500">Receive daily performance summary</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Digest</p>
+                            <p className="text-sm text-gray-500">Get weekly analytics report</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Revenue Milestones</p>
+                            <p className="text-sm text-gray-500">Alert at $1K, $10K, $100K milestones</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Notification Email</Label>
+                          <Input type="email" placeholder="notifications@company.com" />
+                          <p className="text-xs text-gray-500">Where to send email notifications</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertOctagon className="w-5 h-5 text-red-600" />
+                          Alert Settings
+                        </CardTitle>
+                        <CardDescription>Get alerted about important issues</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">High Bounce Rate</p>
+                            <p className="text-sm text-gray-500">Alert when bounce rate exceeds 5%</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Spam Complaints</p>
+                            <p className="text-sm text-gray-500">Alert on spam complaints</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">List Health Warning</p>
+                            <p className="text-sm text-gray-500">Notify when list quality degrades</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Automation Failures</p>
+                            <p className="text-sm text-gray-500">Alert when automations fail</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Deliverability Settings */}
+                {settingsTab === 'deliverability' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Authentication
+                        </CardTitle>
+                        <CardDescription>Email authentication for better deliverability</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Shield className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium text-green-800 dark:text-green-400">SPF Record</p>
+                              <p className="text-sm text-green-600 dark:text-green-500">Configured and verified</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-600">Verified</Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Shield className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium text-green-800 dark:text-green-400">DKIM Signature</p>
+                              <p className="text-sm text-green-600 dark:text-green-500">Emails are digitally signed</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-600">Verified</Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <AlertOctagon className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium text-amber-800 dark:text-amber-400">DMARC Policy</p>
+                              <p className="text-sm text-amber-600 dark:text-amber-500">Recommended for full protection</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Custom Tracking Domain</Label>
+                          <Input placeholder="track.yourdomain.com" />
+                          <p className="text-xs text-gray-500">Improves deliverability and branding</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Sending Limits
+                        </CardTitle>
+                        <CardDescription>Control your sending rate</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Daily Sending Limit</Label>
+                          <Select defaultValue="unlimited">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1000">1,000 emails/day</SelectItem>
+                              <SelectItem value="10000">10,000 emails/day</SelectItem>
+                              <SelectItem value="50000">50,000 emails/day</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Throttle Sending</p>
+                            <p className="text-sm text-gray-500">Gradually send to improve deliverability</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Smart Sending</p>
+                            <p className="text-sm text-gray-500">Send at optimal times per recipient</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-orange-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Send events to external services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-service.com/webhook" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center space-x-2">
+                            <Switch id="webhook-sent" />
+                            <Label htmlFor="webhook-sent">Email Sent</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="webhook-opened" defaultChecked />
+                            <Label htmlFor="webhook-opened">Email Opened</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="webhook-clicked" defaultChecked />
+                            <Label htmlFor="webhook-clicked">Link Clicked</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="webhook-unsubscribed" defaultChecked />
+                            <Label htmlFor="webhook-unsubscribed">Unsubscribed</Label>
+                          </div>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook Endpoint
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-violet-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys and access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="bc_live_xxxxxxxxxxxxxxxxxxxxx" readOnly />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-500">Use this key for API authentication</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500">Enable programmatic access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Rate Limit</Label>
+                          <Select defaultValue="1000">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100 requests/minute</SelectItem>
+                              <SelectItem value="1000">1,000 requests/minute</SelectItem>
+                              <SelectItem value="10000">10,000 requests/minute</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Connected Apps
+                        </CardTitle>
+                        <CardDescription>Third-party integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Shopify', 'Stripe', 'Salesforce', 'Zapier'].map((app, idx) => (
+                          <div key={app} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
+                                <Globe className="w-5 h-5 text-violet-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{app}</p>
+                                <p className="text-sm text-gray-500">{idx < 2 ? 'Connected' : 'Not connected'}</p>
+                              </div>
+                            </div>
+                            <Button variant={idx < 2 ? 'outline' : 'default'} size="sm">
+                              {idx < 2 ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Protect your account and data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500">Require 2FA for all team members</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Allowlist</p>
+                            <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all account activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Control your data retention and exports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Data Retention</Label>
+                          <Select defaultValue="365">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500">How long to keep campaign data</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">GDPR Compliance Mode</p>
+                            <p className="text-sm text-gray-500">Enable GDPR-compliant data handling</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export All Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-indigo-600" />
+                          Subscription & Billing
+                        </CardTitle>
+                        <CardDescription>Manage your plan and payments</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-violet-800 dark:text-violet-400">Pro Plan</p>
+                            <p className="text-sm text-violet-600 dark:text-violet-500">Unlimited campaigns • 100K contacts</p>
+                          </div>
+                          <Badge className="bg-violet-600">Active</Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-violet-600">{stats.totalCampaigns}</p>
+                            <p className="text-xs text-gray-500">Campaigns</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">{(stats.totalSent / 1000).toFixed(0)}K</p>
+                            <p className="text-xs text-gray-500">Emails Sent</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-emerald-600">${(stats.totalRevenue / 1000).toFixed(0)}K</p>
+                            <p className="text-xs text-gray-500">Revenue</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            Manage Subscription
+                          </Button>
+                          <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                            Upgrade Plan
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Purge All Contacts</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all subscriber data</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Purge</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Campaigns</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all campaign history</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Close Account</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently delete your account</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Close</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
