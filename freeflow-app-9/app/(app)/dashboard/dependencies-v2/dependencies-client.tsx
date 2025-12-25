@@ -46,7 +46,24 @@ import {
   Bell,
   BellOff,
   X,
-  Check
+  Check,
+  Key,
+  Webhook,
+  Mail,
+  Link2,
+  Palette,
+  Copy,
+  AlertOctagon,
+  Trash2,
+  History,
+  FileCode,
+  BarChart3,
+  Server,
+  Cpu,
+  HardDrive,
+  Cog,
+  Code2,
+  Scan
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -54,7 +71,19 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Type definitions for Dependabot/Snyk level
@@ -313,6 +342,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   const [showVulnDialog, setShowVulnDialog] = useState(false)
   const [showScanDialog, setShowScanDialog] = useState(false)
   const [expandedDeps, setExpandedDeps] = useState<Set<string>>(new Set())
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredVulns = useMemo(() => {
     return mockVulnerabilities.filter(vuln => {
@@ -816,70 +846,665 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - npm/Maven Level with 6 Sub-tabs */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Security Policies</h2>
-              <div className="space-y-4">
-                {mockPolicies.map((policy) => (
-                  <div key={policy.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div className="flex items-center gap-4">
+            <div className="flex gap-6">
+              {/* Settings Sidebar */}
+              <div className="w-64 shrink-0">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 px-3">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'security', icon: Shield, label: 'Security Policies' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations' },
+                      { id: 'scanning', icon: Scan, label: 'Scanning' },
+                      { id: 'advanced', icon: Lock, label: 'Advanced' }
+                    ].map(item => (
                       <button
-                        className={`w-12 h-6 rounded-full transition-colors ${policy.enabled ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                        }`}
                       >
-                        <div className={`w-5 h-5 rounded-full bg-white shadow transform transition-transform ${policy.enabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
                       </button>
-                      <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{policy.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{policy.description}</p>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="flex-1 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                          <Package className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Package Manager Settings</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure dependency management preferences</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default Package Manager</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Select your primary package manager</p>
+                          </div>
+                          <Select defaultValue="npm">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="npm">npm</SelectItem>
+                              <SelectItem value="yarn">Yarn</SelectItem>
+                              <SelectItem value="pnpm">pnpm</SelectItem>
+                              <SelectItem value="bun">Bun</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Update Dependencies</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create PRs for updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Lock File Verification</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Verify lock file integrity on each scan</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Include Dev Dependencies</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Scan development dependencies for issues</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(policy.severity)}`}>
-                        {policy.severity}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        policy.action === 'block' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                        policy.action === 'warn' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                      }`}>
-                        {policy.action}
-                      </span>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Layers className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dependency Display</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Customize how dependencies are shown</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Show Transitive Dependencies</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display indirect dependency tree</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Group by Ecosystem</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Group dependencies by package type</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Show Download Stats</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display weekly download counts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                )}
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Integrations</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['GitHub', 'GitLab', 'Bitbucket'].map((provider) => (
-                  <div key={provider} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <GitBranch className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-900 dark:text-white">{provider}</span>
+                {/* Security Policies */}
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <ShieldAlert className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vulnerability Policies</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Define how vulnerabilities are handled</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        {mockPolicies.map((policy) => (
+                          <div key={policy.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <Switch defaultChecked={policy.enabled} />
+                              <div>
+                                <h4 className="font-medium text-gray-900 dark:text-white">{policy.name}</h4>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{policy.description}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(policy.severity)}`}>
+                                {policy.severity}
+                              </span>
+                              <Select defaultValue={policy.action}>
+                                <SelectTrigger className="w-28">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="block">Block</SelectItem>
+                                  <SelectItem value="warn">Warn</SelectItem>
+                                  <SelectItem value="allow">Allow</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <button className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-medium">
-                      Connect
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Scan Schedule</h2>
-              <div className="flex items-center gap-4">
-                <select className="px-3 py-2 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                  <option>Daily</option>
-                  <option>Weekly</option>
-                  <option>On push</option>
-                  <option>Manual only</option>
-                </select>
-                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">
-                  Save Schedule
-                </button>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                          <Scale className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">License Policies</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Control allowed license types</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Block Copyleft Licenses</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent GPL, LGPL, AGPL licenses</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Require OSI Approved</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Only allow OSI-approved licenses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Warn on Unknown Licenses</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when license cannot be determined</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notifications */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure email alert preferences</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Critical Vulnerabilities</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Immediate alerts for critical CVEs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Daily Digest</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Summary of all dependency changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">New Updates Available</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when packages have updates</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">License Policy Violations</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on license compliance issues</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Webhook className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Webhook Notifications</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Send alerts to external services</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send alerts to Slack channels</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Microsoft Teams</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Post to Teams channels</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">PagerDuty</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Trigger incidents for critical vulns</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook URL</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-webhook-url.com/endpoint" className="flex-1" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Integrations */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                          <GitBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Source Control</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Connect your repositories</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { name: 'GitHub', status: 'connected', repos: 12 },
+                          { name: 'GitLab', status: 'not_connected', repos: 0 },
+                          { name: 'Bitbucket', status: 'not_connected', repos: 0 },
+                          { name: 'Azure DevOps', status: 'not_connected', repos: 0 }
+                        ].map(provider => (
+                          <div key={provider.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <GitBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                              <div>
+                                <span className="font-medium text-gray-900 dark:text-white">{provider.name}</span>
+                                {provider.status === 'connected' && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{provider.repos} repositories</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button variant={provider.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {provider.status === 'connected' ? 'Manage' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                          <Terminal className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">CI/CD Integration</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Connect to your build pipelines</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { name: 'GitHub Actions', connected: true },
+                          { name: 'GitLab CI', connected: false },
+                          { name: 'Jenkins', connected: false },
+                          { name: 'CircleCI', connected: false }
+                        ].map(ci => (
+                          <div key={ci.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Cpu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                              <span className="font-medium text-gray-900 dark:text-white">{ci.name}</span>
+                            </div>
+                            <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                              {ci.connected ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                          <Key className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">API Access</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Manage API tokens and access</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono">
+                            dep_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate API Token
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Scanning */}
+                {settingsTab === 'scanning' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                          <Scan className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Scan Schedule</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure automated scanning</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Scan Frequency</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How often to scan dependencies</p>
+                          </div>
+                          <Select defaultValue="daily">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="push">On Push</SelectItem>
+                              <SelectItem value="manual">Manual Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Scan on Pull Request</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Check dependencies before merge</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Block Merge on Critical</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent merge with critical vulnerabilities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                          <Database className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vulnerability Databases</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure vulnerability data sources</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">National Vulnerability Database (NVD)</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">NIST CVE database</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">GitHub Advisory Database</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">GitHub security advisories</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">OSV Database</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Open Source Vulnerabilities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Snyk Vulnerability DB</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Snyk curated database</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                          <FileCode className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Scan Scope</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">What to include in scans</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Lock Files</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">package-lock.json, yarn.lock, etc.</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Container Images</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Scan Dockerfile dependencies</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Infrastructure as Code</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Terraform, CloudFormation modules</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Advanced */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                          <Cog className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Advanced Configuration</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Power user settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Remediation</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create fix PRs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Group Updates</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Combine updates into single PRs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Rebasing Strategy</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How to handle update PR conflicts</p>
+                          </div>
+                          <Select defaultValue="auto">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="auto">Auto Rebase</SelectItem>
+                              <SelectItem value="manual">Manual</SelectItem>
+                              <SelectItem value="recreate">Recreate PR</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <History className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Data & History</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Manage scan history and data</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">History Retention</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep scan history</p>
+                          </div>
+                          <Select defaultValue="90">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export Scan Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            Generate Report
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Danger Zone */}
+                    <div className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                          <p className="text-sm text-red-600/70 dark:text-red-400/70">Destructive actions</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Clear Vulnerability Cache</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Force re-scan of all dependencies</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Reset All Policies</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Restore security policies to defaults</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Delete All Scan History</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all historical data</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
