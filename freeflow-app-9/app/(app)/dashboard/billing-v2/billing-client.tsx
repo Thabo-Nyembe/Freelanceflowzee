@@ -8,7 +8,8 @@ import {
   Building, User, Mail, Phone, Globe, Shield, Lock, CreditCard as CardIcon,
   Tag, Percent, RotateCcw, Webhook, FileText, Filter, Search, Star, Gift,
   BadgePercent, Wallet, Banknote, PiggyBank, Activity, ArrowRight, Timer,
-  CheckCircle2, XCircle, History, Bell, Link2
+  CheckCircle2, XCircle, History, Bell, Link2, Key, Database, Palette, Languages,
+  TestTube, AlertOctagon, Fingerprint, ShieldCheck, Layers, Repeat, Send
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -20,6 +21,8 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBilling, type BillingTransaction, type BillingStatus } from '@/lib/hooks/use-billing'
 
 interface Subscription {
@@ -164,6 +167,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [showNewCouponModal, setShowNewCouponModal] = useState(false)
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [settingsTab, setSettingsTab] = useState('payment')
 
   const { transactions, loading, error } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
@@ -773,129 +777,994 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto-retry Failed Payments</p>
-                      <p className="text-sm text-gray-500">Retry failed charges up to 4 times</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">3D Secure</p>
-                      <p className="text-sm text-gray-500">Require 3D Secure for all cards</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Customer Portal</p>
-                      <p className="text-sm text-gray-500">Allow customers to manage subscriptions</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="grid w-full grid-cols-6 mb-6">
+                <TabsTrigger value="payment" className="gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  Payment
+                </TabsTrigger>
+                <TabsTrigger value="invoicing" className="gap-2">
+                  <Receipt className="w-4 h-4" />
+                  Invoicing
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="gap-2">
+                  <Bell className="w-4 h-4" />
+                  Notifications
+                </TabsTrigger>
+                <TabsTrigger value="integrations" className="gap-2">
+                  <Link2 className="w-4 h-4" />
+                  Integrations
+                </TabsTrigger>
+                <TabsTrigger value="taxes" className="gap-2">
+                  <Percent className="w-4 h-4" />
+                  Taxes
+                </TabsTrigger>
+                <TabsTrigger value="advanced" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  Advanced
+                </TabsTrigger>
+              </TabsList>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Invoice Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto-finalize Drafts</p>
-                      <p className="text-sm text-gray-500">Automatically finalize invoices after 1 hour</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Email Invoices</p>
-                      <p className="text-sm text-gray-500">Send invoices via email automatically</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Invoice Footer</label>
-                    <Input placeholder="Thank you for your business!" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Webhook className="h-5 w-5 text-indigo-600" />
-                    Webhooks
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {webhooks.map(wh => (
-                      <div key={wh.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Badge className={getStatusColor(wh.status)}>{wh.status}</Badge>
-                            <code className="text-sm text-gray-600 dark:text-gray-400 truncate">{wh.url}</code>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {wh.events.length} events • {wh.success_rate}% success rate
-                          </div>
+              {/* Payment Settings */}
+              <TabsContent value="payment" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CreditCard className="h-5 w-5 text-indigo-600" />
+                        Payment Methods
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Credit Cards</p>
+                          <p className="text-sm text-gray-500">Accept Visa, Mastercard, Amex, Discover</p>
                         </div>
-                        <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                        <Switch defaultChecked />
                       </div>
-                    ))}
-                    <Button variant="outline" className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Endpoint
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">ACH Bank Transfers</p>
+                          <p className="text-sm text-gray-500">US bank account debits</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">SEPA Direct Debit</p>
+                          <p className="text-sm text-gray-500">European bank transfers</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Apple Pay / Google Pay</p>
+                          <p className="text-sm text-gray-500">Mobile wallet payments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Wire Transfers</p>
+                          <p className="text-sm text-gray-500">For enterprise invoices</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Payment Received</p>
-                      <p className="text-sm text-gray-500">Notify when payment succeeds</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Payment Failed</p>
-                      <p className="text-sm text-gray-500">Alert on failed payments</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Subscription Canceled</p>
-                      <p className="text-sm text-gray-500">Notify on cancellations</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Trial Ending</p>
-                      <p className="text-sm text-gray-500">Remind 3 days before trial ends</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Repeat className="h-5 w-5 text-indigo-600" />
+                        Retry Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-retry Failed Payments</p>
+                          <p className="text-sm text-gray-500">Automatically retry failed charges</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Retry Schedule</Label>
+                        <Select defaultValue="smart">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="smart">Smart Retry (Stripe optimized)</SelectItem>
+                            <SelectItem value="fixed">Fixed Schedule (1, 3, 5, 7 days)</SelectItem>
+                            <SelectItem value="custom">Custom Schedule</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Max Retry Attempts</Label>
+                        <Select defaultValue="4">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="2">2 attempts</SelectItem>
+                            <SelectItem value="4">4 attempts</SelectItem>
+                            <SelectItem value="6">6 attempts</SelectItem>
+                            <SelectItem value="8">8 attempts</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Update Card Prompt</p>
+                          <p className="text-sm text-gray-500">Prompt customers to update failed cards</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-indigo-600" />
+                        Fraud Prevention
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Radar Fraud Detection</p>
+                          <p className="text-sm text-gray-500">AI-powered fraud prevention</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">3D Secure Authentication</p>
+                          <p className="text-sm text-gray-500">Require 3DS for high-risk transactions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Risk Threshold</Label>
+                        <Select defaultValue="balanced">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="permissive">Permissive (fewer blocks)</SelectItem>
+                            <SelectItem value="balanced">Balanced (recommended)</SelectItem>
+                            <SelectItem value="strict">Strict (more blocks)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">CVC Verification</p>
+                          <p className="text-sm text-gray-500">Require CVC for all transactions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Address Verification (AVS)</p>
+                          <p className="text-sm text-gray-500">Verify billing address matches</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-indigo-600" />
+                        Customer Portal
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Enable Customer Portal</p>
+                          <p className="text-sm text-gray-500">Let customers manage subscriptions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Allow Plan Changes</p>
+                          <p className="text-sm text-gray-500">Customers can upgrade/downgrade</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Allow Cancellations</p>
+                          <p className="text-sm text-gray-500">Customers can cancel subscriptions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Invoice History Access</p>
+                          <p className="text-sm text-gray-500">View and download past invoices</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Portal URL</Label>
+                        <div className="flex gap-2">
+                          <Input value="https://billing.yourapp.com/portal" readOnly className="flex-1" />
+                          <Button variant="outline" size="icon">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Invoicing Settings */}
+              <TabsContent value="invoicing" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Receipt className="h-5 w-5 text-indigo-600" />
+                        Invoice Defaults
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-finalize Drafts</p>
+                          <p className="text-sm text-gray-500">Automatically finalize after 1 hour</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-advance Collection</p>
+                          <p className="text-sm text-gray-500">Automatically charge open invoices</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Payment Due</Label>
+                        <Select defaultValue="30">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">Due on receipt</SelectItem>
+                            <SelectItem value="7">Net 7</SelectItem>
+                            <SelectItem value="15">Net 15</SelectItem>
+                            <SelectItem value="30">Net 30</SelectItem>
+                            <SelectItem value="60">Net 60</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Default Currency</Label>
+                        <Select defaultValue="usd">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="usd">USD - US Dollar</SelectItem>
+                            <SelectItem value="eur">EUR - Euro</SelectItem>
+                            <SelectItem value="gbp">GBP - British Pound</SelectItem>
+                            <SelectItem value="cad">CAD - Canadian Dollar</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-indigo-600" />
+                        Invoice Numbering
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Invoice Prefix</Label>
+                        <Input defaultValue="INV-" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Next Invoice Number</Label>
+                        <Input defaultValue="2024-006" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Numbering Format</Label>
+                        <Select defaultValue="year-seq">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sequential">Sequential (001, 002, 003)</SelectItem>
+                            <SelectItem value="year-seq">Year + Sequential (2024-001)</SelectItem>
+                            <SelectItem value="date-seq">Date + Sequential (20241223-001)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Reset Yearly</p>
+                          <p className="text-sm text-gray-500">Reset sequence number each year</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Palette className="h-5 w-5 text-indigo-600" />
+                        Invoice Branding
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Company Logo</Label>
+                        <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
+                          <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                            <Building className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <Button variant="outline" size="sm">Upload Logo</Button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Primary Color</Label>
+                        <div className="flex gap-2">
+                          <div className="w-10 h-10 rounded bg-indigo-600 border-2 border-indigo-700" />
+                          <Input defaultValue="#4F46E5" className="flex-1" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Invoice Footer</Label>
+                        <Input placeholder="Thank you for your business!" defaultValue="Thank you for your business!" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Payment Instructions</Label>
+                        <Input placeholder="Additional payment details..." />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Send className="h-5 w-5 text-indigo-600" />
+                        Email Delivery
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Email Invoices</p>
+                          <p className="text-sm text-gray-500">Send invoices via email automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Attach PDF</p>
+                          <p className="text-sm text-gray-500">Include PDF attachment in emails</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Reply-To Email</Label>
+                        <Input type="email" placeholder="billing@yourcompany.com" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">BCC Email</Label>
+                        <Input type="email" placeholder="accounting@yourcompany.com" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Notifications Settings */}
+              <TabsContent value="notifications" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Mail className="h-5 w-5 text-indigo-600" />
+                        Customer Notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Payment Successful</p>
+                          <p className="text-sm text-gray-500">Confirm successful payments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Payment Failed</p>
+                          <p className="text-sm text-gray-500">Alert when payment fails</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Invoice Sent</p>
+                          <p className="text-sm text-gray-500">Notify when invoice is created</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Subscription Confirmed</p>
+                          <p className="text-sm text-gray-500">Welcome email for new subscriptions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Subscription Canceled</p>
+                          <p className="text-sm text-gray-500">Confirmation of cancellation</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Refund Processed</p>
+                          <p className="text-sm text-gray-500">Notify when refund is issued</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="h-5 w-5 text-indigo-600" />
+                        Team Notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">New Subscription</p>
+                          <p className="text-sm text-gray-500">Alert when customer subscribes</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Payment Failed (Internal)</p>
+                          <p className="text-sm text-gray-500">Alert team on failed payments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Subscription Canceled (Internal)</p>
+                          <p className="text-sm text-gray-500">Alert team on cancellations</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Large Payment Received</p>
+                          <p className="text-sm text-gray-500">Alert on payments over threshold</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Large Payment Threshold</Label>
+                        <Input type="number" defaultValue="1000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Notification Email</Label>
+                        <Input type="email" placeholder="finance@yourcompany.com" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Timer className="h-5 w-5 text-indigo-600" />
+                        Dunning & Reminders
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Enable Dunning</p>
+                          <p className="text-sm text-gray-500">Automated collection reminders</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Trial Ending Reminder</p>
+                          <p className="text-sm text-gray-500">Remind 3 days before trial ends</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Invoice Due Reminder</p>
+                          <p className="text-sm text-gray-500">Remind before invoice is due</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Past Due Reminders</p>
+                          <p className="text-sm text-gray-500">Send escalating past due notices</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Dunning Schedule</Label>
+                        <Select defaultValue="standard">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="gentle">Gentle (3, 7, 14 days)</SelectItem>
+                            <SelectItem value="standard">Standard (1, 3, 7, 14 days)</SelectItem>
+                            <SelectItem value="aggressive">Aggressive (1, 2, 3, 5 days)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ExternalLink className="h-5 w-5 text-indigo-600" />
+                        Slack Integration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="w-10 h-10 bg-[#4A154B] rounded flex items-center justify-center">
+                          <span className="text-white font-bold">#</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 dark:text-white">Slack Workspace</p>
+                          <p className="text-sm text-green-600">Connected to #billing-alerts</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Payment Events</p>
+                          <p className="text-sm text-gray-500">Post payment notifications</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Subscription Events</p>
+                          <p className="text-sm text-gray-500">Post subscription changes</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Weekly Summary</p>
+                          <p className="text-sm text-gray-500">Post weekly billing summary</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Integrations Settings */}
+              <TabsContent value="integrations" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Link2 className="h-5 w-5 text-indigo-600" />
+                        Connected Services
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[
+                          { name: 'QuickBooks', status: 'connected', icon: '📊', desc: 'Accounting sync' },
+                          { name: 'Xero', status: 'not_connected', icon: '📈', desc: 'Accounting integration' },
+                          { name: 'Salesforce', status: 'connected', icon: '☁️', desc: 'CRM sync' },
+                          { name: 'HubSpot', status: 'not_connected', icon: '🔶', desc: 'CRM & marketing' },
+                          { name: 'NetSuite', status: 'not_connected', icon: '📋', desc: 'ERP integration' },
+                          { name: 'Slack', status: 'connected', icon: '#', desc: 'Team notifications' }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xl">
+                                {integration.icon}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-xs text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            {integration.status === 'connected' ? (
+                              <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                            ) : (
+                              <Button variant="outline" size="sm">Connect</Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="h-5 w-5 text-indigo-600" />
+                        Webhooks
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {webhooks.map(wh => (
+                          <div key={wh.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Badge className={getStatusColor(wh.status)}>{wh.status}</Badge>
+                                <code className="text-sm text-gray-600 dark:text-gray-400 truncate">{wh.url}</code>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {wh.events.length} events • {wh.success_rate}% success rate
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Endpoint
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Key className="h-5 w-5 text-indigo-600" />
+                        API Access
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Publishable Key</Label>
+                        <div className="flex gap-2">
+                          <Input value="pk_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" />
+                          <Button variant="outline" size="icon">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Secret Key</Label>
+                        <div className="flex gap-2">
+                          <Input value="STRIPE_KEY_PLACEHOLDER" readOnly className="flex-1 font-mono text-sm" type="password" />
+                          <Button variant="outline" size="icon">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="icon">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          <strong>Warning:</strong> Never share your secret key in public repositories or client-side code.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Rotate API Keys
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Taxes Settings */}
+              <TabsContent value="taxes" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="lg:col-span-2">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Percent className="h-5 w-5 text-indigo-600" />
+                        Tax Rates
+                      </CardTitle>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Tax Rate
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {taxRates.map(tax => (
+                          <div key={tax.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Globe className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <h4 className="font-medium text-gray-900 dark:text-white">{tax.name}</h4>
+                                <p className="text-sm text-gray-500">{tax.jurisdiction} • {tax.country}{tax.state ? `, ${tax.state}` : ''}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="font-semibold text-gray-900 dark:text-white">{tax.percentage}%</span>
+                              <Badge className={tax.inclusive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>
+                                {tax.inclusive ? 'Inclusive' : 'Exclusive'}
+                              </Badge>
+                              <Switch checked={tax.active} />
+                              <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-indigo-600" />
+                        Tax Automation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Automatic Tax Calculation</p>
+                          <p className="text-sm text-gray-500">Calculate taxes based on customer location</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Tax ID Validation</p>
+                          <p className="text-sm text-gray-500">Validate VAT/GST numbers automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Reverse Charge</p>
+                          <p className="text-sm text-gray-500">Apply reverse charge for B2B EU transactions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Tax Provider</Label>
+                        <Select defaultValue="stripe-tax">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="stripe-tax">Stripe Tax</SelectItem>
+                            <SelectItem value="avalara">Avalara</SelectItem>
+                            <SelectItem value="taxjar">TaxJar</SelectItem>
+                            <SelectItem value="manual">Manual</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Building className="h-5 w-5 text-indigo-600" />
+                        Business Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Legal Business Name</Label>
+                        <Input defaultValue="Your Company Inc." />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Tax ID / VAT Number</Label>
+                        <Input defaultValue="US123456789" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Business Address</Label>
+                        <Input defaultValue="123 Business St, San Francisco, CA 94102" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Tax Registration Country</Label>
+                        <Select defaultValue="us">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="us">United States</SelectItem>
+                            <SelectItem value="uk">United Kingdom</SelectItem>
+                            <SelectItem value="de">Germany</SelectItem>
+                            <SelectItem value="fr">France</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Advanced Settings */}
+              <TabsContent value="advanced" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TestTube className="h-5 w-5 text-indigo-600" />
+                        Test Mode
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                          <p className="font-medium text-yellow-800 dark:text-yellow-200">Test Mode Active</p>
+                        </div>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          No real charges will be made. Use test card numbers for testing.
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Enable Test Mode</p>
+                          <p className="text-sm text-gray-500">Use test API keys and data</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Test Card Number</Label>
+                        <div className="flex gap-2">
+                          <Input value="4242 4242 4242 4242" readOnly className="flex-1 font-mono" />
+                          <Button variant="outline" size="icon">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Layers className="h-5 w-5 text-indigo-600" />
+                        Subscription Behavior
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Proration Behavior</Label>
+                        <Select defaultValue="create_prorations">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="create_prorations">Create prorations</SelectItem>
+                            <SelectItem value="none">No prorations</SelectItem>
+                            <SelectItem value="always_invoice">Always invoice immediately</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Collection Method</Label>
+                        <Select defaultValue="charge_automatically">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="charge_automatically">Charge automatically</SelectItem>
+                            <SelectItem value="send_invoice">Send invoice</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Pause Collection</p>
+                          <p className="text-sm text-gray-500">Allow pausing subscriptions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Grace Period (Days)</Label>
+                        <Input type="number" defaultValue="3" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5 text-indigo-600" />
+                        Data Management
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Data Retention</Label>
+                        <Select defaultValue="7years">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1year">1 year</SelectItem>
+                            <SelectItem value="3years">3 years</SelectItem>
+                            <SelectItem value="7years">7 years (recommended)</SelectItem>
+                            <SelectItem value="indefinite">Indefinite</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export All Billing Data
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Generate Tax Report
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <History className="h-4 w-4 mr-2" />
+                        View Audit Log
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-red-200 dark:border-red-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-red-600">
+                        <AlertOctagon className="h-5 w-5" />
+                        Danger Zone
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-sm text-red-800 dark:text-red-200">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Cancel All Subscriptions
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete All Test Data
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Lock className="h-4 w-4 mr-2" />
+                        Disable Billing Module
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
