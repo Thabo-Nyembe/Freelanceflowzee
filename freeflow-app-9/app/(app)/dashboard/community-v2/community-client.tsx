@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +28,8 @@ import {
   VolumeX, Gavel, FileText, ExternalLink, Copy, Rocket, Gem, Palette, Folder,
   FolderPlus, Tag, SlidersHorizontal, ShieldCheck, ShieldAlert, Mail, Bot,
   Webhook, PuzzlePiece, Download, Upload, RefreshCw, History, Eye as EyeIcon,
-  MoreVertical, ChevronUp, X, Check, AlertCircle, Info, HelpCircle
+  MoreVertical, ChevronUp, X, Check, AlertCircle, Info, HelpCircle, Key, HardDrive,
+  CreditCard, Sliders
 } from 'lucide-react'
 
 // ============== DISCORD-LEVEL INTERFACES ==============
@@ -475,6 +477,7 @@ export default function CommunityClient() {
   const [showServerSettings, setShowServerSettings] = useState(false)
   const [showEventDialog, setShowEventDialog] = useState(false)
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const stats: ServerStats = useMemo(() => ({
     totalMembers: 1250,
@@ -649,6 +652,7 @@ export default function CommunityClient() {
               <TabsTrigger value="roles" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Shield className="w-4 h-4 mr-2" />Roles</TabsTrigger>
               <TabsTrigger value="moderation" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Gavel className="w-4 h-4 mr-2" />Moderation</TabsTrigger>
               <TabsTrigger value="analytics" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><BarChart3 className="w-4 h-4 mr-2" />Analytics</TabsTrigger>
+              <TabsTrigger value="settings" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
           </div>
 
@@ -1027,6 +1031,690 @@ export default function CommunityClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Discord Level */}
+          <TabsContent value="settings" className="flex-1 p-4 m-0 overflow-auto">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <nav className="space-y-1">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'moderation', label: 'Moderation', icon: Shield },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'permissions', label: 'Permissions', icon: Key },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSettingsTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                        settingsTab === item.id
+                          ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+
+                {/* Community Stats */}
+                <Card className="mt-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Community Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Total Members</span>
+                      <Badge variant="secondary">{stats.totalMembers.toLocaleString()}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Online Now</span>
+                      <span className="text-sm font-medium text-green-600">{stats.onlineMembers}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Boost Level</span>
+                      <span className="text-sm font-medium text-pink-600">Level {stats.boostLevel}</span>
+                    </div>
+                    <Progress value={(serverBoost.boostCount / (serverBoost.nextLevel?.required || 14)) * 100} className="h-2 mt-2" />
+                    <p className="text-xs text-gray-500 mt-1">{serverBoost.boostCount}/{serverBoost.nextLevel?.required} boosts</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-orange-600" />
+                          Server Overview
+                        </CardTitle>
+                        <CardDescription>Configure your community server settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Server Name</Label>
+                            <Input defaultValue="FreeFlow Community" />
+                            <p className="text-xs text-gray-500">Visible to all members</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Server Region</Label>
+                            <Select defaultValue="us-east">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="us-east">US East</SelectItem>
+                                <SelectItem value="us-west">US West</SelectItem>
+                                <SelectItem value="europe">Europe</SelectItem>
+                                <SelectItem value="asia">Asia</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Server Description</Label>
+                          <Textarea placeholder="Describe your community..." defaultValue="The official FreeFlow community for creators, developers, and innovators." />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Community Mode</p>
+                            <p className="text-sm text-gray-500">Enable community features like discovery</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Discoverable</p>
+                            <p className="text-sm text-gray-500">Allow users to find this server</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Verification Level
+                        </CardTitle>
+                        <CardDescription>Set requirements for new members</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Verification Level</Label>
+                          <Select defaultValue="medium">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None - Unrestricted</SelectItem>
+                              <SelectItem value="low">Low - Verified email</SelectItem>
+                              <SelectItem value="medium">Medium - 5 min account age</SelectItem>
+                              <SelectItem value="high">High - 10 min membership</SelectItem>
+                              <SelectItem value="highest">Highest - Verified phone</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Explicit Content Filter</p>
+                            <p className="text-sm text-gray-500">Scan media from members without roles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">2FA Requirement</p>
+                            <p className="text-sm text-gray-500">Require 2FA for moderation actions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Moderation Settings */}
+                {settingsTab === 'moderation' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Auto-Moderation
+                        </CardTitle>
+                        <CardDescription>Configure automatic moderation rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Block Spam</p>
+                            <p className="text-sm text-gray-500">Automatically delete spam messages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Block Harmful Links</p>
+                            <p className="text-sm text-gray-500">Remove phishing and malware links</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Block Keyword Phrases</p>
+                            <p className="text-sm text-gray-500">Filter specific words or phrases</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Block Mention Spam</p>
+                            <p className="text-sm text-gray-500">Limit mass @mentions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Mention Limit</Label>
+                          <Select defaultValue="5">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3 mentions</SelectItem>
+                              <SelectItem value="5">5 mentions</SelectItem>
+                              <SelectItem value="10">10 mentions</SelectItem>
+                              <SelectItem value="20">20 mentions</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Gavel className="w-5 h-5 text-red-600" />
+                          Default Punishments
+                        </CardTitle>
+                        <CardDescription>Set default actions for violations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>First Offense</Label>
+                            <Select defaultValue="warn">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="warn">Warning</SelectItem>
+                                <SelectItem value="mute">5 min mute</SelectItem>
+                                <SelectItem value="timeout">1 hour timeout</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Second Offense</Label>
+                            <Select defaultValue="mute">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mute">1 hour mute</SelectItem>
+                                <SelectItem value="timeout">24 hour timeout</SelectItem>
+                                <SelectItem value="kick">Kick</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Third Offense</Label>
+                            <Select defaultValue="timeout">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="timeout">24 hour timeout</SelectItem>
+                                <SelectItem value="kick">Kick</SelectItem>
+                                <SelectItem value="ban">Ban</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Severe Offense</Label>
+                            <Select defaultValue="ban">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="kick">Kick</SelectItem>
+                                <SelectItem value="ban">Ban</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Log Mod Actions</p>
+                            <p className="text-sm text-gray-500">Record all moderation actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-amber-500" />
+                          Server Notifications
+                        </CardTitle>
+                        <CardDescription>Configure notification defaults</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Notification Setting</Label>
+                          <Select defaultValue="mentions">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Messages</SelectItem>
+                              <SelectItem value="mentions">Only @mentions</SelectItem>
+                              <SelectItem value="none">Nothing</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Mobile Push Notifications</p>
+                            <p className="text-sm text-gray-500">Send notifications to mobile devices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Suppress @everyone</p>
+                            <p className="text-sm text-gray-500">Disable @everyone and @here by default</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Role Mention Highlighting</p>
+                            <p className="text-sm text-gray-500">Highlight when your role is mentioned</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                          Admin Alerts
+                        </CardTitle>
+                        <CardDescription>Notifications for server admins</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">New Member Joins</p>
+                            <p className="text-sm text-gray-500">Alert when new members join</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Member Reports</p>
+                            <p className="text-sm text-gray-500">Alert on user reports</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Server Boost Changes</p>
+                            <p className="text-sm text-gray-500">Alert on boost level changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Security Alerts</p>
+                            <p className="text-sm text-gray-500">Notify on suspicious activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Permissions Settings */}
+                {settingsTab === 'permissions' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-violet-600" />
+                          Default Permissions
+                        </CardTitle>
+                        <CardDescription>Set permissions for @everyone role</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { id: 'view', label: 'View Channels', desc: 'Allow viewing text and voice channels', default: true },
+                          { id: 'send', label: 'Send Messages', desc: 'Allow sending messages in channels', default: true },
+                          { id: 'react', label: 'Add Reactions', desc: 'Allow adding emoji reactions', default: true },
+                          { id: 'voice', label: 'Connect to Voice', desc: 'Allow joining voice channels', default: true },
+                          { id: 'speak', label: 'Speak in Voice', desc: 'Allow speaking in voice channels', default: true },
+                          { id: 'embed', label: 'Embed Links', desc: 'Allow embedding links and previews', default: false },
+                          { id: 'attach', label: 'Attach Files', desc: 'Allow uploading files', default: false },
+                          { id: 'mention', label: 'Mention @everyone', desc: 'Allow mentioning everyone', default: false }
+                        ].map(perm => (
+                          <div key={perm.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{perm.label}</p>
+                              <p className="text-sm text-gray-500">{perm.desc}</p>
+                            </div>
+                            <Switch defaultChecked={perm.default} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Role Hierarchy
+                        </CardTitle>
+                        <CardDescription>Manage role permissions and order</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {mockRoles.map(role => (
+                          <div key={role.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: role.color }} />
+                              <span className="font-medium" style={{ color: role.color }}>{role.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">{role.memberCount} members</span>
+                              <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bot className="w-5 h-5 text-blue-600" />
+                          Bots & Apps
+                        </CardTitle>
+                        <CardDescription>Manage server bots and integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockBots.map(bot => (
+                          <div key={bot.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={`https://avatar.vercel.sh/${bot.avatar}`} />
+                                <AvatarFallback>{bot.name.slice(0, 2)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{bot.name}</p>
+                                <p className="text-sm text-gray-500">{bot.description}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <Badge variant="outline">{bot.commands} commands</Badge>
+                              <Switch checked={bot.isEnabled} />
+                            </div>
+                          </div>
+                        ))}
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Bot or App
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-orange-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Send automated messages to channels</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook Name</Label>
+                          <Input placeholder="My Webhook" />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Channel</Label>
+                          <Select defaultValue="general">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="general">#general</SelectItem>
+                              <SelectItem value="announcements">#announcements</SelectItem>
+                              <SelectItem value="bot-channel">#bot-channel</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <ShieldAlert className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Advanced security configurations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Raid Protection</p>
+                            <p className="text-sm text-gray-500">Detect and prevent raid attacks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Suspicious Account Detection</p>
+                            <p className="text-sm text-gray-500">Flag newly created accounts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Anti-Scam Protection</p>
+                            <p className="text-sm text-gray-500">Block known scam patterns</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">DM Spam Protection</p>
+                            <p className="text-sm text-gray-500">Protect members from DM spam</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Server data and exports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Message Retention</Label>
+                          <Select defaultValue="forever">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Audit Log Retention</p>
+                            <p className="text-sm text-gray-500">Keep detailed audit logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export Server Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-indigo-600" />
+                          Server Boost
+                        </CardTitle>
+                        <CardDescription>Current boost level and perks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-pink-800 dark:text-pink-400">Level {serverBoost.level}</p>
+                            <p className="text-sm text-pink-600 dark:text-pink-500">{serverBoost.boostCount} boosts from {serverBoost.boostersCount} boosters</p>
+                          </div>
+                          <Gem className="w-8 h-8 text-pink-500" />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-orange-600">{stats.totalMembers.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">Members</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">{stats.totalChannels}</p>
+                            <p className="text-xs text-gray-500">Channels</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-pink-600">{serverBoost.level}</p>
+                            <p className="text-xs text-gray-500">Boost Level</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Prune Members</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove inactive members</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Prune</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Messages</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Clear all server message history</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete All</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Server</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this server</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete Server</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
