@@ -9,7 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   TrendingUp,
   DollarSign,
@@ -46,7 +50,22 @@ import {
   Phone,
   ExternalLink,
   Layers,
-  GitBranch
+  GitBranch,
+  Settings,
+  Bell,
+  Shield,
+  Lock,
+  Key,
+  Zap,
+  RefreshCw,
+  Upload,
+  Link2,
+  Palette,
+  AlertTriangle,
+  Info,
+  FileCheck,
+  UserCog,
+  BookOpen
 } from 'lucide-react'
 
 // Types
@@ -289,6 +308,7 @@ export default function InvestorMetricsClient() {
   const [selectedRound, setSelectedRound] = useState<FundingRound | null>(null)
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null)
   const [periodFilter, setPeriodFilter] = useState<'monthly' | 'quarterly' | 'annual'>('quarterly')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -487,6 +507,10 @@ export default function InvestorMetricsClient() {
                 <TabsTrigger value="funding">Funding Rounds</TabsTrigger>
                 <TabsTrigger value="investors">Investors</TabsTrigger>
                 <TabsTrigger value="kpis">KPI Dashboard</TabsTrigger>
+                <TabsTrigger value="settings" className="flex items-center gap-1.5">
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -878,6 +902,663 @@ export default function InvestorMetricsClient() {
                   </CardContent>
                 </Card>
               ))}
+            </TabsContent>
+
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="space-y-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {/* Settings Sub-tabs */}
+                <div className="border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex gap-1 p-2 overflow-x-auto">
+                    {[
+                      { id: 'general', label: 'General', icon: Settings },
+                      { id: 'permissions', label: 'Permissions', icon: Shield },
+                      { id: 'reporting', label: 'Reporting', icon: BarChart3 },
+                      { id: 'integrations', label: 'Integrations', icon: Link2 },
+                      { id: 'compliance', label: 'Compliance', icon: FileCheck },
+                      { id: 'advanced', label: 'Advanced', icon: Zap }
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSettingsTab(tab.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                          settingsTab === tab.id
+                            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <tab.icon className="w-4 h-4" />
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {/* General Settings */}
+                  {settingsTab === 'general' && (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">General Settings</h3>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-amber-600" />
+                            Company Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Company Legal Name</Label>
+                              <Input defaultValue="Kazi Technologies Inc." className="mt-1" />
+                            </div>
+                            <div>
+                              <Label>Doing Business As (DBA)</Label>
+                              <Input defaultValue="Kazi" className="mt-1" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>State of Incorporation</Label>
+                              <Select defaultValue="delaware">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="delaware">Delaware</SelectItem>
+                                  <SelectItem value="california">California</SelectItem>
+                                  <SelectItem value="nevada">Nevada</SelectItem>
+                                  <SelectItem value="wyoming">Wyoming</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Entity Type</Label>
+                              <Select defaultValue="c-corp">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="c-corp">C Corporation</SelectItem>
+                                  <SelectItem value="s-corp">S Corporation</SelectItem>
+                                  <SelectItem value="llc">LLC</SelectItem>
+                                  <SelectItem value="lp">Limited Partnership</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Federal EIN</Label>
+                            <Input defaultValue="XX-XXXXXXX" className="mt-1 font-mono" />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <CircleDollarSign className="w-5 h-5 text-green-600" />
+                            Financial Settings
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Currency</Label>
+                              <Select defaultValue="usd">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="usd">USD ($)</SelectItem>
+                                  <SelectItem value="eur">EUR (€)</SelectItem>
+                                  <SelectItem value="gbp">GBP (£)</SelectItem>
+                                  <SelectItem value="cad">CAD ($)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Fiscal Year End</Label>
+                              <Select defaultValue="december">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="december">December</SelectItem>
+                                  <SelectItem value="march">March</SelectItem>
+                                  <SelectItem value="june">June</SelectItem>
+                                  <SelectItem value="september">September</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Par Value per Share</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Standard par value for common stock</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span>$</span>
+                              <Input type="number" defaultValue="0.0001" className="w-24" step="0.0001" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Bell className="w-5 h-5 text-blue-600" />
+                            Notifications
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Investor Updates</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Notify when investor details change</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Cap Table Changes</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Alert on equity transactions</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>KPI Threshold Alerts</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Notify when metrics exceed limits</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Permissions Settings */}
+                  {settingsTab === 'permissions' && (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Access & Permissions</h3>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <UserCog className="w-5 h-5 text-indigo-600" />
+                            Role-Based Access
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {[
+                            { role: 'Admin', description: 'Full access to all investor data and settings', users: 2 },
+                            { role: 'Finance', description: 'View and edit financial data, cap table', users: 3 },
+                            { role: 'Investor Relations', description: 'Manage investor communications', users: 2 },
+                            { role: 'Viewer', description: 'Read-only access to dashboard', users: 5 }
+                          ].map(role => (
+                            <div key={role.role} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div>
+                                <Label>{role.role}</Label>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{role.description}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge variant="secondary">{role.users} users</Badge>
+                                <Button variant="ghost" size="sm">Configure</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Lock className="w-5 h-5 text-red-600" />
+                            Data Access Controls
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Require MFA for Sensitive Data</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Two-factor authentication for cap table access</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Hide Valuations from Non-Admins</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Restrict valuation visibility</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Investor Portal Access</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Allow investors to view their holdings</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Key className="w-5 h-5 text-amber-600" />
+                            API Access
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <Label>API Key</Label>
+                              <Button variant="ghost" size="sm">Regenerate</Button>
+                            </div>
+                            <Input type="password" value="sk_live_carta_••••••••••••" readOnly className="font-mono" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                            <span className="text-sm text-gray-500">Last used 2 hours ago</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Reporting Settings */}
+                  {settingsTab === 'reporting' && (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reporting Configuration</h3>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-blue-600" />
+                            Investor Reports
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label>Default Report Frequency</Label>
+                            <Select defaultValue="quarterly">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                <SelectItem value="annually">Annually</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Include Financial Statements</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Attach P&L and balance sheet</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Include KPI Dashboard</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Attach key metrics summary</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Auto-send Reports</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically email reports to investors</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <BookOpen className="w-5 h-5 text-purple-600" />
+                            Report Templates
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {[
+                              'Quarterly Investor Update',
+                              'Board Meeting Package',
+                              'Cap Table Summary',
+                              '409A Valuation Report',
+                              'Funding Round Summary'
+                            ].map(template => (
+                              <div key={template} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <span className="font-medium">{template}</span>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm">Preview</Button>
+                                  <Button variant="ghost" size="sm">Edit</Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <Button variant="outline" className="mt-4 w-full">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create Custom Template
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Export Settings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label>Default Export Format</Label>
+                            <Select defaultValue="pdf">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pdf">PDF</SelectItem>
+                                <SelectItem value="excel">Excel (XLSX)</SelectItem>
+                                <SelectItem value="csv">CSV</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Button variant="outline" className="flex items-center gap-2">
+                              <Download className="w-4 h-4" />
+                              Export Cap Table
+                            </Button>
+                            <Button variant="outline" className="flex items-center gap-2">
+                              <Download className="w-4 h-4" />
+                              Export KPIs
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Integrations Settings */}
+                  {settingsTab === 'integrations' && (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integrations</h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { name: 'QuickBooks', description: 'Sync financial data', icon: CircleDollarSign, connected: true, color: 'green' },
+                          { name: 'Stripe', description: 'Payment processing', icon: Wallet, connected: true, color: 'purple' },
+                          { name: 'DocuSign', description: 'Document signing', icon: FileText, connected: true, color: 'blue' },
+                          { name: 'Slack', description: 'Team notifications', icon: Bell, connected: false, color: 'purple' },
+                          { name: 'Salesforce', description: 'CRM integration', icon: Users, connected: false, color: 'blue' },
+                          { name: 'Google Workspace', description: 'Document storage', icon: Globe, connected: true, color: 'amber' }
+                        ].map(integration => (
+                          <Card key={integration.name}>
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-3">
+                                  <div className={`w-10 h-10 rounded-lg bg-${integration.color}-100 dark:bg-${integration.color}-900/40 flex items-center justify-center`}>
+                                    <integration.icon className={`w-5 h-5 text-${integration.color}-600`} />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium text-gray-900 dark:text-white">{integration.name}</h4>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
+                                  </div>
+                                </div>
+                                {integration.connected ? (
+                                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
+                                ) : (
+                                  <Button size="sm" variant="outline">Connect</Button>
+                                )}
+                              </div>
+                              {integration.connected && (
+                                <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                  <RefreshCw className="w-3 h-3" />
+                                  Last synced 10 minutes ago
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Data Import</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="p-6 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                            <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Drag and drop files to import</p>
+                            <p className="text-xs text-gray-500 mt-1">Supports CSV, Excel, and Carta export files</p>
+                            <Button variant="outline" className="mt-4">Browse Files</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Compliance Settings */}
+                  {settingsTab === 'compliance' && (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Compliance & Legal</h3>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <FileCheck className="w-5 h-5 text-green-600" />
+                            Regulatory Filings
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Form D Reminder</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Alert 15 days before filing deadline</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Delaware Franchise Tax</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Annual filing reminder</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>409A Valuation Tracker</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Track valuation expiration dates</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Scale className="w-5 h-5 text-blue-600" />
+                            Legal Documents
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {[
+                              { name: 'Certificate of Incorporation', status: 'active', date: '2023-01-15' },
+                              { name: 'Bylaws', status: 'active', date: '2023-01-15' },
+                              { name: 'Investor Rights Agreement', status: 'active', date: '2024-01-15' },
+                              { name: 'Stock Plan', status: 'needs_update', date: '2023-06-01' },
+                              { name: 'ROFR Agreement', status: 'active', date: '2024-01-15' }
+                            ].map(doc => (
+                              <div key={doc.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <FileText className="w-5 h-5 text-gray-400" />
+                                  <div>
+                                    <span className="font-medium">{doc.name}</span>
+                                    <p className="text-xs text-gray-500">{doc.date}</p>
+                                  </div>
+                                </div>
+                                <Badge className={doc.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
+                                  {doc.status === 'active' ? 'Active' : 'Needs Update'}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Info className="w-5 h-5 text-purple-600" />
+                            Audit Trail
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Enable Audit Logging</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Track all cap table changes</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div>
+                            <Label>Audit Log Retention</Label>
+                            <Select defaultValue="7years">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1year">1 Year</SelectItem>
+                                <SelectItem value="3years">3 Years</SelectItem>
+                                <SelectItem value="5years">5 Years</SelectItem>
+                                <SelectItem value="7years">7 Years</SelectItem>
+                                <SelectItem value="forever">Forever</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Advanced Settings */}
+                  {settingsTab === 'advanced' && (
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Advanced Settings</h3>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-amber-600" />
+                            Performance
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Auto-refresh Dashboard</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Update data every 5 minutes</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Cache Financial Data</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Improve load times with caching</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div>
+                            <Label>Historical Data Range</Label>
+                            <Select defaultValue="5years">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1year">1 Year</SelectItem>
+                                <SelectItem value="2years">2 Years</SelectItem>
+                                <SelectItem value="5years">5 Years</SelectItem>
+                                <SelectItem value="all">All Time</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Palette className="w-5 h-5 text-pink-600" />
+                            Display Options
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label>Default Dashboard View</Label>
+                            <Select defaultValue="overview">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="overview">Overview</SelectItem>
+                                <SelectItem value="cap-table">Cap Table</SelectItem>
+                                <SelectItem value="funding">Funding Rounds</SelectItem>
+                                <SelectItem value="kpis">KPI Dashboard</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Compact Number Format</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Show $1.5M instead of $1,500,000</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Show Fully Diluted by Default</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display fully diluted ownership</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-red-200 dark:border-red-800">
+                        <CardHeader>
+                          <CardTitle className="text-base text-red-600 dark:text-red-400 flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5" />
+                            Danger Zone
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                            <div>
+                              <Label className="text-red-700 dark:text-red-400">Reset All KPIs</Label>
+                              <p className="text-sm text-red-600 dark:text-red-500">Clear all historical KPI data</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Reset</Button>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                            <div>
+                              <Label className="text-red-700 dark:text-red-400">Export & Delete Account</Label>
+                              <p className="text-sm text-red-600 dark:text-red-500">Download all data and close account</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Export & Delete</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
