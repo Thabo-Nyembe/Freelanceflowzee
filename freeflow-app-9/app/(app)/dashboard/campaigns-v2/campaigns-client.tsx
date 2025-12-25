@@ -1,6 +1,20 @@
 'use client'
+
 import { useState, useMemo } from 'react'
-import { useCampaigns, type Campaign, type CampaignType, type CampaignStatus } from '@/lib/hooks/use-campaigns'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogFooter, DialogTrigger
+} from '@/components/ui/dialog'
 import {
   Mail, Send, BarChart3, Users, Target, Zap, Clock, TrendingUp,
   Plus, Search, Filter, MoreVertical, Play, Pause, CheckCircle2,
@@ -8,773 +22,1392 @@ import {
   MousePointer, ArrowUpRight, Sparkles, MessageSquare, Phone,
   Globe, Settings, FileText, Layout, Layers, GitBranch, Split,
   FlaskConical, Inbox, UserPlus, Tag, Megaphone, ChevronRight,
-  RefreshCw, Download, Share2, BarChart2, PieChart, Activity
+  RefreshCw, Download, Share2, BarChart2, PieChart, Activity,
+  Palette, Image, Type, Link2, Wand2, Brain, Gauge, Shield,
+  MapPin, Smartphone, Monitor, Tablet, ArrowUp, ArrowDown,
+  ThumbsUp, ThumbsDown, Star, Heart, Ban, AlertTriangle, CheckCircle,
+  XCircle, Timer, TrendingDown, MailOpen, MousePointerClick, UserMinus,
+  Unlink, ExternalLink, Hash, AtSign, Percent, LineChart, AreaChart
 } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
-type ViewMode = 'campaigns' | 'automations' | 'templates' | 'audiences' | 'analytics'
+// ============== MAILCHIMP-LEVEL INTERFACES ==============
 
-interface EmailTemplate {
+type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'running' | 'paused' | 'completed' | 'archived'
+type CampaignType = 'email' | 'sms' | 'social' | 'multi_channel' | 'ab_test' | 'automation'
+type EmailType = 'regular' | 'automated' | 'rss' | 'transactional' | 'plain_text'
+type AudienceStatus = 'subscribed' | 'unsubscribed' | 'cleaned' | 'pending' | 'transactional'
+
+interface Campaign {
   id: string
   name: string
-  category: string
-  thumbnail: string
-  usageCount: number
-  conversionRate: number
+  description?: string
+  type: CampaignType
+  emailType?: EmailType
+  status: CampaignStatus
+  subject?: string
+  previewText?: string
+  fromName: string
+  fromEmail: string
+  replyTo?: string
+  audienceId: string
+  audienceName: string
+  audienceSize: number
+  templateId?: string
+  content?: {
+    html: string
+    plainText?: string
+  }
+  schedule?: {
+    sendAt: Date
+    timezone: string
+    sendTimeOptimization: boolean
+  }
+  tracking: {
+    opensTracking: boolean
+    clicksTracking: boolean
+    googleAnalytics: boolean
+    utmParams?: Record<string, string>
+  }
+  stats: CampaignStats
+  abTest?: ABTest
+  automation?: AutomationTrigger
+  tags: string[]
+  createdAt: Date
+  updatedAt: Date
+  sentAt?: Date
+}
+
+interface CampaignStats {
+  sent: number
+  delivered: number
+  bounced: number
+  opens: number
+  uniqueOpens: number
+  clicks: number
+  uniqueClicks: number
+  unsubscribes: number
+  complaints: number
+  revenue: number
+  conversions: number
+  openRate: number
+  clickRate: number
+  bounceRate: number
+  unsubscribeRate: number
+  deliverabilityRate: number
+}
+
+interface ABTest {
+  id: string
+  name: string
+  testType: 'subject' | 'from_name' | 'content' | 'send_time'
+  variants: ABVariant[]
+  winner?: string
+  winnerCriteria: 'open_rate' | 'click_rate' | 'revenue'
+  testDuration: number
+  testPercentage: number
+  status: 'testing' | 'completed' | 'no_winner'
+}
+
+interface ABVariant {
+  id: string
+  name: string
+  subject?: string
+  fromName?: string
+  content?: string
+  sendTime?: Date
+  stats: {
+    sent: number
+    opens: number
+    clicks: number
+    conversions: number
+    openRate: number
+    clickRate: number
+  }
+  isWinner: boolean
+}
+
+interface AutomationTrigger {
+  type: 'signup' | 'purchase' | 'abandoned_cart' | 'birthday' | 'date' | 'activity' | 'tag_added' | 'custom'
+  config: Record<string, unknown>
+  delayDays: number
+  delayHours: number
 }
 
 interface Audience {
   id: string
   name: string
-  count: number
+  description?: string
+  stats: {
+    total: number
+    subscribed: number
+    unsubscribed: number
+    cleaned: number
+    pending: number
+    avgOpenRate: number
+    avgClickRate: number
+  }
   growthRate: number
+  lastCampaignSent?: Date
   tags: string[]
-  lastActivity: string
+  segments: AudienceSegment[]
+  createdAt: Date
+}
+
+interface AudienceSegment {
+  id: string
+  name: string
+  type: 'saved' | 'static' | 'dynamic'
+  conditions: SegmentCondition[]
+  memberCount: number
+  createdAt: Date
+}
+
+interface SegmentCondition {
+  field: string
+  operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'is_blank'
+  value: string | number | boolean
+}
+
+interface Subscriber {
+  id: string
+  email: string
+  firstName?: string
+  lastName?: string
+  status: AudienceStatus
+  rating: 1 | 2 | 3 | 4 | 5
+  engagementScore: number
+  openRate: number
+  clickRate: number
+  source: string
+  location?: {
+    country: string
+    city?: string
+    timezone?: string
+  }
+  tags: string[]
+  customFields: Record<string, unknown>
+  joinedAt: Date
+  lastActivityAt?: Date
+}
+
+interface EmailTemplate {
+  id: string
+  name: string
+  category: 'basic' | 'newsletter' | 'product' | 'event' | 'announcement' | 'ecommerce'
+  thumbnail: string
+  html: string
+  usageCount: number
+  openRate: number
+  clickRate: number
+  isCustom: boolean
+  createdAt: Date
 }
 
 interface AutomationWorkflow {
   id: string
   name: string
-  trigger: string
+  description?: string
+  trigger: AutomationTrigger
   status: 'active' | 'paused' | 'draft'
-  emailsSent: number
-  openRate: number
-  clickRate: number
+  steps: WorkflowStep[]
+  stats: {
+    enrolled: number
+    completed: number
+    active: number
+    revenue: number
+    openRate: number
+    clickRate: number
+  }
+  createdAt: Date
 }
 
-export default function CampaignsClient({ initialCampaigns }: { initialCampaigns: Campaign[] }) {
-  const [campaignTypeFilter, setCampaignTypeFilter] = useState<CampaignType | 'all'>('all')
-  const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'all'>('all')
-  const [viewMode, setViewMode] = useState<ViewMode>('campaigns')
+interface WorkflowStep {
+  id: string
+  type: 'email' | 'delay' | 'condition' | 'split' | 'tag' | 'webhook'
+  config: Record<string, unknown>
+  position: number
+  stats?: {
+    sent?: number
+    opens?: number
+    clicks?: number
+  }
+}
+
+interface ContentBlock {
+  id: string
+  type: 'text' | 'image' | 'button' | 'divider' | 'social' | 'video' | 'product' | 'code'
+  content: Record<string, unknown>
+  styles: Record<string, string>
+}
+
+interface DeliverabilityReport {
+  domain: string
+  score: number
+  spfStatus: 'pass' | 'fail' | 'neutral'
+  dkimStatus: 'pass' | 'fail' | 'neutral'
+  dmarcStatus: 'pass' | 'fail' | 'neutral'
+  blacklistStatus: 'clean' | 'listed'
+  reputation: 'excellent' | 'good' | 'fair' | 'poor'
+  issues: string[]
+  recommendations: string[]
+}
+
+// ============== MOCK DATA ==============
+
+const mockCampaigns: Campaign[] = [
+  {
+    id: 'camp1',
+    name: 'Summer Sale 2024',
+    description: 'Annual summer sale announcement with exclusive discounts',
+    type: 'email',
+    emailType: 'regular',
+    status: 'completed',
+    subject: '🌞 Summer Sale is Here! Up to 50% Off',
+    previewText: 'Don\'t miss our biggest sale of the year',
+    fromName: 'FreeFlow Store',
+    fromEmail: 'hello@freeflow.com',
+    audienceId: 'aud1',
+    audienceName: 'All Subscribers',
+    audienceSize: 12450,
+    tags: ['sale', 'summer', '2024'],
+    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
+    stats: {
+      sent: 12450, delivered: 12234, bounced: 216, opens: 5856, uniqueOpens: 4234,
+      clicks: 1890, uniqueClicks: 1456, unsubscribes: 23, complaints: 2,
+      revenue: 45670, conversions: 234, openRate: 34.6, clickRate: 11.9,
+      bounceRate: 1.7, unsubscribeRate: 0.18, deliverabilityRate: 98.3
+    },
+    createdAt: new Date('2024-06-01'),
+    updatedAt: new Date('2024-06-15'),
+    sentAt: new Date('2024-06-15T10:00:00')
+  },
+  {
+    id: 'camp2',
+    name: 'Welcome Series - Day 1',
+    description: 'First email in welcome automation series',
+    type: 'automation',
+    emailType: 'automated',
+    status: 'running',
+    subject: 'Welcome to FreeFlow! Here\'s what to expect',
+    fromName: 'FreeFlow Team',
+    fromEmail: 'welcome@freeflow.com',
+    audienceId: 'aud2',
+    audienceName: 'New Signups',
+    audienceSize: 890,
+    tags: ['welcome', 'onboarding'],
+    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
+    stats: {
+      sent: 4532, delivered: 4498, bounced: 34, opens: 3456, uniqueOpens: 3012,
+      clicks: 1234, uniqueClicks: 987, unsubscribes: 12, complaints: 0,
+      revenue: 12340, conversions: 156, openRate: 67.0, clickRate: 21.9,
+      bounceRate: 0.8, unsubscribeRate: 0.26, deliverabilityRate: 99.2
+    },
+    automation: { type: 'signup', config: {}, delayDays: 0, delayHours: 1 },
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-06-20')
+  },
+  {
+    id: 'camp3',
+    name: 'Product Launch: Pro Plan',
+    description: 'Announcing new Pro plan features',
+    type: 'ab_test',
+    emailType: 'regular',
+    status: 'completed',
+    subject: 'Introducing FreeFlow Pro',
+    fromName: 'FreeFlow',
+    fromEmail: 'hello@freeflow.com',
+    audienceId: 'aud1',
+    audienceName: 'All Subscribers',
+    audienceSize: 10000,
+    tags: ['product', 'launch', 'pro'],
+    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
+    stats: {
+      sent: 10000, delivered: 9856, bounced: 144, opens: 4234, uniqueOpens: 3567,
+      clicks: 890, uniqueClicks: 756, unsubscribes: 8, complaints: 1,
+      revenue: 23450, conversions: 89, openRate: 36.2, clickRate: 7.7,
+      bounceRate: 1.4, unsubscribeRate: 0.08, deliverabilityRate: 98.6
+    },
+    abTest: {
+      id: 'ab1',
+      name: 'Subject Line Test',
+      testType: 'subject',
+      variants: [
+        { id: 'v1', name: 'Variant A', subject: 'Introducing FreeFlow Pro', stats: { sent: 5000, opens: 1890, clicks: 456, conversions: 45, openRate: 37.8, clickRate: 9.1 }, isWinner: true },
+        { id: 'v2', name: 'Variant B', subject: 'Meet the New FreeFlow Pro Plan', stats: { sent: 5000, opens: 1677, clicks: 300, conversions: 44, openRate: 33.5, clickRate: 6.0 }, isWinner: false }
+      ],
+      winner: 'v1',
+      winnerCriteria: 'open_rate',
+      testDuration: 4,
+      testPercentage: 100,
+      status: 'completed'
+    },
+    createdAt: new Date('2024-05-01'),
+    updatedAt: new Date('2024-05-10'),
+    sentAt: new Date('2024-05-10T09:00:00')
+  },
+  {
+    id: 'camp4',
+    name: 'Abandoned Cart Recovery',
+    description: 'Automated cart abandonment emails',
+    type: 'automation',
+    emailType: 'automated',
+    status: 'running',
+    subject: 'You left something behind! 🛒',
+    fromName: 'FreeFlow Store',
+    fromEmail: 'shop@freeflow.com',
+    audienceId: 'aud3',
+    audienceName: 'Cart Abandoners',
+    audienceSize: 2340,
+    tags: ['ecommerce', 'recovery', 'cart'],
+    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
+    stats: {
+      sent: 1234, delivered: 1220, bounced: 14, opens: 634, uniqueOpens: 567,
+      clicks: 312, uniqueClicks: 289, unsubscribes: 3, complaints: 0,
+      revenue: 8940, conversions: 67, openRate: 46.5, clickRate: 23.7,
+      bounceRate: 1.1, unsubscribeRate: 0.24, deliverabilityRate: 98.9
+    },
+    automation: { type: 'abandoned_cart', config: { cartValue: 50 }, delayDays: 0, delayHours: 2 },
+    createdAt: new Date('2024-02-15'),
+    updatedAt: new Date('2024-06-18')
+  },
+  {
+    id: 'camp5',
+    name: 'Monthly Newsletter - June',
+    description: 'June newsletter with company updates',
+    type: 'email',
+    emailType: 'regular',
+    status: 'scheduled',
+    subject: 'June Updates: New Features & Tips',
+    fromName: 'FreeFlow Newsletter',
+    fromEmail: 'newsletter@freeflow.com',
+    audienceId: 'aud4',
+    audienceName: 'Newsletter Subscribers',
+    audienceSize: 8900,
+    tags: ['newsletter', 'monthly'],
+    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
+    schedule: { sendAt: new Date('2024-07-01T10:00:00'), timezone: 'America/New_York', sendTimeOptimization: true },
+    stats: {
+      sent: 0, delivered: 0, bounced: 0, opens: 0, uniqueOpens: 0,
+      clicks: 0, uniqueClicks: 0, unsubscribes: 0, complaints: 0,
+      revenue: 0, conversions: 0, openRate: 0, clickRate: 0,
+      bounceRate: 0, unsubscribeRate: 0, deliverabilityRate: 0
+    },
+    createdAt: new Date('2024-06-20'),
+    updatedAt: new Date('2024-06-22')
+  }
+]
+
+const mockAudiences: Audience[] = [
+  {
+    id: 'aud1',
+    name: 'All Subscribers',
+    description: 'Main subscriber list',
+    stats: { total: 12450, subscribed: 11234, unsubscribed: 890, cleaned: 326, pending: 0, avgOpenRate: 34.5, avgClickRate: 12.3 },
+    growthRate: 5.2,
+    tags: ['main', 'active'],
+    segments: [
+      { id: 'seg1', name: 'High Engagers', type: 'dynamic', conditions: [{ field: 'engagement_score', operator: 'greater_than', value: 80 }], memberCount: 2340, createdAt: new Date() },
+      { id: 'seg2', name: 'Inactive (90 days)', type: 'dynamic', conditions: [{ field: 'last_activity', operator: 'less_than', value: 90 }], memberCount: 1560, createdAt: new Date() }
+    ],
+    createdAt: new Date('2023-01-01')
+  },
+  {
+    id: 'aud2',
+    name: 'New Signups (30 days)',
+    description: 'Recently joined subscribers',
+    stats: { total: 890, subscribed: 870, unsubscribed: 12, cleaned: 8, pending: 0, avgOpenRate: 56.7, avgClickRate: 18.9 },
+    growthRate: 12.3,
+    tags: ['new', 'onboarding'],
+    segments: [],
+    createdAt: new Date('2024-05-01')
+  },
+  {
+    id: 'aud3',
+    name: 'E-commerce Customers',
+    description: 'Customers who have made a purchase',
+    stats: { total: 4560, subscribed: 4320, unsubscribed: 180, cleaned: 60, pending: 0, avgOpenRate: 42.3, avgClickRate: 15.6 },
+    growthRate: 8.7,
+    tags: ['customers', 'purchasers'],
+    segments: [
+      { id: 'seg3', name: 'VIP Customers', type: 'saved', conditions: [{ field: 'total_spent', operator: 'greater_than', value: 500 }], memberCount: 890, createdAt: new Date() },
+      { id: 'seg4', name: 'One-time Buyers', type: 'saved', conditions: [{ field: 'order_count', operator: 'equals', value: 1 }], memberCount: 2340, createdAt: new Date() }
+    ],
+    createdAt: new Date('2023-06-01')
+  },
+  {
+    id: 'aud4',
+    name: 'Newsletter Subscribers',
+    description: 'Blog and content subscribers',
+    stats: { total: 8900, subscribed: 8450, unsubscribed: 340, cleaned: 110, pending: 0, avgOpenRate: 38.9, avgClickRate: 14.2 },
+    growthRate: 3.4,
+    tags: ['content', 'blog'],
+    segments: [],
+    createdAt: new Date('2023-03-01')
+  }
+]
+
+const mockAutomations: AutomationWorkflow[] = [
+  {
+    id: 'auto1',
+    name: 'Welcome Email Series',
+    description: 'Onboard new subscribers with a 5-email series',
+    trigger: { type: 'signup', config: {}, delayDays: 0, delayHours: 1 },
+    status: 'active',
+    steps: [
+      { id: 's1', type: 'email', config: { subject: 'Welcome!' }, position: 1, stats: { sent: 4532, opens: 3456, clicks: 1234 } },
+      { id: 's2', type: 'delay', config: { days: 2 }, position: 2 },
+      { id: 's3', type: 'email', config: { subject: 'Getting Started' }, position: 3, stats: { sent: 4012, opens: 2890, clicks: 890 } },
+      { id: 's4', type: 'delay', config: { days: 3 }, position: 4 },
+      { id: 's5', type: 'email', config: { subject: 'Pro Tips' }, position: 5, stats: { sent: 3678, opens: 2456, clicks: 678 } }
+    ],
+    stats: { enrolled: 4890, completed: 3456, active: 1234, revenue: 23450, openRate: 68.2, clickRate: 24.5 },
+    createdAt: new Date('2024-01-01')
+  },
+  {
+    id: 'auto2',
+    name: 'Abandoned Cart Recovery',
+    description: 'Recover lost sales with 3 follow-up emails',
+    trigger: { type: 'abandoned_cart', config: { minCartValue: 50 }, delayDays: 0, delayHours: 2 },
+    status: 'active',
+    steps: [
+      { id: 's6', type: 'email', config: { subject: 'You forgot something!' }, position: 1, stats: { sent: 1234, opens: 634, clicks: 312 } },
+      { id: 's7', type: 'delay', config: { days: 1 }, position: 2 },
+      { id: 's8', type: 'condition', config: { check: 'not_purchased' }, position: 3 },
+      { id: 's9', type: 'email', config: { subject: '10% off your cart' }, position: 4, stats: { sent: 890, opens: 456, clicks: 234 } }
+    ],
+    stats: { enrolled: 2340, completed: 1890, active: 450, revenue: 45670, openRate: 52.1, clickRate: 31.2 },
+    createdAt: new Date('2024-02-15')
+  },
+  {
+    id: 'auto3',
+    name: 'Birthday Campaign',
+    description: 'Send birthday wishes with special offer',
+    trigger: { type: 'birthday', config: { daysBefore: 3 }, delayDays: 0, delayHours: 0 },
+    status: 'active',
+    steps: [
+      { id: 's10', type: 'email', config: { subject: '🎂 Happy Birthday!' }, position: 1, stats: { sent: 456, opens: 376, clicks: 189 } }
+    ],
+    stats: { enrolled: 456, completed: 456, active: 0, revenue: 8900, openRate: 82.5, clickRate: 45.2 },
+    createdAt: new Date('2024-03-01')
+  }
+]
+
+const mockTemplates: EmailTemplate[] = [
+  { id: 't1', name: 'Welcome Email', category: 'basic', thumbnail: '📧', html: '', usageCount: 234, openRate: 68.2, clickRate: 24.5, isCustom: false, createdAt: new Date() },
+  { id: 't2', name: 'Product Launch', category: 'announcement', thumbnail: '🚀', html: '', usageCount: 156, openRate: 42.3, clickRate: 18.7, isCustom: false, createdAt: new Date() },
+  { id: 't3', name: 'Newsletter Classic', category: 'newsletter', thumbnail: '📰', html: '', usageCount: 445, openRate: 38.9, clickRate: 14.2, isCustom: false, createdAt: new Date() },
+  { id: 't4', name: 'Cart Abandonment', category: 'ecommerce', thumbnail: '🛒', html: '', usageCount: 312, openRate: 52.1, clickRate: 31.2, isCustom: false, createdAt: new Date() },
+  { id: 't5', name: 'Re-engagement', category: 'basic', thumbnail: '💫', html: '', usageCount: 189, openRate: 28.3, clickRate: 12.1, isCustom: false, createdAt: new Date() },
+  { id: 't6', name: 'Sale Announcement', category: 'ecommerce', thumbnail: '🎉', html: '', usageCount: 267, openRate: 45.6, clickRate: 22.8, isCustom: false, createdAt: new Date() },
+  { id: 't7', name: 'Event Invitation', category: 'event', thumbnail: '📅', html: '', usageCount: 123, openRate: 51.2, clickRate: 28.9, isCustom: false, createdAt: new Date() },
+  { id: 't8', name: 'Custom Brand Template', category: 'basic', thumbnail: '✨', html: '', usageCount: 89, openRate: 44.5, clickRate: 19.3, isCustom: true, createdAt: new Date() }
+]
+
+const mockDeliverability: DeliverabilityReport = {
+  domain: 'freeflow.com',
+  score: 92,
+  spfStatus: 'pass',
+  dkimStatus: 'pass',
+  dmarcStatus: 'pass',
+  blacklistStatus: 'clean',
+  reputation: 'excellent',
+  issues: [],
+  recommendations: ['Consider implementing BIMI for brand visibility', 'Monitor feedback loops from major ISPs']
+}
+
+// ============== HELPER FUNCTIONS ==============
+
+const getStatusColor = (status: CampaignStatus): string => {
+  const colors: Record<CampaignStatus, string> = {
+    draft: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300',
+    scheduled: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400',
+    sending: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
+    running: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400',
+    paused: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400',
+    completed: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400',
+    archived: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-700 dark:text-gray-400'
+  }
+  return colors[status] || colors.draft
+}
+
+const getCampaignTypeColor = (type: CampaignType): string => {
+  const colors: Record<CampaignType, string> = {
+    email: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+    sms: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    social: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    multi_channel: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    ab_test: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    automation: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+  }
+  return colors[type] || colors.email
+}
+
+const getCampaignIcon = (type: CampaignType) => {
+  const icons: Record<CampaignType, React.ReactNode> = {
+    email: <Mail className="w-4 h-4" />,
+    sms: <MessageSquare className="w-4 h-4" />,
+    social: <Globe className="w-4 h-4" />,
+    multi_channel: <Layers className="w-4 h-4" />,
+    ab_test: <Split className="w-4 h-4" />,
+    automation: <Zap className="w-4 h-4" />
+  }
+  return icons[type] || icons.email
+}
+
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+  return num.toString()
+}
+
+// ============== MAIN COMPONENT ==============
+
+export default function CampaignsClient() {
+  const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'all'>('all')
+  const [typeFilter, setTypeFilter] = useState<CampaignType | 'all'>('all')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
-  const [showNewCampaign, setShowNewCampaign] = useState(false)
-  const { campaigns, loading, error } = useCampaigns({ campaignType: campaignTypeFilter, status: statusFilter })
-  const displayCampaigns = campaigns.length > 0 ? campaigns : initialCampaigns
-
-  // Mock templates
-  const templates: EmailTemplate[] = [
-    { id: '1', name: 'Welcome Series', category: 'Onboarding', thumbnail: '📧', usageCount: 234, conversionRate: 32.5 },
-    { id: '2', name: 'Product Launch', category: 'Announcement', thumbnail: '🚀', usageCount: 156, conversionRate: 28.3 },
-    { id: '3', name: 'Newsletter', category: 'Content', thumbnail: '📰', usageCount: 445, conversionRate: 18.7 },
-    { id: '4', name: 'Cart Abandonment', category: 'E-commerce', thumbnail: '🛒', usageCount: 312, conversionRate: 45.2 },
-    { id: '5', name: 'Re-engagement', category: 'Retention', thumbnail: '💫', usageCount: 189, conversionRate: 22.1 },
-    { id: '6', name: 'Promotional Sale', category: 'Sales', thumbnail: '🎉', usageCount: 267, conversionRate: 35.8 }
-  ]
-
-  // Mock audiences
-  const audiences: Audience[] = [
-    { id: '1', name: 'All Subscribers', count: 12450, growthRate: 5.2, tags: ['active', 'engaged'], lastActivity: '2 hours ago' },
-    { id: '2', name: 'High-Value Customers', count: 2340, growthRate: 8.7, tags: ['vip', 'purchasers'], lastActivity: '1 day ago' },
-    { id: '3', name: 'New Signups (30 days)', count: 890, growthRate: 12.3, tags: ['new', 'onboarding'], lastActivity: '3 hours ago' },
-    { id: '4', name: 'Inactive Users', count: 3210, growthRate: -2.1, tags: ['churned', 're-engage'], lastActivity: '30 days ago' },
-    { id: '5', name: 'Newsletter Subscribers', count: 8900, growthRate: 3.4, tags: ['content', 'blog'], lastActivity: '5 hours ago' }
-  ]
-
-  // Mock automations
-  const automations: AutomationWorkflow[] = [
-    { id: '1', name: 'Welcome Email Series', trigger: 'New signup', status: 'active', emailsSent: 4532, openRate: 68.2, clickRate: 24.5 },
-    { id: '2', name: 'Abandoned Cart Recovery', trigger: 'Cart abandonment', status: 'active', emailsSent: 1234, openRate: 52.1, clickRate: 31.2 },
-    { id: '3', name: 'Post-Purchase Follow-up', trigger: 'Order completed', status: 'active', emailsSent: 2890, openRate: 71.4, clickRate: 18.9 },
-    { id: '4', name: 'Re-engagement Campaign', trigger: '30 days inactive', status: 'paused', emailsSent: 890, openRate: 28.3, clickRate: 8.7 },
-    { id: '5', name: 'Birthday Discount', trigger: 'Birthday', status: 'active', emailsSent: 456, openRate: 82.5, clickRate: 45.2 }
-  ]
+  const [showCampaignDialog, setShowCampaignDialog] = useState(false)
+  const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showAudienceDialog, setShowAudienceDialog] = useState(false)
 
   const stats = useMemo(() => ({
-    total: displayCampaigns.length,
-    running: displayCampaigns.filter(c => c.status === 'running').length,
-    totalRevenue: displayCampaigns.reduce((sum, c) => sum + c.revenue_generated, 0),
-    avgROI: displayCampaigns.length > 0
-      ? (displayCampaigns.reduce((sum, c) => sum + (c.roi_percentage || 0), 0) / displayCampaigns.length)
-      : 0,
-    totalImpressions: displayCampaigns.reduce((sum, c) => sum + c.impressions, 0),
-    avgOpenRate: 42.3,
-    avgClickRate: 12.8,
-    totalSubscribers: 12450
-  }), [displayCampaigns])
+    totalCampaigns: mockCampaigns.length,
+    activeCampaigns: mockCampaigns.filter(c => c.status === 'running').length,
+    scheduledCampaigns: mockCampaigns.filter(c => c.status === 'scheduled').length,
+    totalSubscribers: mockAudiences.reduce((sum, a) => sum + a.stats.subscribed, 0),
+    avgOpenRate: mockCampaigns.filter(c => c.stats.openRate > 0).reduce((sum, c) => sum + c.stats.openRate, 0) / mockCampaigns.filter(c => c.stats.openRate > 0).length || 0,
+    avgClickRate: mockCampaigns.filter(c => c.stats.clickRate > 0).reduce((sum, c) => sum + c.stats.clickRate, 0) / mockCampaigns.filter(c => c.stats.clickRate > 0).length || 0,
+    totalRevenue: mockCampaigns.reduce((sum, c) => sum + c.stats.revenue, 0),
+    totalSent: mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
+  }), [])
 
   const filteredCampaigns = useMemo(() => {
-    let filtered = displayCampaigns
-    if (campaignTypeFilter !== 'all') {
-      filtered = filtered.filter(c => c.campaign_type === campaignTypeFilter)
-    }
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(c => c.status === statusFilter)
-    }
-    if (searchQuery) {
-      filtered = filtered.filter(c =>
-        c.campaign_name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-    return filtered
-  }, [displayCampaigns, campaignTypeFilter, statusFilter, searchQuery])
-
-  const getCampaignIcon = (type: string) => {
-    switch (type) {
-      case 'email': return <Mail className="h-4 w-4" />
-      case 'sms': return <MessageSquare className="h-4 w-4" />
-      case 'social': return <Globe className="h-4 w-4" />
-      case 'multi_channel': return <Layers className="h-4 w-4" />
-      default: return <Megaphone className="h-4 w-4" />
-    }
-  }
-
-  if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
+    return mockCampaigns.filter(campaign => {
+      if (statusFilter !== 'all' && campaign.status !== statusFilter) return false
+      if (typeFilter !== 'all' && campaign.type !== typeFilter) return false
+      if (searchQuery && !campaign.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+      return true
+    })
+  }, [statusFilter, typeFilter, searchQuery])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 text-white">
-        <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="max-w-[1800px] mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Megaphone className="h-8 w-8" />
-                <h1 className="text-3xl font-bold">Marketing Hub</h1>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <Megaphone className="w-8 h-8" />
               </div>
-              <p className="text-rose-100">Create, automate, and analyze your marketing campaigns</p>
+              <div>
+                <h1 className="text-3xl font-bold">Marketing Hub</h1>
+                <p className="text-rose-100">Mailchimp-Level Email Marketing Platform</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1.5">
-                <Sparkles className="h-4 w-4" />
-                <span className="text-sm">AI-Powered</span>
-              </div>
-              <button
-                onClick={() => setShowNewCampaign(true)}
-                className="flex items-center gap-2 bg-white text-rose-600 px-4 py-2 rounded-lg font-medium hover:bg-rose-50 transition-colors"
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Content
+              </Button>
+              <Button
+                onClick={() => setShowNewCampaignDialog(true)}
+                className="bg-white text-rose-600 hover:bg-rose-50"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="w-4 h-4 mr-2" />
                 New Campaign
-              </button>
+              </Button>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Mail className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Campaigns</span>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-8 gap-3">
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-rose-400 to-pink-500 rounded-lg">
+                  <Mail className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Campaigns</p>
+                  <p className="text-xl font-bold">{stats.totalCampaigns}</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats.total}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Play className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Active</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg">
+                  <Play className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Active</p>
+                  <p className="text-xl font-bold">{stats.activeCampaigns}</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats.running}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Users className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Subscribers</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Scheduled</p>
+                  <p className="text-xl font-bold">{stats.scheduledCampaigns}</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats.totalSubscribers.toLocaleString()}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Eye className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Impressions</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-purple-400 to-violet-500 rounded-lg">
+                  <Users className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Subscribers</p>
+                  <p className="text-xl font-bold">{formatNumber(stats.totalSubscribers)}</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{(stats.totalImpressions / 1000).toFixed(1)}K</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Send className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Open Rate</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg">
+                  <MailOpen className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Open Rate</p>
+                  <p className="text-xl font-bold">{stats.avgOpenRate.toFixed(1)}%</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats.avgOpenRate}%</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <MousePointer className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Click Rate</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-lg">
+                  <MousePointerClick className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Click Rate</p>
+                  <p className="text-xl font-bold">{stats.avgClickRate.toFixed(1)}%</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats.avgClickRate}%</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <DollarSign className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Revenue</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Revenue</p>
+                  <p className="text-xl font-bold">${formatNumber(stats.totalRevenue)}</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">${(stats.totalRevenue / 1000).toFixed(1)}K</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="h-4 w-4 text-rose-200" />
-                <span className="text-rose-200 text-sm">Avg ROI</span>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-fuchsia-400 to-pink-500 rounded-lg">
+                  <Send className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-rose-100">Emails Sent</p>
+                  <p className="text-xl font-bold">{formatNumber(stats.totalSent)}</p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats.avgROI.toFixed(1)}%</div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-8">
-        {/* View Tabs */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
-            {([
-              { key: 'campaigns', label: 'Campaigns', icon: Mail },
-              { key: 'automations', label: 'Automations', icon: Zap },
-              { key: 'templates', label: 'Templates', icon: Layout },
-              { key: 'audiences', label: 'Audiences', icon: Users },
-              { key: 'analytics', label: 'Analytics', icon: BarChart3 }
-            ] as { key: ViewMode, label: string, icon: any }[]).map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setViewMode(key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === key
-                    ? 'bg-rose-600 text-white'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 p-1">
+              <TabsTrigger value="campaigns" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Campaigns
+              </TabsTrigger>
+              <TabsTrigger value="automations" className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Automations
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="flex items-center gap-2">
+                <Layout className="w-4 h-4" />
+                Templates
+              </TabsTrigger>
+              <TabsTrigger value="audiences" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Audiences
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="deliverability" className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Deliverability
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-64"
-              />
-            </div>
-          </div>
-        </div>
-
-        {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-rose-600 border-r-transparent"></div>
-          </div>
-        )}
-
-        {/* Campaigns View */}
-        {viewMode === 'campaigns' && !loading && (
-          <>
-            <div className="flex items-center gap-4 mb-6">
-              <select
-                value={campaignTypeFilter}
-                onChange={(e) => setCampaignTypeFilter(e.target.value as any)}
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Types</option>
-                <option value="email">Email</option>
-                <option value="sms">SMS</option>
-                <option value="social">Social</option>
-                <option value="multi_channel">Multi-Channel</option>
-              </select>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="running">Running</option>
-                <option value="completed">Completed</option>
-                <option value="paused">Paused</option>
-              </select>
-            </div>
-
-            {filteredCampaigns.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700">
-                <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No campaigns found</p>
-                <button
-                  onClick={() => setShowNewCampaign(true)}
-                  className="mt-4 inline-flex items-center gap-2 text-rose-600 dark:text-rose-400 font-medium hover:underline"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create your first campaign
-                </button>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search campaigns..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 w-64"
+                />
               </div>
-            ) : (
+            </div>
+          </div>
+
+          {/* Campaigns Tab */}
+          <TabsContent value="campaigns">
+            <div className="space-y-6">
+              {/* Filters */}
+              <div className="flex items-center gap-4">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <option value="all">All Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="running">Running</option>
+                  <option value="paused">Paused</option>
+                  <option value="completed">Completed</option>
+                </select>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as any)}
+                  className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <option value="all">All Types</option>
+                  <option value="email">Email</option>
+                  <option value="automation">Automation</option>
+                  <option value="ab_test">A/B Test</option>
+                  <option value="sms">SMS</option>
+                </select>
+              </div>
+
+              {/* Campaign List */}
               <div className="space-y-4">
                 {filteredCampaigns.map(campaign => (
-                  <div
+                  <Card
                     key={campaign.id}
-                    onClick={() => setSelectedCampaign(campaign)}
-                    className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700 hover:shadow-md transition-all cursor-pointer group"
+                    className="p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => {
+                      setSelectedCampaign(campaign)
+                      setShowCampaignDialog(true)
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${
-                          campaign.status === 'running'
-                            ? 'bg-green-100 dark:bg-green-900/30'
-                            : campaign.status === 'completed'
-                              ? 'bg-blue-100 dark:bg-blue-900/30'
-                              : campaign.status === 'paused'
-                                ? 'bg-yellow-100 dark:bg-yellow-900/30'
-                                : 'bg-gray-100 dark:bg-gray-700'
-                        }`}>
-                          {getCampaignIcon(campaign.campaign_type)}
+                        <div className={`p-3 rounded-lg ${getCampaignTypeColor(campaign.type)}`}>
+                          {getCampaignIcon(campaign.type)}
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{campaign.campaign_name}</h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs ${
-                              campaign.status === 'running' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                              campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                              campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                              'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                            }`}>
-                              {campaign.status}
+                            <h3 className="font-semibold text-lg">{campaign.name}</h3>
+                            <Badge className={getStatusColor(campaign.status)}>{campaign.status}</Badge>
+                            <Badge className={getCampaignTypeColor(campaign.type)}>{campaign.type}</Badge>
+                            {campaign.abTest && <Badge className="bg-amber-100 text-amber-700">A/B Test</Badge>}
+                          </div>
+                          {campaign.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{campaign.description}</p>
+                          )}
+                          {campaign.subject && (
+                            <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
+                              <span className="font-medium">Subject:</span> {campaign.subject}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Users className="w-3 h-3" />
+                              {formatNumber(campaign.audienceSize)} subscribers
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-xs bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
-                              {campaign.campaign_type}
+                            <span className="flex items-center gap-1">
+                              <Send className="w-3 h-3" />
+                              {formatNumber(campaign.stats.sent)} sent
                             </span>
-                            {campaign.is_automated && (
-                              <span className="px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                                Automated
+                            {campaign.sentAt && (
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {campaign.sentAt.toLocaleDateString()}
+                              </span>
+                            )}
+                            {campaign.schedule && (
+                              <span className="flex items-center gap-1 text-blue-600">
+                                <Clock className="w-3 h-3" />
+                                Scheduled: {campaign.schedule.sendAt.toLocaleDateString()}
                               </span>
                             )}
                           </div>
-                          {campaign.description && <p className="text-sm text-gray-600 dark:text-gray-400">{campaign.description}</p>}
-                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-500 mt-2">
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {campaign.audience_size.toLocaleString()} audience
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {campaign.impressions.toLocaleString()} impressions
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MousePointer className="h-3 w-3" />
-                              {campaign.clicks.toLocaleString()} clicks
-                            </span>
-                          </div>
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <div className="flex items-center gap-4">
-                          {campaign.roi_percentage && (
-                            <div>
-                              <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">{campaign.roi_percentage.toFixed(1)}%</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-500">ROI</div>
-                            </div>
-                          )}
-                          {campaign.revenue_generated > 0 && (
-                            <div>
-                              <div className="text-2xl font-bold text-green-600 dark:text-green-400">${campaign.revenue_generated.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-500">Revenue</div>
-                            </div>
-                          )}
-                        </div>
-                        {campaign.conversion_rate && (
-                          <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                            {campaign.conversion_rate.toFixed(1)}% conversion rate
+                      <div className="flex items-center gap-8">
+                        {campaign.stats.openRate > 0 && (
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{campaign.stats.openRate.toFixed(1)}%</div>
+                            <div className="text-xs text-gray-500">Open Rate</div>
                           </div>
                         )}
+                        {campaign.stats.clickRate > 0 && (
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-600">{campaign.stats.clickRate.toFixed(1)}%</div>
+                            <div className="text-xs text-gray-500">Click Rate</div>
+                          </div>
+                        )}
+                        {campaign.stats.revenue > 0 && (
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">${formatNumber(campaign.stats.revenue)}</div>
+                            <div className="text-xs text-gray-500">Revenue</div>
+                          </div>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {campaign.status === 'running' ? (
-                        <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg">
-                          <Pause className="h-3 w-3" />
-                          Pause
-                        </button>
-                      ) : campaign.status === 'paused' ? (
-                        <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg">
-                          <Play className="h-3 w-3" />
-                          Resume
-                        </button>
-                      ) : null}
-                      <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                        <Edit2 className="h-3 w-3" />
-                        Edit
-                      </button>
-                      <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                        <Copy className="h-3 w-3" />
-                        Duplicate
-                      </button>
-                      <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                        <BarChart3 className="h-3 w-3" />
-                        Analytics
-                      </button>
-                    </div>
-                  </div>
+                    {/* A/B Test Results */}
+                    {campaign.abTest && campaign.abTest.status === 'completed' && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Split className="w-4 h-4 text-amber-600" />
+                          <span className="text-sm font-medium">A/B Test Results</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          {campaign.abTest.variants.map(variant => (
+                            <div
+                              key={variant.id}
+                              className={`p-3 rounded-lg ${variant.isWinner ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800'}`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">{variant.name}</span>
+                                {variant.isWinner && <Badge className="bg-green-100 text-green-700">Winner</Badge>}
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{variant.subject}</p>
+                              <div className="flex items-center gap-4 text-sm">
+                                <span>Open: {variant.stats.openRate.toFixed(1)}%</span>
+                                <span>Click: {variant.stats.clickRate.toFixed(1)}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
                 ))}
               </div>
-            )}
-          </>
-        )}
-
-        {/* Automations View */}
-        {viewMode === 'automations' && !loading && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-gray-600 dark:text-gray-400">Automate your marketing with powerful workflows</p>
-              <button className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors">
-                <Plus className="h-4 w-4" />
-                New Automation
-              </button>
             </div>
+          </TabsContent>
 
-            {automations.map(automation => (
-              <div key={automation.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-lg ${
-                      automation.status === 'active'
-                        ? 'bg-green-100 dark:bg-green-900/30'
-                        : automation.status === 'paused'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/30'
-                          : 'bg-gray-100 dark:bg-gray-700'
-                    }`}>
-                      <Zap className={`h-5 w-5 ${
-                        automation.status === 'active' ? 'text-green-600 dark:text-green-400' :
-                        automation.status === 'paused' ? 'text-yellow-600 dark:text-yellow-400' :
-                        'text-gray-600 dark:text-gray-400'
-                      }`} />
+          {/* Automations Tab */}
+          <TabsContent value="automations">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Email Automations</h2>
+                  <p className="text-gray-500">Create automated email journeys</p>
+                </div>
+                <Button><Plus className="w-4 h-4 mr-2" />Create Automation</Button>
+              </div>
+
+              <div className="grid gap-4">
+                {mockAutomations.map(automation => (
+                  <Card key={automation.id} className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-lg ${automation.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                          <Zap className={`w-5 h-5 ${automation.status === 'active' ? 'text-green-600' : 'text-gray-600'}`} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{automation.name}</h3>
+                            <Badge className={automation.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {automation.status}
+                            </Badge>
+                          </div>
+                          {automation.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{automation.description}</p>
+                          )}
+                          <p className="text-sm text-gray-500">
+                            Trigger: {automation.trigger.type.replace('_', ' ')}
+                          </p>
+                          <div className="flex items-center gap-2 mt-3">
+                            {automation.steps.filter(s => s.type === 'email').map((step, i) => (
+                              <div key={step.id} className="flex items-center gap-2">
+                                {i > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
+                                <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded">
+                                  <Mail className="w-4 h-4 text-rose-600" />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-6">
+                        <div className="text-center">
+                          <div className="text-xl font-bold">{formatNumber(automation.stats.enrolled)}</div>
+                          <div className="text-xs text-gray-500">Enrolled</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-600">{automation.stats.openRate.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-500">Open Rate</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-blue-600">{automation.stats.clickRate.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-500">Click Rate</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-600">${formatNumber(automation.stats.revenue)}</div>
+                          <div className="text-xs text-gray-500">Revenue</div>
+                        </div>
+                        <Switch checked={automation.status === 'active'} />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Templates Tab */}
+          <TabsContent value="templates">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Email Templates</h2>
+                  <p className="text-gray-500">Design beautiful emails with drag-and-drop</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline"><Wand2 className="w-4 h-4 mr-2" />AI Generate</Button>
+                  <Button><Plus className="w-4 h-4 mr-2" />Create Template</Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-6">
+                {mockTemplates.map(template => (
+                  <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+                    <div className="h-40 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center relative">
+                      <span className="text-6xl">{template.thumbnail}</span>
+                      {template.isCustom && (
+                        <Badge className="absolute top-2 right-2 bg-purple-100 text-purple-700">Custom</Badge>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">{template.name}</h3>
+                        <Badge variant="outline">{template.category}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>Used {template.usageCount} times</span>
+                        <span className="text-green-600">{template.openRate.toFixed(1)}% opens</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        Use Template
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Audiences Tab */}
+          <TabsContent value="audiences">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Audience Lists</h2>
+                  <p className="text-gray-500">Segment and manage your subscribers</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline"><Download className="w-4 h-4 mr-2" />Import</Button>
+                  <Button><Plus className="w-4 h-4 mr-2" />Create Audience</Button>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {mockAudiences.map(audience => (
+                  <Card key={audience.id} className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-rose-100 dark:bg-rose-900/30 rounded-lg">
+                          <Users className="w-5 h-5 text-rose-600" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{audience.name}</h3>
+                            <div className="flex items-center gap-1">
+                              {audience.growthRate >= 0 ? (
+                                <ArrowUp className="w-4 h-4 text-green-500" />
+                              ) : (
+                                <ArrowDown className="w-4 h-4 text-red-500" />
+                              )}
+                              <span className={audience.growthRate >= 0 ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+                                {Math.abs(audience.growthRate)}%
+                              </span>
+                            </div>
+                          </div>
+                          {audience.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{audience.description}</p>
+                          )}
+                          <div className="flex items-center gap-2">
+                            {audience.tags.map(tag => (
+                              <Badge key={tag} variant="outline">{tag}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-8">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold">{formatNumber(audience.stats.subscribed)}</div>
+                          <div className="text-xs text-gray-500">Subscribed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">{audience.stats.avgOpenRate.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-500">Avg Opens</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">{audience.stats.avgClickRate.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-500">Avg Clicks</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold">{audience.segments.length}</div>
+                          <div className="text-xs text-gray-500">Segments</div>
+                        </div>
+                        <Button variant="ghost" size="icon">
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {audience.segments.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="text-sm font-medium mb-2">Segments</div>
+                        <div className="flex flex-wrap gap-2">
+                          {audience.segments.map(segment => (
+                            <Badge key={segment.id} variant="outline" className="gap-1">
+                              <Target className="w-3 h-3" />
+                              {segment.name} ({formatNumber(segment.memberCount)})
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-4">
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">Emails Sent (30d)</h3>
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                  </div>
+                  <p className="text-3xl font-bold">{formatNumber(28450)}</p>
+                  <p className="text-xs text-green-600 mt-1">+12.5% vs last period</p>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">Avg Open Rate</h3>
+                    <MailOpen className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <p className="text-3xl font-bold">{stats.avgOpenRate.toFixed(1)}%</p>
+                  <Progress value={stats.avgOpenRate} className="mt-2" />
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">Avg Click Rate</h3>
+                    <MousePointerClick className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <p className="text-3xl font-bold">{stats.avgClickRate.toFixed(1)}%</p>
+                  <Progress value={stats.avgClickRate} className="mt-2" />
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">Revenue (30d)</h3>
+                    <DollarSign className="w-5 h-5 text-green-500" />
+                  </div>
+                  <p className="text-3xl font-bold">${formatNumber(stats.totalRevenue)}</p>
+                  <p className="text-xs text-green-600 mt-1">+8.3% vs last period</p>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <Card className="p-6">
+                  <h3 className="font-semibold mb-4">Email Performance Over Time</h3>
+                  <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <AreaChart className="w-16 h-16 text-gray-400" />
+                    <span className="ml-4 text-gray-500">Performance chart</span>
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <h3 className="font-semibold mb-4">Campaign Type Breakdown</h3>
+                  <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <PieChart className="w-16 h-16 text-gray-400" />
+                    <span className="ml-4 text-gray-500">Type distribution</span>
+                  </div>
+                </Card>
+              </div>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-4">Top Performing Campaigns</h3>
+                <div className="space-y-4">
+                  {mockCampaigns.filter(c => c.stats.openRate > 0).sort((a, b) => b.stats.openRate - a.stats.openRate).slice(0, 5).map((campaign, i) => (
+                    <div key={campaign.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <span className="text-lg font-bold text-gray-400">#{i + 1}</span>
+                        <div>
+                          <p className="font-medium">{campaign.name}</p>
+                          <p className="text-sm text-gray-500">{campaign.sentAt?.toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6 text-sm">
+                        <div className="text-center">
+                          <p className="font-semibold text-green-600">{campaign.stats.openRate.toFixed(1)}%</p>
+                          <p className="text-xs text-gray-500">Opens</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-semibold text-blue-600">{campaign.stats.clickRate.toFixed(1)}%</p>
+                          <p className="text-xs text-gray-500">Clicks</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-semibold text-green-600">${formatNumber(campaign.stats.revenue)}</p>
+                          <p className="text-xs text-gray-500">Revenue</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Deliverability Tab */}
+          <TabsContent value="deliverability">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Email Deliverability</h2>
+                  <p className="text-gray-500">Monitor your sender reputation and inbox placement</p>
+                </div>
+                <Button variant="outline"><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+                  <div className="flex items-center justify-between mb-4">
+                    <Shield className="w-8 h-8 text-green-600" />
+                    <Badge className="bg-green-100 text-green-700">Excellent</Badge>
+                  </div>
+                  <p className="text-4xl font-bold text-green-700">{mockDeliverability.score}</p>
+                  <p className="text-sm text-green-600 mt-1">Sender Score</p>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-500" />
+                    <span className="font-medium">SPF</span>
+                  </div>
+                  <p className="text-lg font-semibold text-green-600">{mockDeliverability.spfStatus.toUpperCase()}</p>
+                  <p className="text-xs text-gray-500 mt-1">Email authentication</p>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-500" />
+                    <span className="font-medium">DKIM</span>
+                  </div>
+                  <p className="text-lg font-semibold text-green-600">{mockDeliverability.dkimStatus.toUpperCase()}</p>
+                  <p className="text-xs text-gray-500 mt-1">Domain verification</p>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-500" />
+                    <span className="font-medium">DMARC</span>
+                  </div>
+                  <p className="text-lg font-semibold text-green-600">{mockDeliverability.dmarcStatus.toUpperCase()}</p>
+                  <p className="text-xs text-gray-500 mt-1">Policy enforcement</p>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <Card className="p-6">
+                  <h3 className="font-semibold mb-4">Delivery Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm">Delivery Rate</span>
+                        <span className="font-semibold">98.3%</span>
+                      </div>
+                      <Progress value={98.3} className="h-2" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{automation.name}</h3>
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${
-                          automation.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                          automation.status === 'paused' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                          'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                        }`}>
-                          {automation.status}
-                        </span>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm">Bounce Rate</span>
+                        <span className="font-semibold text-red-600">1.7%</span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Trigger: {automation.trigger}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">{automation.emailsSent.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500">Emails Sent</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-green-600 dark:text-green-400">{automation.openRate}%</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500">Open Rate</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{automation.clickRate}%</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500">Click Rate</div>
-                    </div>
-                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                      <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Templates View */}
-        {viewMode === 'templates' && !loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {templates.map(template => (
-              <div key={template.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
-                <div className="h-32 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center">
-                  <span className="text-5xl">{template.thumbnail}</span>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{template.name}</h3>
-                    <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
-                      {template.category}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <span>Used {template.usageCount} times</span>
-                    <span className="text-green-600 dark:text-green-400">{template.conversionRate}% CVR</span>
-                  </div>
-                  <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 border border-rose-600 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 opacity-0 group-hover:opacity-100 transition-all">
-                    Use Template
-                    <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Audiences View */}
-        {viewMode === 'audiences' && !loading && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-gray-600 dark:text-gray-400">Segment and manage your subscriber lists</p>
-              <button className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors">
-                <Plus className="h-4 w-4" />
-                Create Segment
-              </button>
-            </div>
-
-            {audiences.map(audience => (
-              <div key={audience.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700 hover:shadow-md transition-all cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-rose-100 dark:bg-rose-900/30 rounded-lg">
-                      <Users className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                      <Progress value={1.7} className="h-2 bg-gray-100 [&>div]:bg-red-500" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{audience.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        {audience.tags.map(tag => (
-                          <span key={tag} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
-                            {tag}
-                          </span>
-                        ))}
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm">Complaint Rate</span>
+                        <span className="font-semibold text-yellow-600">0.02%</span>
                       </div>
+                      <Progress value={0.02} className="h-2 bg-gray-100 [&>div]:bg-yellow-500" />
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-8">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{audience.count.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500">Subscribers</div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`text-lg font-bold ${audience.growthRate >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {audience.growthRate >= 0 ? '+' : ''}{audience.growthRate}%
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm">Unsubscribe Rate</span>
+                        <span className="font-semibold">0.18%</span>
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500">Growth</div>
+                      <Progress value={0.18} className="h-2" />
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-500">
-                      Last active: {audience.lastActivity}
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <h3 className="font-semibold mb-4">Recommendations</h3>
+                  <div className="space-y-3">
+                    {mockDeliverability.recommendations.map((rec, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <Sparkles className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-blue-800 dark:text-blue-300">{rec}</p>
+                      </div>
+                    ))}
+                    <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-green-800 dark:text-green-300">Your domain is not on any email blacklists</p>
                     </div>
-                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                      <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    </button>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Analytics View */}
-        {viewMode === 'analytics' && !loading && (
-          <div className="space-y-6">
-            {/* Performance Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Email Performance</h3>
-                  <Mail className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Open Rate</span>
-                    <span className="font-medium text-gray-900 dark:text-white">42.3%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full">
-                    <div className="h-full bg-rose-600 rounded-full" style={{ width: '42.3%' }}></div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Click Rate</span>
-                    <span className="font-medium text-gray-900 dark:text-white">12.8%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full">
-                    <div className="h-full bg-blue-600 rounded-full" style={{ width: '12.8%' }}></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Subscriber Growth</h3>
-                  <UserPlus className="h-5 w-5 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">+1,234</div>
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>12.5% from last month</span>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Revenue Attribution</h3>
-                  <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">${(stats.totalRevenue / 1000).toFixed(1)}K</div>
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>8.3% from last month</span>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">A/B Test Results</h3>
-                  <FlaskConical className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">3 Active</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Winner determined in 2 tests
-                </div>
+                </Card>
               </div>
             </div>
-
-            {/* Charts Placeholder */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Campaign Performance Over Time</h3>
-                <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <div className="text-center">
-                    <Activity className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500 dark:text-gray-400">Performance chart</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Channel Breakdown</h3>
-                <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <div className="text-center">
-                    <PieChart className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500 dark:text-gray-400">Channel distribution</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Campaign Detail Modal */}
-      <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      {/* Campaign Detail Dialog */}
+      <Dialog open={showCampaignDialog} onOpenChange={setShowCampaignDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              {getCampaignIcon(selectedCampaign?.campaign_type || 'email')}
-              {selectedCampaign?.campaign_name}
+              {selectedCampaign && getCampaignIcon(selectedCampaign.type)}
+              {selectedCampaign?.name}
             </DialogTitle>
           </DialogHeader>
-
-          <Tabs defaultValue="overview" className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="audience">Audience</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-
-            <ScrollArea className="flex-1 mt-4">
-              <TabsContent value="overview" className="mt-0 space-y-6">
+          <ScrollArea className="h-[60vh]">
+            {selectedCampaign && (
+              <div className="space-y-6">
                 <div className="grid grid-cols-4 gap-4">
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCampaign?.audience_size.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Audience</div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{formatNumber(selectedCampaign.stats.sent)}</p>
+                    <p className="text-sm text-gray-500">Sent</p>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCampaign?.impressions.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Impressions</div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedCampaign.stats.openRate.toFixed(1)}%</p>
+                    <p className="text-sm text-gray-500">Open Rate</p>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCampaign?.clicks.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Clicks</div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-blue-600">{selectedCampaign.stats.clickRate.toFixed(1)}%</p>
+                    <p className="text-sm text-gray-500">Click Rate</p>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedCampaign?.conversions}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Conversions</div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">${formatNumber(selectedCampaign.stats.revenue)}</p>
+                    <p className="text-sm text-gray-500">Revenue</p>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Campaign Details</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">Type:</span>
-                      <span className="ml-2 text-gray-900 dark:text-white">{selectedCampaign?.campaign_type}</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <Card className="p-4">
+                    <h4 className="font-semibold mb-3">Campaign Details</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Subject</span>
+                        <span>{selectedCampaign.subject}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">From</span>
+                        <span>{selectedCampaign.fromName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Audience</span>
+                        <span>{selectedCampaign.audienceName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Type</span>
+                        <Badge className={getCampaignTypeColor(selectedCampaign.type)}>{selectedCampaign.type}</Badge>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">Phase:</span>
-                      <span className="ml-2 text-gray-900 dark:text-white">{selectedCampaign?.phase}</span>
+                  </Card>
+                  <Card className="p-4">
+                    <h4 className="font-semibold mb-3">Engagement Metrics</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Unique Opens</span>
+                        <span>{formatNumber(selectedCampaign.stats.uniqueOpens)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Unique Clicks</span>
+                        <span>{formatNumber(selectedCampaign.stats.uniqueClicks)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Unsubscribes</span>
+                        <span className="text-red-600">{selectedCampaign.stats.unsubscribes}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Conversions</span>
+                        <span className="text-green-600">{selectedCampaign.stats.conversions}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                      <span className="ml-2 text-gray-900 dark:text-white">{selectedCampaign?.status}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">Automated:</span>
-                      <span className="ml-2 text-gray-900 dark:text-white">{selectedCampaign?.is_automated ? 'Yes' : 'No'}</span>
-                    </div>
-                  </div>
+                  </Card>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="analytics" className="mt-0">
-                <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                  <div className="text-center">
-                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500 dark:text-gray-400">Campaign analytics</p>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="audience" className="mt-0">
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  Audience insights and segmentation data
-                </div>
-              </TabsContent>
-
-              <TabsContent value="settings" className="mt-0">
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  Campaign settings and configuration
-                </div>
-              </TabsContent>
-            </ScrollArea>
-          </Tabs>
+              </div>
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
-      {/* New Campaign Modal */}
-      <Dialog open={showNewCampaign} onOpenChange={setShowNewCampaign}>
+      {/* New Campaign Dialog */}
+      <Dialog open={showNewCampaignDialog} onOpenChange={setShowNewCampaignDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <Plus className="h-6 w-6 text-rose-600" />
-              Create New Campaign
-            </DialogTitle>
+            <DialogTitle>Create New Campaign</DialogTitle>
+            <DialogDescription>Choose a campaign type to get started</DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-rose-400 dark:hover:border-rose-500 transition-colors group">
-                <Mail className="h-8 w-8 text-gray-400 group-hover:text-rose-600 transition-colors" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">Email Campaign</span>
-                <span className="text-xs text-gray-500">Send email to your list</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-rose-400 dark:hover:border-rose-500 transition-colors group">
-                <Zap className="h-8 w-8 text-gray-400 group-hover:text-rose-600 transition-colors" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">Automation</span>
-                <span className="text-xs text-gray-500">Create automated workflow</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-rose-400 dark:hover:border-rose-500 transition-colors group">
-                <Split className="h-8 w-8 text-gray-400 group-hover:text-rose-600 transition-colors" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">A/B Test</span>
-                <span className="text-xs text-gray-500">Test and optimize</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-rose-400 dark:hover:border-rose-500 transition-colors group">
-                <Layers className="h-8 w-8 text-gray-400 group-hover:text-rose-600 transition-colors" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">Multi-Channel</span>
-                <span className="text-xs text-gray-500">Email + SMS + Social</span>
-              </button>
-            </div>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
+              <Mail className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
+              <span className="font-medium">Email Campaign</span>
+              <span className="text-xs text-gray-500">Send a one-time email</span>
+            </button>
+            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
+              <Zap className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
+              <span className="font-medium">Automation</span>
+              <span className="text-xs text-gray-500">Create automated flows</span>
+            </button>
+            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
+              <Split className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
+              <span className="font-medium">A/B Test</span>
+              <span className="text-xs text-gray-500">Test and optimize</span>
+            </button>
+            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
+              <MessageSquare className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
+              <span className="font-medium">SMS Campaign</span>
+              <span className="text-xs text-gray-500">Send text messages</span>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
