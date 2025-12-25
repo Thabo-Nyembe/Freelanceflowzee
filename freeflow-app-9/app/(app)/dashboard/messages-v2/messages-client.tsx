@@ -1,78 +1,30 @@
 'use client'
 
-import { useState, useMemo, useRef, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useMemo, useRef } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import { Progress } from '@/components/ui/progress'
 import {
-  MessageSquare,
-  Plus,
-  Search,
-  Hash,
-  Lock,
-  Users,
-  Settings,
-  Bell,
-  BellOff,
-  Star,
-  StarOff,
-  Pin,
-  Bookmark,
-  MoreHorizontal,
-  Send,
-  Smile,
-  Paperclip,
-  AtSign,
-  Image,
-  FileText,
-  Video,
-  Phone,
-  ChevronDown,
-  ChevronRight,
-  Circle,
-  Clock,
-  Check,
-  CheckCheck,
-  Reply,
-  Forward,
-  Edit,
-  Trash2,
-  Copy,
-  ExternalLink,
-  Filter,
-  Archive,
-  Inbox,
-  Download,
-  Upload,
-  Mic,
-  MicOff,
-  Headphones,
-  Volume2,
-  MoreVertical,
-  X,
-  Maximize2,
-  Minimize2,
-  MessageCircle,
-  ThumbsUp,
-  Heart,
-  Laugh,
-  Frown,
-  Eye,
-  EyeOff,
-  UserPlus,
-  LogOut,
-  Zap,
-  Bot,
-  Workflow,
-  Code,
-  Link2,
-  Calendar,
-  AlertCircle
+  MessageSquare, Plus, Search, Hash, Lock, Users, Settings, Bell, BellOff,
+  Star, StarOff, Pin, Bookmark, MoreHorizontal, Send, Smile, Paperclip,
+  AtSign, Image, FileText, Video, Phone, ChevronDown, ChevronRight, Circle,
+  Clock, Check, CheckCheck, Reply, Forward, Edit, Trash2, Copy, ExternalLink,
+  Filter, Archive, Inbox, Download, Upload, Mic, MicOff, Headphones, Volume2,
+  MoreVertical, X, Maximize2, Minimize2, MessageCircle, ThumbsUp, Heart,
+  Laugh, Frown, Eye, EyeOff, UserPlus, LogOut, Zap, Bot, Workflow, Code,
+  Link2, Calendar, AlertCircle, ArrowUpRight, ArrowDownRight, TrendingUp,
+  FolderOpen, Files, Sparkles, Globe, Moon, Sun, Palette, Shield, Key,
+  RefreshCw, Megaphone, PhoneCall, PhoneOff, ScreenShare, Layers, PlayCircle,
+  PauseCircle, StopCircle, Radio, Voicemail, BookOpen, HelpCircle, Cog
 } from 'lucide-react'
 
 // Types
@@ -80,6 +32,8 @@ type ChannelType = 'public' | 'private' | 'direct' | 'group'
 type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed'
 type UserStatus = 'online' | 'away' | 'dnd' | 'offline'
 type ReactionType = 'thumbsup' | 'heart' | 'laugh' | 'celebrate' | 'eyes' | 'fire' | 'check' | 'plus1'
+type CallType = 'audio' | 'video' | 'huddle'
+type CallStatus = 'ongoing' | 'ended' | 'missed' | 'scheduled'
 
 interface User {
   id: string
@@ -151,10 +105,45 @@ interface Attachment {
 interface Thread {
   id: string
   parentMessage: Message
-  replies: Message[]
-  participantCount: number
+  channel: string
+  replies: number
+  participants: User[]
   lastReply: string
   isFollowing: boolean
+  isUnread: boolean
+}
+
+interface Call {
+  id: string
+  type: CallType
+  status: CallStatus
+  channelId: string
+  channelName: string
+  participants: User[]
+  startTime: string
+  endTime?: string
+  duration?: number
+  isRecorded: boolean
+}
+
+interface SharedFile {
+  id: string
+  name: string
+  type: string
+  size: number
+  uploadedBy: User
+  uploadedAt: string
+  channelId: string
+  channelName: string
+  downloads: number
+}
+
+interface Mention {
+  id: string
+  message: Message
+  channel: string
+  isRead: boolean
+  mentionedAt: string
 }
 
 // Mock Data
@@ -177,230 +166,91 @@ const mockUsers: User[] = [
 ]
 
 const mockChannels: Channel[] = [
-  {
-    id: 'c1',
-    name: 'general',
-    type: 'public',
-    description: 'Company-wide announcements and work-based matters',
-    topic: 'Welcome to the team! Read the pinned post for guidelines.',
-    members: mockUsers,
-    memberCount: 156,
-    unreadCount: 3,
-    isMuted: false,
-    isStarred: true,
-    isPinned: true,
-    lastActivity: '2024-01-15T14:30:00Z',
-    createdAt: '2023-01-01T00:00:00Z',
-    createdBy: mockUsers[0]
-  },
-  {
-    id: 'c2',
-    name: 'engineering',
-    type: 'public',
-    description: 'Engineering team discussions',
-    topic: 'Sprint 24 planning in progress',
-    members: [mockUsers[1], mockUsers[3]],
-    memberCount: 42,
-    unreadCount: 12,
-    isMuted: false,
-    isStarred: true,
-    isPinned: false,
-    lastActivity: '2024-01-15T14:28:00Z',
-    createdAt: '2023-01-15T00:00:00Z',
-    createdBy: mockUsers[1]
-  },
-  {
-    id: 'c3',
-    name: 'design-team',
-    type: 'private',
-    description: 'Private channel for the design team',
-    members: [mockUsers[2]],
-    memberCount: 8,
-    unreadCount: 0,
-    isMuted: true,
-    isStarred: false,
-    isPinned: false,
-    lastActivity: '2024-01-15T12:00:00Z',
-    createdAt: '2023-02-01T00:00:00Z',
-    createdBy: mockUsers[2]
-  },
-  {
-    id: 'c4',
-    name: 'random',
-    type: 'public',
-    description: 'Non-work banter and water cooler conversation',
-    topic: 'Share memes, gifs, and good vibes only!',
-    members: mockUsers,
-    memberCount: 134,
-    unreadCount: 0,
-    isMuted: false,
-    isStarred: false,
-    isPinned: false,
-    lastActivity: '2024-01-15T10:00:00Z',
-    createdAt: '2023-01-01T00:00:00Z',
-    createdBy: mockUsers[0]
-  },
-  {
-    id: 'dm1',
-    name: 'Sarah Chen',
-    type: 'direct',
-    members: [mockUsers[0]],
-    memberCount: 2,
-    unreadCount: 1,
-    isMuted: false,
-    isStarred: false,
-    isPinned: false,
-    lastActivity: '2024-01-15T14:25:00Z',
-    createdAt: '2023-06-15T00:00:00Z',
-    createdBy: currentUser
-  },
-  {
-    id: 'dm2',
-    name: 'Mike Johnson',
-    type: 'direct',
-    members: [mockUsers[1]],
-    memberCount: 2,
-    unreadCount: 0,
-    isMuted: false,
-    isStarred: false,
-    isPinned: false,
-    lastActivity: '2024-01-14T16:00:00Z',
-    createdAt: '2023-07-01T00:00:00Z',
-    createdBy: currentUser
-  }
+  { id: 'c1', name: 'general', type: 'public', description: 'Company-wide announcements', topic: 'Welcome to the team!', members: mockUsers, memberCount: 156, unreadCount: 3, isMuted: false, isStarred: true, isPinned: true, lastActivity: '2024-01-15T14:30:00Z', createdAt: '2023-01-01T00:00:00Z', createdBy: mockUsers[0] },
+  { id: 'c2', name: 'engineering', type: 'public', description: 'Engineering team discussions', topic: 'Sprint 24 planning', members: [mockUsers[1], mockUsers[3]], memberCount: 42, unreadCount: 12, isMuted: false, isStarred: true, isPinned: false, lastActivity: '2024-01-15T14:28:00Z', createdAt: '2023-01-15T00:00:00Z', createdBy: mockUsers[1] },
+  { id: 'c3', name: 'design-team', type: 'private', description: 'Private design channel', members: [mockUsers[2]], memberCount: 8, unreadCount: 0, isMuted: true, isStarred: false, isPinned: false, lastActivity: '2024-01-15T12:00:00Z', createdAt: '2023-02-01T00:00:00Z', createdBy: mockUsers[2] },
+  { id: 'c4', name: 'random', type: 'public', description: 'Non-work banter', topic: 'Share memes!', members: mockUsers, memberCount: 134, unreadCount: 0, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T10:00:00Z', createdAt: '2023-01-01T00:00:00Z', createdBy: mockUsers[0] },
+  { id: 'c5', name: 'product', type: 'public', description: 'Product discussions', members: mockUsers, memberCount: 28, unreadCount: 5, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T13:00:00Z', createdAt: '2023-03-01T00:00:00Z', createdBy: mockUsers[0] },
+  { id: 'dm1', name: 'Sarah Chen', type: 'direct', members: [mockUsers[0]], memberCount: 2, unreadCount: 1, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T14:25:00Z', createdAt: '2023-06-15T00:00:00Z', createdBy: currentUser },
+  { id: 'dm2', name: 'Mike Johnson', type: 'direct', members: [mockUsers[1]], memberCount: 2, unreadCount: 0, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-14T16:00:00Z', createdAt: '2023-07-01T00:00:00Z', createdBy: currentUser }
 ]
 
 const mockMessages: Message[] = [
-  {
-    id: 'm1',
-    channelId: 'c1',
-    content: 'Hey team! Quick update on the Q1 roadmap - we\'re making great progress on the new features. Check out the attached doc for details.',
-    author: mockUsers[0],
-    createdAt: '2024-01-15T14:30:00Z',
-    status: 'read',
-    reactions: [
-      { type: 'thumbsup', count: 5, users: mockUsers.slice(0, 5), hasReacted: true },
-      { type: 'heart', count: 2, users: mockUsers.slice(0, 2), hasReacted: false }
-    ],
-    threadCount: 3,
-    threadParticipants: [mockUsers[1], mockUsers[2]],
-    attachments: [
-      { id: 'a1', type: 'file', name: 'Q1_Roadmap.pdf', url: '#', size: 2500000 }
-    ],
-    mentions: [],
-    isPinned: true,
-    isBookmarked: false
-  },
-  {
-    id: 'm2',
-    channelId: 'c1',
-    content: '@sarah.chen Looks great! I have a few questions about the timeline for the API changes.',
-    author: mockUsers[1],
-    createdAt: '2024-01-15T14:28:00Z',
-    status: 'read',
-    reactions: [],
-    threadCount: 0,
-    threadParticipants: [],
-    attachments: [],
-    mentions: [mockUsers[0]],
-    isPinned: false,
-    isBookmarked: false,
-    parentId: 'm1'
-  },
-  {
-    id: 'm3',
-    channelId: 'c1',
-    content: 'Sure! Let\'s discuss in the thread. The API changes are scheduled for week 3.',
-    author: mockUsers[0],
-    createdAt: '2024-01-15T14:26:00Z',
-    status: 'read',
-    reactions: [
-      { type: 'check', count: 1, users: [mockUsers[1]], hasReacted: false }
-    ],
-    threadCount: 0,
-    threadParticipants: [],
-    attachments: [],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: false,
-    parentId: 'm1'
-  },
-  {
-    id: 'm4',
-    channelId: 'c2',
-    content: '```javascript\nconst newFeature = {\n  name: "Dark Mode",\n  status: "in-progress",\n  eta: "2024-01-20"\n};\n```\nJust pushed the initial implementation! PR link: https://github.com/example/pr/123',
-    author: mockUsers[3],
-    createdAt: '2024-01-15T14:20:00Z',
-    status: 'read',
-    reactions: [
-      { type: 'fire', count: 8, users: mockUsers, hasReacted: true },
-      { type: 'eyes', count: 3, users: mockUsers.slice(0, 3), hasReacted: false }
-    ],
-    threadCount: 5,
-    threadParticipants: [mockUsers[0], mockUsers[1], mockUsers[2]],
-    attachments: [],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: true
-  },
-  {
-    id: 'm5',
-    channelId: 'c2',
-    content: 'New deployment completed successfully!',
-    author: mockUsers[5],
-    createdAt: '2024-01-15T14:15:00Z',
-    status: 'read',
-    reactions: [
-      { type: 'celebrate', count: 12, users: mockUsers, hasReacted: true }
-    ],
-    threadCount: 0,
-    threadParticipants: [],
-    attachments: [],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: false
-  },
-  {
-    id: 'm6',
-    channelId: 'dm1',
-    content: 'Hey! Are you free for a quick sync at 3pm?',
-    author: mockUsers[0],
-    createdAt: '2024-01-15T14:25:00Z',
-    status: 'delivered',
-    reactions: [],
-    threadCount: 0,
-    threadParticipants: [],
-    attachments: [],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: false
-  }
+  { id: 'm1', channelId: 'c1', content: 'Hey team! Quick update on the Q1 roadmap - check out the attached doc.', author: mockUsers[0], createdAt: '2024-01-15T14:30:00Z', status: 'read', reactions: [{ type: 'thumbsup', count: 5, users: mockUsers.slice(0, 5), hasReacted: true }], threadCount: 3, threadParticipants: [mockUsers[1], mockUsers[2]], attachments: [{ id: 'a1', type: 'file', name: 'Q1_Roadmap.pdf', url: '#', size: 2500000 }], mentions: [], isPinned: true, isBookmarked: false },
+  { id: 'm2', channelId: 'c1', content: '@sarah.chen Looks great! Questions about the timeline.', author: mockUsers[1], createdAt: '2024-01-15T14:28:00Z', status: 'read', reactions: [], threadCount: 0, threadParticipants: [], attachments: [], mentions: [mockUsers[0]], isPinned: false, isBookmarked: false, parentId: 'm1' },
+  { id: 'm3', channelId: 'c2', content: '```javascript\nconst feature = { name: "Dark Mode", status: "done" };\n```\nJust pushed!', author: mockUsers[3], createdAt: '2024-01-15T14:20:00Z', status: 'read', reactions: [{ type: 'fire', count: 8, users: mockUsers, hasReacted: true }], threadCount: 5, threadParticipants: [mockUsers[0], mockUsers[1]], attachments: [], mentions: [], isPinned: false, isBookmarked: true },
+  { id: 'm4', channelId: 'c2', content: 'New deployment completed successfully!', author: mockUsers[5], createdAt: '2024-01-15T14:15:00Z', status: 'read', reactions: [{ type: 'celebrate', count: 12, users: mockUsers, hasReacted: true }], threadCount: 0, threadParticipants: [], attachments: [], mentions: [], isPinned: false, isBookmarked: false },
+  { id: 'm5', channelId: 'dm1', content: 'Hey! Are you free for a quick sync at 3pm?', author: mockUsers[0], createdAt: '2024-01-15T14:25:00Z', status: 'delivered', reactions: [], threadCount: 0, threadParticipants: [], attachments: [], mentions: [], isPinned: false, isBookmarked: false }
+]
+
+const mockThreads: Thread[] = [
+  { id: 't1', parentMessage: mockMessages[0], channel: 'general', replies: 3, participants: [mockUsers[0], mockUsers[1], mockUsers[2]], lastReply: '2024-01-15T14:35:00Z', isFollowing: true, isUnread: true },
+  { id: 't2', parentMessage: mockMessages[2], channel: 'engineering', replies: 5, participants: [mockUsers[0], mockUsers[1], mockUsers[3]], lastReply: '2024-01-15T14:25:00Z', isFollowing: true, isUnread: false },
+  { id: 't3', parentMessage: mockMessages[0], channel: 'general', replies: 2, participants: [mockUsers[2], mockUsers[3]], lastReply: '2024-01-15T13:00:00Z', isFollowing: false, isUnread: false }
+]
+
+const mockCalls: Call[] = [
+  { id: 'call1', type: 'huddle', status: 'ongoing', channelId: 'c2', channelName: '#engineering', participants: [mockUsers[1], mockUsers[3]], startTime: '2024-01-15T14:00:00Z', isRecorded: false },
+  { id: 'call2', type: 'video', status: 'scheduled', channelId: 'c1', channelName: '#general', participants: mockUsers.slice(0, 4), startTime: '2024-01-16T10:00:00Z', isRecorded: true },
+  { id: 'call3', type: 'audio', status: 'ended', channelId: 'dm1', channelName: 'Sarah Chen', participants: [mockUsers[0]], startTime: '2024-01-15T11:00:00Z', endTime: '2024-01-15T11:30:00Z', duration: 1800, isRecorded: false },
+  { id: 'call4', type: 'video', status: 'missed', channelId: 'dm2', channelName: 'Mike Johnson', participants: [mockUsers[1]], startTime: '2024-01-15T09:00:00Z', isRecorded: false }
+]
+
+const mockFiles: SharedFile[] = [
+  { id: 'f1', name: 'Q1_Roadmap.pdf', type: 'application/pdf', size: 2500000, uploadedBy: mockUsers[0], uploadedAt: '2024-01-15T14:30:00Z', channelId: 'c1', channelName: '#general', downloads: 45 },
+  { id: 'f2', name: 'design-system.figma', type: 'application/figma', size: 15000000, uploadedBy: mockUsers[2], uploadedAt: '2024-01-14T10:00:00Z', channelId: 'c3', channelName: '#design-team', downloads: 12 },
+  { id: 'f3', name: 'architecture.png', type: 'image/png', size: 850000, uploadedBy: mockUsers[3], uploadedAt: '2024-01-13T16:00:00Z', channelId: 'c2', channelName: '#engineering', downloads: 28 },
+  { id: 'f4', name: 'demo-video.mp4', type: 'video/mp4', size: 125000000, uploadedBy: mockUsers[0], uploadedAt: '2024-01-12T09:00:00Z', channelId: 'c5', channelName: '#product', downloads: 67 },
+  { id: 'f5', name: 'meeting-notes.docx', type: 'application/docx', size: 45000, uploadedBy: mockUsers[1], uploadedAt: '2024-01-11T14:00:00Z', channelId: 'c1', channelName: '#general', downloads: 23 }
+]
+
+const mockMentions: Mention[] = [
+  { id: 'men1', message: mockMessages[1], channel: '#general', isRead: false, mentionedAt: '2024-01-15T14:28:00Z' },
+  { id: 'men2', message: { ...mockMessages[0], content: '@you Great work on the feature!' } as Message, channel: '#engineering', isRead: false, mentionedAt: '2024-01-15T13:00:00Z' },
+  { id: 'men3', message: { ...mockMessages[0], content: '@you Can you review this PR?' } as Message, channel: '#engineering', isRead: true, mentionedAt: '2024-01-14T16:00:00Z' }
 ]
 
 export default function MessagesClient() {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
   const [searchQuery, setSearchQuery] = useState('')
   const [messageInput, setMessageInput] = useState('')
-  const [showChannelList, setShowChannelList] = useState(true)
   const [showThreadPanel, setShowThreadPanel] = useState(false)
   const [selectedThread, setSelectedThread] = useState<Message | null>(null)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [channelFilter, setChannelFilter] = useState<'all' | 'unread' | 'starred'>('all')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [activeCall, setActiveCall] = useState<Call | null>(null)
+
+  // Settings
+  const [settings, setSettings] = useState({
+    notifications: true,
+    sounds: true,
+    desktopNotifications: true,
+    emailDigest: false,
+    darkMode: false,
+    compactMode: false,
+    showTypingIndicators: true,
+    showOnlineStatus: true,
+    messagePreview: true,
+    autoMarkRead: true
+  })
+
+  // Stats
+  const stats = useMemo(() => {
+    const totalMessages = mockMessages.length * 150
+    const totalChannels = mockChannels.length
+    const unreadMessages = mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
+    const activeThreads = mockThreads.filter(t => t.isUnread).length
+    const totalFiles = mockFiles.length * 25
+    const totalCalls = mockCalls.length * 12
+    const onlineMembers = mockUsers.filter(u => u.status === 'online').length
+    const mentions = mockMentions.filter(m => !m.isRead).length
+    return { totalMessages, totalChannels, unreadMessages, activeThreads, totalFiles, totalCalls, onlineMembers, mentions }
+  }, [])
 
   const filteredChannels = useMemo(() => {
     let channels = mockChannels
-    if (channelFilter === 'unread') {
-      channels = channels.filter(c => c.unreadCount > 0)
-    } else if (channelFilter === 'starred') {
-      channels = channels.filter(c => c.isStarred)
-    }
-    if (searchQuery) {
-      channels = channels.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
+    if (channelFilter === 'unread') channels = channels.filter(c => c.unreadCount > 0)
+    else if (channelFilter === 'starred') channels = channels.filter(c => c.isStarred)
+    if (searchQuery) channels = channels.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
     return channels
   }, [channelFilter, searchQuery])
 
@@ -413,536 +263,810 @@ export default function MessagesClient() {
   const privateChannels = filteredChannels.filter(c => c.type === 'private')
   const directMessages = filteredChannels.filter(c => c.type === 'direct' || c.type === 'group')
 
+  // Helper functions
   const getStatusColor = (status: UserStatus) => {
-    switch (status) {
-      case 'online': return 'bg-green-500'
-      case 'away': return 'bg-yellow-500'
-      case 'dnd': return 'bg-red-500'
-      default: return 'bg-gray-400'
-    }
+    const colors = { online: 'bg-green-500', away: 'bg-yellow-500', dnd: 'bg-red-500', offline: 'bg-gray-400' }
+    return colors[status]
   }
 
   const getReactionIcon = (type: ReactionType) => {
-    switch (type) {
-      case 'thumbsup': return '👍'
-      case 'heart': return '❤️'
-      case 'laugh': return '😂'
-      case 'celebrate': return '🎉'
-      case 'eyes': return '👀'
-      case 'fire': return '🔥'
-      case 'check': return '✅'
-      case 'plus1': return '➕'
-      default: return '👍'
-    }
+    const icons: Record<ReactionType, string> = { thumbsup: '👍', heart: '❤️', laugh: '😂', celebrate: '🎉', eyes: '👀', fire: '🔥', check: '✅', plus1: '➕' }
+    return icons[type]
   }
 
   const formatTime = (date: string) => {
     const d = new Date(date)
     const now = new Date()
-    const diffMs = now.getTime() - d.getTime()
-    const diffHours = Math.floor(diffMs / 3600000)
-
-    if (diffHours < 24) {
-      return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-    } else if (diffHours < 48) {
-      return 'Yesterday'
-    } else {
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    }
+    const diffHours = Math.floor((now.getTime() - d.getTime()) / 3600000)
+    if (diffHours < 24) return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    if (diffHours < 48) return 'Yesterday'
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
   const formatFileSize = (bytes: number) => {
-    if (bytes >= 1000000) return `${(bytes / 1000000).toFixed(1)} MB`
-    if (bytes >= 1000) return `${(bytes / 1000).toFixed(1)} KB`
+    if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`
+    if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(1)} KB`
     return `${bytes} B`
   }
 
-  const totalUnread = mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const statCards = [
+    { label: 'Messages', value: stats.totalMessages.toLocaleString(), change: 15.3, icon: MessageSquare, gradient: 'from-purple-500 to-indigo-500' },
+    { label: 'Channels', value: stats.totalChannels.toString(), change: 8.7, icon: Hash, gradient: 'from-blue-500 to-cyan-500' },
+    { label: 'Unread', value: stats.unreadMessages.toString(), change: -12.4, icon: Inbox, gradient: 'from-red-500 to-orange-500' },
+    { label: 'Active Threads', value: stats.activeThreads.toString(), change: 5.2, icon: MessageCircle, gradient: 'from-green-500 to-emerald-500' },
+    { label: 'Shared Files', value: stats.totalFiles.toString(), change: 22.1, icon: Files, gradient: 'from-amber-500 to-yellow-500' },
+    { label: 'Calls Today', value: stats.totalCalls.toString(), change: 18.9, icon: Phone, gradient: 'from-pink-500 to-rose-500' },
+    { label: 'Online', value: stats.onlineMembers.toString(), change: 0, icon: Users, gradient: 'from-cyan-500 to-teal-500' },
+    { label: 'Mentions', value: stats.mentions.toString(), change: -5.0, icon: AtSign, gradient: 'from-indigo-500 to-purple-500' }
+  ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 flex">
-      {/* Workspace Sidebar */}
-      <div className="w-16 bg-[#3F0E40] flex flex-col items-center py-4 gap-4">
-        <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center text-white font-bold">
-          FF
-        </div>
-        <div className="flex-1" />
-        <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10">
-          <Plus className="w-5 h-5" />
-        </Button>
-      </div>
-
-      {/* Channel List */}
-      {showChannelList && (
-        <div className="w-64 bg-[#3F0E40] text-white flex flex-col">
-          {/* Workspace Header */}
-          <div className="p-4 border-b border-white/10">
-            <div className="flex items-center justify-between">
-              <h1 className="font-bold text-lg">FreeFlow</h1>
-              <ChevronDown className="w-4 h-4 opacity-60" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <div className={`w-2 h-2 rounded-full ${getStatusColor(currentUser.status)}`} />
-              <span className="text-sm opacity-80">{currentUser.displayName}</span>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Slack-level team communication platform</p>
             </div>
           </div>
-
-          {/* Search */}
-          <div className="p-3">
+          <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
-                placeholder="Search..."
+                placeholder="Search messages, channels..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-white/10 border-0 text-white placeholder:text-white/50"
+                className="pl-10 w-72"
               />
             </div>
-          </div>
-
-          {/* Quick Filters */}
-          <div className="px-3 py-2 flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`text-xs ${channelFilter === 'unread' ? 'bg-white/20' : ''} text-white/80 hover:text-white hover:bg-white/10`}
-              onClick={() => setChannelFilter(channelFilter === 'unread' ? 'all' : 'unread')}
-            >
-              <Inbox className="w-3 h-3 mr-1" />
-              {totalUnread}
+            <Button variant="outline" size="icon">
+              <Filter className="w-4 h-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`text-xs ${channelFilter === 'starred' ? 'bg-white/20' : ''} text-white/80 hover:text-white hover:bg-white/10`}
-              onClick={() => setChannelFilter(channelFilter === 'starred' ? 'all' : 'starred')}
-            >
-              <Star className="w-3 h-3" />
+            <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              New Message
             </Button>
           </div>
-
-          <ScrollArea className="flex-1">
-            {/* Channels */}
-            <div className="p-2">
-              <div className="flex items-center justify-between px-2 py-1 text-sm opacity-70">
-                <span className="font-medium">Channels</span>
-                <Plus className="w-4 h-4 cursor-pointer hover:opacity-100" />
-              </div>
-              {publicChannels.map(channel => (
-                <ChannelItem
-                  key={channel.id}
-                  channel={channel}
-                  isSelected={selectedChannel?.id === channel.id}
-                  onClick={() => setSelectedChannel(channel)}
-                />
-              ))}
-            </div>
-
-            {/* Private Channels */}
-            {privateChannels.length > 0 && (
-              <div className="p-2">
-                <div className="flex items-center justify-between px-2 py-1 text-sm opacity-70">
-                  <span className="font-medium">Private</span>
-                  <Plus className="w-4 h-4 cursor-pointer hover:opacity-100" />
-                </div>
-                {privateChannels.map(channel => (
-                  <ChannelItem
-                    key={channel.id}
-                    channel={channel}
-                    isSelected={selectedChannel?.id === channel.id}
-                    onClick={() => setSelectedChannel(channel)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Direct Messages */}
-            <div className="p-2">
-              <div className="flex items-center justify-between px-2 py-1 text-sm opacity-70">
-                <span className="font-medium">Direct Messages</span>
-                <Plus className="w-4 h-4 cursor-pointer hover:opacity-100" />
-              </div>
-              {directMessages.map(channel => (
-                <DMItem
-                  key={channel.id}
-                  channel={channel}
-                  isSelected={selectedChannel?.id === channel.id}
-                  onClick={() => setSelectedChannel(channel)}
-                  getStatusColor={getStatusColor}
-                />
-              ))}
-            </div>
-          </ScrollArea>
         </div>
-      )}
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
-        {selectedChannel ? (
-          <>
-            {/* Channel Header */}
-            <div className="h-14 px-4 flex items-center justify-between border-b dark:border-gray-800">
-              <div className="flex items-center gap-3">
-                {selectedChannel.type === 'direct' ? (
-                  <div className="relative">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback>{selectedChannel.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(selectedChannel.members[0]?.status || 'offline')}`} />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {statCards.map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                ) : (
-                  <div className="w-8 h-8 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    {selectedChannel.type === 'private' ? <Lock className="w-4 h-4" /> : <Hash className="w-4 h-4" />}
-                  </div>
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-semibold">{selectedChannel.name}</h2>
-                    {selectedChannel.isStarred && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
-                  </div>
-                  {selectedChannel.topic && (
-                    <p className="text-xs text-muted-foreground truncate max-w-md">{selectedChannel.topic}</p>
+                  {stat.change !== 0 && (
+                    <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(stat.change)}%
+                    </div>
                   )}
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Phone className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Video className="w-4 h-4" />
-                </Button>
-                <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Users className="w-4 h-4" />
-                  {selectedChannel.memberCount}
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Pin className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Tabs */}
+        <Tabs defaultValue="channels" className="space-y-6">
+          <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+            <TabsTrigger value="channels" className="flex items-center gap-2">
+              <Hash className="w-4 h-4" />
+              Channels
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Messages
+            </TabsTrigger>
+            <TabsTrigger value="threads" className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Threads
+            </TabsTrigger>
+            <TabsTrigger value="calls" className="flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              Calls
+            </TabsTrigger>
+            <TabsTrigger value="files" className="flex items-center gap-2">
+              <Files className="w-4 h-4" />
+              Files
+            </TabsTrigger>
+            <TabsTrigger value="mentions" className="flex items-center gap-2">
+              <AtSign className="w-4 h-4" />
+              Mentions
+            </TabsTrigger>
+            <TabsTrigger value="search" className="flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              Search
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Channels Tab */}
+          <TabsContent value="channels" className="space-y-6">
+            <div className="flex items-center gap-2">
+              <Button variant={channelFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setChannelFilter('all')}>All</Button>
+              <Button variant={channelFilter === 'unread' ? 'default' : 'outline'} size="sm" onClick={() => setChannelFilter('unread')}>Unread ({stats.unreadMessages})</Button>
+              <Button variant={channelFilter === 'starred' ? 'default' : 'outline'} size="sm" onClick={() => setChannelFilter('starred')}>Starred</Button>
             </div>
 
-            {/* Messages Area */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {channelMessages.map(message => (
-                  <MessageItem
-                    key={message.id}
-                    message={message}
-                    formatTime={formatTime}
-                    formatFileSize={formatFileSize}
-                    getReactionIcon={getReactionIcon}
-                    onThreadClick={() => {
-                      setSelectedThread(message)
-                      setShowThreadPanel(true)
-                    }}
-                  />
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                {publicChannels.length > 0 && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Hash className="w-5 h-5" />
+                        Public Channels
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {publicChannels.map(channel => (
+                        <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedChannel(channel)}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                              <Hash className="w-5 h-5 text-gray-500" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">#{channel.name}</p>
+                                {channel.isStarred && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
+                                {channel.isMuted && <BellOff className="w-4 h-4 text-gray-400" />}
+                              </div>
+                              <p className="text-sm text-gray-500">{channel.description}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-sm text-gray-500">{channel.memberCount} members</div>
+                            {channel.unreadCount > 0 && (
+                              <Badge className="bg-red-500 text-white">{channel.unreadCount}</Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Message Input */}
-            <div className="p-4 border-t dark:border-gray-800">
-              <div className="relative border dark:border-gray-700 rounded-lg">
-                <div className="flex items-center gap-2 p-2 border-b dark:border-gray-700">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                  <div className="h-4 w-px bg-gray-200 dark:bg-gray-700" />
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Code className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Link2 className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <AtSign className="w-4 h-4" />
-                  </Button>
-                </div>
-                <Textarea
-                  placeholder={`Message #${selectedChannel.name}`}
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  className="border-0 resize-none min-h-[80px] focus-visible:ring-0"
-                />
-                <div className="flex items-center justify-between p-2 border-t dark:border-gray-700">
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Paperclip className="w-4 h-4" />
+                {privateChannels.length > 0 && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Lock className="w-5 h-5" />
+                        Private Channels
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {privateChannels.map(channel => (
+                        <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                              <Lock className="w-5 h-5 text-gray-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium">#{channel.name}</p>
+                              <p className="text-sm text-gray-500">{channel.description}</p>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-500">{channel.memberCount} members</div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Users className="w-5 h-5" />
+                      Direct Messages
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {directMessages.map(channel => (
+                      <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <Avatar>
+                              <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(channel.members[0]?.status || 'offline')}`} />
+                          </div>
+                          <div>
+                            <p className="font-medium">{channel.name}</p>
+                            <p className="text-sm text-gray-500">{channel.members[0]?.title}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-gray-500">{formatTime(channel.lastActivity)}</span>
+                          {channel.unreadCount > 0 && (
+                            <Badge className="bg-red-500 text-white">{channel.unreadCount}</Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      Quick Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Channel
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-                      <Smile className="w-4 h-4" />
+                    <Button variant="outline" className="w-full justify-start">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Invite People
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Mic className="w-4 h-4" />
+                    <Button variant="outline" className="w-full justify-start">
+                      <Bot className="w-4 h-4 mr-2" />
+                      Add App
                     </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Workflow className="w-4 h-4 mr-2" />
+                      Create Workflow
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Online Now
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {mockUsers.filter(u => u.status === 'online' && !u.isBot).map(user => (
+                      <div key={user.id} className="flex items-center gap-3">
+                        <div className="relative">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${getStatusColor(user.status)}`} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{user.displayName}</p>
+                          <p className="text-xs text-gray-500">{user.statusText || user.title}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Messages Tab */}
+          <TabsContent value="messages" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <Card className="lg:col-span-1 border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Conversations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-2">
+                      {mockChannels.map(channel => (
+                        <div key={channel.id} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${selectedChannel?.id === channel.id ? 'bg-purple-100 dark:bg-purple-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`} onClick={() => setSelectedChannel(channel)}>
+                          {channel.type === 'direct' ? (
+                            <Avatar className="w-8 h-8">
+                              <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                              {channel.type === 'private' ? <Lock className="w-4 h-4" /> : <Hash className="w-4 h-4" />}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{channel.type === 'direct' ? channel.name : `#${channel.name}`}</p>
+                            <p className="text-xs text-gray-500 truncate">{formatTime(channel.lastActivity)}</p>
+                          </div>
+                          {channel.unreadCount > 0 && (
+                            <Badge className="bg-red-500 text-white text-xs">{channel.unreadCount}</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-3 border-0 shadow-sm">
+                {selectedChannel ? (
+                  <div className="flex flex-col h-[600px]">
+                    <CardHeader className="border-b">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {selectedChannel.type === 'direct' ? <Avatar><AvatarFallback>{selectedChannel.name.charAt(0)}</AvatarFallback></Avatar> : <Hash className="w-5 h-5" />}
+                          <div>
+                            <CardTitle>{selectedChannel.type === 'direct' ? selectedChannel.name : `#${selectedChannel.name}`}</CardTitle>
+                            <CardDescription>{selectedChannel.memberCount} members</CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon"><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon"><Video className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon"><Pin className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <ScrollArea className="flex-1 p-4">
+                      <div className="space-y-4">
+                        {channelMessages.map(message => (
+                          <div key={message.id} className="flex gap-3 group">
+                            <Avatar>
+                              <AvatarFallback>{message.author.displayName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm">{message.author.displayName}</span>
+                                <span className="text-xs text-gray-500">{formatTime(message.createdAt)}</span>
+                                {message.isPinned && <Pin className="w-3 h-3 text-yellow-500" />}
+                              </div>
+                              <p className="text-sm mt-1">{message.content}</p>
+                              {message.reactions.length > 0 && (
+                                <div className="flex gap-1 mt-2">
+                                  {message.reactions.map((reaction, idx) => (
+                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs">
+                                      {getReactionIcon(reaction.type)} {reaction.count}
+                                    </Button>
+                                  ))}
+                                </div>
+                              )}
+                              {message.threadCount > 0 && (
+                                <button className="flex items-center gap-2 mt-2 text-xs text-blue-600 hover:underline" onClick={() => { setSelectedThread(message); setShowThreadPanel(true); }}>
+                                  {message.threadCount} replies <ChevronRight className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                    <div className="p-4 border-t">
+                      <div className="flex gap-2">
+                        <Input placeholder={`Message #${selectedChannel.name}`} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1" />
+                        <Button><Send className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
                   </div>
-                  <Button size="sm" disabled={!messageInput.trim()}>
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
-              <p>Choose a channel or direct message to start chatting</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Thread Panel */}
-      {showThreadPanel && selectedThread && (
-        <div className="w-96 border-l dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col">
-          <div className="h-14 px-4 flex items-center justify-between border-b dark:border-gray-800">
-            <h3 className="font-semibold">Thread</h3>
-            <Button variant="ghost" size="icon" onClick={() => setShowThreadPanel(false)}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          <ScrollArea className="flex-1 p-4">
-            <MessageItem
-              message={selectedThread}
-              formatTime={formatTime}
-              formatFileSize={formatFileSize}
-              getReactionIcon={getReactionIcon}
-              isThreadParent
-            />
-            <div className="border-l-2 border-gray-200 dark:border-gray-700 ml-4 pl-4 mt-4 space-y-4">
-              <p className="text-sm text-muted-foreground">{selectedThread.threadCount} replies</p>
-              {mockMessages
-                .filter(m => m.parentId === selectedThread.id)
-                .map(reply => (
-                  <MessageItem
-                    key={reply.id}
-                    message={reply}
-                    formatTime={formatTime}
-                    formatFileSize={formatFileSize}
-                    getReactionIcon={getReactionIcon}
-                    isCompact
-                  />
-                ))}
-            </div>
-          </ScrollArea>
-          <div className="p-4 border-t dark:border-gray-800">
-            <div className="relative border dark:border-gray-700 rounded-lg">
-              <Textarea
-                placeholder="Reply..."
-                className="border-0 resize-none min-h-[60px] focus-visible:ring-0"
-              />
-              <div className="flex items-center justify-end p-2">
-                <Button size="sm">
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Channel Item Component
-function ChannelItem({
-  channel,
-  isSelected,
-  onClick
-}: {
-  channel: Channel
-  isSelected: boolean
-  onClick: () => void
-}) {
-  return (
-    <div
-      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer ${
-        isSelected ? 'bg-[#1164A3] text-white' : 'hover:bg-white/10'
-      }`}
-      onClick={onClick}
-    >
-      {channel.type === 'private' ? (
-        <Lock className="w-4 h-4 opacity-70" />
-      ) : (
-        <Hash className="w-4 h-4 opacity-70" />
-      )}
-      <span className="flex-1 truncate text-sm">{channel.name}</span>
-      {channel.unreadCount > 0 && (
-        <Badge className="bg-red-500 text-white text-xs h-5 min-w-[20px] flex items-center justify-center">
-          {channel.unreadCount}
-        </Badge>
-      )}
-      {channel.isMuted && <BellOff className="w-3 h-3 opacity-50" />}
-    </div>
-  )
-}
-
-// DM Item Component
-function DMItem({
-  channel,
-  isSelected,
-  onClick,
-  getStatusColor
-}: {
-  channel: Channel
-  isSelected: boolean
-  onClick: () => void
-  getStatusColor: (status: UserStatus) => string
-}) {
-  const user = channel.members[0]
-  return (
-    <div
-      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer ${
-        isSelected ? 'bg-[#1164A3] text-white' : 'hover:bg-white/10'
-      }`}
-      onClick={onClick}
-    >
-      <div className="relative">
-        <Avatar className="w-5 h-5">
-          <AvatarFallback className="text-xs">{channel.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        {user && (
-          <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#3F0E40] ${getStatusColor(user.status)}`} />
-        )}
-      </div>
-      <span className="flex-1 truncate text-sm">{channel.name}</span>
-      {channel.unreadCount > 0 && (
-        <Badge className="bg-red-500 text-white text-xs h-5 min-w-[20px] flex items-center justify-center">
-          {channel.unreadCount}
-        </Badge>
-      )}
-    </div>
-  )
-}
-
-// Message Item Component
-function MessageItem({
-  message,
-  formatTime,
-  formatFileSize,
-  getReactionIcon,
-  onThreadClick,
-  isThreadParent,
-  isCompact
-}: {
-  message: Message
-  formatTime: (date: string) => string
-  formatFileSize: (bytes: number) => string
-  getReactionIcon: (type: ReactionType) => string
-  onThreadClick?: () => void
-  isThreadParent?: boolean
-  isCompact?: boolean
-}) {
-  return (
-    <div className={`group ${isCompact ? '' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'} px-2 py-2 rounded-lg transition-colors`}>
-      <div className="flex gap-3">
-        <Avatar className={isCompact ? 'w-6 h-6' : 'w-9 h-9'}>
-          <AvatarFallback className={isCompact ? 'text-xs' : ''}>
-            {message.author.displayName.split(' ').map(n => n[0]).join('')}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm">{message.author.displayName}</span>
-            {message.author.isBot && (
-              <Badge variant="outline" className="text-xs py-0 h-4">
-                <Bot className="w-3 h-3 mr-1" />
-                App
-              </Badge>
-            )}
-            <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
-            {message.isPinned && <Pin className="w-3 h-3 text-yellow-500" />}
-            {message.isBookmarked && <Bookmark className="w-3 h-3 text-blue-500" />}
-          </div>
-          <div className="mt-1 text-sm whitespace-pre-wrap">
-            {message.content.includes('```') ? (
-              <div className="bg-gray-900 text-gray-100 p-3 rounded-md my-2 font-mono text-xs overflow-x-auto">
-                {message.content.replace(/```\w*\n?/g, '')}
-              </div>
-            ) : (
-              message.content
-            )}
-          </div>
-
-          {/* Attachments */}
-          {message.attachments.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {message.attachments.map(attachment => (
-                <div key={attachment.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg max-w-xs">
-                  <FileText className="w-8 h-8 text-gray-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{attachment.name}</p>
-                    <p className="text-xs text-muted-foreground">{attachment.size ? formatFileSize(attachment.size) : ''}</p>
+                ) : (
+                  <div className="h-[600px] flex items-center justify-center text-gray-500">
+                    <div className="text-center">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Select a conversation</p>
+                    </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Download className="w-4 h-4" />
+                )}
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Threads Tab */}
+          <TabsContent value="threads" className="space-y-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Active Threads</CardTitle>
+                <CardDescription>Conversations you're following</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockThreads.map(thread => (
+                    <div key={thread.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <div className="flex items-start gap-3">
+                        <Avatar>
+                          <AvatarFallback>{thread.parentMessage.author.displayName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{thread.parentMessage.author.displayName}</span>
+                            <span className="text-xs text-gray-500">in #{thread.channel}</span>
+                            {thread.isUnread && <Badge className="bg-blue-500 text-white text-xs">New</Badge>}
+                          </div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{thread.parentMessage.content}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>{thread.replies} replies</span>
+                            <div className="flex -space-x-1">
+                              {thread.participants.slice(0, 3).map(p => (
+                                <Avatar key={p.id} className="w-5 h-5 border border-white">
+                                  <AvatarFallback className="text-[8px]">{p.displayName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              ))}
+                            </div>
+                            <span>Last reply {formatTime(thread.lastReply)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Calls Tab */}
+          <TabsContent value="calls" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Radio className="w-5 h-5 text-green-500 animate-pulse" />
+                    Active Calls
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockCalls.filter(c => c.status === 'ongoing').map(call => (
+                      <div key={call.id} className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            {call.type === 'huddle' ? <Headphones className="w-5 h-5 text-green-600" /> : call.type === 'video' ? <Video className="w-5 h-5 text-green-600" /> : <Phone className="w-5 h-5 text-green-600" />}
+                            <div>
+                              <p className="font-medium">{call.channelName}</p>
+                              <p className="text-xs text-gray-500">{call.participants.length} participants</p>
+                            </div>
+                          </div>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                            Join
+                          </Button>
+                        </div>
+                        <div className="flex -space-x-2">
+                          {call.participants.map(p => (
+                            <Avatar key={p.id} className="w-8 h-8 border-2 border-white">
+                              <AvatarFallback>{p.displayName.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    {mockCalls.filter(c => c.status === 'ongoing').length === 0 && (
+                      <p className="text-center text-gray-500 py-8">No active calls</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5" />
+                    Scheduled Calls
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockCalls.filter(c => c.status === 'scheduled').map(call => (
+                      <div key={call.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Video className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">{call.channelName}</p>
+                              <p className="text-sm text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">View</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2 border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Call History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {mockCalls.filter(c => c.status === 'ended' || c.status === 'missed').map(call => (
+                      <div key={call.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="flex items-center gap-3">
+                          {call.status === 'missed' ? <PhoneOff className="w-5 h-5 text-red-500" /> : <Phone className="w-5 h-5 text-gray-500" />}
+                          <div>
+                            <p className="font-medium">{call.channelName}</p>
+                            <p className="text-sm text-gray-500">{formatTime(call.startTime)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {call.duration && <span className="text-sm text-gray-500">{formatDuration(call.duration)}</span>}
+                          <Badge className={call.status === 'missed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}>{call.status}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Files Tab */}
+          <TabsContent value="files" className="space-y-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Shared Files</CardTitle>
+                    <CardDescription>All files shared across channels</CardDescription>
+                  </div>
+                  <Button>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload File
                   </Button>
                 </div>
-              ))}
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {mockFiles.map(file => (
+                    <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                          {file.type.includes('image') ? <Image className="w-6 h-6 text-blue-500" /> :
+                           file.type.includes('video') ? <Video className="w-6 h-6 text-purple-500" /> :
+                           file.type.includes('pdf') ? <FileText className="w-6 h-6 text-red-500" /> :
+                           <FolderOpen className="w-6 h-6 text-gray-500" />}
+                        </div>
+                        <div>
+                          <p className="font-medium">{file.name}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>{formatFileSize(file.size)}</span>
+                            <span>•</span>
+                            <span>{file.channelName}</span>
+                            <span>•</span>
+                            <span>{formatTime(file.uploadedAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-500">{file.downloads} downloads</span>
+                        <Button variant="outline" size="icon">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Mentions Tab */}
+          <TabsContent value="mentions" className="space-y-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Mentions & Reactions</CardTitle>
+                <CardDescription>Messages where you were mentioned</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockMentions.map(mention => (
+                    <div key={mention.id} className={`p-4 border rounded-lg ${mention.isRead ? '' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200'}`}>
+                      <div className="flex items-start gap-3">
+                        <Avatar>
+                          <AvatarFallback>{mention.message.author.displayName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{mention.message.author.displayName}</span>
+                            <span className="text-xs text-gray-500">in {mention.channel}</span>
+                            <span className="text-xs text-gray-500">•</span>
+                            <span className="text-xs text-gray-500">{formatTime(mention.mentionedAt)}</span>
+                            {!mention.isRead && <Badge className="bg-blue-500 text-white text-xs">New</Badge>}
+                          </div>
+                          <p className="text-sm">{mention.message.content}</p>
+                        </div>
+                        <Button variant="ghost" size="icon">
+                          <Reply className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Search Tab */}
+          <TabsContent value="search" className="space-y-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Advanced Search</CardTitle>
+                <CardDescription>Search across all messages, files, and channels</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input placeholder="Search messages..." className="pl-10 h-12 text-lg" />
+                    </div>
+                    <Button size="lg">Search</Button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">from:@user</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">in:#channel</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">has:file</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">has:link</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">before:date</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">after:date</Badge>
+                  </div>
+
+                  <div className="py-12 text-center text-gray-500">
+                    <Search className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p className="text-lg">Enter a search term to find messages</p>
+                    <p className="text-sm">Use filters to narrow down results</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="w-5 h-5" />
+                    Notifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Push Notifications</Label>
+                      <p className="text-xs text-gray-500">Receive notifications for new messages</p>
+                    </div>
+                    <Switch checked={settings.notifications} onCheckedChange={(checked) => setSettings({ ...settings, notifications: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Sound Alerts</Label>
+                      <p className="text-xs text-gray-500">Play sounds for notifications</p>
+                    </div>
+                    <Switch checked={settings.sounds} onCheckedChange={(checked) => setSettings({ ...settings, sounds: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Desktop Notifications</Label>
+                      <p className="text-xs text-gray-500">Show desktop notification popups</p>
+                    </div>
+                    <Switch checked={settings.desktopNotifications} onCheckedChange={(checked) => setSettings({ ...settings, desktopNotifications: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Email Digest</Label>
+                      <p className="text-xs text-gray-500">Receive daily email summaries</p>
+                    </div>
+                    <Switch checked={settings.emailDigest} onCheckedChange={(checked) => setSettings({ ...settings, emailDigest: checked })} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="w-5 h-5" />
+                    Appearance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {settings.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                      <div>
+                        <Label className="font-medium">Dark Mode</Label>
+                        <p className="text-xs text-gray-500">Use dark theme</p>
+                      </div>
+                    </div>
+                    <Switch checked={settings.darkMode} onCheckedChange={(checked) => setSettings({ ...settings, darkMode: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Compact Mode</Label>
+                      <p className="text-xs text-gray-500">Reduce spacing in messages</p>
+                    </div>
+                    <Switch checked={settings.compactMode} onCheckedChange={(checked) => setSettings({ ...settings, compactMode: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Message Preview</Label>
+                      <p className="text-xs text-gray-500">Show message previews in sidebar</p>
+                    </div>
+                    <Switch checked={settings.messagePreview} onCheckedChange={(checked) => setSettings({ ...settings, messagePreview: checked })} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Privacy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Show Typing Indicators</Label>
+                      <p className="text-xs text-gray-500">Let others see when you're typing</p>
+                    </div>
+                    <Switch checked={settings.showTypingIndicators} onCheckedChange={(checked) => setSettings({ ...settings, showTypingIndicators: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Show Online Status</Label>
+                      <p className="text-xs text-gray-500">Let others see your status</p>
+                    </div>
+                    <Switch checked={settings.showOnlineStatus} onCheckedChange={(checked) => setSettings({ ...settings, showOnlineStatus: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Auto Mark as Read</Label>
+                      <p className="text-xs text-gray-500">Automatically mark messages as read</p>
+                    </div>
+                    <Switch checked={settings.autoMarkRead} onCheckedChange={(checked) => setSettings({ ...settings, autoMarkRead: checked })} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <HelpCircle className="w-5 h-5" />
+                    Help & Support
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button variant="outline" className="w-full justify-start">
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Documentation
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Contact Support
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Zap className="w-4 h-4 mr-2" />
+                    Keyboard Shortcuts
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Check for Updates
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
-          )}
-
-          {/* Reactions */}
-          {message.reactions.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {message.reactions.map((reaction, idx) => (
-                <Button
-                  key={idx}
-                  variant="outline"
-                  size="sm"
-                  className={`h-6 px-2 text-xs ${reaction.hasReacted ? 'bg-blue-50 border-blue-200' : ''}`}
-                >
-                  {getReactionIcon(reaction.type)} {reaction.count}
-                </Button>
-              ))}
-              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100">
-                <Smile className="w-3 h-3" />
-              </Button>
-            </div>
-          )}
-
-          {/* Thread */}
-          {message.threadCount > 0 && !isThreadParent && (
-            <button
-              className="flex items-center gap-2 mt-2 text-xs text-blue-600 hover:underline"
-              onClick={onThreadClick}
-            >
-              <div className="flex -space-x-1">
-                {message.threadParticipants.slice(0, 3).map(user => (
-                  <Avatar key={user.id} className="w-4 h-4 border border-white">
-                    <AvatarFallback className="text-[8px]">{user.displayName.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-              {message.threadCount} {message.threadCount === 1 ? 'reply' : 'replies'}
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-
-        {/* Message Actions */}
-        <div className="flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Smile className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <MessageCircle className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Bookmark className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <MoreHorizontal className="w-4 h-4" />
-          </Button>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
