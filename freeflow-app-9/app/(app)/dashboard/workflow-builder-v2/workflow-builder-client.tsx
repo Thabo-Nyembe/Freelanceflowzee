@@ -1,119 +1,215 @@
-// Workflow Builder V2 - n8n Level Visual Workflow Editor
-// Upgraded with: Visual Canvas, Node Library, Execution History, Templates
-
 'use client'
 
-import { useState, useCallback, useMemo, useRef } from 'react'
-import { toast } from 'sonner'
+import { useState, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  GitBranch,
-  Plus,
-  Play,
-  Pause,
-  Save,
-  Settings,
-  Zap,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Activity,
-  Copy,
-  Trash2,
-  Loader2,
-  Search,
-  Filter,
-  MoreHorizontal,
-  ChevronRight,
-  ArrowRight,
-  Circle,
-  Square,
-  Diamond,
-  Hexagon,
-  Triangle,
-  Database,
-  Mail,
-  MessageSquare,
-  Webhook,
-  Calendar,
-  FileText,
-  Globe,
-  Code,
-  Terminal,
-  Box,
-  Layers,
-  Repeat,
-  Split,
-  Merge,
-  AlertTriangle,
-  RefreshCw,
-  Download,
-  Upload,
-  Share2,
-  History,
-  Bug,
-  Eye,
-  ZoomIn,
-  ZoomOut,
-  Move,
-  Maximize2,
-  Minimize2,
-  LayoutGrid,
-  Sparkles,
-  Cpu,
-  Lock,
-  Unlock,
-  Star,
-  BarChart3
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogFooter, DialogTrigger
+} from '@/components/ui/dialog'
+import {
+  GitBranch, Plus, Play, Pause, Save, Settings, Zap, CheckCircle,
+  XCircle, Clock, Activity, Copy, Trash2, Loader2, Search, Filter,
+  MoreHorizontal, ChevronRight, ArrowRight, Diamond, Database, Mail,
+  MessageSquare, Webhook, Calendar, FileText, Globe, Code, Terminal,
+  Box, Layers, Repeat, Split, Merge, AlertTriangle, RefreshCw, Download,
+  Upload, Share2, History, Bug, Eye, ZoomIn, ZoomOut, Move, Maximize2,
+  Minimize2, LayoutGrid, Sparkles, Cpu, Lock, Unlock, Star, BarChart3,
+  MousePointer, Link2, Unlink, RotateCcw, Undo, Redo, Grid, Grip,
+  FolderOpen, Users, Key, ShieldCheck, Package, GitCommit, GitMerge,
+  GitPullRequest, Tag, Timer, TrendingUp, TrendingDown, AlertCircle,
+  Info, HelpCircle, ExternalLink, Clipboard, Check, X, MoreVertical,
+  ChevronDown, ChevronUp, Folder, FilePlus, FileCode, Workflow, Route,
+  Network, Shuffle, SlidersHorizontal, Gauge, Target, Crosshair
 } from 'lucide-react'
-import { useWorkflows, Workflow, WorkflowStats } from '@/lib/hooks/use-workflows'
 
-// ============================================================================
-// TYPES - N8N LEVEL WORKFLOW SYSTEM
-// ============================================================================
+// ============== N8N-LEVEL WORKFLOW INTERFACES ==============
+
+type NodeType =
+  | 'trigger_manual' | 'trigger_webhook' | 'trigger_schedule' | 'trigger_event' | 'trigger_database'
+  | 'action_http' | 'action_email' | 'action_slack' | 'action_database' | 'action_code' | 'action_transform'
+  | 'action_google_sheets' | 'action_airtable' | 'action_notion' | 'action_stripe' | 'action_sendgrid'
+  | 'condition_if' | 'condition_switch' | 'condition_filter'
+  | 'loop_foreach' | 'loop_while' | 'loop_split_batches'
+  | 'control_delay' | 'control_merge' | 'control_split' | 'control_error' | 'control_wait'
+
+type WorkflowStatus = 'draft' | 'active' | 'paused' | 'error' | 'archived'
+type ExecutionStatus = 'success' | 'error' | 'running' | 'waiting' | 'cancelled' | 'timeout'
+type CredentialType = 'api_key' | 'oauth2' | 'basic_auth' | 'bearer' | 'custom'
 
 interface WorkflowNode {
   id: string
   type: NodeType
   name: string
+  displayName: string
   description?: string
   position: { x: number; y: number }
-  data: Record<string, unknown>
-  inputs: string[]
-  outputs: string[]
-  status?: 'idle' | 'running' | 'success' | 'error'
-  isDisabled?: boolean
+  parameters: Record<string, unknown>
+  credentials?: string[]
+  disabled: boolean
+  notes?: string
+  color?: string
+  webhookId?: string
+  retryOnFail: boolean
+  maxTries: number
+  waitBetweenTries: number
+  continueOnFail: boolean
+  alwaysOutputData: boolean
+  executeOnce: boolean
 }
 
 interface NodeConnection {
   id: string
   sourceNodeId: string
-  sourceOutput: string
+  sourceHandle: string
   targetNodeId: string
-  targetInput: string
+  targetHandle: string
+  label?: string
+  animated?: boolean
 }
 
-interface ExecutionLog {
+interface Workflow {
+  id: string
+  name: string
+  description?: string
+  status: WorkflowStatus
+  nodes: WorkflowNode[]
+  connections: NodeConnection[]
+  settings: WorkflowSettings
+  staticData?: Record<string, unknown>
+  tags: string[]
+  createdAt: Date
+  updatedAt: Date
+  createdBy: string
+  lastExecutedAt?: Date
+  executionCount: number
+  successCount: number
+  errorCount: number
+  avgExecutionTime: number
+  isShared: boolean
+  sharedWith: string[]
+  version: number
+  versionHistory: WorkflowVersion[]
+}
+
+interface WorkflowSettings {
+  executionOrder: 'v0' | 'v1'
+  saveExecutionProgress: boolean
+  saveManualExecutions: boolean
+  callerPolicy: 'any' | 'none' | 'workflowsFromAList' | 'workflowsFromSameOwner'
+  timezone: string
+  errorWorkflow?: string
+  executionTimeout: number
+  maxConcurrency: number
+}
+
+interface WorkflowVersion {
+  id: string
+  version: number
+  createdAt: Date
+  createdBy: string
+  description: string
+  nodesSnapshot: WorkflowNode[]
+  connectionsSnapshot: NodeConnection[]
+}
+
+interface WorkflowExecution {
   id: string
   workflowId: string
-  status: 'success' | 'error' | 'running' | 'waiting'
-  startedAt: string
-  finishedAt?: string
+  workflowName: string
+  status: ExecutionStatus
+  mode: 'manual' | 'trigger' | 'webhook' | 'retry'
+  startedAt: Date
+  finishedAt?: Date
   duration?: number
   nodesExecuted: number
   totalNodes: number
-  error?: string
-  data?: Record<string, unknown>
+  error?: {
+    message: string
+    node?: string
+    stack?: string
+  }
+  data?: ExecutionData
+  retryOf?: string
+  retrySuccessId?: string
+}
+
+interface ExecutionData {
+  startData?: Record<string, unknown>
+  resultData?: {
+    runData: Record<string, NodeExecutionData[]>
+    lastNodeExecuted?: string
+  }
+}
+
+interface NodeExecutionData {
+  startTime: number
+  executionTime: number
+  source?: string[]
+  data: Record<string, unknown>[]
+  error?: {
+    message: string
+    description?: string
+  }
+}
+
+interface WorkflowCredential {
+  id: string
+  name: string
+  type: CredentialType
+  nodeTypes: NodeType[]
+  createdAt: Date
+  updatedAt: Date
+  data: Record<string, unknown>
+  isShared: boolean
+  usageCount: number
+}
+
+interface WorkflowVariable {
+  id: string
+  key: string
+  value: string
+  type: 'string' | 'number' | 'boolean' | 'json'
+  description?: string
+  isSecret: boolean
+}
+
+interface NodeDefinition {
+  type: NodeType
+  name: string
+  displayName: string
+  description: string
+  category: 'trigger' | 'action' | 'condition' | 'loop' | 'control'
+  subcategory?: string
+  icon: React.ReactNode
+  iconColor: string
+  color: string
+  inputs: { name: string; type: string }[]
+  outputs: { name: string; type: string }[]
+  properties: NodeProperty[]
+  credentials?: { name: string; required: boolean }[]
+  version: number
+  documentationUrl?: string
+}
+
+interface NodeProperty {
+  name: string
+  displayName: string
+  type: 'string' | 'number' | 'boolean' | 'options' | 'collection' | 'json' | 'fixedCollection'
+  default?: unknown
+  required?: boolean
+  description?: string
+  options?: { name: string; value: string | number | boolean }[]
+  placeholder?: string
 }
 
 interface WorkflowTemplate {
@@ -121,543 +217,572 @@ interface WorkflowTemplate {
   name: string
   description: string
   category: string
+  subcategory?: string
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
   nodes: WorkflowNode[]
   connections: NodeConnection[]
-  popularity: number
-  isNew: boolean
-  icon: string
+  usageCount: number
+  rating: number
+  author: string
+  tags: string[]
+  iconEmoji: string
+  estimatedTime: string
+  createdAt: Date
+  featured: boolean
 }
 
-type NodeType =
-  | 'trigger_manual'
-  | 'trigger_webhook'
-  | 'trigger_schedule'
-  | 'trigger_event'
-  | 'action_http'
-  | 'action_email'
-  | 'action_slack'
-  | 'action_database'
-  | 'action_code'
-  | 'action_transform'
-  | 'condition_if'
-  | 'condition_switch'
-  | 'loop_foreach'
-  | 'loop_while'
-  | 'control_delay'
-  | 'control_merge'
-  | 'control_split'
-  | 'control_error'
-
-interface NodeDefinition {
-  type: NodeType
-  name: string
-  description: string
-  category: 'trigger' | 'action' | 'condition' | 'loop' | 'control'
-  icon: React.ReactNode
-  color: string
-  inputs: number
-  outputs: number
-  configFields: ConfigField[]
+interface WorkflowStats {
+  totalWorkflows: number
+  activeWorkflows: number
+  draftWorkflows: number
+  totalExecutions: number
+  successfulExecutions: number
+  failedExecutions: number
+  avgExecutionTime: number
+  executionsToday: number
+  successRateToday: number
 }
 
-interface ConfigField {
-  name: string
-  label: string
-  type: 'text' | 'textarea' | 'select' | 'number' | 'boolean' | 'json'
-  required?: boolean
-  options?: string[]
-  default?: unknown
-}
-
-// ============================================================================
-// NODE DEFINITIONS - N8N LEVEL NODE LIBRARY
-// ============================================================================
+// ============== NODE DEFINITIONS ==============
 
 const NODE_DEFINITIONS: NodeDefinition[] = [
   // Triggers
-  { type: 'trigger_manual', name: 'Manual Trigger', description: 'Start workflow manually', category: 'trigger', icon: <Play className="h-4 w-4" />, color: 'bg-green-500', inputs: 0, outputs: 1, configFields: [] },
-  { type: 'trigger_webhook', name: 'Webhook', description: 'Start on HTTP request', category: 'trigger', icon: <Webhook className="h-4 w-4" />, color: 'bg-green-500', inputs: 0, outputs: 1, configFields: [{ name: 'method', label: 'HTTP Method', type: 'select', options: ['GET', 'POST', 'PUT', 'DELETE'] }, { name: 'path', label: 'Path', type: 'text', required: true }] },
-  { type: 'trigger_schedule', name: 'Schedule', description: 'Run on schedule', category: 'trigger', icon: <Calendar className="h-4 w-4" />, color: 'bg-green-500', inputs: 0, outputs: 1, configFields: [{ name: 'cron', label: 'Cron Expression', type: 'text', required: true, default: '0 9 * * *' }] },
-  { type: 'trigger_event', name: 'Event', description: 'Trigger on event', category: 'trigger', icon: <Zap className="h-4 w-4" />, color: 'bg-green-500', inputs: 0, outputs: 1, configFields: [{ name: 'event', label: 'Event Name', type: 'text', required: true }] },
+  { type: 'trigger_manual', name: 'Manual Trigger', displayName: 'Manual Trigger', description: 'Start workflow manually', category: 'trigger', icon: <Play className="h-4 w-4" />, iconColor: 'text-green-600', color: 'bg-green-500', inputs: [], outputs: [{ name: 'main', type: 'main' }], properties: [], version: 1 },
+  { type: 'trigger_webhook', name: 'Webhook', displayName: 'Webhook', description: 'Start on HTTP request', category: 'trigger', icon: <Webhook className="h-4 w-4" />, iconColor: 'text-green-600', color: 'bg-green-500', inputs: [], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'httpMethod', displayName: 'HTTP Method', type: 'options', options: [{ name: 'GET', value: 'GET' }, { name: 'POST', value: 'POST' }, { name: 'PUT', value: 'PUT' }, { name: 'DELETE', value: 'DELETE' }], default: 'POST' }, { name: 'path', displayName: 'Path', type: 'string', required: true }], version: 1 },
+  { type: 'trigger_schedule', name: 'Schedule Trigger', displayName: 'Schedule Trigger', description: 'Run on schedule (cron)', category: 'trigger', icon: <Calendar className="h-4 w-4" />, iconColor: 'text-green-600', color: 'bg-green-500', inputs: [], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'cronExpression', displayName: 'Cron Expression', type: 'string', default: '0 9 * * *', description: 'Run at 9 AM daily' }], version: 1 },
+  { type: 'trigger_event', name: 'Event Trigger', displayName: 'Event Trigger', description: 'Trigger on system event', category: 'trigger', icon: <Zap className="h-4 w-4" />, iconColor: 'text-green-600', color: 'bg-green-500', inputs: [], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'eventName', displayName: 'Event Name', type: 'string', required: true }], version: 1 },
+  { type: 'trigger_database', name: 'Database Trigger', displayName: 'Database Trigger', description: 'Trigger on DB changes', category: 'trigger', subcategory: 'Database', icon: <Database className="h-4 w-4" />, iconColor: 'text-green-600', color: 'bg-green-500', inputs: [], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'operation', displayName: 'Operation', type: 'options', options: [{ name: 'Insert', value: 'insert' }, { name: 'Update', value: 'update' }, { name: 'Delete', value: 'delete' }] }], version: 1 },
 
-  // Actions
-  { type: 'action_http', name: 'HTTP Request', description: 'Make API calls', category: 'action', icon: <Globe className="h-4 w-4" />, color: 'bg-blue-500', inputs: 1, outputs: 1, configFields: [{ name: 'url', label: 'URL', type: 'text', required: true }, { name: 'method', label: 'Method', type: 'select', options: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] }, { name: 'headers', label: 'Headers', type: 'json' }, { name: 'body', label: 'Body', type: 'json' }] },
-  { type: 'action_email', name: 'Send Email', description: 'Send email messages', category: 'action', icon: <Mail className="h-4 w-4" />, color: 'bg-blue-500', inputs: 1, outputs: 1, configFields: [{ name: 'to', label: 'To', type: 'text', required: true }, { name: 'subject', label: 'Subject', type: 'text', required: true }, { name: 'body', label: 'Body', type: 'textarea' }] },
-  { type: 'action_slack', name: 'Slack', description: 'Send Slack messages', category: 'action', icon: <MessageSquare className="h-4 w-4" />, color: 'bg-blue-500', inputs: 1, outputs: 1, configFields: [{ name: 'channel', label: 'Channel', type: 'text', required: true }, { name: 'message', label: 'Message', type: 'textarea', required: true }] },
-  { type: 'action_database', name: 'Database', description: 'Query databases', category: 'action', icon: <Database className="h-4 w-4" />, color: 'bg-blue-500', inputs: 1, outputs: 1, configFields: [{ name: 'operation', label: 'Operation', type: 'select', options: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] }, { name: 'query', label: 'Query', type: 'textarea' }] },
-  { type: 'action_code', name: 'Code', description: 'Run custom code', category: 'action', icon: <Code className="h-4 w-4" />, color: 'bg-blue-500', inputs: 1, outputs: 1, configFields: [{ name: 'language', label: 'Language', type: 'select', options: ['JavaScript', 'Python'] }, { name: 'code', label: 'Code', type: 'textarea', required: true }] },
-  { type: 'action_transform', name: 'Transform', description: 'Transform data', category: 'action', icon: <Layers className="h-4 w-4" />, color: 'bg-blue-500', inputs: 1, outputs: 1, configFields: [{ name: 'expression', label: 'Expression', type: 'textarea' }] },
+  // Actions - Core
+  { type: 'action_http', name: 'HTTP Request', displayName: 'HTTP Request', description: 'Make API calls', category: 'action', subcategory: 'Core', icon: <Globe className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'url', displayName: 'URL', type: 'string', required: true }, { name: 'method', displayName: 'Method', type: 'options', options: [{ name: 'GET', value: 'GET' }, { name: 'POST', value: 'POST' }, { name: 'PUT', value: 'PUT' }, { name: 'DELETE', value: 'DELETE' }] }, { name: 'authentication', displayName: 'Authentication', type: 'options', options: [{ name: 'None', value: 'none' }, { name: 'Basic Auth', value: 'basicAuth' }, { name: 'Bearer', value: 'bearer' }, { name: 'OAuth2', value: 'oauth2' }] }], version: 1 },
+  { type: 'action_code', name: 'Code', displayName: 'Code', description: 'Run JavaScript/Python', category: 'action', subcategory: 'Core', icon: <Code className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'language', displayName: 'Language', type: 'options', options: [{ name: 'JavaScript', value: 'javascript' }, { name: 'Python', value: 'python' }] }, { name: 'code', displayName: 'Code', type: 'string', required: true }], version: 1 },
+  { type: 'action_transform', name: 'Transform', displayName: 'Set', description: 'Transform/set data', category: 'action', subcategory: 'Core', icon: <Layers className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'mode', displayName: 'Mode', type: 'options', options: [{ name: 'Manual', value: 'manual' }, { name: 'Expression', value: 'expression' }] }], version: 1 },
+
+  // Actions - Communication
+  { type: 'action_email', name: 'Send Email', displayName: 'Send Email', description: 'Send emails via SMTP', category: 'action', subcategory: 'Communication', icon: <Mail className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'to', displayName: 'To', type: 'string', required: true }, { name: 'subject', displayName: 'Subject', type: 'string', required: true }, { name: 'body', displayName: 'Body', type: 'string' }], credentials: [{ name: 'smtp', required: true }], version: 1 },
+  { type: 'action_slack', name: 'Slack', displayName: 'Slack', description: 'Send Slack messages', category: 'action', subcategory: 'Communication', icon: <MessageSquare className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'channel', displayName: 'Channel', type: 'string', required: true }, { name: 'text', displayName: 'Message', type: 'string', required: true }], credentials: [{ name: 'slackApi', required: true }], version: 1 },
+  { type: 'action_sendgrid', name: 'SendGrid', displayName: 'SendGrid', description: 'Send emails via SendGrid', category: 'action', subcategory: 'Communication', icon: <Mail className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'to', displayName: 'To', type: 'string', required: true }], credentials: [{ name: 'sendGrid', required: true }], version: 1 },
+
+  // Actions - Data
+  { type: 'action_database', name: 'Database', displayName: 'Postgres/MySQL', description: 'Query databases', category: 'action', subcategory: 'Data', icon: <Database className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'operation', displayName: 'Operation', type: 'options', options: [{ name: 'Execute Query', value: 'query' }, { name: 'Insert', value: 'insert' }, { name: 'Update', value: 'update' }, { name: 'Delete', value: 'delete' }] }, { name: 'query', displayName: 'Query', type: 'string' }], credentials: [{ name: 'postgres', required: true }], version: 1 },
+  { type: 'action_google_sheets', name: 'Google Sheets', displayName: 'Google Sheets', description: 'Read/write spreadsheets', category: 'action', subcategory: 'Data', icon: <FileText className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'operation', displayName: 'Operation', type: 'options', options: [{ name: 'Read', value: 'read' }, { name: 'Append', value: 'append' }, { name: 'Update', value: 'update' }] }], credentials: [{ name: 'googleSheets', required: true }], version: 1 },
+  { type: 'action_airtable', name: 'Airtable', displayName: 'Airtable', description: 'Airtable operations', category: 'action', subcategory: 'Data', icon: <LayoutGrid className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [], credentials: [{ name: 'airtable', required: true }], version: 1 },
+  { type: 'action_notion', name: 'Notion', displayName: 'Notion', description: 'Notion database operations', category: 'action', subcategory: 'Data', icon: <FileCode className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [], credentials: [{ name: 'notion', required: true }], version: 1 },
+
+  // Actions - Payments
+  { type: 'action_stripe', name: 'Stripe', displayName: 'Stripe', description: 'Payment operations', category: 'action', subcategory: 'Payments', icon: <Cpu className="h-4 w-4" />, iconColor: 'text-blue-600', color: 'bg-blue-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'operation', displayName: 'Operation', type: 'options', options: [{ name: 'Create Payment', value: 'createPayment' }, { name: 'Create Customer', value: 'createCustomer' }] }], credentials: [{ name: 'stripe', required: true }], version: 1 },
 
   // Conditions
-  { type: 'condition_if', name: 'IF', description: 'Conditional branching', category: 'condition', icon: <Diamond className="h-4 w-4" />, color: 'bg-yellow-500', inputs: 1, outputs: 2, configFields: [{ name: 'condition', label: 'Condition', type: 'textarea', required: true }] },
-  { type: 'condition_switch', name: 'Switch', description: 'Multiple branches', category: 'condition', icon: <Split className="h-4 w-4" />, color: 'bg-yellow-500', inputs: 1, outputs: 4, configFields: [{ name: 'cases', label: 'Cases', type: 'json' }] },
+  { type: 'condition_if', name: 'IF', displayName: 'IF', description: 'Conditional branching', category: 'condition', icon: <Diamond className="h-4 w-4" />, iconColor: 'text-yellow-600', color: 'bg-yellow-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'true', type: 'main' }, { name: 'false', type: 'main' }], properties: [{ name: 'conditions', displayName: 'Conditions', type: 'fixedCollection' }], version: 1 },
+  { type: 'condition_switch', name: 'Switch', displayName: 'Switch', description: 'Multiple branches', category: 'condition', icon: <Split className="h-4 w-4" />, iconColor: 'text-yellow-600', color: 'bg-yellow-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'output0', type: 'main' }, { name: 'output1', type: 'main' }, { name: 'output2', type: 'main' }, { name: 'output3', type: 'main' }], properties: [], version: 1 },
+  { type: 'condition_filter', name: 'Filter', displayName: 'Filter', description: 'Filter items', category: 'condition', icon: <Filter className="h-4 w-4" />, iconColor: 'text-yellow-600', color: 'bg-yellow-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'kept', type: 'main' }, { name: 'discarded', type: 'main' }], properties: [], version: 1 },
 
   // Loops
-  { type: 'loop_foreach', name: 'For Each', description: 'Loop over items', category: 'loop', icon: <Repeat className="h-4 w-4" />, color: 'bg-purple-500', inputs: 1, outputs: 1, configFields: [{ name: 'items', label: 'Items Expression', type: 'text' }] },
-  { type: 'loop_while', name: 'While', description: 'Loop while condition', category: 'loop', icon: <RefreshCw className="h-4 w-4" />, color: 'bg-purple-500', inputs: 1, outputs: 1, configFields: [{ name: 'condition', label: 'Condition', type: 'textarea' }, { name: 'maxIterations', label: 'Max Iterations', type: 'number', default: 100 }] },
+  { type: 'loop_foreach', name: 'Loop Over Items', displayName: 'Loop Over Items', description: 'Loop over each item', category: 'loop', icon: <Repeat className="h-4 w-4" />, iconColor: 'text-purple-600', color: 'bg-purple-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [], version: 1 },
+  { type: 'loop_while', name: 'While', displayName: 'While', description: 'Loop while condition', category: 'loop', icon: <RefreshCw className="h-4 w-4" />, iconColor: 'text-purple-600', color: 'bg-purple-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'maxIterations', displayName: 'Max Iterations', type: 'number', default: 100 }], version: 1 },
+  { type: 'loop_split_batches', name: 'Split In Batches', displayName: 'Split In Batches', description: 'Process in batches', category: 'loop', icon: <Shuffle className="h-4 w-4" />, iconColor: 'text-purple-600', color: 'bg-purple-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'loop', type: 'main' }, { name: 'done', type: 'main' }], properties: [{ name: 'batchSize', displayName: 'Batch Size', type: 'number', default: 10 }], version: 1 },
 
   // Control
-  { type: 'control_delay', name: 'Delay', description: 'Wait before continuing', category: 'control', icon: <Clock className="h-4 w-4" />, color: 'bg-gray-500', inputs: 1, outputs: 1, configFields: [{ name: 'duration', label: 'Duration (ms)', type: 'number', default: 1000 }] },
-  { type: 'control_merge', name: 'Merge', description: 'Merge branches', category: 'control', icon: <Merge className="h-4 w-4" />, color: 'bg-gray-500', inputs: 2, outputs: 1, configFields: [{ name: 'mode', label: 'Mode', type: 'select', options: ['Wait All', 'First'] }] },
-  { type: 'control_split', name: 'Split', description: 'Split into branches', category: 'control', icon: <Split className="h-4 w-4" />, color: 'bg-gray-500', inputs: 1, outputs: 2, configFields: [] },
-  { type: 'control_error', name: 'Error Handler', description: 'Handle errors', category: 'control', icon: <AlertTriangle className="h-4 w-4" />, color: 'bg-red-500', inputs: 1, outputs: 2, configFields: [{ name: 'continueOnError', label: 'Continue on Error', type: 'boolean' }] },
+  { type: 'control_delay', name: 'Wait', displayName: 'Wait', description: 'Wait before continuing', category: 'control', icon: <Clock className="h-4 w-4" />, iconColor: 'text-gray-600', color: 'bg-gray-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'amount', displayName: 'Wait Amount', type: 'number', default: 1 }, { name: 'unit', displayName: 'Unit', type: 'options', options: [{ name: 'Seconds', value: 'seconds' }, { name: 'Minutes', value: 'minutes' }, { name: 'Hours', value: 'hours' }] }], version: 1 },
+  { type: 'control_merge', name: 'Merge', displayName: 'Merge', description: 'Merge branches', category: 'control', icon: <Merge className="h-4 w-4" />, iconColor: 'text-gray-600', color: 'bg-gray-500', inputs: [{ name: 'input1', type: 'main' }, { name: 'input2', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'mode', displayName: 'Mode', type: 'options', options: [{ name: 'Append', value: 'append' }, { name: 'Merge By Index', value: 'mergeByIndex' }, { name: 'Wait', value: 'wait' }] }], version: 1 },
+  { type: 'control_split', name: 'No Op', displayName: 'No Operation', description: 'Pass through', category: 'control', icon: <ArrowRight className="h-4 w-4" />, iconColor: 'text-gray-600', color: 'bg-gray-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [], version: 1 },
+  { type: 'control_error', name: 'Error Trigger', displayName: 'Error Trigger', description: 'Handle errors', category: 'control', icon: <AlertTriangle className="h-4 w-4" />, iconColor: 'text-red-600', color: 'bg-red-500', inputs: [], outputs: [{ name: 'main', type: 'main' }], properties: [], version: 1 },
+  { type: 'control_wait', name: 'Wait', displayName: 'Wait', description: 'Wait for webhook', category: 'control', icon: <Timer className="h-4 w-4" />, iconColor: 'text-gray-600', color: 'bg-gray-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'resume', displayName: 'Resume', type: 'options', options: [{ name: 'After Time Interval', value: 'timeInterval' }, { name: 'On Webhook Call', value: 'webhook' }] }], version: 1 },
 ]
 
-// ============================================================================
-// MOCK DATA - TEMPLATES & EXECUTION LOGS
-// ============================================================================
+// ============== MOCK DATA ==============
 
-const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
+const mockWorkflows: Workflow[] = [
   {
-    id: 't1', name: 'Slack Alert on Form Submit', description: 'Send Slack notification when a form is submitted', category: 'Notifications', icon: '📬', popularity: 95, isNew: false,
-    nodes: [{ id: 'n1', type: 'trigger_webhook', name: 'Webhook', position: { x: 100, y: 200 }, data: { method: 'POST', path: '/form' }, inputs: [], outputs: ['n2'] }],
-    connections: [{ id: 'c1', sourceNodeId: 'n1', sourceOutput: 'out1', targetNodeId: 'n2', targetInput: 'in1' }]
+    id: 'wf1',
+    name: 'Lead Processing Pipeline',
+    description: 'Automatically process new leads from form submissions',
+    status: 'active',
+    nodes: [],
+    connections: [],
+    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
+    tags: ['leads', 'crm', 'automation'],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-15'),
+    createdBy: 'user1',
+    lastExecutedAt: new Date('2024-01-15T10:30:00'),
+    executionCount: 1245,
+    successCount: 1230,
+    errorCount: 15,
+    avgExecutionTime: 2340,
+    isShared: true,
+    sharedWith: ['team'],
+    version: 5,
+    versionHistory: []
   },
   {
-    id: 't2', name: 'Daily Report Generator', description: 'Generate and email daily reports automatically', category: 'Reporting', icon: '📊', popularity: 88, isNew: false,
-    nodes: [], connections: []
+    id: 'wf2',
+    name: 'Daily Report Generator',
+    description: 'Generate and send daily sales reports',
+    status: 'active',
+    nodes: [],
+    connections: [],
+    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
+    tags: ['reports', 'scheduled', 'email'],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-14'),
+    createdBy: 'user1',
+    lastExecutedAt: new Date('2024-01-15T09:00:00'),
+    executionCount: 45,
+    successCount: 44,
+    errorCount: 1,
+    avgExecutionTime: 15670,
+    isShared: false,
+    sharedWith: [],
+    version: 3,
+    versionHistory: []
   },
   {
-    id: 't3', name: 'Lead Scoring Workflow', description: 'Score leads based on their actions and update CRM', category: 'Sales', icon: '🎯', popularity: 82, isNew: true,
-    nodes: [], connections: []
+    id: 'wf3',
+    name: 'Slack Notification Bot',
+    description: 'Send notifications to Slack on various events',
+    status: 'paused',
+    nodes: [],
+    connections: [],
+    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
+    tags: ['notifications', 'slack'],
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-01-12'),
+    createdBy: 'user2',
+    executionCount: 890,
+    successCount: 885,
+    errorCount: 5,
+    avgExecutionTime: 450,
+    isShared: true,
+    sharedWith: ['team'],
+    version: 2,
+    versionHistory: []
   },
   {
-    id: 't4', name: 'GitHub to Jira Sync', description: 'Create Jira tickets from GitHub issues', category: 'Development', icon: '🔄', popularity: 91, isNew: false,
-    nodes: [], connections: []
-  },
-  {
-    id: 't5', name: 'Customer Onboarding', description: 'Automated welcome sequence for new customers', category: 'Customer Success', icon: '👋', popularity: 79, isNew: true,
-    nodes: [], connections: []
-  },
+    id: 'wf4',
+    name: 'Customer Onboarding',
+    description: 'Automated onboarding sequence for new customers',
+    status: 'draft',
+    nodes: [],
+    connections: [],
+    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
+    tags: ['onboarding', 'customers'],
+    createdAt: new Date('2024-01-14'),
+    updatedAt: new Date('2024-01-15'),
+    createdBy: 'user1',
+    executionCount: 0,
+    successCount: 0,
+    errorCount: 0,
+    avgExecutionTime: 0,
+    isShared: false,
+    sharedWith: [],
+    version: 1,
+    versionHistory: []
+  }
 ]
 
-const EXECUTION_LOGS: ExecutionLog[] = [
-  { id: 'e1', workflowId: 'w1', status: 'success', startedAt: '2024-01-28T10:30:00Z', finishedAt: '2024-01-28T10:30:02Z', duration: 2000, nodesExecuted: 5, totalNodes: 5 },
-  { id: 'e2', workflowId: 'w1', status: 'success', startedAt: '2024-01-28T10:25:00Z', finishedAt: '2024-01-28T10:25:01Z', duration: 1500, nodesExecuted: 5, totalNodes: 5 },
-  { id: 'e3', workflowId: 'w2', status: 'error', startedAt: '2024-01-28T10:20:00Z', finishedAt: '2024-01-28T10:20:03Z', duration: 3000, nodesExecuted: 3, totalNodes: 5, error: 'Connection timeout' },
-  { id: 'e4', workflowId: 'w1', status: 'running', startedAt: '2024-01-28T10:35:00Z', nodesExecuted: 2, totalNodes: 5 },
-  { id: 'e5', workflowId: 'w3', status: 'success', startedAt: '2024-01-28T10:15:00Z', finishedAt: '2024-01-28T10:15:04Z', duration: 4000, nodesExecuted: 8, totalNodes: 8 },
+const mockExecutions: WorkflowExecution[] = [
+  { id: 'ex1', workflowId: 'wf1', workflowName: 'Lead Processing Pipeline', status: 'success', mode: 'trigger', startedAt: new Date('2024-01-15T10:30:00'), finishedAt: new Date('2024-01-15T10:30:02'), duration: 2340, nodesExecuted: 8, totalNodes: 8 },
+  { id: 'ex2', workflowId: 'wf1', workflowName: 'Lead Processing Pipeline', status: 'success', mode: 'trigger', startedAt: new Date('2024-01-15T10:25:00'), finishedAt: new Date('2024-01-15T10:25:02'), duration: 2100, nodesExecuted: 8, totalNodes: 8 },
+  { id: 'ex3', workflowId: 'wf2', workflowName: 'Daily Report Generator', status: 'error', mode: 'trigger', startedAt: new Date('2024-01-15T09:00:00'), finishedAt: new Date('2024-01-15T09:00:05'), duration: 5000, nodesExecuted: 4, totalNodes: 6, error: { message: 'Connection timeout', node: 'HTTP Request' } },
+  { id: 'ex4', workflowId: 'wf1', workflowName: 'Lead Processing Pipeline', status: 'running', mode: 'webhook', startedAt: new Date('2024-01-15T10:35:00'), nodesExecuted: 3, totalNodes: 8 },
+  { id: 'ex5', workflowId: 'wf3', workflowName: 'Slack Notification Bot', status: 'success', mode: 'trigger', startedAt: new Date('2024-01-15T10:20:00'), finishedAt: new Date('2024-01-15T10:20:01'), duration: 450, nodesExecuted: 3, totalNodes: 3 }
 ]
 
-// ============================================================================
-// MAIN COMPONENT - N8N LEVEL WORKFLOW BUILDER
-// ============================================================================
+const mockTemplates: WorkflowTemplate[] = [
+  { id: 't1', name: 'Slack Alert on Form Submit', description: 'Send Slack notification when a form is submitted', category: 'Notifications', difficulty: 'beginner', nodes: [], connections: [], usageCount: 2340, rating: 4.8, author: 'n8n', tags: ['slack', 'forms'], iconEmoji: '📬', estimatedTime: '5 min', createdAt: new Date(), featured: true },
+  { id: 't2', name: 'Daily Report Generator', description: 'Generate and email daily reports automatically', category: 'Reporting', difficulty: 'intermediate', nodes: [], connections: [], usageCount: 1890, rating: 4.7, author: 'n8n', tags: ['reports', 'email'], iconEmoji: '📊', estimatedTime: '15 min', createdAt: new Date(), featured: true },
+  { id: 't3', name: 'Lead Scoring Workflow', description: 'Score leads based on their actions and update CRM', category: 'Sales', difficulty: 'advanced', nodes: [], connections: [], usageCount: 1234, rating: 4.6, author: 'n8n', tags: ['crm', 'leads'], iconEmoji: '🎯', estimatedTime: '30 min', createdAt: new Date(), featured: false },
+  { id: 't4', name: 'GitHub to Jira Sync', description: 'Create Jira tickets from GitHub issues', category: 'Development', difficulty: 'intermediate', nodes: [], connections: [], usageCount: 987, rating: 4.5, author: 'community', tags: ['github', 'jira'], iconEmoji: '🔄', estimatedTime: '20 min', createdAt: new Date(), featured: false },
+  { id: 't5', name: 'Customer Onboarding', description: 'Automated welcome sequence for new customers', category: 'Customer Success', difficulty: 'intermediate', nodes: [], connections: [], usageCount: 1567, rating: 4.9, author: 'n8n', tags: ['onboarding', 'email'], iconEmoji: '👋', estimatedTime: '25 min', createdAt: new Date(), featured: true },
+  { id: 't6', name: 'Invoice Processing', description: 'Extract data from invoices and update accounting', category: 'Finance', difficulty: 'advanced', nodes: [], connections: [], usageCount: 876, rating: 4.4, author: 'community', tags: ['invoices', 'ocr'], iconEmoji: '🧾', estimatedTime: '45 min', createdAt: new Date(), featured: false }
+]
 
-interface WorkflowBuilderClientProps {
-  initialWorkflows: Workflow[]
-  initialStats: WorkflowStats
+const mockCredentials: WorkflowCredential[] = [
+  { id: 'cred1', name: 'Slack Bot', type: 'oauth2', nodeTypes: ['action_slack'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: true, usageCount: 12 },
+  { id: 'cred2', name: 'SendGrid API', type: 'api_key', nodeTypes: ['action_sendgrid', 'action_email'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: false, usageCount: 8 },
+  { id: 'cred3', name: 'Postgres Production', type: 'custom', nodeTypes: ['action_database'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: true, usageCount: 15 },
+  { id: 'cred4', name: 'Google Sheets', type: 'oauth2', nodeTypes: ['action_google_sheets'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: true, usageCount: 6 }
+]
+
+const mockVariables: WorkflowVariable[] = [
+  { id: 'var1', key: 'API_BASE_URL', value: 'https://api.example.com', type: 'string', description: 'Base URL for API calls', isSecret: false },
+  { id: 'var2', key: 'NOTIFICATION_EMAIL', value: 'alerts@company.com', type: 'string', description: 'Email for notifications', isSecret: false },
+  { id: 'var3', key: 'STRIPE_API_KEY', value: '••••••••••••', type: 'string', description: 'Stripe API Key', isSecret: true },
+  { id: 'var4', key: 'MAX_RETRIES', value: '3', type: 'number', description: 'Maximum retry attempts', isSecret: false }
+]
+
+// ============== HELPER FUNCTIONS ==============
+
+const getStatusColor = (status: WorkflowStatus): string => {
+  const colors: Record<WorkflowStatus, string> = {
+    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    paused: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    archived: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+  }
+  return colors[status] || colors.draft
 }
 
-export default function WorkflowBuilderClient({ initialWorkflows, initialStats }: WorkflowBuilderClientProps) {
-  // State
+const getExecutionStatusColor = (status: ExecutionStatus): string => {
+  const colors: Record<ExecutionStatus, string> = {
+    success: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    waiting: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    cancelled: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    timeout: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+  }
+  return colors[status] || colors.waiting
+}
+
+const formatDuration = (ms: number): string => {
+  if (ms < 1000) return `${ms}ms`
+  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
+  return `${(ms / 60000).toFixed(1)}m`
+}
+
+const formatTimeAgo = (date: Date): string => {
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
+
+const getDifficultyColor = (difficulty: string): string => {
+  switch (difficulty) {
+    case 'beginner': return 'bg-green-100 text-green-700'
+    case 'intermediate': return 'bg-yellow-100 text-yellow-700'
+    case 'advanced': return 'bg-red-100 text-red-700'
+    default: return 'bg-gray-100 text-gray-700'
+  }
+}
+
+// ============== MAIN COMPONENT ==============
+
+export default function WorkflowBuilderClient() {
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showNewWorkflowDialog, setShowNewWorkflowDialog] = useState(false)
+  const [showWorkflowDialog, setShowWorkflowDialog] = useState(false)
   const [showNodeLibrary, setShowNodeLibrary] = useState(false)
-  const [showTemplates, setShowTemplates] = useState(false)
-  const [selectedNodeCategory, setSelectedNodeCategory] = useState<string>('all')
-  const [canvasZoom, setCanvasZoom] = useState(100)
-  const [showNodeConfig, setShowNodeConfig] = useState(false)
-  const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false)
+  const [showVariablesDialog, setShowVariablesDialog] = useState(false)
 
-  // Form state for new workflow
-  const [newWorkflowName, setNewWorkflowName] = useState('')
-  const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
+  const stats: WorkflowStats = useMemo(() => ({
+    totalWorkflows: mockWorkflows.length,
+    activeWorkflows: mockWorkflows.filter(w => w.status === 'active').length,
+    draftWorkflows: mockWorkflows.filter(w => w.status === 'draft').length,
+    totalExecutions: mockWorkflows.reduce((sum, w) => sum + w.executionCount, 0),
+    successfulExecutions: mockWorkflows.reduce((sum, w) => sum + w.successCount, 0),
+    failedExecutions: mockWorkflows.reduce((sum, w) => sum + w.errorCount, 0),
+    avgExecutionTime: mockWorkflows.filter(w => w.avgExecutionTime > 0).reduce((sum, w) => sum + w.avgExecutionTime, 0) / mockWorkflows.filter(w => w.avgExecutionTime > 0).length || 0,
+    executionsToday: 156,
+    successRateToday: 98.7
+  }), [])
 
-  // Workflow hook
-  const {
-    workflows,
-    stats,
-    loading,
-    createWorkflow,
-    updateWorkflow,
-    deleteWorkflow,
-    startWorkflow,
-    pauseWorkflow,
-    resumeWorkflow
-  } = useWorkflows(initialWorkflows, initialStats)
-
-  // Filter nodes by category
   const filteredNodes = useMemo(() => {
-    if (selectedNodeCategory === 'all') return NODE_DEFINITIONS
-    return NODE_DEFINITIONS.filter(n => n.category === selectedNodeCategory)
-  }, [selectedNodeCategory])
+    return selectedCategory === 'all'
+      ? NODE_DEFINITIONS
+      : NODE_DEFINITIONS.filter(n => n.category === selectedCategory)
+  }, [selectedCategory])
 
-  // Filter workflows by search
   const filteredWorkflows = useMemo(() => {
-    if (!searchQuery) return workflows
-    return workflows.filter(w =>
+    return mockWorkflows.filter(w =>
       w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       w.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [workflows, searchQuery])
-
-  // Stats for display
-  const displayStats = useMemo(() => [
-    { label: 'Total Workflows', value: stats.total, color: 'text-violet-600', icon: <GitBranch className="h-5 w-5" /> },
-    { label: 'Active', value: stats.active, color: 'text-green-600', icon: <Activity className="h-5 w-5" /> },
-    { label: 'Completed', value: stats.completed, color: 'text-blue-600', icon: <CheckCircle className="h-5 w-5" /> },
-    { label: 'Success Rate', value: `${Math.round(stats.avgCompletionRate)}%`, color: 'text-purple-600', icon: <BarChart3 className="h-5 w-5" /> },
-  ], [stats])
-
-  // Handlers
-  const handleCreateWorkflow = useCallback(async () => {
-    if (!newWorkflowName.trim()) {
-      toast.error('Please enter a workflow name')
-      return
-    }
-
-    await createWorkflow({
-      name: newWorkflowName,
-      description: newWorkflowDescription,
-      status: 'draft',
-      total_steps: 0,
-      current_step: 0,
-      completion_rate: 0,
-      steps_config: [],
-      approvals_required: 0,
-      approvals_received: 0,
-      assigned_to: [],
-      dependencies: [],
-      tags: []
-    })
-
-    toast.success('Workflow Created', {
-      description: `"${newWorkflowName}" is ready to build`
-    })
-
-    setShowCreateDialog(false)
-    setNewWorkflowName('')
-    setNewWorkflowDescription('')
-  }, [newWorkflowName, newWorkflowDescription, createWorkflow])
-
-  const handleUseTemplate = useCallback((template: WorkflowTemplate) => {
-    toast.success('Template Applied', {
-      description: `Creating workflow from "${template.name}"`
-    })
-    setShowTemplates(false)
-  }, [])
-
-  const handleDragNode = useCallback((nodeType: NodeType) => {
-    toast.info('Node Ready', {
-      description: 'Drag to canvas to add node'
-    })
-    setShowNodeLibrary(false)
-  }, [])
-
-  const handleDeleteWorkflow = useCallback(async (workflowId: string) => {
-    await deleteWorkflow(workflowId)
-    toast.success('Workflow Deleted')
-  }, [deleteWorkflow])
-
-  const handleStartWorkflow = useCallback(async (workflowId: string) => {
-    await startWorkflow(workflowId)
-    toast.success('Workflow Started')
-  }, [startWorkflow])
-
-  const handlePauseWorkflow = useCallback(async (workflowId: string) => {
-    await pauseWorkflow(workflowId)
-    toast.success('Workflow Paused')
-  }, [pauseWorkflow])
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-      case 'paused': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      case 'completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      default: return 'bg-gray-100 text-gray-700'
-    }
-  }
-
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(minutes / 60)
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    return `${Math.floor(hours / 24)}d ago`
-  }
+  }, [searchQuery])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl">
-                <GitBranch className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white">
+        <div className="max-w-[1800px] mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <Workflow className="w-8 h-8" />
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                  n8n Level
-                </Badge>
-                <Badge variant="outline" className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                  {NODE_DEFINITIONS.length} Nodes
-                </Badge>
+              <div>
+                <h1 className="text-3xl font-bold">Workflow Builder</h1>
+                <p className="text-violet-100">n8n-Level Visual Automation Platform</p>
               </div>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Workflow Builder
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Visual automation for any workflow
-            </p>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => setShowCredentialsDialog(true)}>
+                <Key className="w-4 h-4 mr-2" />
+                Credentials
+              </Button>
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => setShowVariablesDialog(true)}>
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                Variables
+              </Button>
+              <Button onClick={() => setShowNewWorkflowDialog(true)} className="bg-white text-violet-600 hover:bg-violet-50">
+                <Plus className="w-4 h-4 mr-2" />
+                New Workflow
+              </Button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={() => setShowTemplates(true)}>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Templates
-            </Button>
-            <Button
-              className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-              onClick={() => setShowCreateDialog(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Workflow
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {displayStats.map((stat, i) => (
-            <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-                    <div className="text-sm text-gray-500">{stat.label}</div>
-                  </div>
-                  <div className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-700 ${stat.color}`}>
-                    {stat.icon}
-                  </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-8 gap-3">
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg">
+                  <GitBranch className="w-4 h-4 text-white" />
                 </div>
-              </CardContent>
+                <div>
+                  <p className="text-xs text-violet-100">Workflows</p>
+                  <p className="text-xl font-bold">{stats.totalWorkflows}</p>
+                </div>
+              </div>
             </Card>
-          ))}
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Active</p>
+                  <p className="text-xl font-bold">{stats.activeWorkflows}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg">
+                  <Play className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Executions</p>
+                  <p className="text-xl font-bold">{stats.totalExecutions.toLocaleString()}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Success</p>
+                  <p className="text-xl font-bold">{stats.successfulExecutions.toLocaleString()}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-red-400 to-rose-500 rounded-lg">
+                  <XCircle className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Failed</p>
+                  <p className="text-xl font-bold">{stats.failedExecutions}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Avg Time</p>
+                  <p className="text-xl font-bold">{formatDuration(stats.avgExecutionTime)}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg">
+                  <Zap className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Today</p>
+                  <p className="text-xl font-bold">{stats.executionsToday}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-100">Success Rate</p>
+                  <p className="text-xl font-bold">{stats.successRateToday}%</p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
+      </div>
 
-        {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-1">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 p-1 mb-6">
             <TabsTrigger value="workflows" className="flex items-center gap-2">
-              <GitBranch className="h-4 w-4" />
+              <GitBranch className="w-4 h-4" />
               Workflows
             </TabsTrigger>
-            <TabsTrigger value="nodes" className="flex items-center gap-2">
-              <Box className="h-4 w-4" />
-              Node Library
-            </TabsTrigger>
             <TabsTrigger value="executions" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
+              <History className="w-4 h-4" />
               Executions
             </TabsTrigger>
+            <TabsTrigger value="nodes" className="flex items-center gap-2">
+              <Box className="w-4 h-4" />
+              Node Library
+            </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="w-4 h-4" />
               Templates
+            </TabsTrigger>
+            <TabsTrigger value="credentials" className="flex items-center gap-2">
+              <Key className="w-4 h-4" />
+              Credentials
+            </TabsTrigger>
+            <TabsTrigger value="variables" className="flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4" />
+              Variables
             </TabsTrigger>
           </TabsList>
 
           {/* Workflows Tab */}
-          <TabsContent value="workflows" className="space-y-6">
-            {/* Search */}
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-              <CardContent className="p-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <TabsContent value="workflows">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     placeholder="Search workflows..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-9"
                   />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Workflows List */}
-            {loading && workflows.length === 0 ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+                <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
               </div>
-            ) : filteredWorkflows.length === 0 ? (
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardContent className="p-12 text-center">
-                  <GitBranch className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Workflows Yet</h3>
-                  <p className="text-gray-500 mb-4">Create your first workflow to automate tasks</p>
-                  <Button onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Workflow
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+              <div className="grid grid-cols-3 gap-6">
                 {filteredWorkflows.map(workflow => (
-                  <Card key={workflow.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
+                  <Card key={workflow.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedWorkflow(workflow); setShowWorkflowDialog(true) }}>
                     <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <GitBranch className="h-5 w-5 text-violet-600" />
-                          <Badge className={getStatusColor(workflow.status)}>
-                            {workflow.status}
-                          </Badge>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                            <GitBranch className="w-5 h-5 text-violet-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{workflow.name}</h3>
+                            <Badge className={getStatusColor(workflow.status)}>{workflow.status}</Badge>
+                          </div>
                         </div>
-                        <Button size="sm" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                          <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
 
-                      <h3 className="font-semibold mb-1">{workflow.name}</h3>
-                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                        {workflow.description || 'No description'}
-                      </p>
+                      {workflow.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{workflow.description}</p>
+                      )}
 
-                      <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
-                        <span className="flex items-center gap-1">
-                          <Box className="h-3 w-3" />
-                          {workflow.total_steps} nodes
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          {workflow.completion_rate}%
-                        </span>
+                      <div className="flex items-center gap-2 mb-4">
+                        {workflow.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                        ))}
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => setSelectedWorkflow(workflow)}
-                        >
-                          <Settings className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        {workflow.status === 'draft' && (
-                          <Button size="sm" onClick={() => handleStartWorkflow(workflow.id)}>
-                            <Play className="h-3 w-3 mr-1" />
-                            Start
-                          </Button>
-                        )}
-                        {workflow.status === 'active' && (
-                          <Button size="sm" variant="outline" onClick={() => handlePauseWorkflow(workflow.id)}>
-                            <Pause className="h-3 w-3 mr-1" />
-                            Pause
-                          </Button>
-                        )}
-                        {workflow.status === 'paused' && (
-                          <Button size="sm" onClick={() => startWorkflow(workflow.id)}>
-                            <Play className="h-3 w-3 mr-1" />
-                            Resume
-                          </Button>
-                        )}
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteWorkflow(workflow.id)}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                      <div className="grid grid-cols-3 gap-2 text-center text-sm mb-4">
+                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                          <p className="font-semibold">{workflow.executionCount.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500">Runs</p>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                          <p className="font-semibold text-green-600">{((workflow.successCount / workflow.executionCount) * 100 || 0).toFixed(0)}%</p>
+                          <p className="text-xs text-gray-500">Success</p>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                          <p className="font-semibold">{formatDuration(workflow.avgExecutionTime)}</p>
+                          <p className="text-xs text-gray-500">Avg</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          {workflow.lastExecutedAt && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatTimeAgo(workflow.lastExecutedAt)}
+                            </span>
+                          )}
+                          {workflow.isShared && (
+                            <span className="flex items-center gap-1">
+                              <Users className="w-3 h-3" />
+                              Shared
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button size="sm" variant="ghost"><Settings className="w-3 h-3" /></Button>
+                          {workflow.status === 'active' ? (
+                            <Button size="sm" variant="ghost"><Pause className="w-3 h-3" /></Button>
+                          ) : workflow.status !== 'archived' && (
+                            <Button size="sm" variant="ghost"><Play className="w-3 h-3" /></Button>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-            )}
-          </TabsContent>
-
-          {/* Node Library Tab */}
-          <TabsContent value="nodes" className="space-y-6">
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap">
-              {['all', 'trigger', 'action', 'condition', 'loop', 'control'].map(cat => (
-                <Button
-                  key={cat}
-                  size="sm"
-                  variant={selectedNodeCategory === cat ? 'default' : 'outline'}
-                  onClick={() => setSelectedNodeCategory(cat)}
-                  className={selectedNodeCategory === cat ? 'bg-violet-600 hover:bg-violet-700' : ''}
-                >
-                  {cat === 'all' ? 'All Nodes' : cat.charAt(0).toUpperCase() + cat.slice(1) + 's'}
-                </Button>
-              ))}
-            </div>
-
-            {/* Nodes Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filteredNodes.map(node => (
-                <Card
-                  key={node.type}
-                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-grab"
-                  draggable
-                  onDragStart={() => handleDragNode(node.type)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${node.color} text-white`}>
-                        {node.icon}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{node.name}</h4>
-                        <p className="text-xs text-gray-500">{node.description}</p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                          <span>{node.inputs} in</span>
-                          <ArrowRight className="h-3 w-3" />
-                          <span>{node.outputs} out</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           </TabsContent>
 
           {/* Executions Tab */}
-          <TabsContent value="executions" className="space-y-6">
-            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+          <TabsContent value="executions">
+            <Card>
               <CardHeader>
                 <CardTitle>Execution History</CardTitle>
                 <CardDescription>Recent workflow runs and their status</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {EXECUTION_LOGS.map(log => (
-                    <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  {mockExecutions.map(execution => (
+                    <div key={execution.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-4">
-                        {log.status === 'success' && <CheckCircle className="h-5 w-5 text-green-600" />}
-                        {log.status === 'error' && <XCircle className="h-5 w-5 text-red-600" />}
-                        {log.status === 'running' && <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />}
-                        {log.status === 'waiting' && <Clock className="h-5 w-5 text-gray-400" />}
-
+                        {execution.status === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                        {execution.status === 'error' && <XCircle className="w-5 h-5 text-red-600" />}
+                        {execution.status === 'running' && <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />}
+                        {execution.status === 'waiting' && <Clock className="w-5 h-5 text-yellow-600" />}
                         <div>
-                          <div className="font-medium">Workflow #{log.workflowId}</div>
-                          <div className="text-sm text-gray-500">{formatTimeAgo(log.startedAt)}</div>
+                          <p className="font-medium">{execution.workflowName}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>{formatTimeAgo(execution.startedAt)}</span>
+                            <Badge variant="outline" className="text-xs">{execution.mode}</Badge>
+                          </div>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-6 text-sm">
+                      <div className="flex items-center gap-6">
                         <div className="text-center">
-                          <div className="font-medium">{log.nodesExecuted}/{log.totalNodes}</div>
-                          <div className="text-xs text-gray-500">Nodes</div>
+                          <p className="font-semibold">{execution.nodesExecuted}/{execution.totalNodes}</p>
+                          <p className="text-xs text-gray-500">Nodes</p>
                         </div>
-                        {log.duration && (
+                        {execution.duration && (
                           <div className="text-center">
-                            <div className="font-medium">{(log.duration / 1000).toFixed(1)}s</div>
-                            <div className="text-xs text-gray-500">Duration</div>
+                            <p className="font-semibold">{formatDuration(execution.duration)}</p>
+                            <p className="text-xs text-gray-500">Duration</p>
                           </div>
                         )}
-                        <Badge className={log.status === 'success' ? 'bg-green-100 text-green-700' : log.status === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}>
-                          {log.status}
-                        </Badge>
-                        <Button size="sm" variant="ghost">
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <Badge className={getExecutionStatusColor(execution.status)}>{execution.status}</Badge>
+                        <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -666,127 +791,263 @@ export default function WorkflowBuilderClient({ initialWorkflows, initialStats }
             </Card>
           </TabsContent>
 
+          {/* Nodes Tab */}
+          <TabsContent value="nodes">
+            <div className="space-y-6">
+              <div className="flex gap-2 flex-wrap">
+                {['all', 'trigger', 'action', 'condition', 'loop', 'control'].map(cat => (
+                  <Button
+                    key={cat}
+                    size="sm"
+                    variant={selectedCategory === cat ? 'default' : 'outline'}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={selectedCategory === cat ? 'bg-violet-600 hover:bg-violet-700' : ''}
+                  >
+                    {cat === 'all' ? 'All Nodes' : cat.charAt(0).toUpperCase() + cat.slice(1) + 's'}
+                    {cat !== 'all' && <Badge variant="outline" className="ml-2">{NODE_DEFINITIONS.filter(n => n.category === cat).length}</Badge>}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                {filteredNodes.map(node => (
+                  <Card key={node.type} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-lg ${node.color} text-white`}>
+                          {node.icon}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{node.displayName}</h4>
+                          <p className="text-xs text-gray-500 line-clamp-2">{node.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline" className="text-xs">{node.category}</Badge>
+                            {node.subcategory && <Badge variant="outline" className="text-xs">{node.subcategory}</Badge>}
+                          </div>
+                          <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                            <span>{node.inputs.length} in</span>
+                            <ArrowRight className="w-3 h-3" />
+                            <span>{node.outputs.length} out</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
           {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {WORKFLOW_TEMPLATES.map(template => (
-                <Card key={template.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => handleUseTemplate(template)}>
+          <TabsContent value="templates">
+            <div className="grid grid-cols-3 gap-6">
+              {mockTemplates.map(template => (
+                <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <span className="text-3xl">{template.icon}</span>
+                      <span className="text-4xl">{template.iconEmoji}</span>
                       <div className="flex items-center gap-2">
-                        {template.isNew && <Badge className="bg-blue-100 text-blue-700">New</Badge>}
-                        <Badge variant="outline">{template.category}</Badge>
+                        {template.featured && <Badge className="bg-violet-100 text-violet-700">Featured</Badge>}
+                        <Badge className={getDifficultyColor(template.difficulty)}>{template.difficulty}</Badge>
                       </div>
                     </div>
-
                     <h3 className="font-semibold mb-2">{template.name}</h3>
-                    <p className="text-sm text-gray-500 mb-4">{template.description}</p>
-
-                    <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Star className="h-3 w-3" />
-                        {template.popularity}% popular
-                      </span>
-                      <Button size="sm" variant="outline">
-                        Use Template
-                      </Button>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{template.description}</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      {template.tags.slice(0, 3).map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                      ))}
                     </div>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1"><Star className="w-3 h-3 text-yellow-500" />{template.rating}</span>
+                        <span>{template.usageCount.toLocaleString()} uses</span>
+                      </div>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{template.estimatedTime}</span>
+                    </div>
+                    <Button className="w-full mt-4" variant="outline">Use Template</Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </TabsContent>
-        </Tabs>
 
-        {/* Create Workflow Dialog */}
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <GitBranch className="h-5 w-5 text-violet-600" />
-                Create New Workflow
-              </DialogTitle>
-              <DialogDescription>
-                Start building your automation workflow
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Workflow Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., Lead Processing Workflow"
-                  value={newWorkflowName}
-                  onChange={(e) => setNewWorkflowName(e.target.value)}
-                />
+          {/* Credentials Tab */}
+          <TabsContent value="credentials">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Credentials</h2>
+                  <p className="text-gray-500">Manage API keys and authentication</p>
+                </div>
+                <Button><Plus className="w-4 h-4 mr-2" />Add Credential</Button>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe what this workflow does..."
-                  value={newWorkflowDescription}
-                  onChange={(e) => setNewWorkflowDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-                onClick={handleCreateWorkflow}
-                disabled={loading || !newWorkflowName.trim()}
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                Create Workflow
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Templates Dialog */}
-        <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-violet-600" />
-                Workflow Templates
-              </DialogTitle>
-              <DialogDescription>
-                Start from a pre-built template
-              </DialogDescription>
-            </DialogHeader>
-
-            <ScrollArea className="max-h-96">
-              <div className="grid md:grid-cols-2 gap-4">
-                {WORKFLOW_TEMPLATES.map(template => (
-                  <div
-                    key={template.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
-                    onClick={() => handleUseTemplate(template)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{template.icon}</span>
-                      <div>
-                        <h4 className="font-medium">{template.name}</h4>
-                        <p className="text-sm text-gray-500">{template.description}</p>
-                        <Badge variant="outline" className="mt-2 text-xs">{template.category}</Badge>
+              <div className="grid gap-4">
+                {mockCredentials.map(cred => (
+                  <Card key={cred.id}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                          <Key className="w-5 h-5 text-violet-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{cred.name}</h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Badge variant="outline">{cred.type}</Badge>
+                            {cred.isShared && <span className="flex items-center gap-1"><Users className="w-3 h-3" />Shared</span>}
+                            <span>Used in {cred.usageCount} workflows</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="sm"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
+            </div>
+          </TabsContent>
+
+          {/* Variables Tab */}
+          <TabsContent value="variables">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Variables</h2>
+                  <p className="text-gray-500">Global variables available in all workflows</p>
+                </div>
+                <Button><Plus className="w-4 h-4 mr-2" />Add Variable</Button>
+              </div>
+
+              <Card>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {mockVariables.map(variable => (
+                      <div key={variable.id} className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          {variable.isSecret ? (
+                            <Lock className="w-5 h-5 text-yellow-600" />
+                          ) : (
+                            <SlidersHorizontal className="w-5 h-5 text-gray-400" />
+                          )}
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <code className="font-mono font-semibold">{variable.key}</code>
+                              <Badge variant="outline">{variable.type}</Badge>
+                              {variable.isSecret && <Badge className="bg-yellow-100 text-yellow-700">Secret</Badge>}
+                            </div>
+                            {variable.description && <p className="text-sm text-gray-500">{variable.description}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{variable.value}</code>
+                          <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* New Workflow Dialog */}
+      <Dialog open={showNewWorkflowDialog} onOpenChange={setShowNewWorkflowDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5 text-violet-600" />
+              Create New Workflow
+            </DialogTitle>
+            <DialogDescription>Start building your automation</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Workflow Name</Label>
+              <Input placeholder="e.g., Lead Processing Pipeline" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea placeholder="Describe what this workflow does..." rows={3} />
+            </div>
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <Input placeholder="e.g., leads, crm, automation" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)}>Cancel</Button>
+            <Button className="bg-violet-600 hover:bg-violet-700">Create Workflow</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Workflow Detail Dialog */}
+      <Dialog open={showWorkflowDialog} onOpenChange={setShowWorkflowDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <GitBranch className="w-5 h-5 text-violet-600" />
+              {selectedWorkflow?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh]">
+            {selectedWorkflow && (
+              <div className="space-y-6 p-4">
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedWorkflow.executionCount.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Total Executions</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{((selectedWorkflow.successCount / selectedWorkflow.executionCount) * 100 || 0).toFixed(1)}%</p>
+                    <p className="text-sm text-gray-500">Success Rate</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{formatDuration(selectedWorkflow.avgExecutionTime)}</p>
+                    <p className="text-sm text-gray-500">Avg Duration</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">v{selectedWorkflow.version}</p>
+                    <p className="text-sm text-gray-500">Version</p>
+                  </div>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Workflow Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-gray-500">Status</Label>
+                        <p><Badge className={getStatusColor(selectedWorkflow.status)}>{selectedWorkflow.status}</Badge></p>
+                      </div>
+                      <div>
+                        <Label className="text-gray-500">Created</Label>
+                        <p>{selectedWorkflow.createdAt.toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <Label className="text-gray-500">Last Updated</Label>
+                        <p>{selectedWorkflow.updatedAt.toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <Label className="text-gray-500">Last Executed</Label>
+                        <p>{selectedWorkflow.lastExecutedAt ? formatTimeAgo(selectedWorkflow.lastExecutedAt) : 'Never'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
