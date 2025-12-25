@@ -20,8 +20,12 @@ import {
   Target, Layers, Box, GitBranch, Cloud, Shield, Lock, Play, Pause,
   ExternalLink, Copy, Maximize2, Grid, List, MapPin, Gauge, Terminal,
   FileText, Hash, Network, Radio, Thermometer, Droplets, Wind, Timer,
-  CircleDot, Sparkles, Rocket, TrendingUp as TrendUp
+  CircleDot, Sparkles, Rocket, TrendingUp as TrendUp,
+  Key, Webhook, Sliders, AlertOctagon, CreditCard, Archive, Trash2, Edit3, Mail
 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CardDescription } from '@/components/ui/card'
 
 // ============================================================================
 // TYPE DEFINITIONS - Datadog Level Monitoring
@@ -321,6 +325,7 @@ export default function OverviewClient() {
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const timeRanges: { value: TimeRange; label: string }[] = [
     { value: '1h', label: '1H' },
@@ -806,71 +811,857 @@ export default function OverviewClient() {
           </TabsContent>
 
           {/* Settings Tab */}
+          {/* Settings Tab - Mixpanel Level Analytics Platform */}
           <TabsContent value="settings" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-indigo-600" />
-                    Notification Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
-                      <p className="text-sm text-gray-500">Receive alerts via email</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Slack Notifications</p>
-                      <p className="text-sm text-gray-500">Send alerts to Slack channels</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">PagerDuty Integration</p>
-                      <p className="text-sm text-gray-500">Route critical alerts to PagerDuty</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 lg:col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                    <CardDescription>Configure dashboard platform</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'metrics', label: 'Metrics', icon: BarChart3 },
+                        { id: 'alerts', label: 'Alerts', icon: Bell },
+                        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-600 text-white'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-indigo-600" />
-                    Dashboard Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto-refresh</p>
-                      <p className="text-sm text-gray-500">Refresh data automatically</p>
+                {/* Platform Stats Sidebar */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Platform Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">API Usage</span>
+                        <span className="font-medium">78%</span>
+                      </div>
+                      <Progress value={78} className="h-2" />
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">High Contrast Mode</p>
-                      <p className="text-sm text-gray-500">Enhanced visibility for metrics</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Event Volume</span>
+                        <span className="font-medium">2.4M/day</span>
+                      </div>
+                      <Progress value={65} className="h-2" />
                     </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Compact View</p>
-                      <p className="text-sm text-gray-500">Show more data on screen</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Data Storage</span>
+                        <span className="font-medium">847 GB</span>
+                      </div>
+                      <Progress value={84} className="h-2" />
                     </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="pt-4 border-t space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Active Users</span>
+                        <span className="font-medium">12,458</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Dashboards</span>
+                        <span className="font-medium text-indigo-600">24</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Reports</span>
+                        <span className="font-medium text-purple-600">156</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 lg:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Basic platform configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Organization Name</Label>
+                            <Input defaultValue="Kazi Platform" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Environment</Label>
+                            <Select defaultValue="production">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="development">Development</SelectItem>
+                                <SelectItem value="staging">Staging</SelectItem>
+                                <SelectItem value="production">Production</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="iso">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="iso">YYYY-MM-DD</SelectItem>
+                                <SelectItem value="us">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="eu">DD/MM/YYYY</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-4 border-t">
+                          <div>
+                            <Label>Week Starts On</Label>
+                            <p className="text-sm text-gray-500">First day of the week in reports</p>
+                          </div>
+                          <Select defaultValue="monday">
+                            <SelectTrigger className="w-[150px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sunday">Sunday</SelectItem>
+                              <SelectItem value="monday">Monday</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Display Preferences</CardTitle>
+                        <CardDescription>Customize dashboard appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Dark Mode</Label>
+                            <p className="text-sm text-gray-500">Use dark theme for dashboard</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Compact View</Label>
+                            <p className="text-sm text-gray-500">Show more data on screen</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>High Contrast Mode</Label>
+                            <p className="text-sm text-gray-500">Enhanced visibility for metrics</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Sparklines</Label>
+                            <p className="text-sm text-gray-500">Display mini charts in cards</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Animate Transitions</Label>
+                            <p className="text-sm text-gray-500">Smooth animations between states</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Metrics Settings */}
+                {settingsTab === 'metrics' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Metric Collection</CardTitle>
+                        <CardDescription>Configure how metrics are collected</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Metric Collection</Label>
+                            <p className="text-sm text-gray-500">Collect and aggregate metrics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Collection Interval</Label>
+                            <Select defaultValue="10">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="5">5 seconds</SelectItem>
+                                <SelectItem value="10">10 seconds</SelectItem>
+                                <SelectItem value="30">30 seconds</SelectItem>
+                                <SelectItem value="60">1 minute</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Aggregation Method</Label>
+                            <Select defaultValue="avg">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="avg">Average</SelectItem>
+                                <SelectItem value="sum">Sum</SelectItem>
+                                <SelectItem value="max">Maximum</SelectItem>
+                                <SelectItem value="min">Minimum</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Include Host Tags</Label>
+                            <p className="text-sm text-gray-500">Add host metadata to metrics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Custom Metric Tags</Label>
+                            <p className="text-sm text-gray-500">Add custom tags to all metrics</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Retention</CardTitle>
+                        <CardDescription>Configure how long metrics are stored</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Activity className="h-5 w-5 text-blue-600" />
+                              <Label className="text-base">High Resolution</Label>
+                            </div>
+                            <Select defaultValue="15">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="7">7 days</SelectItem>
+                                <SelectItem value="15">15 days</SelectItem>
+                                <SelectItem value="30">30 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-gray-500 mt-2">1-second resolution</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-2 mb-3">
+                              <BarChart3 className="h-5 w-5 text-purple-600" />
+                              <Label className="text-base">Aggregated</Label>
+                            </div>
+                            <Select defaultValue="90">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="30">30 days</SelectItem>
+                                <SelectItem value="90">90 days</SelectItem>
+                                <SelectItem value="365">1 year</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-gray-500 mt-2">1-minute resolution</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Metric Categories</CardTitle>
+                        <CardDescription>Enable/disable metric categories</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Infrastructure', enabled: true, count: 156 },
+                          { name: 'Application Performance', enabled: true, count: 89 },
+                          { name: 'Business Metrics', enabled: true, count: 45 },
+                          { name: 'Custom Events', enabled: true, count: 234 },
+                          { name: 'User Behavior', enabled: false, count: 0 }
+                        ].map((category, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <BarChart3 className={`h-4 w-4 ${category.enabled ? 'text-indigo-600' : 'text-gray-400'}`} />
+                              <div>
+                                <p className="font-medium">{category.name}</p>
+                                <p className="text-sm text-gray-500">{category.count} metrics</p>
+                              </div>
+                            </div>
+                            <Switch defaultChecked={category.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Alert Settings */}
+                {settingsTab === 'alerts' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Channels</CardTitle>
+                        <CardDescription>Configure where alerts are sent</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Email', icon: Mail, config: 'team@company.com', enabled: true },
+                          { name: 'Slack', icon: Webhook, config: '#alerts-production', enabled: true },
+                          { name: 'PagerDuty', icon: Bell, config: 'On-call rotation', enabled: true },
+                          { name: 'Microsoft Teams', icon: Webhook, config: 'DevOps Channel', enabled: false },
+                          { name: 'Webhook', icon: Globe, config: 'https://hooks.example.com', enabled: false }
+                        ].map((channel, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${channel.enabled ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <channel.icon className={`h-4 w-4 ${channel.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{channel.name}</p>
+                                <p className="text-sm text-gray-500">{channel.config}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Button variant="ghost" size="sm">
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                              <Switch defaultChecked={channel.enabled} />
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full mt-4">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Notification Channel
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Alert Policies</CardTitle>
+                        <CardDescription>Configure alert behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Alert Cooldown</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">No cooldown</SelectItem>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Auto-resolve After</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="never">Never</SelectItem>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Aggregate Similar Alerts</Label>
+                            <p className="text-sm text-gray-500">Group related alerts together</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Weekend Quiet Hours</Label>
+                            <p className="text-sm text-gray-500">Reduce non-critical alerts on weekends</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Include Context Data</Label>
+                            <p className="text-sm text-gray-500">Add metrics and logs to alert notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Escalation Policies</CardTitle>
+                        <CardDescription>Configure multi-tier alert escalation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { tier: 'Tier 1', team: 'On-call Engineer', delay: 'Immediate', channels: ['PagerDuty'] },
+                          { tier: 'Tier 2', team: 'Team Lead', delay: '15 min', channels: ['PagerDuty', 'SMS'] },
+                          { tier: 'Tier 3', team: 'Engineering Manager', delay: '30 min', channels: ['Phone'] }
+                        ].map((policy, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{policy.tier}: {policy.team}</p>
+                              <p className="text-sm text-gray-500">
+                                After {policy.delay} → {policy.channels.join(', ')}
+                              </p>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Escalation Tier
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Dashboard Settings */}
+                {settingsTab === 'dashboard' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Auto-refresh</CardTitle>
+                        <CardDescription>Configure automatic data refresh</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Auto-refresh</Label>
+                            <p className="text-sm text-gray-500">Automatically update dashboard data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Refresh Interval</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10 seconds</SelectItem>
+                                <SelectItem value="30">30 seconds</SelectItem>
+                                <SelectItem value="60">1 minute</SelectItem>
+                                <SelectItem value="300">5 minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Pause After Inactivity</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="never">Never</SelectItem>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Refresh Indicator</Label>
+                            <p className="text-sm text-gray-500">Display when data is refreshing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Default Views</CardTitle>
+                        <CardDescription>Configure default dashboard settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Time Range</Label>
+                            <Select defaultValue="4h">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1h">Last 1 hour</SelectItem>
+                                <SelectItem value="4h">Last 4 hours</SelectItem>
+                                <SelectItem value="24h">Last 24 hours</SelectItem>
+                                <SelectItem value="7d">Last 7 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Tab</Label>
+                            <Select defaultValue="overview">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="overview">Overview</SelectItem>
+                                <SelectItem value="services">Services</SelectItem>
+                                <SelectItem value="alerts">Alerts</SelectItem>
+                                <SelectItem value="logs">Logs</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Remember Last View</Label>
+                            <p className="text-sm text-gray-500">Open to last viewed tab</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Persist Filters</Label>
+                            <p className="text-sm text-gray-500">Remember applied filters</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Widget Settings</CardTitle>
+                        <CardDescription>Configure dashboard widgets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Trend Indicators</Label>
+                            <p className="text-sm text-gray-500">Display up/down arrows on metrics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Sparklines</Label>
+                            <p className="text-sm text-gray-500">Mini charts in metric cards</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Color-coded Status</Label>
+                            <p className="text-sm text-gray-500">Use colors for health status</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Hover Tooltips</Label>
+                            <p className="text-sm text-gray-500">Show details on hover</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Cloud Providers</CardTitle>
+                        <CardDescription>Connect to cloud infrastructure</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'AWS CloudWatch', status: 'connected', lastSync: '2 min ago' },
+                          { name: 'Google Cloud Monitoring', status: 'connected', lastSync: '5 min ago' },
+                          { name: 'Azure Monitor', status: 'not_connected', lastSync: null },
+                          { name: 'Datadog', status: 'not_connected', lastSync: null }
+                        ].map((provider, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${provider.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <Cloud className={`h-4 w-4 ${provider.status === 'connected' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{provider.name}</p>
+                                {provider.lastSync && (
+                                  <p className="text-sm text-gray-500">Last sync: {provider.lastSync}</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button variant={provider.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {provider.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Manage API keys and access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="kazi-prod-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-500">Created: Dec 1, 2024 • Last used: 2 min ago</p>
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div>
+                            <Label>Enable API</Label>
+                            <p className="text-sm text-gray-500">Allow programmatic access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Rate Limiting</Label>
+                            <p className="text-sm text-gray-500">1000 requests/minute</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <CardDescription>Send data to external services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Metrics Export', url: 'https://metrics.example.com/ingest', events: ['metrics'] },
+                          { name: 'Alert Handler', url: 'https://alerts.example.com/webhook', events: ['alerts'] }
+                        ].map((webhook, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div>
+                              <p className="font-medium">{webhook.name}</p>
+                              <p className="text-sm text-gray-500 font-mono">{webhook.url}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-red-600">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Export</CardTitle>
+                        <CardDescription>Export dashboard data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Export Format</Label>
+                            <Select defaultValue="json">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="json">JSON</SelectItem>
+                                <SelectItem value="csv">CSV</SelectItem>
+                                <SelectItem value="parquet">Parquet</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Range</Label>
+                            <Select defaultValue="7d">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1d">Last 24 hours</SelectItem>
+                                <SelectItem value="7d">Last 7 days</SelectItem>
+                                <SelectItem value="30d">Last 30 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Download className="h-4 w-4 mr-2" />
+                          Export Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Security</CardTitle>
+                        <CardDescription>Security and compliance settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>IP Allowlist</Label>
+                            <p className="text-sm text-gray-500">Restrict access by IP</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Audit Logging</Label>
+                            <p className="text-sm text-gray-500">Log all configuration changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Data Encryption</Label>
+                            <p className="text-sm text-gray-500">Encrypt data at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Clear All Metrics</p>
+                            <p className="text-sm text-gray-500">Delete all stored metrics data</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Clear Metrics
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Reset All Dashboards</p>
+                            <p className="text-sm text-gray-500">Restore default dashboard layouts</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Reset Dashboards
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Delete All Data</p>
+                            <p className="text-sm text-gray-500">Permanently delete all monitoring data</p>
+                          </div>
+                          <Button variant="destructive">
+                            Delete All
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
