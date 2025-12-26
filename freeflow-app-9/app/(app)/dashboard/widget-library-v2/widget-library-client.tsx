@@ -54,9 +54,22 @@ import {
   MessageSquare,
   Calendar,
   ArrowUpRight,
-  RefreshCw
+  RefreshCw,
+  Bell,
+  Key,
+  Webhook,
+  Mail,
+  AlertOctagon,
+  Sliders,
+  Globe,
+  Lock,
+  HardDrive,
+  Trash2 as TrashIcon
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -389,6 +402,7 @@ export default function WidgetLibraryClient() {
   const [selectedWidget, setSelectedWidget] = useState<Widget | null>(null)
   const [showCodeModal, setShowCodeModal] = useState(false)
   const [codeWidget, setCodeWidget] = useState<Widget | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculation
   const stats = useMemo(() => {
@@ -607,6 +621,10 @@ export default function WidgetLibraryClient() {
             <TabsTrigger value="saved" className="gap-2">
               <Bookmark className="w-4 h-4" />
               Saved
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -963,6 +981,812 @@ export default function WidgetLibraryClient() {
                   </Card>
                 )
               })}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Notion Widgets Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: <Sliders className="w-4 h-4" /> },
+                        { id: 'widgets', label: 'Widgets', icon: <Component className="w-4 h-4" /> },
+                        { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+                        { id: 'api', label: 'API & Tokens', icon: <Key className="w-4 h-4" /> },
+                        { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> },
+                        { id: 'advanced', label: 'Advanced', icon: <Code className="w-4 h-4" /> }
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setSettingsTab(tab.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === tab.id
+                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          {tab.icon}
+                          <span className="font-medium">{tab.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-purple-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure your widget library preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default View Mode</Label>
+                            <Select defaultValue="grid">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select view" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="grid">Grid View</SelectItem>
+                                <SelectItem value="list">List View</SelectItem>
+                                <SelectItem value="compact">Compact View</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Widgets Per Page</Label>
+                            <Select defaultValue="24">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select count" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="12">12 widgets</SelectItem>
+                                <SelectItem value="24">24 widgets</SelectItem>
+                                <SelectItem value="48">48 widgets</SelectItem>
+                                <SelectItem value="96">96 widgets</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Show Featured Widgets</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Display featured widgets prominently</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Show Ratings & Reviews</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Display widget ratings on cards</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Show Install Count</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Display number of installations</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Auto-Update Widgets</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Automatically update to latest versions</div>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Discovery Preferences</CardTitle>
+                        <CardDescription>Customize your widget discovery experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Sort Order</Label>
+                            <Select defaultValue="popular">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select sort" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="popular">Most Popular</SelectItem>
+                                <SelectItem value="rating">Highest Rated</SelectItem>
+                                <SelectItem value="recent">Recently Updated</SelectItem>
+                                <SelectItem value="name">Alphabetical</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Category</Label>
+                            <Select defaultValue="all">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All Categories</SelectItem>
+                                <SelectItem value="display">Display</SelectItem>
+                                <SelectItem value="input">Input</SelectItem>
+                                <SelectItem value="data-viz">Data Visualization</SelectItem>
+                                <SelectItem value="layout">Layout</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Personalized Recommendations</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Suggest widgets based on your usage</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Show Beta Widgets</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Include widgets in beta testing</div>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Show Experimental Widgets</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Include experimental features</div>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Display Settings</CardTitle>
+                        <CardDescription>Configure visual preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Theme</Label>
+                            <Select defaultValue="system">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select theme" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="light">Light</SelectItem>
+                                <SelectItem value="dark">Dark</SelectItem>
+                                <SelectItem value="system">System</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Card Style</Label>
+                            <Select defaultValue="elevated">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select style" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="flat">Flat</SelectItem>
+                                <SelectItem value="elevated">Elevated</SelectItem>
+                                <SelectItem value="bordered">Bordered</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Widgets Settings */}
+                {settingsTab === 'widgets' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Component className="w-5 h-5 text-purple-600" />
+                          Installed Widgets
+                        </CardTitle>
+                        <CardDescription>Manage your installed widgets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockWidgets.filter(w => w.is_bookmarked).map((widget) => {
+                          const CategoryIcon = getCategoryIcon(widget.category)
+                          return (
+                            <div key={widget.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getCategoryColor(widget.category)}`}>
+                                  <CategoryIcon className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-semibold text-gray-900 dark:text-white">{widget.name}</h4>
+                                    {widget.is_official && <Shield className="w-4 h-4 text-blue-500" />}
+                                    <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Installed</Badge>
+                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    v{widget.version} • {widget.size_kb}KB • Updated: {widget.last_updated}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <RefreshCw className="w-4 h-4 mr-1" />
+                                  Update
+                                </Button>
+                                <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                  Uninstall
+                                </Button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Widget Installation</CardTitle>
+                        <CardDescription>Configure installation behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Auto-Install Dependencies</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Automatically install required dependencies</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Check Compatibility</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Verify React/Next.js compatibility before install</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Sandbox Mode</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Test widgets in isolated environment first</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Widget Publishing</CardTitle>
+                        <CardDescription>Settings for publishing your own widgets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default License</Label>
+                            <Select defaultValue="mit">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select license" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mit">MIT</SelectItem>
+                                <SelectItem value="apache-2.0">Apache 2.0</SelectItem>
+                                <SelectItem value="gpl-3.0">GPL 3.0</SelectItem>
+                                <SelectItem value="bsd-3">BSD 3-Clause</SelectItem>
+                                <SelectItem value="proprietary">Proprietary</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Visibility</Label>
+                            <Select defaultValue="public">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select visibility" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="public">Public</SelectItem>
+                                <SelectItem value="unlisted">Unlisted</SelectItem>
+                                <SelectItem value="private">Private</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-purple-600" />
+                          Notification Preferences
+                        </CardTitle>
+                        <CardDescription>Configure how you receive widget library notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">New Widget Releases</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Get notified about new widgets in categories you follow</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Widget Updates Available</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Notify when updates are available for installed widgets</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Security Alerts</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Alert about security vulnerabilities in widgets</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Weekly Digest</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Receive weekly summary of trending widgets</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Deprecation Warnings</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Notify when installed widgets are deprecated</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Delivery Channels</CardTitle>
+                        <CardDescription>Choose how you want to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Email Notifications</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">user@example.com</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                              <Bell className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Push Notifications</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Browser & mobile push</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                              <MessageSquare className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">In-App Notifications</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Show in notification center</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* API & Tokens Settings */}
+                {settingsTab === 'api' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-purple-600" />
+                          API Tokens
+                        </CardTitle>
+                        <CardDescription>Manage API tokens for widget publishing and access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Publisher Token</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Use this token to publish widgets via CLI</div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="wgt_pub_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">Regenerate</Button>
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">Created Jan 15, 2024 • Last used 2 hours ago</div>
+                        </div>
+
+                        <div className="p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">Read-Only Token</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Access widget metadata and analytics</div>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Read Only</Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="wgt_read_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">Regenerate</Button>
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">Created Jan 10, 2024 • Last used 1 hour ago</div>
+                        </div>
+
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Token
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Configure webhooks for widget events</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <span className="font-medium text-gray-900 dark:text-white">Widget Install Hook</span>
+                            </div>
+                            <Badge>Enabled</Badge>
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">https://api.yourapp.com/webhooks/widgets</div>
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>Events: widget.installed, widget.updated, widget.removed</span>
+                          </div>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>API Usage</CardTitle>
+                        <CardDescription>Monitor your API usage and rate limits</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-purple-600">2,847</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">API Calls Today</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-blue-600">99.2%</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Success Rate</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-pink-600">28ms</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Avg Response</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Rate Limit Usage</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">2,847 / 50,000</span>
+                          </div>
+                          <Progress value={5.7} className="h-2" />
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Resets in 12 hours</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-purple-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Manage security and access control</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Verify Widget Signatures</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Only install widgets with valid signatures</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Security Scanning</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Scan widgets for vulnerabilities before install</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Only Official Widgets</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Restrict to officially verified widgets only</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Audit Logging</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Log all widget installations and removals</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Control who can manage widgets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Who can install widgets</Label>
+                          <Select defaultValue="admins">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admins">Admins only</SelectItem>
+                              <SelectItem value="developers">Admins & Developers</SelectItem>
+                              <SelectItem value="all">All team members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Who can publish widgets</Label>
+                          <Select defaultValue="developers">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admins">Admins only</SelectItem>
+                              <SelectItem value="developers">Admins & Developers</SelectItem>
+                              <SelectItem value="all">All team members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Blocked Widgets</CardTitle>
+                        <CardDescription>Widgets blocked from installation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <AlertOctagon className="w-5 h-5 text-red-600 dark:text-red-400" />
+                              <div>
+                                <div className="font-medium text-red-800 dark:text-red-200">UnsafeWidget</div>
+                                <div className="text-sm text-red-600 dark:text-red-400">Blocked due to security vulnerability</div>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Unblock</Button>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Block a Widget
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="w-5 h-5 text-purple-600" />
+                          Developer Options
+                        </CardTitle>
+                        <CardDescription>Advanced configuration for developers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Developer Mode</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Enable advanced debugging features</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Source Maps</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Include source maps for debugging</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Console Logging</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Log widget events to console</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Hot Reload</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Auto-reload widgets on changes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Performance</CardTitle>
+                        <CardDescription>Optimize widget loading performance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Loading Strategy</Label>
+                            <Select defaultValue="lazy">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="eager">Eager</SelectItem>
+                                <SelectItem value="lazy">Lazy</SelectItem>
+                                <SelectItem value="on-demand">On Demand</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Bundle Size Limit</Label>
+                            <Select defaultValue="500">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="250">250KB</SelectItem>
+                                <SelectItem value="500">500KB</SelectItem>
+                                <SelectItem value="1000">1MB</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Code Splitting</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Split widgets into separate chunks</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Prefetching</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Prefetch widgets likely to be used</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage widget data and cache</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Export Widget Config</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Download all widget configurations</div>
+                          </div>
+                          <Button variant="outline">Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Import Widget Config</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Import configurations from file</div>
+                          </div>
+                          <Button variant="outline">Import</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Clear Widget Cache</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Remove all cached widget data</div>
+                          </div>
+                          <Button variant="outline">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions - proceed with caution</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <div className="font-medium text-red-600 dark:text-red-400">Reset All Settings</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Reset all widget settings to defaults</div>
+                          </div>
+                          <Button variant="destructive">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <div className="font-medium text-red-600 dark:text-red-400">Uninstall All Widgets</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Remove all installed widgets</div>
+                          </div>
+                          <Button variant="destructive">Uninstall All</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

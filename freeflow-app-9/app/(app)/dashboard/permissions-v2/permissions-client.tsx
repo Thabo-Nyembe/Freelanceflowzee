@@ -74,7 +74,8 @@ import {
   Workflow,
   CheckSquare,
   Square,
-  Copy
+  Copy,
+  CreditCard
 } from 'lucide-react'
 
 // Okta-level types
@@ -777,176 +778,875 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - AWS IAM Level with 6 Sub-tabs Sidebar Navigation */}
           <TabsContent value="settings" className="mt-6">
-            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="security"><ShieldCheck className="w-4 h-4 mr-2" />Security</TabsTrigger>
-                <TabsTrigger value="authentication"><Fingerprint className="w-4 h-4 mr-2" />Authentication</TabsTrigger>
-                <TabsTrigger value="provisioning"><UserCog className="w-4 h-4 mr-2" />Provisioning</TabsTrigger>
-                <TabsTrigger value="api"><Key className="w-4 h-4 mr-2" />API</TabsTrigger>
-                <TabsTrigger value="integrations"><Link2 className="w-4 h-4 mr-2" />Integrations</TabsTrigger>
-                <TabsTrigger value="advanced"><Settings className="w-4 h-4 mr-2" />Advanced</TabsTrigger>
-              </TabsList>
-
-              {/* Security Settings */}
-              <TabsContent value="security">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Password Policy</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div><Label>Minimum Length</Label><Select defaultValue="12"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="8">8 characters</SelectItem><SelectItem value="10">10 characters</SelectItem><SelectItem value="12">12 characters</SelectItem><SelectItem value="16">16 characters</SelectItem></SelectContent></Select></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Require Uppercase</p><p className="text-sm text-gray-500">At least one uppercase letter</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Require Numbers</p><p className="text-sm text-gray-500">At least one number</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Require Special Characters</p><p className="text-sm text-gray-500">At least one special character</p></div><Switch defaultChecked /></div>
-                    <div><Label>Password Expiry</Label><Select defaultValue="90"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="30">30 days</SelectItem><SelectItem value="60">60 days</SelectItem><SelectItem value="90">90 days</SelectItem><SelectItem value="never">Never</SelectItem></SelectContent></Select></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Session Management</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div><Label>Session Timeout</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem><SelectItem value="60">1 hour</SelectItem><SelectItem value="480">8 hours</SelectItem></SelectContent></Select></div>
-                    <div><Label>Max Sessions per User</Label><Select defaultValue="5"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="1">1 session</SelectItem><SelectItem value="3">3 sessions</SelectItem><SelectItem value="5">5 sessions</SelectItem><SelectItem value="unlimited">Unlimited</SelectItem></SelectContent></Select></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Force Re-authentication</p><p className="text-sm text-gray-500">For sensitive actions</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Remember Device</p><p className="text-sm text-gray-500">Trust recognized devices</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                  <Card className="col-span-2"><CardHeader><CardTitle>Account Lockout</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div><Label>Max Failed Attempts</Label><Select defaultValue="5"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">3 attempts</SelectItem><SelectItem value="5">5 attempts</SelectItem><SelectItem value="10">10 attempts</SelectItem></SelectContent></Select></div>
-                      <div><Label>Lockout Duration</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem><SelectItem value="60">1 hour</SelectItem><SelectItem value="permanent">Until admin unlock</SelectItem></SelectContent></Select></div>
-                      <div><Label>Reset Counter After</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem><SelectItem value="60">1 hour</SelectItem></SelectContent></Select></div>
-                    </div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-
-              {/* Authentication Settings */}
-              <TabsContent value="authentication">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Multi-Factor Authentication</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Require MFA</p><p className="text-sm text-gray-500">For all users</p></div><Switch defaultChecked /></div>
-                    <div><Label>MFA Grace Period</Label><Select defaultValue="7"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0">Immediately</SelectItem><SelectItem value="1">1 day</SelectItem><SelectItem value="7">7 days</SelectItem><SelectItem value="30">30 days</SelectItem></SelectContent></Select></div>
-                    <div className="space-y-2">
-                      <Label>Allowed Factors</Label>
-                      {['Authenticator App (TOTP)', 'Push Notification', 'SMS', 'Email', 'Security Key (WebAuthn)'].map(factor => (
-                        <div key={factor} className="flex items-center justify-between p-2 border rounded-lg"><span className="text-sm">{factor}</span><Switch defaultChecked={factor !== 'SMS'} /></div>
-                      ))}
-                    </div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Single Sign-On</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Enable SSO</p><p className="text-sm text-gray-500">SAML 2.0 / OIDC</p></div><Switch defaultChecked /></div>
-                    <div><Label>Default Identity Provider</Label><Select defaultValue="okta"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="okta">Okta</SelectItem><SelectItem value="azure">Azure AD</SelectItem><SelectItem value="google">Google Workspace</SelectItem><SelectItem value="onelogin">OneLogin</SelectItem></SelectContent></Select></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Allow Password Login</p><p className="text-sm text-gray-500">In addition to SSO</p></div><Switch /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Just-in-Time Provisioning</p><p className="text-sm text-gray-500">Auto-create accounts</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-
-              {/* Provisioning Settings */}
-              <TabsContent value="provisioning">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>User Provisioning</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Auto-provision Users</p><p className="text-sm text-gray-500">From identity provider</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deactivate Users</p><p className="text-sm text-gray-500">When removed from IdP</p></div><Switch defaultChecked /></div>
-                    <div><Label>Default Role for New Users</Label><Select defaultValue="standard"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="basic">Basic</SelectItem><SelectItem value="standard">Standard</SelectItem><SelectItem value="manager">Manager</SelectItem></SelectContent></Select></div>
-                    <div><Label>Default Group</Label><Select defaultValue="all"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Users</SelectItem><SelectItem value="new">New Users</SelectItem></SelectContent></Select></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>SCIM Configuration</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Enable SCIM</p><p className="text-sm text-gray-500">System for Cross-domain Identity Management</p></div><Switch /></div>
-                    <div><Label>SCIM Endpoint</Label><Input value="https://api.company.com/scim/v2" disabled className="mt-1 font-mono text-sm" /></div>
-                    <div><Label>Bearer Token</Label><div className="flex items-center gap-2 mt-1"><Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled /><Button variant="outline" size="sm"><Copy className="w-4 h-4" /></Button></div></div>
-                    <Button variant="outline" className="w-full"><RefreshCw className="w-4 h-4 mr-2" />Regenerate Token</Button>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-
-              {/* API Settings */}
-              <TabsContent value="api">
-                <div className="space-y-6">
-                  <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>API Keys</CardTitle><Button size="sm" onClick={() => setShowAPIKeyDialog(true)}><Plus className="w-4 h-4 mr-2" />Create API Key</Button></div></CardHeader><CardContent className="p-0">
-                    <div className="divide-y">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="sticky top-8">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <nav className="space-y-1 px-3 pb-4">
                       {[
-                        { name: 'Production API Key', prefix: 'pk_live_', created: '2024-01-15', lastUsed: '2 hours ago', status: 'active' },
-                        { name: 'Development API Key', prefix: 'pk_test_', created: '2024-01-10', lastUsed: '1 day ago', status: 'active' },
-                        { name: 'CI/CD Integration', prefix: 'pk_ci_', created: '2024-01-05', lastUsed: '5 minutes ago', status: 'active' },
-                      ].map((key, i) => (
-                        <div key={i} className="flex items-center justify-between p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center"><Key className="w-5 h-5 text-purple-600" /></div>
-                            <div><h4 className="font-medium">{key.name}</h4><p className="text-sm text-gray-500 font-mono">{key.prefix}••••••••</p></div>
+                        { id: 'security', label: 'Security', icon: ShieldCheck, desc: 'Policies & rules' },
+                        { id: 'authentication', label: 'Authentication', icon: Fingerprint, desc: 'MFA & SSO' },
+                        { id: 'provisioning', label: 'Provisioning', icon: UserCog, desc: 'User lifecycle' },
+                        { id: 'api', label: 'API & Tokens', icon: Key, desc: 'API access' },
+                        { id: 'integrations', label: 'Integrations', icon: Link2, desc: 'Directory sync' },
+                        { id: 'advanced', label: 'Advanced', icon: Settings, desc: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right text-sm"><p className="text-gray-500">Last used: {key.lastUsed}</p><p className="text-gray-400">Created: {key.created}</p></div>
-                            <Badge className="bg-green-100 text-green-700">{key.status}</Badge>
-                            <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
-                          </div>
-                        </div>
+                        </button>
                       ))}
-                    </div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Rate Limiting</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><Label>Requests per Minute</Label><Input type="number" defaultValue="1000" className="mt-1" /></div>
-                      <div><Label>Requests per Hour</Label><Input type="number" defaultValue="10000" className="mt-1" /></div>
-                    </div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Enable Rate Limiting</p><p className="text-sm text-gray-500">Prevent API abuse</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Integrations Settings */}
-              <TabsContent value="integrations">
-                <Card><CardHeader><CardTitle>Directory Integrations</CardTitle></CardHeader><CardContent className="space-y-4">
-                  {[
-                    { name: 'Active Directory', status: 'connected', users: 156, icon: Network },
-                    { name: 'Google Workspace', status: 'connected', users: 142, icon: Globe },
-                    { name: 'LDAP', status: 'disconnected', users: 0, icon: Workflow },
-                    { name: 'Azure AD', status: 'disconnected', users: 0, icon: Globe },
-                  ].map(integration => (
-                    <div key={integration.name} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <integration.icon className={`w-5 h-5 ${integration.status === 'connected' ? 'text-green-600' : 'text-gray-500'}`} />
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Password Policy</CardTitle>
+                        <p className="text-sm text-gray-500">Configure password requirements</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Minimum Length</Label>
+                            <Select defaultValue="12">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="8">8 characters</SelectItem>
+                                <SelectItem value="10">10 characters</SelectItem>
+                                <SelectItem value="12">12 characters</SelectItem>
+                                <SelectItem value="16">16 characters</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Password Expiry</Label>
+                            <Select defaultValue="90">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="30">30 days</SelectItem>
+                                <SelectItem value="60">60 days</SelectItem>
+                                <SelectItem value="90">90 days</SelectItem>
+                                <SelectItem value="never">Never</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
-                        <div><h4 className="font-medium">{integration.name}</h4>{integration.status === 'connected' && <p className="text-sm text-gray-500">{integration.users} users synced</p>}</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge>
-                        <Button variant="outline" size="sm">{integration.status === 'connected' ? 'Configure' : 'Connect'}</Button>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent></Card>
-              </TabsContent>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Lock className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Require Uppercase</p>
+                              <p className="text-sm text-gray-500">At least one uppercase letter</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Key className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Require Numbers</p>
+                              <p className="text-sm text-gray-500">At least one numeric character</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <ShieldCheck className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Require Special Characters</p>
+                              <p className="text-sm text-gray-500">At least one special character (!@#$%)</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Password History</p>
+                            <p className="text-sm text-gray-500">Remember last N passwords</p>
+                          </div>
+                          <Select defaultValue="5">
+                            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">Last 3</SelectItem>
+                              <SelectItem value="5">Last 5</SelectItem>
+                              <SelectItem value="10">Last 10</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Advanced Settings */}
-              <TabsContent value="advanced">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card><CardHeader><CardTitle>Audit & Compliance</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Audit Logging</p><p className="text-sm text-gray-500">Log all authentication events</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Detailed Logs</p><p className="text-sm text-gray-500">Include request/response data</p></div><Switch /></div>
-                    <div><Label>Log Retention</Label><Select defaultValue="365"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="90">90 days</SelectItem><SelectItem value="180">180 days</SelectItem><SelectItem value="365">1 year</SelectItem><SelectItem value="730">2 years</SelectItem></SelectContent></Select></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Security Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Suspicious Login Alerts</p><p className="text-sm text-gray-500">Email on unusual activity</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Admin Action Alerts</p><p className="text-sm text-gray-500">Notify on role changes</p></div><Switch defaultChecked /></div>
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Security Report</p><p className="text-sm text-gray-500">Summary of security events</p></div><Switch defaultChecked /></div>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Data Management</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="flex items-center justify-between"><div><p className="font-medium">Data Encryption</p><p className="text-sm text-gray-500">Encrypt data at rest</p></div><Switch defaultChecked /></div>
-                    <div><Label>Encryption Key</Label><Select defaultValue="aes256"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="aes128">AES-128</SelectItem><SelectItem value="aes256">AES-256</SelectItem></SelectContent></Select></div>
-                    <Button variant="outline" className="w-full"><Download className="w-4 h-4 mr-2" />Export All Data</Button>
-                  </CardContent></Card>
-                  <Card><CardHeader><CardTitle>Danger Zone</CardTitle></CardHeader><CardContent className="space-y-4">
-                    <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
-                      <h4 className="font-medium text-red-800">Reset All Permissions</h4>
-                      <p className="text-sm text-red-600 mb-3">This will reset all custom permissions to defaults</p>
-                      <Button variant="outline" className="text-red-600 border-red-200">Reset Permissions</Button>
-                    </div>
-                    <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
-                      <h4 className="font-medium text-red-800">Revoke All Sessions</h4>
-                      <p className="text-sm text-red-600 mb-3">Force all users to re-authenticate</p>
-                      <Button variant="outline" className="text-red-600 border-red-200">Revoke Sessions</Button>
-                    </div>
-                  </CardContent></Card>
-                </div>
-              </TabsContent>
-            </Tabs>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Session Management</CardTitle>
+                        <p className="text-sm text-gray-500">Control user session behavior</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Session Timeout</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                                <SelectItem value="480">8 hours</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Max Sessions per User</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 session</SelectItem>
+                                <SelectItem value="3">3 sessions</SelectItem>
+                                <SelectItem value="5">5 sessions</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Force Re-authentication</p>
+                            <p className="text-sm text-gray-500">For sensitive actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Remember Device</p>
+                            <p className="text-sm text-gray-500">Trust recognized devices for 30 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Account Lockout</CardTitle>
+                        <p className="text-sm text-gray-500">Brute force protection settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <Label>Max Failed Attempts</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3">3 attempts</SelectItem>
+                                <SelectItem value="5">5 attempts</SelectItem>
+                                <SelectItem value="10">10 attempts</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Lockout Duration</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                                <SelectItem value="permanent">Until admin unlock</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Reset Counter After</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Authentication Settings */}
+                {settingsTab === 'authentication' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Multi-Factor Authentication</CardTitle>
+                        <p className="text-sm text-gray-500">Configure MFA requirements</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Fingerprint className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Require MFA for All Users</p>
+                              <p className="text-sm text-gray-500">Enforce MFA organization-wide</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>MFA Grace Period</Label>
+                          <Select defaultValue="7">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">Immediately</SelectItem>
+                              <SelectItem value="1">1 day</SelectItem>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="mb-3 block">Allowed Authentication Factors</Label>
+                          <div className="space-y-2">
+                            {[
+                              { name: 'Authenticator App (TOTP)', icon: Smartphone, enabled: true },
+                              { name: 'Push Notification', icon: Zap, enabled: true },
+                              { name: 'SMS', icon: Phone, enabled: false },
+                              { name: 'Email', icon: Mail, enabled: true },
+                              { name: 'Security Key (WebAuthn)', icon: Key, enabled: true },
+                            ].map(factor => (
+                              <div key={factor.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <factor.icon className="h-4 w-4 text-gray-500" />
+                                  <span className="text-sm">{factor.name}</span>
+                                </div>
+                                <Switch defaultChecked={factor.enabled} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Single Sign-On (SSO)</CardTitle>
+                        <p className="text-sm text-gray-500">SAML 2.0 and OIDC configuration</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Globe className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Enable SSO</p>
+                              <p className="text-sm text-gray-500">Allow SAML 2.0 / OIDC login</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Default Identity Provider</Label>
+                          <Select defaultValue="okta">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="okta">Okta</SelectItem>
+                              <SelectItem value="azure">Azure AD</SelectItem>
+                              <SelectItem value="google">Google Workspace</SelectItem>
+                              <SelectItem value="onelogin">OneLogin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Password Login</p>
+                            <p className="text-sm text-gray-500">In addition to SSO</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Just-in-Time Provisioning</p>
+                            <p className="text-sm text-gray-500">Auto-create accounts on first SSO login</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Provisioning Settings */}
+                {settingsTab === 'provisioning' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>User Provisioning</CardTitle>
+                        <p className="text-sm text-gray-500">Automatic user lifecycle management</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <UserPlus className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Auto-provision Users</p>
+                              <p className="text-sm text-gray-500">Create users from identity provider</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                              <UserMinus className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Auto-deactivate Users</p>
+                              <p className="text-sm text-gray-500">When removed from identity provider</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Role for New Users</Label>
+                            <Select defaultValue="standard">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="basic">Basic</SelectItem>
+                                <SelectItem value="standard">Standard</SelectItem>
+                                <SelectItem value="manager">Manager</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Default Group</Label>
+                            <Select defaultValue="all">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All Users</SelectItem>
+                                <SelectItem value="new">New Users</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>SCIM Configuration</CardTitle>
+                        <p className="text-sm text-gray-500">System for Cross-domain Identity Management</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable SCIM 2.0</p>
+                            <p className="text-sm text-gray-500">Enable SCIM API for provisioning</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>SCIM Endpoint</Label>
+                          <Input value="https://api.company.com/scim/v2" disabled className="mt-1 font-mono text-sm" />
+                        </div>
+                        <div>
+                          <Label>Bearer Token</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled className="font-mono" />
+                            <Button variant="outline" size="sm"><Copy className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate Token
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Attribute Mapping</CardTitle>
+                        <p className="text-sm text-gray-500">Map IdP attributes to user fields</p>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {[
+                          { source: 'email', target: 'email', required: true },
+                          { source: 'given_name', target: 'firstName', required: true },
+                          { source: 'family_name', target: 'lastName', required: true },
+                          { source: 'department', target: 'department', required: false },
+                          { source: 'title', target: 'jobTitle', required: false },
+                        ].map((mapping, i) => (
+                          <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Input value={mapping.source} className="font-mono text-sm" />
+                            <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <Input value={mapping.target} className="font-mono text-sm" />
+                            {mapping.required && <Badge variant="outline" className="flex-shrink-0">Required</Badge>}
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Mapping
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* API Settings */}
+                {settingsTab === 'api' && (
+                  <>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                          <CardTitle>API Keys</CardTitle>
+                          <p className="text-sm text-gray-500">Manage API access tokens</p>
+                        </div>
+                        <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowAPIKeyDialog(true)}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create API Key
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="divide-y dark:divide-gray-800">
+                          {[
+                            { name: 'Production API Key', prefix: 'pk_live_', created: '2024-01-15', lastUsed: '2 hours ago', status: 'active' },
+                            { name: 'Development API Key', prefix: 'pk_test_', created: '2024-01-10', lastUsed: '1 day ago', status: 'active' },
+                            { name: 'CI/CD Integration', prefix: 'pk_ci_', created: '2024-01-05', lastUsed: '5 minutes ago', status: 'active' },
+                          ].map((key, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                  <Key className="w-5 h-5 text-purple-600" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium">{key.name}</h4>
+                                  <p className="text-sm text-gray-500 font-mono">{key.prefix}••••••••</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right text-sm">
+                                  <p className="text-gray-500">Last used: {key.lastUsed}</p>
+                                  <p className="text-gray-400">Created: {key.created}</p>
+                                </div>
+                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{key.status}</Badge>
+                                <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Rate Limiting</CardTitle>
+                        <p className="text-sm text-gray-500">Prevent API abuse</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Requests per Minute</Label>
+                            <Input type="number" defaultValue="1000" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Requests per Hour</Label>
+                            <Input type="number" defaultValue="10000" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Rate Limiting</p>
+                            <p className="text-sm text-gray-500">Throttle excessive requests</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Allowlisting</p>
+                            <p className="text-sm text-gray-500">Only allow specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <p className="text-sm text-gray-500">Real-time event notifications</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-mono text-sm text-purple-600">https://api.company.com/webhooks/iam</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <p className="text-xs text-gray-500">Events: user.created, user.updated, user.deleted</p>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Directory Integrations</CardTitle>
+                        <p className="text-sm text-gray-500">Connect identity directories</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Active Directory', status: 'connected', users: 156, icon: Network, lastSync: '5 min ago' },
+                          { name: 'Google Workspace', status: 'connected', users: 142, icon: Globe, lastSync: '1 hour ago' },
+                          { name: 'LDAP', status: 'disconnected', users: 0, icon: Workflow, lastSync: null },
+                          { name: 'Azure AD', status: 'disconnected', users: 0, icon: Globe, lastSync: null },
+                        ].map(integration => (
+                          <div key={integration.name} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <integration.icon className={`w-5 h-5 ${integration.status === 'connected' ? 'text-green-600' : 'text-gray-500'}`} />
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{integration.name}</h4>
+                                {integration.status === 'connected' && (
+                                  <p className="text-sm text-gray-500">{integration.users} users synced • Last sync: {integration.lastSync}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'}>
+                                {integration.status}
+                              </Badge>
+                              <Button variant="outline" size="sm">
+                                {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>HR System Integration</CardTitle>
+                        <p className="text-sm text-gray-500">Sync with HR platforms</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Workday', connected: false },
+                          { name: 'BambooHR', connected: true },
+                          { name: 'ADP', connected: false },
+                          { name: 'Rippling', connected: false },
+                        ].map(hr => (
+                          <div key={hr.name} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <span className="font-medium">{hr.name}</span>
+                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm">
+                              {hr.connected ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Audit & Compliance</CardTitle>
+                        <p className="text-sm text-gray-500">Logging and compliance settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <History className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Audit Logging</p>
+                              <p className="text-sm text-gray-500">Log all authentication events</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Detailed Logs</p>
+                            <p className="text-sm text-gray-500">Include request/response data</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Log Retention Period</Label>
+                          <Select defaultValue="365">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="730">2 years</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Security Notifications</CardTitle>
+                        <p className="text-sm text-gray-500">Alert configuration</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                              <AlertTriangle className="h-5 w-5 text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Suspicious Login Alerts</p>
+                              <p className="text-sm text-gray-500">Email on unusual activity</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Admin Action Alerts</p>
+                            <p className="text-sm text-gray-500">Notify on role changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Security Report</p>
+                            <p className="text-sm text-gray-500">Summary of security events</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <p className="text-sm text-gray-500">Encryption and export</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Lock className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Data Encryption at Rest</p>
+                              <p className="text-sm text-gray-500">AES-256 encryption</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                        </div>
+                        <div>
+                          <Label>Encryption Algorithm</Label>
+                          <Select defaultValue="aes256">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="aes128">AES-128</SelectItem>
+                              <SelectItem value="aes256">AES-256</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export All Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <p className="text-sm text-gray-500">Irreversible actions</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-red-800 dark:text-red-400">Reset All Permissions</h4>
+                              <p className="text-sm text-red-600 dark:text-red-400/80">This will reset all custom permissions to defaults</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-red-800 dark:text-red-400">Revoke All Sessions</h4>
+                              <p className="text-sm text-red-600 dark:text-red-400/80">Force all users to re-authenticate</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
+                              Revoke
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-red-800 dark:text-red-400">Delete All API Keys</h4>
+                              <p className="text-sm text-red-600 dark:text-red-400/80">Revoke all API access immediately</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Compliance Standards</CardTitle>
+                        <p className="text-sm text-gray-500">Regulatory compliance settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <ShieldCheck className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">SOC 2 Compliance Mode</p>
+                              <p className="text-sm text-gray-500">Enable SOC 2 Type II controls</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Globe className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">GDPR Compliance</p>
+                              <p className="text-sm text-gray-500">European data protection</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Lock className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">HIPAA Compliance</p>
+                              <p className="text-sm text-gray-500">Healthcare data protection</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                              <CreditCard className="h-5 w-5 text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">PCI-DSS Compliance</p>
+                              <p className="text-sm text-gray-500">Payment card industry standards</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Zero Trust Settings</CardTitle>
+                        <p className="text-sm text-gray-500">Advanced security model</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Continuous Verification</p>
+                            <p className="text-sm text-gray-500">Verify user identity on every request</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Device Trust</p>
+                            <p className="text-sm text-gray-500">Require registered devices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Network Context</p>
+                            <p className="text-sm text-gray-500">Consider network location in auth</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Least Privilege Access</p>
+                            <p className="text-sm text-gray-500">Minimal permissions by default</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

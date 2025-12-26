@@ -421,6 +421,853 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900">
+      {/* Main Settings View - Full Screen */}
+      {activeTab === 'settings' && (
+        <div className="p-8 max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                <Settings className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chat Settings</h1>
+                <p className="text-gray-500 dark:text-gray-400">Configure your Intercom-level chat experience</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => setActiveTab('inbox')}>
+              <ChevronRight className="h-4 w-4 mr-2 rotate-180" />
+              Back to Inbox
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-12 gap-6">
+            {/* Settings Sidebar */}
+            <div className="col-span-3">
+              <Card className="bg-white dark:bg-gray-800">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: <Settings className="w-4 h-4" /> },
+                      { id: 'conversations', label: 'Conversations', icon: <MessageSquare className="w-4 h-4" /> },
+                      { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+                      { id: 'channels', label: 'Channels', icon: <Globe className="w-4 h-4" /> },
+                      { id: 'team', label: 'Team', icon: <Users className="w-4 h-4" /> },
+                      { id: 'ai', label: 'AI & Automation', icon: <Sparkles className="w-4 h-4" /> }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSettingsTab(tab.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          settingsTab === tab.id
+                            ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        {tab.icon}
+                        <span className="font-medium">{tab.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Settings Content */}
+            <div className="col-span-9 space-y-6">
+              {/* General Settings */}
+              {settingsTab === 'general' && (
+                <>
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-cyan-600" />
+                        Inbox Preferences
+                      </CardTitle>
+                      <CardDescription>Configure your inbox display and behavior</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Default Inbox View</Label>
+                          <Select defaultValue="all">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Conversations</SelectItem>
+                              <SelectItem value="mine">My Conversations</SelectItem>
+                              <SelectItem value="unassigned">Unassigned</SelectItem>
+                              <SelectItem value="starred">Starred</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Sort Order</Label>
+                          <Select defaultValue="newest">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="newest">Newest First</SelectItem>
+                              <SelectItem value="oldest">Oldest First</SelectItem>
+                              <SelectItem value="priority">Priority</SelectItem>
+                              <SelectItem value="waiting">Waiting Longest</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Show Unread Count</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Display unread badge in sidebar</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Auto-archive Resolved</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Move closed conversations to archive after 30 days</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Show Customer Panel</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Always display customer info sidebar</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Compact Mode</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Show more conversations in a smaller space</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Message Settings</CardTitle>
+                      <CardDescription>Configure messaging behavior and appearance</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Send Message With</Label>
+                          <Select defaultValue="enter">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="enter">Enter</SelectItem>
+                              <SelectItem value="shift-enter">Shift + Enter</SelectItem>
+                              <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Text Size</Label>
+                          <Select defaultValue="medium">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">Small</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="large">Large</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Show Typing Indicator</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Show when you're typing to customers</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Read Receipts</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Show when messages have been read</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Message Previews</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Show message content in conversation list</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Spell Check</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Highlight spelling errors in messages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Appearance</CardTitle>
+                      <CardDescription>Customize the chat interface look</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Theme</Label>
+                          <Select defaultValue="system">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="light">Light</SelectItem>
+                              <SelectItem value="dark">Dark</SelectItem>
+                              <SelectItem value="system">System</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Accent Color</Label>
+                          <div className="flex gap-2 mt-2">
+                            {['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'].map(color => (
+                              <button
+                                key={color}
+                                className="w-8 h-8 rounded-full border-2 border-gray-200 hover:scale-110 transition-transform"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {/* Conversations Settings */}
+              {settingsTab === 'conversations' && (
+                <>
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-cyan-600" />
+                        Conversation Management
+                      </CardTitle>
+                      <CardDescription>Configure how conversations are handled</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Auto-Close Inactive</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Close conversations after 7 days of inactivity</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Require Resolution Notes</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Agents must add notes when closing</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Conversation Rating</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Ask customers to rate conversations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Transcript Emails</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Send transcript after conversation ends</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Quick Replies</CardTitle>
+                      <CardDescription>Manage saved responses for common questions</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {SAVED_REPLIES.slice(0, 3).map(reply => (
+                        <div key={reply.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-900 dark:text-white">{reply.name}</h4>
+                              <Badge variant="outline">{reply.shortcut}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{reply.content}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{reply.category}</Badge>
+                            <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Button variant="outline" className="w-full">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Quick Reply
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Tags & Categories</CardTitle>
+                      <CardDescription>Organize conversations with tags</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {['billing', 'feature-request', 'bug', 'sales', 'support', 'urgent', 'VIP', 'onboarding', 'feedback'].map(tag => (
+                          <Badge key={tag} variant="outline" className="text-sm py-1 px-3">
+                            {tag}
+                            <button className="ml-2 text-gray-400 hover:text-gray-600">×</button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input placeholder="Add new tag..." />
+                        <Button>Add</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {/* Notifications Settings */}
+              {settingsTab === 'notifications' && (
+                <>
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-cyan-600" />
+                        Notification Preferences
+                      </CardTitle>
+                      <CardDescription>Configure how you receive alerts</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Desktop Notifications</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Show browser notifications</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">New Message Alerts</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify on new customer messages</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Assignment Alerts</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify when assigned new conversations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Mention Alerts</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify when @mentioned by teammates</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">VIP Customer Alerts</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Priority alerts for VIP customers</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Sound Settings</CardTitle>
+                      <CardDescription>Configure notification sounds</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Sound Alerts</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Play sound for new messages</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Notification Sound</Label>
+                          <Select defaultValue="chime">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="chime">Chime</SelectItem>
+                              <SelectItem value="pop">Pop</SelectItem>
+                              <SelectItem value="ding">Ding</SelectItem>
+                              <SelectItem value="bell">Bell</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Volume</Label>
+                          <Select defaultValue="medium">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Do Not Disturb</CardTitle>
+                      <CardDescription>Pause notifications during specific times</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Enable DND</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Temporarily pause all notifications</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Start Time</Label>
+                          <Input type="time" defaultValue="18:00" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>End Time</Label>
+                          <Input type="time" defaultValue="09:00" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {/* Channels Settings */}
+              {settingsTab === 'channels' && (
+                <>
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-cyan-600" />
+                        Chat Widget
+                      </CardTitle>
+                      <CardDescription>Configure your website chat widget</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Enable Chat Widget</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Show widget on your website</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Widget Position</Label>
+                          <Select defaultValue="right">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="left">Bottom Left</SelectItem>
+                              <SelectItem value="right">Bottom Right</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Launcher Style</Label>
+                          <Select defaultValue="icon">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="icon">Icon Only</SelectItem>
+                              <SelectItem value="text">With Text</SelectItem>
+                              <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Widget Color</Label>
+                        <div className="flex gap-2">
+                          {['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'].map(color => (
+                            <button
+                              key={color}
+                              className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:scale-110 transition-transform"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Email Channel</CardTitle>
+                      <CardDescription>Configure email-to-chat conversion</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Forward Emails to Chat</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Convert support emails to conversations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Support Email Address</Label>
+                        <Input defaultValue="support@yourcompany.com" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email Signature</Label>
+                        <Textarea placeholder="Your email signature..." rows={3} />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Social Channels</CardTitle>
+                      <CardDescription>Connect social messaging platforms</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'Facebook Messenger', connected: true },
+                        { name: 'WhatsApp Business', connected: false },
+                        { name: 'Twitter/X DM', connected: false },
+                        { name: 'Instagram DM', connected: false },
+                        { name: 'Slack', connected: true }
+                      ].map(channel => (
+                        <div key={channel.name} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{channel.name}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {channel.connected ? 'Connected' : 'Not connected'}
+                              </div>
+                            </div>
+                          </div>
+                          <Button variant={channel.connected ? 'outline' : 'default'} size="sm">
+                            {channel.connected ? 'Configure' : 'Connect'}
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {/* Team Settings */}
+              {settingsTab === 'team' && (
+                <>
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Users className="w-5 h-5 text-cyan-600" />
+                            Team Members
+                          </CardTitle>
+                          <CardDescription>Manage your support team</CardDescription>
+                        </div>
+                        <Button>
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Invite Member
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {TEAM_MEMBERS.map(member => (
+                        <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <Avatar className="h-12 w-12">
+                                <AvatarImage src={member.avatar} />
+                                <AvatarFallback>{member.name[0]}</AvatarFallback>
+                              </Avatar>
+                              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${
+                                member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
+                              }`} />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-gray-900 dark:text-white">{member.name}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{member.email}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline" className="capitalize">{member.role}</Badge>
+                            <div className="text-right text-sm text-gray-500">
+                              <div>{member.assignedConversations} active</div>
+                              <div>{member.resolvedToday} resolved</div>
+                            </div>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Assignment Rules</CardTitle>
+                      <CardDescription>Configure how conversations are assigned</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Auto-assign Conversations</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Automatically assign new chats to available agents</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Assignment Method</Label>
+                        <Select defaultValue="round-robin">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="round-robin">Round Robin</SelectItem>
+                            <SelectItem value="load-balanced">Load Balanced</SelectItem>
+                            <SelectItem value="random">Random</SelectItem>
+                            <SelectItem value="manual">Manual Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Max Concurrent Conversations</Label>
+                        <Select defaultValue="10">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5 conversations</SelectItem>
+                            <SelectItem value="10">10 conversations</SelectItem>
+                            <SelectItem value="15">15 conversations</SelectItem>
+                            <SelectItem value="unlimited">Unlimited</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Business Hours</CardTitle>
+                      <CardDescription>Set when your team is available</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Enable Business Hours</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Show availability status to customers</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Start Time</Label>
+                          <Input type="time" defaultValue="09:00" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>End Time</Label>
+                          <Input type="time" defaultValue="18:00" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Timezone</Label>
+                        <Select defaultValue="utc">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="utc">UTC</SelectItem>
+                            <SelectItem value="est">Eastern Time (ET)</SelectItem>
+                            <SelectItem value="pst">Pacific Time (PT)</SelectItem>
+                            <SelectItem value="gmt">GMT</SelectItem>
+                            <SelectItem value="cet">Central European Time (CET)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {/* AI & Automation Settings */}
+              {settingsTab === 'ai' && (
+                <>
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-cyan-600" />
+                        AI Assistant
+                      </CardTitle>
+                      <CardDescription>Configure AI-powered features</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">AI Response Suggestions</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Show AI-powered response recommendations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Auto-tag Conversations</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">AI automatically adds relevant tags</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Sentiment Analysis</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Analyze customer sentiment in messages</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Priority Detection</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">AI detects urgent conversations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Confidence Threshold</Label>
+                        <Select defaultValue="80">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="60">60% - Show more suggestions</SelectItem>
+                            <SelectItem value="80">80% - Balanced</SelectItem>
+                            <SelectItem value="95">95% - High confidence only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Chatbot</CardTitle>
+                      <CardDescription>Configure automated responses</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Enable Chatbot</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Handle common questions automatically</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Human Handoff</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Transfer to agent when bot can't help</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Bot Personality</Label>
+                        <Select defaultValue="friendly">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="friendly">Friendly & Casual</SelectItem>
+                            <SelectItem value="professional">Professional</SelectItem>
+                            <SelectItem value="formal">Formal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle>Automations</CardTitle>
+                      <CardDescription>Set up automatic actions</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Welcome Message</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Send greeting to new visitors</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Away Message</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Auto-reply when team is offline</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Follow-up Reminders</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Remind about unanswered conversations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Satisfaction Survey</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Send survey after conversation ends</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Chat Interface */}
+      {activeTab === 'inbox' && (
       <div className="flex h-screen">
         {/* Left Sidebar - Conversations List */}
         <div className="w-80 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col">

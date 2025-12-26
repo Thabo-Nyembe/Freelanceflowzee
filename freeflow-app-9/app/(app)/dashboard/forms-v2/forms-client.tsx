@@ -234,6 +234,7 @@ const formatDuration = (seconds: number): string => {
 
 export default function FormsClient({ initialForms }: { initialForms: Form[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [statusFilter, setStatusFilter] = useState<FormStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<FormType | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -924,92 +925,798 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Typeform Level with 6 Sub-tabs */}
           <TabsContent value="settings">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Form Defaults</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Show progress bar', desc: 'Display completion progress to respondents', enabled: true },
-                    { label: 'One question at a time', desc: 'Typeform-style focused experience', enabled: true },
-                    { label: 'Save partial responses', desc: 'Allow respondents to continue later', enabled: false },
-                    { label: 'Email notifications', desc: 'Get notified on new submissions', enabled: true },
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div>
-                        <p className="font-medium">{setting.label}</p>
-                        <p className="text-sm text-gray-500">{setting.desc}</p>
-                      </div>
-                      <Switch defaultChecked={setting.enabled} />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="sticky top-8">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <nav className="space-y-1 px-3 pb-4">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, desc: 'Basic preferences' },
+                        { id: 'forms', label: 'Form Builder', icon: FileText, desc: 'Default settings' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & emails' },
+                        { id: 'api', label: 'API & Webhooks', icon: Webhook, desc: 'Integrations' },
+                        { id: 'security', label: 'Security', icon: Lock, desc: 'Access control' },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders, desc: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Themes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    {formThemes.map(theme => (
-                      <button key={theme.id} className="p-3 border rounded-lg hover:border-indigo-500 transition-colors text-left">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: theme.primaryColor }}></div>
-                          <span className="font-medium text-sm">{theme.name}</span>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Workspace Settings</CardTitle>
+                        <p className="text-sm text-gray-500">Configure your forms workspace</p>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Workspace Name</Label>
+                            <Input defaultValue="My Forms Workspace" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Workspace URL</Label>
+                            <Input defaultValue="my-workspace" className="mt-1" />
+                          </div>
                         </div>
-                        <div className="h-8 rounded" style={{ backgroundColor: theme.backgroundColor, border: '1px solid #e5e7eb' }}></div>
-                      </button>
-                    ))}
-                    <button className="p-3 border-2 border-dashed rounded-lg hover:border-indigo-500 transition-colors text-center">
-                      <Palette className="h-5 w-5 mx-auto text-gray-400 mb-1" />
-                      <span className="text-sm text-gray-500">Custom Theme</span>
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
+                        <div>
+                          <Label>Default Language</Label>
+                          <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>English</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                            <option>German</option>
+                            <option>Portuguese</option>
+                            <option>Japanese</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Timezone</Label>
+                          <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>UTC (GMT+0)</option>
+                            <option>Eastern Time (GMT-5)</option>
+                            <option>Pacific Time (GMT-8)</option>
+                            <option>Central European Time (GMT+1)</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Branding</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Logo</Label>
-                    <div className="mt-2 border-2 border-dashed rounded-lg p-6 text-center">
-                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">Upload your logo</p>
-                      <Button variant="outline" size="sm" className="mt-2">Browse</Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div>
-                      <p className="font-medium">Remove Freeflow branding</p>
-                      <p className="text-sm text-gray-500">Show only your brand on forms</p>
-                    </div>
-                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">Pro</Badge>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Branding</CardTitle>
+                        <p className="text-sm text-gray-500">Customize your form branding</p>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div>
+                          <Label>Logo</Label>
+                          <div className="mt-2 border-2 border-dashed rounded-lg p-8 text-center">
+                            <Upload className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
+                            <p className="text-xs text-gray-400 mt-1">PNG, JPG, SVG up to 2MB</p>
+                            <Button variant="outline" size="sm" className="mt-3">Browse Files</Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Primary Color</Label>
+                            <div className="flex gap-2 mt-1">
+                              <div className="w-10 h-10 rounded-lg bg-indigo-600 border cursor-pointer"></div>
+                              <Input defaultValue="#6366f1" className="flex-1" />
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Background Color</Label>
+                            <div className="flex gap-2 mt-1">
+                              <div className="w-10 h-10 rounded-lg bg-white border cursor-pointer"></div>
+                              <Input defaultValue="#ffffff" className="flex-1" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                          <div>
+                            <p className="font-medium">Remove Freeflow Branding</p>
+                            <p className="text-sm text-gray-500">Show only your logo on forms</p>
+                          </div>
+                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
+                            <Star className="h-3 w-3 mr-1" /> Pro
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Custom Domain</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Domain</Label>
-                    <div className="flex gap-2 mt-1">
-                      <Input placeholder="forms.yourcompany.com" />
-                      <Button>Verify</Button>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">Point your domain's CNAME to forms.freeflow.io</p>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Themes</CardTitle>
+                        <p className="text-sm text-gray-500">Choose a default theme for new forms</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-4">
+                          {formThemes.map(theme => (
+                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: theme.primaryColor }}></div>
+                                <span className="font-medium">{theme.name}</span>
+                              </div>
+                              <div className="h-16 rounded-lg border" style={{ backgroundColor: theme.backgroundColor }}></div>
+                              <p className="text-xs text-gray-500 mt-2">{theme.fontFamily}</p>
+                            </button>
+                          ))}
+                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center">
+                            <Palette className="h-8 w-8 text-gray-400 mb-2" />
+                            <span className="text-sm font-medium text-gray-600">Create Custom</span>
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Form Builder Settings */}
+                {settingsTab === 'forms' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Form Defaults</CardTitle>
+                        <p className="text-sm text-gray-500">Default settings for new forms</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'One Question at a Time', desc: 'Typeform-style focused experience', icon: MousePointer, enabled: true },
+                          { label: 'Show Progress Bar', desc: 'Display completion progress to respondents', icon: Gauge, enabled: true },
+                          { label: 'Auto-Save Responses', desc: 'Allow respondents to continue later', icon: Save, enabled: false },
+                          { label: 'Required by Default', desc: 'Make new questions required by default', icon: CheckCircle, enabled: false },
+                          { label: 'Show Question Numbers', desc: 'Display question numbers on form', icon: Hash, enabled: true },
+                          { label: 'Allow Keyboard Navigation', desc: 'Let respondents use Tab/Enter keys', icon: Sliders, enabled: true },
+                        ].map((setting, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                                <setting.icon className="h-5 w-5 text-indigo-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{setting.label}</p>
+                                <p className="text-sm text-gray-500">{setting.desc}</p>
+                              </div>
+                            </div>
+                            <Switch defaultChecked={setting.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Question Types</CardTitle>
+                        <p className="text-sm text-gray-500">Enable or disable question types</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-3">
+                          {questionTypes.slice(0, 12).map(type => (
+                            <div key={type.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="text-indigo-600">{type.icon}</div>
+                                <div>
+                                  <p className="font-medium text-sm">{type.name}</p>
+                                  <p className="text-xs text-gray-500">{type.description}</p>
+                                </div>
+                              </div>
+                              <Switch defaultChecked={!type.isPremium} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Thank You Pages</CardTitle>
+                        <p className="text-sm text-gray-500">Default ending screen settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Thank You Message</Label>
+                          <Input defaultValue="Thank you for your response!" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Redirect After Submission</Label>
+                          <Input placeholder="https://yoursite.com/thank-you" className="mt-1" />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Social Share Buttons</p>
+                            <p className="text-sm text-gray-500">Allow respondents to share the form</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <p className="text-sm text-gray-500">Configure submission alerts</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Mail className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">New Response Notifications</p>
+                              <p className="text-sm text-gray-500">Get notified when someone submits a form</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div>
+                          <Label>Notification Email</Label>
+                          <Input defaultValue="team@company.com" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Notification Frequency</Label>
+                          <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>Instant</option>
+                            <option>Daily Digest</option>
+                            <option>Weekly Summary</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Response Data in Email</p>
+                            <p className="text-sm text-gray-500">Attach form answers to notification email</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Respondent Notifications</CardTitle>
+                        <p className="text-sm text-gray-500">Auto-responder settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Send className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Confirmation Email</p>
+                              <p className="text-sm text-gray-500">Send receipt to respondent after submission</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <div>
+                          <Label>Email Subject</Label>
+                          <Input defaultValue="Thank you for your submission" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Email Body</Label>
+                          <textarea className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-24" defaultValue="Thank you for completing our form. We'll be in touch soon." />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Slack & Teams Integration</CardTitle>
+                        <p className="text-sm text-gray-500">Real-time notifications to team channels</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">💬</span>
+                            <div>
+                              <p className="font-medium">Slack</p>
+                              <p className="text-sm text-gray-500">Connected to #form-responses</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">📋</span>
+                            <div>
+                              <p className="font-medium">Microsoft Teams</p>
+                              <p className="text-sm text-gray-500">Not connected</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* API & Webhooks Settings */}
+                {settingsTab === 'api' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <p className="text-sm text-gray-500">Manage your API keys and tokens</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <p className="font-medium">Personal API Key</p>
+                              <p className="text-xs text-gray-500">Created on Jan 15, 2024</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">Active</Badge>
+                              <Button variant="ghost" size="sm">
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            tf_STRIPE_KEY_PLACEHOLDER
+                          </code>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <AlertOctagon className="h-5 w-5 text-amber-600" />
+                            <p className="text-sm text-amber-800 dark:text-amber-200">Keep your API key secret. Never expose it in client-side code.</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                          <CardTitle>Webhooks</CardTitle>
+                          <p className="text-sm text-gray-500">Get notified via HTTP callbacks</p>
+                        </div>
+                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { url: 'https://api.company.com/forms/webhook', events: ['submission.created'], status: 'active', lastTriggered: '2 min ago' },
+                          { url: 'https://hooks.zapier.com/xxxxx', events: ['submission.created', 'form.updated'], status: 'active', lastTriggered: '1 hour ago' },
+                        ].map((webhook, i) => (
+                          <div key={i} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <code className="text-sm font-mono text-indigo-600">{webhook.url}</code>
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30">
+                                  {webhook.status}
+                                </Badge>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>Events: {webhook.events.join(', ')}</span>
+                              <span>Last triggered: {webhook.lastTriggered}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Documentation</CardTitle>
+                        <p className="text-sm text-gray-500">Learn how to integrate with Forms API</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-4">
+                          {[
+                            { title: 'Getting Started', icon: Code, desc: 'Quick start guide' },
+                            { title: 'API Reference', icon: FileText, desc: 'Full documentation' },
+                            { title: 'SDKs & Libraries', icon: GitBranch, desc: 'Node, Python, PHP' },
+                          ].map((doc, i) => (
+                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left">
+                              <doc.icon className="h-6 w-6 text-indigo-600 mb-2" />
+                              <h4 className="font-medium">{doc.title}</h4>
+                              <p className="text-sm text-gray-500">{doc.desc}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <p className="text-sm text-gray-500">Manage form access and permissions</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Globe className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Public by Default</p>
+                              <p className="text-sm text-gray-500">New forms are accessible to anyone</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Lock className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Password Protection</p>
+                              <p className="text-sm text-gray-500">Require password to access forms</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Users className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Respondent Authentication</p>
+                              <p className="text-sm text-gray-500">Require login to submit forms</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Protection</CardTitle>
+                        <p className="text-sm text-gray-500">Privacy and compliance settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">GDPR Compliance Mode</p>
+                            <p className="text-sm text-gray-500">Enable GDPR consent collection</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Data Encryption at Rest</p>
+                            <p className="text-sm text-gray-500">Encrypt stored responses</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                        </div>
+                        <div>
+                          <Label>Data Retention Period</Label>
+                          <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>30 days</option>
+                            <option>90 days</option>
+                            <option>1 year</option>
+                            <option>Forever</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Address Collection</p>
+                            <p className="text-sm text-gray-500">Store respondent IP addresses</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Anti-Spam & Bot Protection</CardTitle>
+                        <p className="text-sm text-gray-500">Prevent spam submissions</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Lock className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">reCAPTCHA Protection</p>
+                              <p className="text-sm text-gray-500">Add Google reCAPTCHA to forms</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Honeypot Fields</p>
+                            <p className="text-sm text-gray-500">Hidden fields to catch bots</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div>
+                          <Label>Submission Rate Limit</Label>
+                          <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>No limit</option>
+                            <option>1 per minute</option>
+                            <option>5 per hour</option>
+                            <option>10 per day</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Custom Domain</CardTitle>
+                        <p className="text-sm text-gray-500">Use your own domain for forms</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Custom Domain</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input placeholder="forms.yourcompany.com" />
+                            <Button>Verify</Button>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">Point your domain's CNAME to forms.freeflow.io</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <h4 className="font-medium mb-2">DNS Configuration</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                              <span className="text-gray-600 dark:text-gray-400">Type</span>
+                              <span className="font-mono">CNAME</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                              <span className="text-gray-600 dark:text-gray-400">Name</span>
+                              <span className="font-mono">forms</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                              <span className="text-gray-600 dark:text-gray-400">Value</span>
+                              <span className="font-mono">forms.freeflow.io</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Logic & Automation</CardTitle>
+                        <p className="text-sm text-gray-500">Advanced form behavior settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <GitBranch className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Logic Jumps</p>
+                              <p className="text-sm text-gray-500">Enable conditional question flow</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Shuffle className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Question Randomization</p>
+                              <p className="text-sm text-gray-500">Randomize question order</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Wand2 className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">AI-Powered Insights</p>
+                              <p className="text-sm text-gray-500">Automatic response analysis</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">Pro</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Export & Import</CardTitle>
+                        <p className="text-sm text-gray-500">Bulk data management</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex-col">
+                            <Download className="h-6 w-6 mb-2" />
+                            <span className="font-medium">Export All Forms</span>
+                            <span className="text-xs text-gray-500">Download JSON backup</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex-col">
+                            <Upload className="h-6 w-6 mb-2" />
+                            <span className="font-medium">Import Forms</span>
+                            <span className="text-xs text-gray-500">Upload JSON file</span>
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto Backup</p>
+                            <p className="text-sm text-gray-500">Daily automatic backups</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <p className="text-sm text-gray-500">Irreversible actions</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Responses</p>
+                            <p className="text-sm text-gray-500">Permanently remove all form responses</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            Delete All
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Workspace</p>
+                            <p className="text-sm text-gray-500">Delete this workspace and all its data</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Developer Tools</CardTitle>
+                        <p className="text-sm text-gray-500">Advanced debugging and testing</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                              <Code className="h-5 w-5 text-gray-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Debug Mode</p>
+                              <p className="text-sm text-gray-500">Show detailed error messages</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                              <Activity className="h-5 w-5 text-gray-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Verbose Logging</p>
+                              <p className="text-sm text-gray-500">Log all form interactions</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                              <Play className="h-5 w-5 text-gray-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Test Mode</p>
+                              <p className="text-sm text-gray-500">Don't save test submissions</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={false} />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Database className="h-4 w-4 mr-2" />
+                          View API Logs
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Performance Optimization</CardTitle>
+                        <p className="text-sm text-gray-500">Speed and efficiency settings</p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Lazy Load Questions</p>
+                            <p className="text-sm text-gray-500">Load questions as needed</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Cache Responses</p>
+                            <p className="text-sm text-gray-500">Enable browser caching</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Optimize Images</p>
+                            <p className="text-sm text-gray-500">Auto-compress uploaded images</p>
+                          </div>
+                          <Switch defaultChecked={true} />
+                        </div>
+                        <div>
+                          <Label>CDN Region</Label>
+                          <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>Auto (Closest)</option>
+                            <option>North America</option>
+                            <option>Europe</option>
+                            <option>Asia Pacific</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

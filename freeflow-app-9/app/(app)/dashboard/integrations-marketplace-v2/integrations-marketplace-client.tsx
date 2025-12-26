@@ -3,16 +3,19 @@
 import { useState, useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useMarketplaceIntegrations, MarketplaceIntegration, MarketplaceStats } from '@/lib/hooks/use-marketplace-integrations'
 import { createMarketplaceIntegration, deleteMarketplaceIntegration, connectIntegration, disconnectIntegration } from '@/app/actions/marketplace-integrations'
-import { Search, Star, Download, ExternalLink, Shield, Zap, Clock, Users, TrendingUp, CheckCircle, XCircle, Settings, Code, CreditCard, Package, Grid3X3, List, Filter, ChevronRight, Heart, Share2, Flag, MessageSquare, Plus, ArrowUpRight, Sparkles, Award, Verified, Globe, Lock, RefreshCw } from 'lucide-react'
+import { Search, Star, Download, ExternalLink, Shield, Zap, Clock, Users, TrendingUp, CheckCircle, XCircle, Settings, Code, CreditCard, Package, Grid3X3, List, Filter, ChevronRight, Heart, Share2, Flag, MessageSquare, Plus, ArrowUpRight, Sparkles, Award, Verified, Globe, Lock, RefreshCw, Bell, Webhook, Key, HardDrive, AlertOctagon, Sliders, Mail, Copy } from 'lucide-react'
 
 // Stripe Marketplace Level Types
 interface AppListing {
@@ -436,6 +439,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [showInstallDialog, setShowInstallDialog] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
   const [sortBy, setSortBy] = useState<'popular' | 'rating' | 'newest'>('popular')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredApps = useMemo(() => {
     let apps = [...mockApps]
@@ -616,6 +620,10 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               </TabsTrigger>
               <TabsTrigger value="collections">Collections</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
+              <TabsTrigger value="settings">
+                <Settings className="w-4 h-4 mr-1" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -859,6 +867,866 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Zapier Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: <Sliders className="w-4 h-4" /> },
+                        { id: 'apps', label: 'Apps & Connections', icon: <Package className="w-4 h-4" /> },
+                        { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+                        { id: 'api', label: 'API & Webhooks', icon: <Webhook className="w-4 h-4" /> },
+                        { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> },
+                        { id: 'advanced', label: 'Advanced', icon: <Code className="w-4 h-4" /> }
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setSettingsTab(tab.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === tab.id
+                              ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          {tab.icon}
+                          <span className="font-medium">{tab.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-teal-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure your marketplace preferences and display options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default View Mode</Label>
+                            <Select defaultValue="grid">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select view" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="grid">Grid View</SelectItem>
+                                <SelectItem value="list">List View</SelectItem>
+                                <SelectItem value="compact">Compact View</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Items Per Page</Label>
+                            <Select defaultValue="24">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select count" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="12">12 items</SelectItem>
+                                <SelectItem value="24">24 items</SelectItem>
+                                <SelectItem value="48">48 items</SelectItem>
+                                <SelectItem value="96">96 items</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Show Featured Apps</div>
+                              <div className="text-sm text-gray-500">Display featured apps at the top of discover page</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Show App Ratings</div>
+                              <div className="text-sm text-gray-500">Display ratings and reviews on app cards</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Show Install Count</div>
+                              <div className="text-sm text-gray-500">Display how many users have installed each app</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Auto-Update Apps</div>
+                              <div className="text-sm text-gray-500">Automatically update apps when new versions are available</div>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Discovery Preferences</CardTitle>
+                        <CardDescription>Customize how apps are recommended to you</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Sort Order</Label>
+                            <Select defaultValue="popular">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select sort" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="popular">Most Popular</SelectItem>
+                                <SelectItem value="rating">Highest Rated</SelectItem>
+                                <SelectItem value="newest">Newest First</SelectItem>
+                                <SelectItem value="name">Alphabetical</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Preferred Categories</Label>
+                            <Select defaultValue="all">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select categories" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All Categories</SelectItem>
+                                <SelectItem value="productivity">Productivity</SelectItem>
+                                <SelectItem value="analytics">Analytics</SelectItem>
+                                <SelectItem value="marketing">Marketing</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Personalized Recommendations</div>
+                              <div className="text-sm text-gray-500">Use your usage data to suggest relevant apps</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Show Beta Apps</div>
+                              <div className="text-sm text-gray-500">Include apps that are in beta testing</div>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Language & Region</CardTitle>
+                        <CardDescription>Set your locale preferences for the marketplace</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Display Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select language" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English (US)</SelectItem>
+                                <SelectItem value="en-gb">English (UK)</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select currency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD ($)</SelectItem>
+                                <SelectItem value="eur">EUR (€)</SelectItem>
+                                <SelectItem value="gbp">GBP (£)</SelectItem>
+                                <SelectItem value="jpy">JPY (¥)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Apps & Connections Settings */}
+                {settingsTab === 'apps' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Package className="w-5 h-5 text-teal-600" />
+                          Connected Apps
+                        </CardTitle>
+                        <CardDescription>Manage your installed integrations and their permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {installedApps.map(app => (
+                          <div key={app.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-teal-300 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+                                {app.icon}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold text-gray-900 dark:text-white">{app.name}</h4>
+                                  {app.verified && <Verified className="w-4 h-4 text-blue-500" />}
+                                  <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                                </div>
+                                <div className="text-sm text-gray-500 mt-1">
+                                  Plan: {app.currentPlan || 'Free'} • v{app.version} • Last synced: 2 min ago
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm">
+                                <RefreshCw className="w-4 h-4 mr-1" />
+                                Reconnect
+                              </Button>
+                              <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50">
+                                Disconnect
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {installedApps.length === 0 && (
+                          <div className="text-center py-8 text-gray-500">
+                            <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p>No apps connected yet</p>
+                            <Button className="mt-4 bg-teal-600" onClick={() => setActiveTab('discover')}>
+                              Browse Marketplace
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connection Settings</CardTitle>
+                        <CardDescription>Configure how apps connect and sync with your workspace</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-Reconnect</div>
+                            <div className="text-sm text-gray-500">Automatically reconnect when connection is lost</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Background Sync</div>
+                            <div className="text-sm text-gray-500">Keep data synced in the background</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Sync Frequency</div>
+                            <div className="text-sm text-gray-500">How often to sync data with connected apps</div>
+                          </div>
+                          <Select defaultValue="5">
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">Every minute</SelectItem>
+                              <SelectItem value="5">Every 5 minutes</SelectItem>
+                              <SelectItem value="15">Every 15 minutes</SelectItem>
+                              <SelectItem value="60">Every hour</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Sharing</CardTitle>
+                        <CardDescription>Control what data is shared with connected apps</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Share Usage Analytics</div>
+                            <div className="text-sm text-gray-500">Help apps improve by sharing anonymous usage data</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Share Contact Data</div>
+                            <div className="text-sm text-gray-500">Allow apps to access your contact list</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Share Calendar Access</div>
+                            <div className="text-sm text-gray-500">Allow apps to view and manage your calendar</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-teal-600" />
+                          Notification Preferences
+                        </CardTitle>
+                        <CardDescription>Configure how you receive marketplace notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">New App Releases</div>
+                              <div className="text-sm text-gray-500">Get notified when new apps are added to the marketplace</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">App Updates Available</div>
+                              <div className="text-sm text-gray-500">Notify when updates are available for installed apps</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Connection Issues</div>
+                              <div className="text-sm text-gray-500">Alert when an app loses connection or encounters errors</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Weekly Digest</div>
+                              <div className="text-sm text-gray-500">Receive a weekly summary of marketplace activity</div>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Price Changes</div>
+                              <div className="text-sm text-gray-500">Notify when pricing changes for installed apps</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Delivery Channels</CardTitle>
+                        <CardDescription>Choose how you want to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <Mail className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Email Notifications</div>
+                              <div className="text-sm text-gray-500">user@example.com</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-100 rounded-lg">
+                              <Bell className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Push Notifications</div>
+                              <div className="text-sm text-gray-500">Browser & mobile push</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-teal-100 rounded-lg">
+                              <MessageSquare className="w-5 h-5 text-teal-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Slack Notifications</div>
+                              <div className="text-sm text-gray-500">#integrations channel</div>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Quiet Hours</CardTitle>
+                        <CardDescription>Set times when you don't want to be notified</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Enable Quiet Hours</div>
+                            <div className="text-sm text-gray-500">Pause notifications during specified times</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Start Time</Label>
+                            <Input type="time" defaultValue="22:00" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>End Time</Label>
+                            <Input type="time" defaultValue="08:00" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* API & Webhooks Settings */}
+                {settingsTab === 'api' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-teal-600" />
+                          API Keys
+                        </CardTitle>
+                        <CardDescription>Manage API keys for accessing the marketplace programmatically</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <div className="font-medium">Production API Key</div>
+                              <div className="text-sm text-gray-500">Use this key in your production environment</div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="mk_prod_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">Regenerate</Button>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-2">Created Jan 15, 2024 • Last used 2 hours ago</div>
+                        </div>
+
+                        <div className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <div className="font-medium">Test API Key</div>
+                              <div className="text-sm text-gray-500">Use this key for development and testing</div>
+                            </div>
+                            <Badge className="bg-yellow-100 text-yellow-700">Test</Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="mk_test_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">Regenerate</Button>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-2">Created Jan 15, 2024 • Last used 5 min ago</div>
+                        </div>
+
+                        <Button className="w-full bg-teal-600">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-teal-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Configure webhooks to receive real-time events</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <span className="font-medium">App Install Events</span>
+                            </div>
+                            <Badge>Enabled</Badge>
+                          </div>
+                          <div className="text-sm text-gray-500 mb-2">https://api.yourapp.com/webhooks/marketplace</div>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>Events: app.installed, app.uninstalled, app.updated</span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <span className="font-medium">Sync Events</span>
+                            </div>
+                            <Badge>Enabled</Badge>
+                          </div>
+                          <div className="text-sm text-gray-500 mb-2">https://api.yourapp.com/webhooks/sync</div>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>Events: sync.started, sync.completed, sync.failed</span>
+                          </div>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook Endpoint
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Usage</CardTitle>
+                        <CardDescription>Monitor your API usage and rate limits</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-teal-600">12,847</div>
+                            <div className="text-sm text-gray-500">API Calls Today</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-blue-600">98.7%</div>
+                            <div className="text-sm text-gray-500">Success Rate</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-purple-600">45ms</div>
+                            <div className="text-sm text-gray-500">Avg Response</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Rate Limit Usage</span>
+                            <span className="text-sm text-gray-500">12,847 / 100,000</span>
+                          </div>
+                          <Progress value={12.8} className="h-2" />
+                          <div className="text-xs text-gray-500">Resets in 8 hours</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-teal-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Manage security and access control for integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Require Approval for New Apps</div>
+                            <div className="text-sm text-gray-500">Admin must approve before apps can be installed</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Two-Factor Authentication</div>
+                            <div className="text-sm text-gray-500">Require 2FA for sensitive app operations</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">IP Allowlist</div>
+                            <div className="text-sm text-gray-500">Restrict API access to specific IP addresses</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Audit Logging</div>
+                            <div className="text-sm text-gray-500">Log all app installations and configuration changes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Permissions</CardTitle>
+                        <CardDescription>Control who can install and manage apps</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Who can install apps</Label>
+                          <Select defaultValue="admins">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admins">Admins only</SelectItem>
+                              <SelectItem value="managers">Admins & Managers</SelectItem>
+                              <SelectItem value="all">All team members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Who can configure apps</Label>
+                          <Select defaultValue="managers">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admins">Admins only</SelectItem>
+                              <SelectItem value="managers">Admins & Managers</SelectItem>
+                              <SelectItem value="all">All team members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Who can view installed apps</Label>
+                          <Select defaultValue="all">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admins">Admins only</SelectItem>
+                              <SelectItem value="managers">Admins & Managers</SelectItem>
+                              <SelectItem value="all">All team members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Blocked Apps</CardTitle>
+                        <CardDescription>Apps that are blocked from being installed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <AlertOctagon className="w-5 h-5 text-red-600" />
+                              <div>
+                                <div className="font-medium text-red-800 dark:text-red-200">UnsafeApp Pro</div>
+                                <div className="text-sm text-red-600">Blocked by admin on Jan 10, 2024</div>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Unblock</Button>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Block an App
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="w-5 h-5 text-teal-600" />
+                          Developer Options
+                        </CardTitle>
+                        <CardDescription>Advanced configuration for developers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Developer Mode</div>
+                            <div className="text-sm text-gray-500">Enable advanced debugging and logging features</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Show API Response Times</div>
+                            <div className="text-sm text-gray-500">Display response time metrics in the UI</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Console Logging</div>
+                            <div className="text-sm text-gray-500">Log integration events to browser console</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Mock Mode</div>
+                            <div className="text-sm text-gray-500">Use mock data instead of live API calls</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Performance Tuning</CardTitle>
+                        <CardDescription>Optimize integration performance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Connection Timeout (seconds)</Label>
+                            <Input type="number" defaultValue="30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Retry Attempts</Label>
+                            <Input type="number" defaultValue="3" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Batch Size</Label>
+                            <Select defaultValue="100">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="50">50 items</SelectItem>
+                                <SelectItem value="100">100 items</SelectItem>
+                                <SelectItem value="250">250 items</SelectItem>
+                                <SelectItem value="500">500 items</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Cache Duration</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 minute</SelectItem>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage your marketplace data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Export All Data</div>
+                            <div className="text-sm text-gray-500">Download all your marketplace configuration</div>
+                          </div>
+                          <Button variant="outline">Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Import Configuration</div>
+                            <div className="text-sm text-gray-500">Import settings from another workspace</div>
+                          </div>
+                          <Button variant="outline">Import</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Clear Cache</div>
+                            <div className="text-sm text-gray-500">Clear all cached data and force refresh</div>
+                          </div>
+                          <Button variant="outline">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions - proceed with caution</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg">
+                          <div>
+                            <div className="font-medium text-red-600">Reset All Settings</div>
+                            <div className="text-sm text-gray-500">Reset all marketplace settings to defaults</div>
+                          </div>
+                          <Button variant="destructive">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg">
+                          <div>
+                            <div className="font-medium text-red-600">Disconnect All Apps</div>
+                            <div className="text-sm text-gray-500">Remove all connected integrations</div>
+                          </div>
+                          <Button variant="destructive">Disconnect All</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
