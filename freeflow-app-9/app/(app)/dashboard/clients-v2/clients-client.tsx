@@ -12,6 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CardDescription } from '@/components/ui/card'
 import {
   Users,
   Plus,
@@ -393,6 +397,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter clients
   const filteredClients = useMemo(() => {
@@ -572,6 +577,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             <TabsTrigger value="reports" className="gap-2">
               <BarChart3 className="w-4 h-4" />
               Reports
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -928,6 +937,698 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Salesforce Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-1">
+                <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Settings</h3>
+                {[
+                  { id: 'general', label: 'General', icon: Settings },
+                  { id: 'pipeline', label: 'Pipeline', icon: Target },
+                  { id: 'automation', label: 'Automation', icon: Zap },
+                  { id: 'integrations', label: 'Integrations', icon: Link2 },
+                  { id: 'notifications', label: 'Notifications', icon: Bell },
+                  { id: 'advanced', label: 'Advanced', icon: Building2 },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSettingsTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                      settingsTab === item.id
+                        ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>CRM Configuration</CardTitle>
+                        <CardDescription>General CRM settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Organization Name</Label>
+                            <Input defaultValue="Acme Corp" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD ($)</SelectItem>
+                                <SelectItem value="eur">EUR (€)</SelectItem>
+                                <SelectItem value="gbp">GBP (£)</SelectItem>
+                                <SelectItem value="jpy">JPY (¥)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Total Clients</p>
+                            <p className="text-2xl font-bold">1,234</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Open Deals</p>
+                            <p className="text-2xl font-bold">$2.4M</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Win Rate</p>
+                            <p className="text-2xl font-bold text-green-600">42%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Client Fields</CardTitle>
+                        <CardDescription>Customize client record fields</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Company Name', 'Industry', 'Revenue', 'Employee Count', 'Website'].map((field, i) => (
+                          <div key={field} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium">{field}</span>
+                              {i < 2 && <Badge className="bg-red-100 text-red-700">Required</Badge>}
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Custom Field
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Team Settings</CardTitle>
+                        <CardDescription>Sales team configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-indigo-600">12</p>
+                            <p className="text-sm text-gray-500">Sales Reps</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-purple-600">4</p>
+                            <p className="text-sm text-gray-500">Teams</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-green-600">3</p>
+                            <p className="text-sm text-gray-500">Managers</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Territory Management</p>
+                            <p className="text-sm text-gray-500">Auto-assign by region</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Round Robin Assignment</p>
+                            <p className="text-sm text-gray-500">Equal lead distribution</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Pipeline Settings */}
+                {settingsTab === 'pipeline' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Pipeline Stages</CardTitle>
+                        <CardDescription>Configure deal stages</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Lead', prob: 10, color: 'bg-gray-500' },
+                          { name: 'Qualified', prob: 25, color: 'bg-blue-500' },
+                          { name: 'Proposal', prob: 50, color: 'bg-yellow-500' },
+                          { name: 'Negotiation', prob: 75, color: 'bg-orange-500' },
+                          { name: 'Closed Won', prob: 100, color: 'bg-green-500' },
+                          { name: 'Closed Lost', prob: 0, color: 'bg-red-500' },
+                        ].map((stage) => (
+                          <div key={stage.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-3 h-3 rounded-full ${stage.color}`} />
+                              <span className="font-medium">{stage.name}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm text-gray-500">{stage.prob}% probability</span>
+                              <Button variant="ghost" size="sm">Edit</Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Stage
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Deal Settings</CardTitle>
+                        <CardDescription>Configure deal behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Deal Owner</Label>
+                          <Select defaultValue="creator">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="creator">Deal Creator</SelectItem>
+                              <SelectItem value="account">Account Owner</SelectItem>
+                              <SelectItem value="roundrobin">Round Robin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-close Stale Deals</p>
+                            <p className="text-sm text-gray-500">Close after 90 days inactive</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Close Reason</p>
+                            <p className="text-sm text-gray-500">On won/lost deals</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Deal Scoring</p>
+                            <p className="text-sm text-gray-500">AI-powered deal scoring</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Forecasting</CardTitle>
+                        <CardDescription>Revenue forecasting settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Forecast Period</Label>
+                          <Select defaultValue="quarter">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="month">Monthly</SelectItem>
+                              <SelectItem value="quarter">Quarterly</SelectItem>
+                              <SelectItem value="year">Annually</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable AI Forecasting</p>
+                            <p className="text-sm text-gray-500">Predictive analytics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Q4 Forecast</p>
+                            <p className="text-xl font-bold text-indigo-600">$1.2M</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Confidence</p>
+                            <p className="text-xl font-bold text-green-600">78%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Automation Settings */}
+                {settingsTab === 'automation' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Workflow Automation</CardTitle>
+                        <CardDescription>Automate repetitive tasks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Lead Assignment</p>
+                            <p className="text-sm text-gray-500">Auto-assign new leads</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Follow-up Reminders</p>
+                            <p className="text-sm text-gray-500">Auto-schedule reminders</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Deal Stage Updates</p>
+                            <p className="text-sm text-gray-500">Trigger on activity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Win/Loss Analysis</p>
+                            <p className="text-sm text-gray-500">Auto-generate reports</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          Create Custom Workflow
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Sequences</CardTitle>
+                        <CardDescription>Automated email campaigns</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'New Lead Welcome', emails: 5, active: true },
+                          { name: 'Re-engagement', emails: 3, active: true },
+                          { name: 'Post-Demo Follow-up', emails: 4, active: false },
+                        ].map((seq) => (
+                          <div key={seq.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{seq.name}</p>
+                              <p className="text-xs text-gray-500">{seq.emails} emails</p>
+                            </div>
+                            <Switch defaultChecked={seq.active} />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Sequence
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>AI Assistant</CardTitle>
+                        <CardDescription>AI-powered sales assistant</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Email Suggestions</p>
+                            <p className="text-sm text-gray-500">AI-written email drafts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Meeting Prep</p>
+                            <p className="text-sm text-gray-500">Auto-generate briefs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Deal Insights</p>
+                            <p className="text-sm text-gray-500">Risk analysis & suggestions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Integrations</CardTitle>
+                        <CardDescription>Connect email providers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Gmail', icon: Mail, connected: true },
+                          { name: 'Outlook', icon: Mail, connected: true },
+                          { name: 'Exchange', icon: Mail, connected: false },
+                        ].map((int) => (
+                          <div key={int.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <int.icon className="w-5 h-5" />
+                              <span className="font-medium">{int.name}</span>
+                            </div>
+                            <Badge className={int.connected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {int.connected ? 'Connected' : 'Connect'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Calendar Integrations</CardTitle>
+                        <CardDescription>Sync meetings and events</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Google Calendar', 'Outlook Calendar', 'Calendly'].map((cal, i) => (
+                          <div key={cal} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Calendar className="w-5 h-5" />
+                              <span className="font-medium">{cal}</span>
+                            </div>
+                            <Badge className={i === 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {i === 0 ? 'Connected' : 'Connect'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Third-Party Apps</CardTitle>
+                        <CardDescription>Connect external services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Slack', status: 'connected' },
+                          { name: 'Zoom', status: 'connected' },
+                          { name: 'HubSpot', status: 'available' },
+                          { name: 'Mailchimp', status: 'available' },
+                        ].map((app) => (
+                          <div key={app.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <span className="font-medium">{app.name}</span>
+                            <Badge className={app.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {app.status === 'connected' ? 'Connected' : 'Connect'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          Browse App Marketplace
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">New Lead Assigned</p>
+                            <p className="text-sm text-gray-500">When a lead is assigned to you</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Deal Stage Change</p>
+                            <p className="text-sm text-gray-500">When a deal moves stages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Deal Won/Lost</p>
+                            <p className="text-sm text-gray-500">When deals close</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Task Due</p>
+                            <p className="text-sm text-gray-500">Reminder before due date</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>In-App Notifications</CardTitle>
+                        <CardDescription>Configure app alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Real-time Updates</p>
+                            <p className="text-sm text-gray-500">Show live notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sound Alerts</p>
+                            <p className="text-sm text-gray-500">Play notification sounds</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Desktop Notifications</p>
+                            <p className="text-sm text-gray-500">Browser push notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Mobile Push</CardTitle>
+                        <CardDescription>Mobile notification settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Push</p>
+                            <p className="text-sm text-gray-500">Receive on mobile</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Quiet Hours</Label>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                              <Label className="text-xs text-gray-500">From</Label>
+                              <Select defaultValue="22">
+                                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 24 }, (_, i) => (
+                                    <SelectItem key={i} value={i.toString()}>{i.toString().padStart(2, '0')}:00</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-gray-500">To</Label>
+                              <Select defaultValue="8">
+                                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 24 }, (_, i) => (
+                                    <SelectItem key={i} value={i.toString()}>{i.toString().padStart(2, '0')}:00</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Import and export data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export Data</span>
+                          </Button>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Upload className="w-5 h-5" />
+                            <span>Import Data</span>
+                          </Button>
+                        </div>
+                        <div>
+                          <Label>Export Format</Label>
+                          <Select defaultValue="csv">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="csv">CSV</SelectItem>
+                              <SelectItem value="xlsx">Excel</SelectItem>
+                              <SelectItem value="json">JSON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Scheduled Exports</p>
+                            <p className="text-sm text-gray-500">Weekly backup exports</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Developer API settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">API Key</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            crm_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <div>
+                          <Label>Rate Limit</Label>
+                          <Select defaultValue="1000">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100 req/min</SelectItem>
+                              <SelectItem value="1000">1,000 req/min</SelectItem>
+                              <SelectItem value="10000">10,000 req/min</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Audit Log</CardTitle>
+                        <CardDescription>Track all changes</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Audit Log</p>
+                            <p className="text-sm text-gray-500">Track all CRM changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Log Retention</Label>
+                          <Select defaultValue="1year">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="90days">90 days</SelectItem>
+                              <SelectItem value="1year">1 year</SelectItem>
+                              <SelectItem value="3years">3 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          View Audit Log
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Activities</p>
+                              <p className="text-sm text-red-600">Remove activity history</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Merge Duplicate Clients</p>
+                              <p className="text-sm text-red-600">Find and merge duplicates</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Merge
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Reset CRM Data</p>
+                              <p className="text-sm text-red-600">Delete all client data</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

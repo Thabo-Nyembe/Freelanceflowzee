@@ -347,6 +347,7 @@ const getReleaseTypeColor = (type: ReleaseType): string => {
 
 export default function ChangelogClient({ initialChangelog }: { initialChangelog: Changelog[] }) {
   const [activeTab, setActiveTab] = useState('releases')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [releaseTypeFilter, setReleaseTypeFilter] = useState<string>('all')
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
@@ -1073,64 +1074,768 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - LaunchDarkly Level with 6 Sub-tabs */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Release Settings</CardTitle>
-                <CardDescription>Configure release automation and notifications</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Auto-generate Release Notes</h4>
-                    <p className="text-sm text-gray-500">Automatically generate notes from commit messages</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="sticky top-8">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <nav className="space-y-1 px-3 pb-4">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, desc: 'Basic preferences' },
+                        { id: 'releases', label: 'Releases', icon: Tag, desc: 'Release settings' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & emails' },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook, desc: 'External services' },
+                        { id: 'security', label: 'Security', icon: Shield, desc: 'Access control' },
+                        { id: 'advanced', label: 'Advanced', icon: Code, desc: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Include Contributors</h4>
-                    <p className="text-sm text-gray-500">List contributors in release notes</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Repository Settings</CardTitle>
+                        <CardDescription>Configure changelog repository</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Branch</Label>
+                            <Select defaultValue="main">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="main">main</SelectItem>
+                                <SelectItem value="master">master</SelectItem>
+                                <SelectItem value="develop">develop</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Version Format</Label>
+                            <Select defaultValue="semver">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="semver">Semantic (v1.2.3)</SelectItem>
+                                <SelectItem value="calver">CalVer (2024.01.15)</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-increment Version</p>
+                            <p className="text-sm text-gray-500">Automatically increment version on release</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Require Signed Releases</h4>
-                    <p className="text-sm text-gray-500">Only publish releases with GPG signatures</p>
-                  </div>
-                  <Switch />
-                </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Display Preferences</CardTitle>
+                        <CardDescription>Customize changelog appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Release Dates</p>
+                            <p className="text-sm text-gray-500">Display publication dates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Download Stats</p>
+                            <p className="text-sm text-gray-500">Display download counts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Contributors</p>
+                            <p className="text-sm text-gray-500">List contributors per release</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Releases per Page</Label>
+                          <Select defaultValue="10">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5 releases</SelectItem>
+                              <SelectItem value="10">10 releases</SelectItem>
+                              <SelectItem value="25">25 releases</SelectItem>
+                              <SelectItem value="50">50 releases</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Email Notifications</h4>
-                    <p className="text-sm text-gray-500">Send email notifications for new releases</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
+                {/* Releases Settings */}
+                {settingsTab === 'releases' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Release Notes Generation</CardTitle>
+                        <CardDescription>Configure automatic release notes</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <RefreshCw className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Auto-generate Release Notes</p>
+                              <p className="text-sm text-gray-500">Generate from commit messages</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include PR Links</p>
+                            <p className="text-sm text-gray-500">Link to pull requests in notes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Issue References</p>
+                            <p className="text-sm text-gray-500">Link to closed issues</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Categorize Changes</p>
+                            <p className="text-sm text-gray-500">Group by feature, fix, etc.</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-4">Release Template</h4>
-                  <textarea
-                    className="w-full h-40 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono text-sm"
-                    defaultValue={`## What's Changed
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Release Template</CardTitle>
+                        <CardDescription>Default template for new releases</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <textarea
+                          className="w-full h-48 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono text-sm"
+                          defaultValue={`## What's Changed
 
-### Features
+### 🚀 Features
 -
 
-### Bug Fixes
+### 🐛 Bug Fixes
 -
 
-### Contributors
+### 🔧 Improvements
+-
+
+### 📚 Documentation
+-
+
+### 🙏 Contributors
 Thanks to all contributors!`}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                        />
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Reset to Default
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Asset Management</CardTitle>
+                        <CardDescription>Configure release assets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-upload Binaries</p>
+                            <p className="text-sm text-gray-500">Upload build artifacts automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Generate Checksums</p>
+                            <p className="text-sm text-gray-500">SHA256 checksums for assets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Max Asset Size</Label>
+                          <Select defaultValue="100">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="50">50 MB</SelectItem>
+                              <SelectItem value="100">100 MB</SelectItem>
+                              <SelectItem value="250">250 MB</SelectItem>
+                              <SelectItem value="500">500 MB</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'New Release Published', desc: 'When a new version is released', enabled: true },
+                          { label: 'Pre-release Created', desc: 'Beta and RC versions', enabled: true },
+                          { label: 'Release Edited', desc: 'When release notes change', enabled: false },
+                          { label: 'Release Deleted', desc: 'When a release is removed', enabled: true },
+                          { label: 'Download Milestone', desc: 'When downloads hit thresholds', enabled: false },
+                        ].map((notif, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notif.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Slack Integration</CardTitle>
+                        <CardDescription>Post releases to Slack</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Slack className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Slack</p>
+                              <p className="text-sm text-gray-500">#releases channel</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Post New Releases</p>
+                            <p className="text-sm text-gray-500">Announce in channel</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Release Notes</p>
+                            <p className="text-sm text-gray-500">Full notes in message</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <CardDescription>HTTP callbacks for events</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-mono text-sm text-slate-600">https://api.example.com/releases</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <p className="text-xs text-gray-500">Events: release.created, release.published</p>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>CI/CD Integration</CardTitle>
+                        <CardDescription>Automated release pipelines</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'GitHub Actions', connected: true },
+                          { name: 'GitLab CI', connected: false },
+                          { name: 'CircleCI', connected: false },
+                          { name: 'Jenkins', connected: false },
+                        ].map((ci, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <span className="font-medium">{ci.name}</span>
+                            <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                              {ci.connected ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Package Registries</CardTitle>
+                        <CardDescription>Auto-publish to registries</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'npm', connected: true },
+                          { name: 'PyPI', connected: false },
+                          { name: 'Docker Hub', connected: true },
+                          { name: 'Maven Central', connected: false },
+                        ].map((reg, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <Package className="h-5 w-5 text-gray-500" />
+                              <span className="font-medium">{reg.name}</span>
+                            </div>
+                            <Badge className={reg.connected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {reg.connected ? 'Connected' : 'Not connected'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Release Signing</CardTitle>
+                        <CardDescription>Cryptographic signatures</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Shield className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">GPG Signing</p>
+                              <p className="text-sm text-gray-500">Sign releases with GPG</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Signed Commits</p>
+                            <p className="text-sm text-gray-500">Only include verified commits</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">GPG Key</span>
+                            <Badge variant="outline">Configured</Badge>
+                          </div>
+                          <code className="text-sm text-gray-600 font-mono">pub rsa4096 2024-01-01 [SC]</code>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Who can create releases</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Required Approvals</Label>
+                          <Select defaultValue="1">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">No approval required</SelectItem>
+                              <SelectItem value="1">1 approval</SelectItem>
+                              <SelectItem value="2">2 approvals</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Branch Protection</p>
+                            <p className="text-sm text-gray-500">Only release from protected branches</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require CI Passing</p>
+                            <p className="text-sm text-gray-500">All checks must pass</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Release automation API</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">API Token</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-600" />
+                            <span className="text-sm text-amber-800 dark:text-amber-200">Keep your token secret</span>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate Token
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Retention Policy</CardTitle>
+                        <CardDescription>Manage old releases</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-delete Pre-releases</p>
+                            <p className="text-sm text-gray-500">Remove old beta/RC versions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Keep Pre-releases For</Label>
+                          <Select defaultValue="90">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Archive Old Assets</p>
+                            <p className="text-sm text-gray-500">Move to cold storage</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
+                              <p className="text-sm text-red-600">Remove all draft releases</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Reset Settings</p>
+                              <p className="text-sm text-red-600">Reset to defaults</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Feature Flags</CardTitle>
+                        <CardDescription>Control feature rollouts with flags</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Feature Flags</p>
+                            <p className="text-sm text-gray-500">Link releases to feature flags</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 border rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full" />
+                              <span className="font-medium">Production Flags</span>
+                            </div>
+                            <p className="text-2xl font-bold">24</p>
+                            <p className="text-sm text-gray-500">Active flags</p>
+                          </div>
+                          <div className="p-4 border rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                              <span className="font-medium">Staging Flags</span>
+                            </div>
+                            <p className="text-2xl font-bold">18</p>
+                            <p className="text-sm text-gray-500">In testing</p>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Default Flag State</Label>
+                          <Select defaultValue="off">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="off">Off by default</SelectItem>
+                              <SelectItem value="on">On by default</SelectItem>
+                              <SelectItem value="percentage">Percentage rollout</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Environment Configuration</CardTitle>
+                        <CardDescription>Configure release environments</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Production', 'Staging', 'Development', 'QA'].map((env, i) => (
+                          <div key={env} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-3 h-3 rounded-full ${i === 0 ? 'bg-green-500' : i === 1 ? 'bg-yellow-500' : i === 2 ? 'bg-blue-500' : 'bg-purple-500'}`} />
+                              <div>
+                                <p className="font-medium">{env}</p>
+                                <p className="text-xs text-gray-500">{i === 0 ? 'app.example.com' : i === 1 ? 'staging.example.com' : i === 2 ? 'dev.example.com' : 'qa.example.com'}</p>
+                              </div>
+                            </div>
+                            <Badge className={i === 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {i === 0 ? 'Active' : 'Configured'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Environment
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Audit Logs</CardTitle>
+                        <CardDescription>Track release activities</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all release activities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Log Retention</Label>
+                          <Select defaultValue="1year">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30days">30 days</SelectItem>
+                              <SelectItem value="90days">90 days</SelectItem>
+                              <SelectItem value="1year">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">Recent Activity</p>
+                          {[
+                            { action: 'Release v2.4.0 published', user: 'John', time: '2 hours ago' },
+                            { action: 'Draft v2.4.1 created', user: 'Sarah', time: '5 hours ago' },
+                            { action: 'Settings updated', user: 'Admin', time: '1 day ago' },
+                          ].map((log, i) => (
+                            <div key={i} className="flex items-center justify-between text-sm p-2 border-b last:border-0">
+                              <span>{log.action}</span>
+                              <span className="text-gray-500">{log.user} • {log.time}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          View Full Audit Log
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Rollback Configuration</CardTitle>
+                        <CardDescription>Automatic rollback settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-Rollback</p>
+                            <p className="text-sm text-gray-500">Automatically rollback on errors</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Error Threshold</Label>
+                          <Select defaultValue="5">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1% error rate</SelectItem>
+                              <SelectItem value="5">5% error rate</SelectItem>
+                              <SelectItem value="10">10% error rate</SelectItem>
+                              <SelectItem value="custom">Custom threshold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Keep Rollback History</p>
+                            <p className="text-sm text-gray-500">Maintain rollback points</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-3 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-green-600">12</p>
+                            <p className="text-sm text-gray-500">Available rollback points</p>
+                          </div>
+                          <div className="p-3 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">v2.3.2</p>
+                            <p className="text-sm text-gray-500">Last stable version</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Release Analytics</CardTitle>
+                        <CardDescription>Track release performance metrics</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Analytics</p>
+                            <p className="text-sm text-gray-500">Track adoption and impact</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-3 border rounded-lg text-center">
+                            <p className="text-xl font-bold">98.5%</p>
+                            <p className="text-xs text-gray-500">Adoption Rate</p>
+                          </div>
+                          <div className="p-3 border rounded-lg text-center">
+                            <p className="text-xl font-bold">2.3h</p>
+                            <p className="text-xs text-gray-500">Avg Deploy Time</p>
+                          </div>
+                          <div className="p-3 border rounded-lg text-center">
+                            <p className="text-xl font-bold">0</p>
+                            <p className="text-xs text-gray-500">Incidents</p>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Export Format</Label>
+                          <Select defaultValue="csv">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="csv">CSV</SelectItem>
+                              <SelectItem value="json">JSON</SelectItem>
+                              <SelectItem value="xlsx">Excel</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export Analytics
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

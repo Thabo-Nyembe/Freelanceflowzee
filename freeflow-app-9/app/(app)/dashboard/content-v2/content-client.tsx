@@ -4,6 +4,14 @@ import { useState, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Bell, Key, Webhook, Mail, AlertTriangle, Sliders, Globe as GlobeIcon, HardDrive, Trash2 as TrashIcon, RefreshCw, Download, Plus, Settings, Shield, Database, Cloud, Code, Layers, FileText } from 'lucide-react'
 
 // ============================================================================
 // CONTENTFUL/STRAPI-LEVEL CMS - Headless Content Management System
@@ -504,7 +512,7 @@ const mockWebhooks: Webhook[] = [
 ]
 
 export default function ContentClient() {
-  const [activeView, setActiveView] = useState<'entries' | 'assets' | 'types' | 'locales' | 'webhooks'>('entries')
+  const [activeView, setActiveView] = useState<'entries' | 'assets' | 'types' | 'locales' | 'webhooks' | 'settings'>('entries')
   const [selectedEntry, setSelectedEntry] = useState<ContentEntry | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [contentTypeFilter, setContentTypeFilter] = useState<string>('all')
@@ -512,6 +520,7 @@ export default function ContentClient() {
   const [localeFilter, setLocaleFilter] = useState<string>('all')
   const [assetTypeFilter, setAssetTypeFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -682,6 +691,9 @@ export default function ContentClient() {
             </TabsTrigger>
             <TabsTrigger value="webhooks" className="data-[state=active]:bg-purple-100 dark:data-[state=active]:bg-purple-900/30">
               🔗 Webhooks
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-900/30">
+              ⚙️ Settings
             </TabsTrigger>
           </TabsList>
 
@@ -1139,6 +1151,773 @@ export default function ContentClient() {
                   )}
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Contentful Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-1">
+                <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Settings</h3>
+                {[
+                  { id: 'general', label: 'General', icon: Settings },
+                  { id: 'content', label: 'Content Model', icon: Layers },
+                  { id: 'delivery', label: 'Delivery', icon: Cloud },
+                  { id: 'localization', label: 'Localization', icon: GlobeIcon },
+                  { id: 'api', label: 'API Access', icon: Code },
+                  { id: 'advanced', label: 'Advanced', icon: Sliders },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSettingsTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                      settingsTab === item.id
+                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Space Configuration</CardTitle>
+                        <CardDescription>General settings for your content space</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Space Name</Label>
+                            <Input defaultValue="Production Content" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Space ID</Label>
+                            <Input defaultValue="spc_abcd1234" readOnly className="mt-1 bg-gray-50 dark:bg-gray-800" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Description</Label>
+                          <Input defaultValue="Main production content management space" className="mt-1" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Content Entries</p>
+                            <p className="text-2xl font-bold">1,234</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Assets</p>
+                            <p className="text-2xl font-bold">567</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Content Types</p>
+                            <p className="text-2xl font-bold">12</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Environment Settings</CardTitle>
+                        <CardDescription>Manage content environments</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Production', 'Staging', 'Development'].map((env, i) => (
+                          <div key={env} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-3 h-3 rounded-full ${i === 0 ? 'bg-green-500' : i === 1 ? 'bg-yellow-500' : 'bg-blue-500'}`} />
+                              <div>
+                                <p className="font-medium">{env}</p>
+                                <p className="text-xs text-gray-500">{env.toLowerCase()}.cms.example.com</p>
+                              </div>
+                            </div>
+                            <Badge className={i === 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {i === 0 ? 'Primary' : 'Active'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Environment
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Team & Permissions</CardTitle>
+                        <CardDescription>Manage team access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-emerald-600">8</p>
+                            <p className="text-sm text-gray-500">Admins</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">24</p>
+                            <p className="text-sm text-gray-500">Editors</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-gray-600">12</p>
+                            <p className="text-sm text-gray-500">Viewers</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          Manage Team Members
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Content Model Settings */}
+                {settingsTab === 'content' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Content Model Settings</CardTitle>
+                        <CardDescription>Configure content type behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Field Validation</p>
+                            <p className="text-sm text-gray-500">Validate content before publishing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Required SEO Fields</p>
+                            <p className="text-sm text-gray-500">Make SEO fields mandatory</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-generate Slugs</p>
+                            <p className="text-sm text-gray-500">Create URL slugs from titles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Slug Format</Label>
+                          <Select defaultValue="kebab">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="kebab">kebab-case (url-slug)</SelectItem>
+                              <SelectItem value="snake">snake_case (url_slug)</SelectItem>
+                              <SelectItem value="camel">camelCase (urlSlug)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Rich Text Editor</CardTitle>
+                        <CardDescription>Configure rich text field behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Editor Mode</Label>
+                          <Select defaultValue="rich">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="rich">Rich Text (WYSIWYG)</SelectItem>
+                              <SelectItem value="markdown">Markdown</SelectItem>
+                              <SelectItem value="html">HTML</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Embedded Entries</p>
+                            <p className="text-sm text-gray-500">Allow embedding other entries</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Embedded Assets</p>
+                            <p className="text-sm text-gray-500">Allow embedding images/videos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Max Rich Text Size</Label>
+                          <Select defaultValue="500kb">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100kb">100 KB</SelectItem>
+                              <SelectItem value="500kb">500 KB</SelectItem>
+                              <SelectItem value="1mb">1 MB</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Versioning & History</CardTitle>
+                        <CardDescription>Content version control</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Version History</p>
+                            <p className="text-sm text-gray-500">Track all content changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Versions to Keep</Label>
+                          <Select defaultValue="50">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">Last 10 versions</SelectItem>
+                              <SelectItem value="25">Last 25 versions</SelectItem>
+                              <SelectItem value="50">Last 50 versions</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Compare Versions</p>
+                            <p className="text-sm text-gray-500">Side-by-side diff view</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Delivery Settings */}
+                {settingsTab === 'delivery' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Content Delivery Network</CardTitle>
+                        <CardDescription>CDN and caching configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable CDN</p>
+                            <p className="text-sm text-gray-500">Global content delivery</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Cache TTL (seconds)</Label>
+                          <Select defaultValue="3600">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="300">5 minutes</SelectItem>
+                              <SelectItem value="3600">1 hour</SelectItem>
+                              <SelectItem value="86400">24 hours</SelectItem>
+                              <SelectItem value="604800">1 week</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Cache Hit Rate</p>
+                            <p className="text-2xl font-bold text-emerald-600">98.5%</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Avg Response Time</p>
+                            <p className="text-2xl font-bold text-emerald-600">23ms</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Purge Cache
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Image Optimization</CardTitle>
+                        <CardDescription>Automatic image processing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-optimize Images</p>
+                            <p className="text-sm text-gray-500">Compress and resize on upload</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Default Format</Label>
+                          <Select defaultValue="webp">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="webp">WebP (recommended)</SelectItem>
+                              <SelectItem value="avif">AVIF (modern browsers)</SelectItem>
+                              <SelectItem value="jpeg">JPEG (legacy)</SelectItem>
+                              <SelectItem value="png">PNG (lossless)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Quality</Label>
+                          <Select defaultValue="80">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="60">60% (smaller files)</SelectItem>
+                              <SelectItem value="80">80% (balanced)</SelectItem>
+                              <SelectItem value="90">90% (high quality)</SelectItem>
+                              <SelectItem value="100">100% (original)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Generate Responsive Images</p>
+                            <p className="text-sm text-gray-500">Create multiple sizes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Preview Mode</CardTitle>
+                        <CardDescription>Content preview configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Preview URL Pattern</Label>
+                          <Input defaultValue="https://preview.example.com/api/preview?slug={{slug}}" className="mt-1 font-mono text-sm" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Live Preview</p>
+                            <p className="text-sm text-gray-500">Real-time preview updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Preview Token TTL</Label>
+                          <Select defaultValue="3600">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1800">30 minutes</SelectItem>
+                              <SelectItem value="3600">1 hour</SelectItem>
+                              <SelectItem value="86400">24 hours</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Localization Settings */}
+                {settingsTab === 'localization' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Default Locale</CardTitle>
+                        <CardDescription>Primary language settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Primary Locale</Label>
+                          <Select defaultValue="en-US">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en-US">English (US)</SelectItem>
+                              <SelectItem value="en-GB">English (UK)</SelectItem>
+                              <SelectItem value="es-ES">Spanish</SelectItem>
+                              <SelectItem value="fr-FR">French</SelectItem>
+                              <SelectItem value="de-DE">German</SelectItem>
+                              <SelectItem value="ja-JP">Japanese</SelectItem>
+                              <SelectItem value="zh-CN">Chinese (Simplified)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Fallback to Default</p>
+                            <p className="text-sm text-gray-500">Use default locale for missing translations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Enabled Locales</CardTitle>
+                        <CardDescription>Manage available languages</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { code: 'en-US', name: 'English (US)', entries: 1234, isDefault: true },
+                          { code: 'es-ES', name: 'Spanish', entries: 892, isDefault: false },
+                          { code: 'fr-FR', name: 'French', entries: 756, isDefault: false },
+                          { code: 'de-DE', name: 'German', entries: 623, isDefault: false },
+                          { code: 'ja-JP', name: 'Japanese', entries: 445, isDefault: false },
+                        ].map((locale) => (
+                          <div key={locale.code} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{locale.code === 'en-US' ? '🇺🇸' : locale.code === 'es-ES' ? '🇪🇸' : locale.code === 'fr-FR' ? '🇫🇷' : locale.code === 'de-DE' ? '🇩🇪' : '🇯🇵'}</span>
+                              <div>
+                                <p className="font-medium">{locale.name}</p>
+                                <p className="text-xs text-gray-500">{locale.entries} entries</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {locale.isDefault && <Badge className="bg-emerald-100 text-emerald-700">Default</Badge>}
+                              <Switch defaultChecked />
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Locale
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Translation Workflow</CardTitle>
+                        <CardDescription>Automate translations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-translate</p>
+                            <p className="text-sm text-gray-500">Use AI for initial translations</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Translation Provider</Label>
+                          <Select defaultValue="deepl">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="deepl">DeepL (recommended)</SelectItem>
+                              <SelectItem value="google">Google Translate</SelectItem>
+                              <SelectItem value="azure">Azure Translator</SelectItem>
+                              <SelectItem value="manual">Manual only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Review</p>
+                            <p className="text-sm text-gray-500">Translations need approval</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* API Settings */}
+                {settingsTab === 'api' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Keys</CardTitle>
+                        <CardDescription>Manage access tokens</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Content Delivery API</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            cda_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                          <p className="text-xs text-gray-500 mt-2">Read-only access to published content</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Content Management API</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            cma_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                          <p className="text-xs text-gray-500 mt-2">Full read/write access</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Preview API</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            preview_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                          <p className="text-xs text-gray-500 mt-2">Access to draft content</p>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate Keys
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Configuration</CardTitle>
+                        <CardDescription>Rate limits and security</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Rate Limit (requests/second)</Label>
+                          <Select defaultValue="100">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="50">50 req/s</SelectItem>
+                              <SelectItem value="100">100 req/s</SelectItem>
+                              <SelectItem value="500">500 req/s</SelectItem>
+                              <SelectItem value="unlimited">Unlimited (Enterprise)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Allowlist</p>
+                            <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">CORS Enabled</p>
+                            <p className="text-sm text-gray-500">Allow cross-origin requests</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Allowed Origins</Label>
+                          <Input defaultValue="https://example.com, https://app.example.com" className="mt-1 font-mono text-sm" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>GraphQL Settings</CardTitle>
+                        <CardDescription>GraphQL API configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable GraphQL API</p>
+                            <p className="text-sm text-gray-500">Use GraphQL alongside REST</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Query Depth Limit</Label>
+                          <Select defaultValue="10">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5 levels</SelectItem>
+                              <SelectItem value="10">10 levels</SelectItem>
+                              <SelectItem value="15">15 levels</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Introspection</p>
+                            <p className="text-sm text-gray-500">Allow schema introspection</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                          <p className="font-medium text-emerald-700 dark:text-emerald-300">GraphQL Playground</p>
+                          <p className="text-sm text-gray-500">Test queries at: /graphql</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhook Configuration</CardTitle>
+                        <CardDescription>Real-time event notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Webhooks</p>
+                            <p className="text-sm text-gray-500">Send events to external services</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Retry Policy</Label>
+                          <Select defaultValue="3">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">No retries</SelectItem>
+                              <SelectItem value="3">3 retries (default)</SelectItem>
+                              <SelectItem value="5">5 retries</SelectItem>
+                              <SelectItem value="10">10 retries</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Full Payload</p>
+                            <p className="text-sm text-gray-500">Send complete entry data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Secret Key (for signing)</Label>
+                          <Input type="password" defaultValue="webhook_secret_key_xxx" className="mt-1 font-mono" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Import / Export</CardTitle>
+                        <CardDescription>Backup and migrate content</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export Space</span>
+                          </Button>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Plus className="w-5 h-5" />
+                            <span>Import Content</span>
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Assets</p>
+                            <p className="text-sm text-gray-500">Export media files</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Export Format</Label>
+                          <Select defaultValue="json">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="json">JSON</SelectItem>
+                              <SelectItem value="csv">CSV</SelectItem>
+                              <SelectItem value="yaml">YAML</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Audit Log</CardTitle>
+                        <CardDescription>Track all changes</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Audit Log</p>
+                            <p className="text-sm text-gray-500">Log all content changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Log Retention</Label>
+                          <Select defaultValue="1year">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30days">30 days</SelectItem>
+                              <SelectItem value="90days">90 days</SelectItem>
+                              <SelectItem value="1year">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          View Audit Log
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Draft Entries</p>
+                              <p className="text-sm text-red-600">Remove all unpublished content</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Purge Unused Assets</p>
+                              <p className="text-sm text-red-600">Delete orphaned media files</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Purge
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete Space</p>
+                              <p className="text-sm text-red-600">Permanently delete this space</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              <TrashIcon className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -10,6 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CardDescription } from '@/components/ui/card'
 import {
   Monitor,
   Download,
@@ -418,6 +422,7 @@ export default function DesktopAppClient() {
   const [selectedBuild, setSelectedBuild] = useState<Build | null>(null)
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
   const [selectedCrash, setSelectedCrash] = useState<CrashReport | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredBuilds = useMemo(() => {
     return mockBuilds.filter(build => {
@@ -582,6 +587,10 @@ export default function DesktopAppClient() {
             <TabsTrigger value="signing" className="rounded-lg">
               <Shield className="w-4 h-4 mr-2" />
               Code Signing
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -1141,6 +1150,758 @@ export default function DesktopAppClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Electron Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-1">
+                <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Settings</h3>
+                {[
+                  { id: 'general', label: 'General', icon: Settings },
+                  { id: 'build', label: 'Build', icon: Package },
+                  { id: 'updates', label: 'Auto Update', icon: RefreshCw },
+                  { id: 'security', label: 'Security', icon: Shield },
+                  { id: 'platforms', label: 'Platforms', icon: Monitor },
+                  { id: 'advanced', label: 'Advanced', icon: Terminal },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSettingsTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                      settingsTab === item.id
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Application Configuration</CardTitle>
+                        <CardDescription>General app settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Application Name</Label>
+                            <Input defaultValue="MyApp Desktop" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Application ID</Label>
+                            <Input defaultValue="com.myapp.desktop" className="mt-1 font-mono" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Current Version</Label>
+                            <Input defaultValue="2.4.0" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Electron Version</Label>
+                            <Select defaultValue="28">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="28">Electron 28 (Latest)</SelectItem>
+                                <SelectItem value="27">Electron 27</SelectItem>
+                                <SelectItem value="26">Electron 26 LTS</SelectItem>
+                                <SelectItem value="25">Electron 25</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Total Downloads</p>
+                            <p className="text-2xl font-bold">234.5K</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Active Users</p>
+                            <p className="text-2xl font-bold">45.2K</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Crash Rate</p>
+                            <p className="text-2xl font-bold text-green-600">0.2%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Window Configuration</CardTitle>
+                        <CardDescription>Default window settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Width</Label>
+                            <Input type="number" defaultValue="1280" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Height</Label>
+                            <Input type="number" defaultValue="800" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Frameless Window</p>
+                            <p className="text-sm text-gray-500">Use custom title bar</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Remember Window State</p>
+                            <p className="text-sm text-gray-500">Save position and size</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Always On Top</p>
+                            <p className="text-sm text-gray-500">Keep window above others</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>System Tray</CardTitle>
+                        <CardDescription>Tray icon behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Tray Icon</p>
+                            <p className="text-sm text-gray-500">Display in system tray</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Minimize to Tray</p>
+                            <p className="text-sm text-gray-500">Hide window to tray</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Start Minimized</p>
+                            <p className="text-sm text-gray-500">Start in tray on login</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Build Settings */}
+                {settingsTab === 'build' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Build Configuration</CardTitle>
+                        <CardDescription>Electron Forge / Builder settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Build Tool</Label>
+                          <Select defaultValue="forge">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="forge">Electron Forge (Recommended)</SelectItem>
+                              <SelectItem value="builder">Electron Builder</SelectItem>
+                              <SelectItem value="packager">Electron Packager</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Output Directory</Label>
+                          <Input defaultValue="./out" className="mt-1 font-mono" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">ASAR Packaging</p>
+                            <p className="text-sm text-gray-500">Bundle app into archive</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Source Map Support</p>
+                            <p className="text-sm text-gray-500">Include source maps for debugging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Native Modules</CardTitle>
+                        <CardDescription>Rebuild native dependencies</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto Rebuild</p>
+                            <p className="text-sm text-gray-500">Rebuild on Electron version change</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">Native Modules</p>
+                          {['better-sqlite3', 'node-pty', 'keytar', 'sharp'].map((mod) => (
+                            <div key={mod} className="flex items-center justify-between p-2 border rounded-lg">
+                              <span className="font-mono text-sm">{mod}</span>
+                              <Badge className="bg-green-100 text-green-700">Compiled</Badge>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Rebuild All Native Modules
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>CI/CD Integration</CardTitle>
+                        <CardDescription>Automated build pipelines</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['GitHub Actions', 'GitLab CI', 'Azure Pipelines'].map((ci, i) => (
+                          <div key={ci} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <GitBranch className="w-4 h-4" />
+                              <span className="font-medium">{ci}</span>
+                            </div>
+                            <Badge className={i === 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {i === 0 ? 'Connected' : 'Available'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          Configure CI/CD
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Auto Update Settings */}
+                {settingsTab === 'updates' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Auto Update Configuration</CardTitle>
+                        <CardDescription>electron-updater settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Auto Updates</p>
+                            <p className="text-sm text-gray-500">Check for updates automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Update Server URL</Label>
+                          <Input defaultValue="https://releases.myapp.com" className="mt-1 font-mono" />
+                        </div>
+                        <div>
+                          <Label>Check Interval</Label>
+                          <Select defaultValue="hour">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="startup">On Startup Only</SelectItem>
+                              <SelectItem value="hour">Every Hour</SelectItem>
+                              <SelectItem value="day">Once a Day</SelectItem>
+                              <SelectItem value="week">Once a Week</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Download Automatically</p>
+                            <p className="text-sm text-gray-500">Download updates in background</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Update Channels</CardTitle>
+                        <CardDescription>Release channel configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Stable', desc: 'Production releases', users: '42.3K' },
+                          { name: 'Beta', desc: 'Pre-release testing', users: '2.1K' },
+                          { name: 'Alpha', desc: 'Early access', users: '356' },
+                          { name: 'Canary', desc: 'Bleeding edge', users: '89' },
+                        ].map((channel, i) => (
+                          <div key={channel.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-3 h-3 rounded-full ${i === 0 ? 'bg-green-500' : i === 1 ? 'bg-yellow-500' : i === 2 ? 'bg-orange-500' : 'bg-red-500'}`} />
+                              <div>
+                                <p className="font-medium">{channel.name}</p>
+                                <p className="text-xs text-gray-500">{channel.desc}</p>
+                              </div>
+                            </div>
+                            <span className="text-sm text-gray-500">{channel.users} users</span>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Delta Updates</CardTitle>
+                        <CardDescription>Incremental update support</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Delta Updates</p>
+                            <p className="text-sm text-gray-500">Download only changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Avg Full Update</p>
+                            <p className="text-xl font-bold">85 MB</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Avg Delta Update</p>
+                            <p className="text-xl font-bold text-blue-600">12 MB</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Keep Previous Versions</p>
+                            <p className="text-sm text-gray-500">For delta generation</p>
+                          </div>
+                          <Select defaultValue="5">
+                            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">Last 3</SelectItem>
+                              <SelectItem value="5">Last 5</SelectItem>
+                              <SelectItem value="10">Last 10</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Code Signing Certificates</CardTitle>
+                        <CardDescription>Manage signing certificates</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Apple className="w-5 h-5" />
+                              <span className="font-medium">Apple Developer ID</span>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Valid</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500">Expires: Dec 15, 2025</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Monitor className="w-5 h-5" />
+                              <span className="font-medium">Windows EV Certificate</span>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Valid</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500">Expires: Mar 22, 2025</p>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Key className="w-4 h-4 mr-2" />
+                          Manage Certificates
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Content Security Policy</CardTitle>
+                        <CardDescription>CSP configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable CSP</p>
+                            <p className="text-sm text-gray-500">Content Security Policy</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Disable Node Integration</p>
+                            <p className="text-sm text-gray-500">In renderer process</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Context Isolation</p>
+                            <p className="text-sm text-gray-500">Isolate preload scripts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sandbox Mode</p>
+                            <p className="text-sm text-gray-500">Run renderers in sandbox</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Hardened Runtime</CardTitle>
+                        <CardDescription>macOS security settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Hardened Runtime</p>
+                            <p className="text-sm text-gray-500">Required for notarization</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">Entitlements</p>
+                          {[
+                            { name: 'Allow JIT', enabled: true },
+                            { name: 'Allow Unsigned Memory', enabled: true },
+                            { name: 'Allow DYLD Variables', enabled: false },
+                            { name: 'Camera Access', enabled: false },
+                            { name: 'Microphone Access', enabled: false },
+                          ].map((ent) => (
+                            <div key={ent.name} className="flex items-center justify-between p-2 border rounded-lg">
+                              <span className="text-sm">{ent.name}</span>
+                              <Switch defaultChecked={ent.enabled} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Platform Settings */}
+                {settingsTab === 'platforms' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>macOS Configuration</CardTitle>
+                        <CardDescription>Apple platform settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Bundle ID</Label>
+                            <Input defaultValue="com.myapp.desktop" className="mt-1 font-mono" />
+                          </div>
+                          <div>
+                            <Label>Category</Label>
+                            <Select defaultValue="productivity">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="productivity">Productivity</SelectItem>
+                                <SelectItem value="developer">Developer Tools</SelectItem>
+                                <SelectItem value="utilities">Utilities</SelectItem>
+                                <SelectItem value="business">Business</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Universal Binary</p>
+                            <p className="text-sm text-gray-500">Support Intel + Apple Silicon</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">DMG Installer</p>
+                            <p className="text-sm text-gray-500">Create DMG disk image</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Mac App Store</p>
+                            <p className="text-sm text-gray-500">Build for MAS</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Windows Configuration</CardTitle>
+                        <CardDescription>Microsoft platform settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Installer Type</Label>
+                          <Select defaultValue="nsis">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="nsis">NSIS (Recommended)</SelectItem>
+                              <SelectItem value="msi">MSI</SelectItem>
+                              <SelectItem value="squirrel">Squirrel</SelectItem>
+                              <SelectItem value="portable">Portable</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Per-Machine Install</p>
+                            <p className="text-sm text-gray-500">Install for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">ARM64 Support</p>
+                            <p className="text-sm text-gray-500">Windows on ARM</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Microsoft Store</p>
+                            <p className="text-sm text-gray-500">Build for Store</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Linux Configuration</CardTitle>
+                        <CardDescription>Linux platform settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          <p className="font-medium text-sm">Package Formats</p>
+                          {['DEB (Debian/Ubuntu)', 'RPM (Fedora/RHEL)', 'AppImage', 'Snap', 'Flatpak'].map((format, i) => (
+                            <div key={format} className="flex items-center justify-between p-2 border rounded-lg">
+                              <span className="text-sm">{format}</span>
+                              <Switch defaultChecked={i < 3} />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Desktop Entry</p>
+                            <p className="text-sm text-gray-500">Create .desktop file</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>IPC Configuration</CardTitle>
+                        <CardDescription>Inter-process communication</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable IPC Logging</p>
+                            <p className="text-sm text-gray-500">Log all IPC messages</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Message Size Limit</Label>
+                          <Select defaultValue="10mb">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1mb">1 MB</SelectItem>
+                              <SelectItem value="10mb">10 MB</SelectItem>
+                              <SelectItem value="50mb">50 MB</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Validate IPC Schema</p>
+                            <p className="text-sm text-gray-500">Type-check IPC messages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Performance</CardTitle>
+                        <CardDescription>Optimization settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Hardware Acceleration</p>
+                            <p className="text-sm text-gray-500">Use GPU rendering</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">V8 Snapshots</p>
+                            <p className="text-sm text-gray-500">Faster startup</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Background Throttling</p>
+                            <p className="text-sm text-gray-500">Reduce CPU when hidden</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Renderer Process Limit</Label>
+                          <Select defaultValue="4">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">2 processes</SelectItem>
+                              <SelectItem value="4">4 processes</SelectItem>
+                              <SelectItem value="8">8 processes</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Crash Reporting</CardTitle>
+                        <CardDescription>Error tracking configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Crash Reports</p>
+                            <p className="text-sm text-gray-500">Collect crash dumps</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Crash Server URL</Label>
+                          <Input defaultValue="https://crashes.myapp.com/submit" className="mt-1 font-mono" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Source Maps</p>
+                            <p className="text-sm text-gray-500">Better stack traces</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Last 24h Crashes</p>
+                            <p className="text-xl font-bold text-red-600">12</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Crash Rate</p>
+                            <p className="text-xl font-bold text-green-600">0.2%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Clear Build Cache</p>
+                              <p className="text-sm text-red-600">Remove cached builds</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Clear
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Revoke All Update Keys</p>
+                              <p className="text-sm text-red-600">Force full re-download</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Revoke
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Crash Reports</p>
+                              <p className="text-sm text-red-600">Remove crash history</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
