@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -67,7 +69,16 @@ import {
   Calculator,
   Wallet,
   Landmark,
-  CreditCard as CardIcon
+  CreditCard as CardIcon,
+  Bell,
+  Key,
+  Webhook,
+  Mail,
+  AlertTriangle,
+  Sliders,
+  Globe as GlobeIcon,
+  HardDrive,
+  Trash2 as TrashIcon
 } from 'lucide-react'
 
 // Types
@@ -364,6 +375,7 @@ export default function PricingClient({
   initialPlans = mockPlans
 }: PricingClientProps) {
   const [activeTab, setActiveTab] = useState('plans')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPeriod, setSelectedPeriod] = useState<BillingPeriod>('monthly')
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
@@ -841,143 +853,796 @@ export default function PricingClient({
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Stripe Level with 6 Sub-tabs Sidebar Navigation */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Payment Settings</CardTitle>
-                  <CardDescription>Configure payment processing</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
-                        <CreditCard className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Stripe</p>
-                        <p className="text-sm text-gray-500">Connected</p>
-                      </div>
-                    </div>
-                    <Badge className="bg-green-100 text-green-700">Active</Badge>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Default Currency</label>
-                      <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                        <option>USD - US Dollar</option>
-                        <option>EUR - Euro</option>
-                        <option>GBP - British Pound</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Tax Behavior</label>
-                      <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                        <option>Exclusive</option>
-                        <option>Inclusive</option>
-                      </select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-8">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <nav className="space-y-1 px-3 pb-4">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, desc: 'Basic preferences' },
+                        { id: 'payments', label: 'Payments', icon: CreditCard, desc: 'Payment processing' },
+                        { id: 'invoices', label: 'Invoices', icon: Receipt, desc: 'Invoice settings' },
+                        { id: 'subscriptions', label: 'Subscriptions', icon: RefreshCw, desc: 'Subscription rules' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & emails' },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders, desc: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Invoice Settings</CardTitle>
-                  <CardDescription>Configure invoice generation</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Invoice Prefix</label>
-                    <Input defaultValue="INV-" className="mt-1" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-finalize Invoices</p>
-                      <p className="text-sm text-gray-500">Automatically finalize and send invoices</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Include Tax Details</p>
-                      <p className="text-sm text-gray-500">Show tax breakdown on invoices</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Business Information</CardTitle>
+                        <CardDescription>Your company billing details</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Business Name</Label>
+                            <Input defaultValue="Acme Corporation" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Tax ID / VAT Number</Label>
+                            <Input defaultValue="US123456789" className="mt-1" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Billing Email</Label>
+                          <Input defaultValue="billing@acmecorp.com" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Billing Address</Label>
+                          <Input defaultValue="123 Business Ave, Suite 100" className="mt-1" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <Label>City</Label>
+                            <Input defaultValue="San Francisco" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>State</Label>
+                            <Input defaultValue="CA" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>ZIP Code</Label>
+                            <Input defaultValue="94102" className="mt-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Dunning Settings</CardTitle>
-                  <CardDescription>Configure failed payment handling</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Smart Retries</p>
-                      <p className="text-sm text-gray-500">Automatically retry failed payments</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Max Retry Attempts</label>
-                    <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                      <option>3 attempts</option>
-                      <option>5 attempts</option>
-                      <option>7 attempts</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Send Reminder Emails</p>
-                      <p className="text-sm text-gray-500">Email customers about failed payments</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Regional Settings</CardTitle>
+                        <CardDescription>Currency and localization</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Currency</Label>
+                            <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                              <option>USD - US Dollar</option>
+                              <option>EUR - Euro</option>
+                              <option>GBP - British Pound</option>
+                              <option>CAD - Canadian Dollar</option>
+                              <option>AUD - Australian Dollar</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Timezone</Label>
+                            <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                              <option>UTC (GMT+0)</option>
+                              <option>Eastern Time (GMT-5)</option>
+                              <option>Pacific Time (GMT-8)</option>
+                              <option>Central European Time (GMT+1)</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Multi-currency Support</p>
+                            <p className="text-sm text-gray-500">Accept payments in multiple currencies</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Trial Settings</CardTitle>
-                  <CardDescription>Configure trial period behavior</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Default Trial Days</label>
-                    <Input type="number" defaultValue="14" className="mt-1" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Require Payment Method</p>
-                      <p className="text-sm text-gray-500">Collect payment info during trial signup</p>
-                    </div>
-                    <div className="w-12 h-6 bg-gray-300 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Trial End Reminder</p>
-                      <p className="text-sm text-gray-500">Email 3 days before trial ends</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Branding</CardTitle>
+                        <CardDescription>Customize billing appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Logo</Label>
+                          <div className="mt-2 border-2 border-dashed rounded-lg p-6 text-center">
+                            <Package className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-500">Upload your logo for invoices</p>
+                            <Button variant="outline" size="sm" className="mt-2">Browse</Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Primary Color</Label>
+                          <div className="flex gap-2 mt-1">
+                            <div className="w-10 h-10 rounded-lg bg-violet-600 border cursor-pointer"></div>
+                            <Input defaultValue="#7c3aed" className="flex-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Payments Settings */}
+                {settingsTab === 'payments' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Payment Providers</CardTitle>
+                        <CardDescription>Connected payment processors</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
+                              <CreditCard className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Stripe</p>
+                              <p className="text-sm text-gray-500">Primary payment processor</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Wallet className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">PayPal</p>
+                              <p className="text-sm text-gray-500">Alternative payments</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Payment Methods</CardTitle>
+                        <CardDescription>Accepted payment types</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Credit & Debit Cards', desc: 'Visa, Mastercard, Amex', enabled: true },
+                          { name: 'ACH Direct Debit', desc: 'US bank accounts', enabled: true },
+                          { name: 'SEPA Direct Debit', desc: 'European bank transfers', enabled: false },
+                          { name: 'Apple Pay', desc: 'Apple device payments', enabled: true },
+                          { name: 'Google Pay', desc: 'Google Wallet payments', enabled: true },
+                        ].map((method, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{method.name}</p>
+                              <p className="text-sm text-gray-500">{method.desc}</p>
+                            </div>
+                            <Switch defaultChecked={method.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Tax Settings</CardTitle>
+                        <CardDescription>Configure tax calculation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Calculator className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Automatic Tax Calculation</p>
+                              <p className="text-sm text-gray-500">Using Stripe Tax</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Tax Behavior</Label>
+                            <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                              <option>Exclusive (add tax on top)</option>
+                              <option>Inclusive (tax included)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Default Tax Rate</Label>
+                            <Input defaultValue="0%" className="mt-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Invoices Settings */}
+                {settingsTab === 'invoices' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Invoice Generation</CardTitle>
+                        <CardDescription>Configure invoice creation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Invoice Prefix</Label>
+                            <Input defaultValue="INV-" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Starting Number</Label>
+                            <Input type="number" defaultValue="1001" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-finalize Invoices</p>
+                            <p className="text-sm text-gray-500">Automatically finalize and send on creation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Tax Details</p>
+                            <p className="text-sm text-gray-500">Show tax breakdown on invoices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Footer Text</Label>
+                          <textarea className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-20" defaultValue="Thank you for your business!" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Invoice Delivery</CardTitle>
+                        <CardDescription>How invoices are sent to customers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Mail className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Email Invoices</p>
+                              <p className="text-sm text-gray-500">Send PDF invoices via email</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Customer Portal Access</p>
+                            <p className="text-sm text-gray-500">Allow customers to view invoices online</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Days Until Due</Label>
+                          <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                            <option>Due on receipt</option>
+                            <option>Net 7</option>
+                            <option>Net 15</option>
+                            <option>Net 30</option>
+                            <option>Net 60</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Credit Notes</CardTitle>
+                        <CardDescription>Refund and credit settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-apply Credits</p>
+                            <p className="text-sm text-gray-500">Automatically apply credits to future invoices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Credit Note Prefix</Label>
+                          <Input defaultValue="CN-" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Subscriptions Settings */}
+                {settingsTab === 'subscriptions' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Trial Settings</CardTitle>
+                        <CardDescription>Configure trial period behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Trial Days</Label>
+                          <Input type="number" defaultValue="14" className="mt-1" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Payment Method</p>
+                            <p className="text-sm text-gray-500">Collect payment info during trial signup</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Trial End Reminder</p>
+                            <p className="text-sm text-gray-500">Email customers before trial ends</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Reminder Days Before End</Label>
+                          <Input type="number" defaultValue="3" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Dunning Settings</CardTitle>
+                        <CardDescription>Failed payment handling</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                              <RefreshCw className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Smart Retries</p>
+                              <p className="text-sm text-gray-500">AI-powered retry scheduling</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Max Retry Attempts</Label>
+                          <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                            <option>3 attempts</option>
+                            <option>5 attempts</option>
+                            <option>7 attempts</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Send Reminder Emails</p>
+                            <p className="text-sm text-gray-500">Notify customers about failed payments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Days Before Cancellation</Label>
+                          <Input type="number" defaultValue="14" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Cancellation Policy</CardTitle>
+                        <CardDescription>Subscription cancellation rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Immediate Cancellation</p>
+                            <p className="text-sm text-gray-500">Cancel subscriptions immediately</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Prorate Refunds</p>
+                            <p className="text-sm text-gray-500">Refund unused portion of billing period</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Pause</p>
+                            <p className="text-sm text-gray-500">Let customers pause subscriptions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Admin Notifications</CardTitle>
+                        <CardDescription>Alerts for your team</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'New Subscription', desc: 'When a customer subscribes', enabled: true },
+                          { label: 'Subscription Cancelled', desc: 'When a customer cancels', enabled: true },
+                          { label: 'Payment Failed', desc: 'When a payment fails', enabled: true },
+                          { label: 'Dispute Opened', desc: 'When a chargeback is filed', enabled: true },
+                          { label: 'Invoice Paid', desc: 'When an invoice is paid', enabled: false },
+                        ].map((notif, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notif.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Customer Notifications</CardTitle>
+                        <CardDescription>Emails sent to customers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Payment Receipt', desc: 'After successful payment', enabled: true },
+                          { label: 'Invoice Created', desc: 'When new invoice is generated', enabled: true },
+                          { label: 'Payment Reminder', desc: 'Before invoice due date', enabled: true },
+                          { label: 'Subscription Renewal', desc: 'Before renewal date', enabled: true },
+                          { label: 'Plan Changed', desc: 'When subscription plan changes', enabled: true },
+                        ].map((notif, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notif.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Webhook Notifications</CardTitle>
+                        <CardDescription>Real-time event webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-mono text-sm text-violet-600">https://api.yourapp.com/webhooks/billing</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <p className="text-xs text-gray-500">Events: invoice.*, subscription.*, customer.*</p>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Webhook className="w-4 h-4 mr-2" />
+                          Add Webhook Endpoint
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Manage API keys and access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <p className="font-medium">Live API Key</p>
+                              <p className="text-xs text-gray-500">Created Jan 15, 2025</p>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            STRIPE_KEY_PLACEHOLDER
+                          </code>
+                        </div>
+                        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-600" />
+                            <p className="text-sm text-amber-800 dark:text-amber-200">Never share your API key publicly</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Test Mode</CardTitle>
+                        <CardDescription>Development and testing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                              <Zap className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Test Mode Active</p>
+                              <p className="text-sm text-gray-500">No real charges will be made</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <p className="font-medium mb-2">Test Card Numbers</p>
+                          <div className="space-y-1 text-sm font-mono text-gray-600">
+                            <p>4242 4242 4242 4242 - Success</p>
+                            <p>4000 0000 0000 0002 - Declined</p>
+                            <p>4000 0000 0000 3220 - 3D Secure</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Data Export</CardTitle>
+                        <CardDescription>Export billing data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex-col">
+                            <Download className="h-6 w-6 mb-2" />
+                            <span className="font-medium">Export Invoices</span>
+                            <span className="text-xs text-gray-500">CSV format</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex-col">
+                            <Download className="h-6 w-6 mb-2" />
+                            <span className="font-medium">Export Subscriptions</span>
+                            <span className="text-xs text-gray-500">CSV format</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Customer Portal</CardTitle>
+                        <CardDescription>Self-service customer portal settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Users className="w-5 h-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Enable Customer Portal</p>
+                              <p className="text-sm text-gray-500">Let customers manage subscriptions</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Plan Changes</p>
+                            <p className="text-sm text-gray-500">Customers can upgrade/downgrade</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Cancellation</p>
+                            <p className="text-sm text-gray-500">Self-service subscription cancellation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Payment Method Update</p>
+                            <p className="text-sm text-gray-500">Update card on file</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Invoice History</p>
+                            <p className="text-sm text-gray-500">View and download past invoices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Revenue Recovery</CardTitle>
+                        <CardDescription>Optimize failed payment recovery</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <DollarSign className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Revenue Recovery Mode</p>
+                              <p className="text-sm text-gray-500">AI-powered payment recovery</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Card Updater</p>
+                            <p className="text-sm text-gray-500">Automatically update expired cards</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Network Tokens</p>
+                            <p className="text-sm text-gray-500">Higher authorization rates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-green-800 dark:text-green-200">Recovery Rate</span>
+                            <span className="text-lg font-bold text-green-600">87.5%</span>
+                          </div>
+                          <Progress value={87.5} className="h-2" />
+                          <p className="text-xs text-green-600 mt-2">$12,450 recovered this month</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Fraud Prevention</CardTitle>
+                        <CardDescription>Protect against fraudulent transactions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                              <Shield className="w-5 h-5 text-red-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Radar for Fraud Teams</p>
+                              <p className="text-sm text-gray-500">Advanced fraud detection</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">3D Secure Authentication</p>
+                            <p className="text-sm text-gray-500">Extra layer of security</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Block High-Risk Countries</p>
+                            <p className="text-sm text-gray-500">Prevent transactions from risky regions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Risk Threshold</Label>
+                          <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                            <option>Low (Block more)</option>
+                            <option>Medium (Balanced)</option>
+                            <option>High (Allow more)</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Cancel All Subscriptions</p>
+                              <p className="text-sm text-red-600">This will cancel all active subscriptions</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Cancel All
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Reset Billing Configuration</p>
+                              <p className="text-sm text-red-600">Reset all settings to defaults</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Disconnect Stripe</p>
+                              <p className="text-sm text-red-600">Disconnect payment integration</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Disconnect
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
