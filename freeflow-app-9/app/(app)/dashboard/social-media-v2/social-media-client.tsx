@@ -10,6 +10,9 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Share2,
   Heart,
@@ -351,6 +354,7 @@ export default function SocialMediaClient() {
   const [selectedAccount, setSelectedAccount] = useState<SocialAccount | null>(null)
   const [statusFilter, setStatusFilter] = useState<PostStatus | 'all'>('all')
   const [platformFilter, setPlatformFilter] = useState<Platform | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats = useMemo(() => {
@@ -565,6 +569,10 @@ export default function SocialMediaClient() {
             <TabsTrigger value="accounts" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Accounts
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -1063,6 +1071,674 @@ export default function SocialMediaClient() {
                   <p className="text-sm text-gray-500">Add a new social media account</p>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Hootsuite Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-1">
+                <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Settings</h3>
+                {[
+                  { id: 'general', label: 'General', icon: Settings },
+                  { id: 'publishing', label: 'Publishing', icon: Send },
+                  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+                  { id: 'integrations', label: 'Integrations', icon: Link2 },
+                  { id: 'notifications', label: 'Notifications', icon: Bell },
+                  { id: 'advanced', label: 'Advanced', icon: Sliders },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSettingsTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                      settingsTab === item.id
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Organization Settings</CardTitle>
+                        <CardDescription>General social media management settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Organization Name</Label>
+                            <Input defaultValue="Acme Corp" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="pst">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time (PST)</SelectItem>
+                                <SelectItem value="est">Eastern Time (EST)</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Connected Accounts</p>
+                            <p className="text-2xl font-bold">8</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Posts This Month</p>
+                            <p className="text-2xl font-bold">156</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Total Reach</p>
+                            <p className="text-2xl font-bold">1.2M</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Team Settings</CardTitle>
+                        <CardDescription>Manage team access and permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">5</p>
+                            <p className="text-sm text-gray-500">Admins</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-green-600">12</p>
+                            <p className="text-sm text-gray-500">Publishers</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-gray-600">8</p>
+                            <p className="text-sm text-gray-500">Analysts</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Approval</p>
+                            <p className="text-sm text-gray-500">Posts need admin approval</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Invite Team Member
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Content Library</CardTitle>
+                        <CardDescription>Manage media assets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Images</p>
+                            <p className="text-xl font-bold">2,450</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Videos</p>
+                            <p className="text-xl font-bold">128</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-organize</p>
+                            <p className="text-sm text-gray-500">AI-powered organization</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Publishing Settings */}
+                {settingsTab === 'publishing' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Scheduling Preferences</CardTitle>
+                        <CardDescription>Configure post scheduling</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-Schedule</p>
+                            <p className="text-sm text-gray-500">Optimize posting times</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Default Posting Time</Label>
+                          <Select defaultValue="best">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="best">Best Time (AI)</SelectItem>
+                              <SelectItem value="morning">Morning (9 AM)</SelectItem>
+                              <SelectItem value="noon">Noon (12 PM)</SelectItem>
+                              <SelectItem value="evening">Evening (6 PM)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Queue Mode</p>
+                            <p className="text-sm text-gray-500">Add to queue instead of direct publish</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Posts Per Day Limit</Label>
+                          <Select defaultValue="5">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3 posts/day</SelectItem>
+                              <SelectItem value="5">5 posts/day</SelectItem>
+                              <SelectItem value="10">10 posts/day</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Content Guidelines</CardTitle>
+                        <CardDescription>Set posting rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Link Shortening</p>
+                            <p className="text-sm text-gray-500">Auto-shorten URLs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">UTM Parameters</p>
+                            <p className="text-sm text-gray-500">Auto-add tracking codes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Hashtag Suggestions</p>
+                            <p className="text-sm text-gray-500">AI-powered hashtags</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Max Hashtags</Label>
+                          <Select defaultValue="10">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5 hashtags</SelectItem>
+                              <SelectItem value="10">10 hashtags</SelectItem>
+                              <SelectItem value="20">20 hashtags</SelectItem>
+                              <SelectItem value="30">30 hashtags</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Approval Workflow</CardTitle>
+                        <CardDescription>Configure content approval</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Approval</p>
+                            <p className="text-sm text-gray-500">Require approval before publishing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Approvers</Label>
+                          <Select defaultValue="admins">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admins">Admins Only</SelectItem>
+                              <SelectItem value="managers">Managers</SelectItem>
+                              <SelectItem value="any">Any Team Member</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-approve</p>
+                            <p className="text-sm text-gray-500">For trusted publishers</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Analytics Settings */}
+                {settingsTab === 'analytics' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Analytics Dashboard</CardTitle>
+                        <CardDescription>Configure analytics display</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Date Range</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">Last 7 days</SelectItem>
+                              <SelectItem value="30">Last 30 days</SelectItem>
+                              <SelectItem value="90">Last 90 days</SelectItem>
+                              <SelectItem value="365">Last year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Real-time Updates</p>
+                            <p className="text-sm text-gray-500">Live analytics data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Compare Periods</p>
+                            <p className="text-sm text-gray-500">Show comparison metrics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Metrics & KPIs</CardTitle>
+                        <CardDescription>Choose tracked metrics</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Engagement Rate', 'Reach', 'Impressions', 'Clicks', 'Conversions', 'Follower Growth'].map((metric) => (
+                          <div key={metric} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <span className="font-medium">{metric}</span>
+                            <Switch defaultChecked />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Reports</CardTitle>
+                        <CardDescription>Automated reporting settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Reports</p>
+                            <p className="text-sm text-gray-500">Send every Monday</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Monthly Reports</p>
+                            <p className="text-sm text-gray-500">Send on 1st of month</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Report Format</Label>
+                          <Select defaultValue="pdf">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pdf">PDF</SelectItem>
+                              <SelectItem value="xlsx">Excel</SelectItem>
+                              <SelectItem value="csv">CSV</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Social Platforms</CardTitle>
+                        <CardDescription>Connected social networks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Instagram', connected: true, accounts: 3 },
+                          { name: 'Twitter/X', connected: true, accounts: 2 },
+                          { name: 'LinkedIn', connected: true, accounts: 1 },
+                          { name: 'Facebook', connected: true, accounts: 2 },
+                          { name: 'TikTok', connected: false, accounts: 0 },
+                          { name: 'YouTube', connected: false, accounts: 0 },
+                        ].map((platform) => (
+                          <div key={platform.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Share2 className="w-5 h-5" />
+                              <div>
+                                <span className="font-medium">{platform.name}</span>
+                                {platform.connected && (
+                                  <p className="text-xs text-gray-500">{platform.accounts} accounts</p>
+                                )}
+                              </div>
+                            </div>
+                            <Badge className={platform.connected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {platform.connected ? 'Connected' : 'Connect'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Third-Party Tools</CardTitle>
+                        <CardDescription>External integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Canva', status: 'connected' },
+                          { name: 'Google Analytics', status: 'connected' },
+                          { name: 'Slack', status: 'available' },
+                          { name: 'Shopify', status: 'available' },
+                        ].map((tool) => (
+                          <div key={tool.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <span className="font-medium">{tool.name}</span>
+                            <Badge className={tool.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {tool.status === 'connected' ? 'Connected' : 'Connect'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          Browse Integrations
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Developer API settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">API Key</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            sm_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Post Published</p>
+                            <p className="text-sm text-gray-500">When posts go live</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Pending Approval</p>
+                            <p className="text-sm text-gray-500">Posts awaiting review</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Performance Alerts</p>
+                            <p className="text-sm text-gray-500">Viral content notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Mentions & Comments</p>
+                            <p className="text-sm text-gray-500">Engagement alerts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Push Notifications</CardTitle>
+                        <CardDescription>Mobile and desktop alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Desktop Notifications</p>
+                            <p className="text-sm text-gray-500">Browser alerts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Mobile Push</p>
+                            <p className="text-sm text-gray-500">App notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Quiet Hours</Label>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <Select defaultValue="22">
+                              <SelectTrigger><SelectValue placeholder="From" /></SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 24 }, (_, i) => (
+                                  <SelectItem key={i} value={i.toString()}>{i.toString().padStart(2, '0')}:00</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Select defaultValue="8">
+                              <SelectTrigger><SelectValue placeholder="To" /></SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 24 }, (_, i) => (
+                                  <SelectItem key={i} value={i.toString()}>{i.toString().padStart(2, '0')}:00</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Slack Integration</CardTitle>
+                        <CardDescription>Team notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Post Updates</p>
+                            <p className="text-sm text-gray-500">Send to #social channel</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Daily Digest</p>
+                            <p className="text-sm text-gray-500">Summary at end of day</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data & Privacy</CardTitle>
+                        <CardDescription>Data management settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Data Retention</p>
+                            <p className="text-sm text-gray-500">Keep analytics history</p>
+                          </div>
+                          <Select defaultValue="1year">
+                            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="6months">6 months</SelectItem>
+                              <SelectItem value="1year">1 year</SelectItem>
+                              <SelectItem value="2years">2 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export Data</span>
+                          </Button>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Upload className="w-5 h-5" />
+                            <span>Import Data</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>AI & Automation</CardTitle>
+                        <CardDescription>AI-powered features</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">AI Content Suggestions</p>
+                            <p className="text-sm text-gray-500">Generate post ideas</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-respond</p>
+                            <p className="text-sm text-gray-500">AI replies to comments</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sentiment Analysis</p>
+                            <p className="text-sm text-gray-500">Analyze comment sentiment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Trend Detection</p>
+                            <p className="text-sm text-gray-500">Alert on trending topics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
+                              <p className="text-sm text-red-600">Remove all draft posts</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Disconnect All Accounts</p>
+                              <p className="text-sm text-red-600">Remove all connected platforms</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Disconnect
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Reset Analytics</p>
+                              <p className="text-sm text-red-600">Clear all analytics data</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
