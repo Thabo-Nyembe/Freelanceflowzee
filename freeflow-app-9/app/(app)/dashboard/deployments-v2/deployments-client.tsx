@@ -439,12 +439,88 @@ export default function DeploymentsClient() {
           </TabsList>
 
           {/* Deployments Tab */}
-          <TabsContent value="deployments" className="mt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Button variant={environmentFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('all')}>All</Button>
-              <Button variant={environmentFilter === 'production' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('production')} className={environmentFilter === 'production' ? 'bg-purple-600' : ''}><Globe className="h-3 w-3 mr-1" />Production</Button>
-              <Button variant={environmentFilter === 'preview' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('preview')}>Preview</Button>
-              <Button variant={environmentFilter === 'staging' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('staging')}>Staging</Button>
+          <TabsContent value="deployments" className="mt-6 space-y-6">
+            {/* Deployment Stats Banner */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Deployment Overview</h2>
+                  <p className="text-purple-200 text-sm">CI/CD Pipeline Performance</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Button className="bg-white text-purple-700 hover:bg-purple-50"><Rocket className="h-4 w-4 mr-2" />Deploy Now</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{stats.totalDeployments}</p>
+                  <p className="text-sm text-purple-100">Total Deployments</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{stats.successRate}%</p>
+                  <p className="text-sm text-purple-100">Success Rate</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{formatDuration(stats.avgBuildTime)}</p>
+                  <p className="text-sm text-purple-100">Avg Build</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{stats.activeDeployments}</p>
+                  <p className="text-sm text-purple-100">Active</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">12</p>
+                  <p className="text-sm text-purple-100">Today</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">99.9%</p>
+                  <p className="text-sm text-purple-100">Uptime</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions & Filters */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button variant={environmentFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('all')}>All</Button>
+                <Button variant={environmentFilter === 'production' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('production')} className={environmentFilter === 'production' ? 'bg-purple-600' : ''}><Globe className="h-3 w-3 mr-1" />Production</Button>
+                <Button variant={environmentFilter === 'preview' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('preview')}>Preview</Button>
+                <Button variant={environmentFilter === 'staging' ? 'default' : 'outline'} size="sm" onClick={() => setEnvironmentFilter('staging')}>Staging</Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input placeholder="Search deployments..." className="pl-10 w-64" />
+                </div>
+                <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />Filters</Button>
+              </div>
+            </div>
+
+            {/* Pipeline Status */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { stage: 'Build', status: 'success', duration: '45s', icon: Box },
+                { stage: 'Test', status: 'success', duration: '1m 23s', icon: CheckCircle2 },
+                { stage: 'Deploy', status: 'in_progress', duration: '32s', icon: Rocket },
+                { stage: 'Verify', status: 'pending', duration: '-', icon: Shield },
+              ].map((stage, i) => (
+                <Card key={i} className={`border-2 ${stage.status === 'success' ? 'border-green-200 bg-green-50 dark:bg-green-900/10' : stage.status === 'in_progress' ? 'border-blue-200 bg-blue-50 dark:bg-blue-900/10' : 'border-gray-200'}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stage.status === 'success' ? 'bg-green-100' : stage.status === 'in_progress' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                        <stage.icon className={`h-5 w-5 ${stage.status === 'success' ? 'text-green-600' : stage.status === 'in_progress' ? 'text-blue-600 animate-pulse' : 'text-gray-400'}`} />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{stage.stage}</p>
+                        <p className="text-sm text-gray-500">{stage.duration}</p>
+                      </div>
+                      {stage.status === 'success' && <Check className="h-5 w-5 text-green-500 ml-auto" />}
+                      {stage.status === 'in_progress' && <RefreshCw className="h-5 w-5 text-blue-500 ml-auto animate-spin" />}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
             <div className="space-y-3">
               {filteredDeployments.map((deployment, index) => (
@@ -515,13 +591,140 @@ export default function DeploymentsClient() {
           </TabsContent>
 
           {/* Functions Tab */}
-          <TabsContent value="functions" className="mt-6">
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">{stats.totalInvocations.toLocaleString()}</p><p className="text-sm text-gray-500">Total Invocations</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">234ms</p><p className="text-sm text-gray-500">Avg Duration</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">0.09%</p><p className="text-sm text-gray-500">Error Rate</p></CardContent></Card>
+          <TabsContent value="functions" className="mt-6 space-y-6">
+            {/* Serverless Functions Banner */}
+            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Serverless Functions</h2>
+                  <p className="text-yellow-100 text-sm">Edge and serverless compute performance</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Button className="bg-white text-orange-700 hover:bg-orange-50"><Plus className="h-4 w-4 mr-2" />New Function</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockFunctions.length}</p>
+                  <p className="text-sm text-yellow-100">Functions</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{stats.totalInvocations.toLocaleString()}</p>
+                  <p className="text-sm text-yellow-100">Invocations</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">234ms</p>
+                  <p className="text-sm text-yellow-100">Avg Duration</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-green-200">0.09%</p>
+                  <p className="text-sm text-yellow-100">Error Rate</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">5</p>
+                  <p className="text-sm text-yellow-100">Regions</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">99.99%</p>
+                  <p className="text-sm text-yellow-100">Uptime</p>
+                </div>
+              </div>
             </div>
+
+            {/* Function Types */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { type: 'API Routes', count: 12, icon: Globe, color: 'blue', desc: 'RESTful endpoints' },
+                { type: 'Edge Functions', count: 8, icon: Network, color: 'cyan', desc: 'Low latency compute' },
+                { type: 'Cron Jobs', count: 4, icon: Clock, color: 'purple', desc: 'Scheduled tasks' },
+                { type: 'Webhooks', count: 6, icon: Webhook, color: 'green', desc: 'Event handlers' },
+              ].map((ft, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-lg bg-${ft.color}-100 dark:bg-${ft.color}-900/30 flex items-center justify-center`}>
+                        <ft.icon className={`h-5 w-5 text-${ft.color}-600`} />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">{ft.type}</h4>
+                        <p className="text-xs text-gray-500">{ft.desc}</p>
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold">{ft.count}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Function Metrics Chart */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Invocations (Last 24h)</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {['12am', '6am', '12pm', '6pm', 'Now'].map((time, i) => {
+                      const values = [35, 45, 85, 65, 75]
+                      return (
+                        <div key={time} className="flex items-center gap-3">
+                          <span className="w-12 text-xs text-gray-500">{time}</span>
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4">
+                            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 h-4 rounded-full" style={{ width: `${values[i]}%` }} />
+                          </div>
+                          <span className="w-16 text-xs font-medium text-right">{(values[i] * 120).toLocaleString()}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Response Time Distribution</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { range: '< 50ms', pct: 45, color: 'bg-green-500' },
+                      { range: '50-100ms', pct: 30, color: 'bg-blue-500' },
+                      { range: '100-200ms', pct: 15, color: 'bg-yellow-500' },
+                      { range: '200-500ms', pct: 8, color: 'bg-orange-500' },
+                      { range: '> 500ms', pct: 2, color: 'bg-red-500' },
+                    ].map(rt => (
+                      <div key={rt.range} className="flex items-center gap-3">
+                        <span className="w-20 text-xs text-gray-500">{rt.range}</span>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-3">
+                          <div className={`${rt.color} h-3 rounded-full`} style={{ width: `${rt.pct}%` }} />
+                        </div>
+                        <span className="w-10 text-xs font-medium text-right">{rt.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Functions Table */}
             <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>All Functions</CardTitle>
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input placeholder="Search functions..." className="pl-10 w-64" />
+                    </div>
+                    <Select>
+                      <SelectTrigger className="w-[130px]"><SelectValue placeholder="Runtime" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Runtimes</SelectItem>
+                        <SelectItem value="node">Node.js</SelectItem>
+                        <SelectItem value="python">Python</SelectItem>
+                        <SelectItem value="edge">Edge</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {mockFunctions.map(fn => (
@@ -530,13 +733,21 @@ export default function DeploymentsClient() {
                         <Zap className="h-5 w-5 text-purple-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium font-mono text-sm">{fn.name}</p>
-                        <p className="text-xs text-gray-500">{fn.runtime} • {fn.region} • {fn.memory}MB</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium font-mono text-sm">{fn.name}</p>
+                          <Badge variant="outline" className="text-xs">{fn.runtime}</Badge>
+                        </div>
+                        <p className="text-xs text-gray-500">{fn.region} • {fn.memory}MB</p>
                       </div>
                       <div className="grid grid-cols-3 gap-8 text-center">
                         <div><p className="font-medium">{fn.invocations.toLocaleString()}</p><p className="text-xs text-gray-500">invocations</p></div>
                         <div><p className="font-medium">{fn.avgDuration}ms</p><p className="text-xs text-gray-500">avg duration</p></div>
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm"><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm"><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -546,13 +757,60 @@ export default function DeploymentsClient() {
           </TabsContent>
 
           {/* Edge Config Tab */}
-          <TabsContent value="edge" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button><Plus className="h-4 w-4 mr-2" />Create Edge Config</Button>
+          <TabsContent value="edge" className="mt-6 space-y-6">
+            {/* Edge Config Overview */}
+            <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Edge Configuration</h2>
+                  <p className="text-cyan-100 text-sm">Global key-value storage at the edge</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                  <Button className="bg-white text-cyan-700 hover:bg-cyan-50"><Plus className="h-4 w-4 mr-2" />Create Config</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockEdgeConfigs.length}</p>
+                  <p className="text-sm text-cyan-100">Configs</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">156</p>
+                  <p className="text-sm text-cyan-100">Total Items</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">89K</p>
+                  <p className="text-sm text-cyan-100">Total Reads</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">12K</p>
+                  <p className="text-sm text-cyan-100">Total Writes</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">&lt;1ms</p>
+                  <p className="text-sm text-cyan-100">Latency</p>
+                </div>
+              </div>
             </div>
+
+            {/* Edge Regions */}
+            <div className="grid grid-cols-6 gap-4">
+              {['US East', 'US West', 'Europe', 'Asia', 'Australia', 'South America'].map((region, i) => (
+                <Card key={region} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4 text-center">
+                    <Globe2 className="h-8 w-8 mx-auto text-cyan-500 mb-2" />
+                    <p className="font-medium text-sm">{region}</p>
+                    <p className="text-xs text-green-600">Active</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Edge Configs Grid */}
             <div className="grid grid-cols-3 gap-6">
               {mockEdgeConfigs.map(config => (
-                <Card key={config.id} className="border-gray-200 dark:border-gray-700">
+                <Card key={config.id} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center">
@@ -562,10 +820,15 @@ export default function DeploymentsClient() {
                         <h4 className="font-semibold">{config.name}</h4>
                         <p className="text-xs text-gray-500">{config.itemCount} items</p>
                       </div>
+                      <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{(config.reads / 1000).toFixed(0)}k</p><p className="text-xs text-gray-500">Reads</p></div>
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{config.writes}</p><p className="text-xs text-gray-500">Writes</p></div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" size="sm" className="flex-1"><Eye className="h-3 w-3 mr-1" />View</Button>
+                      <Button variant="outline" size="sm" className="flex-1"><Settings className="h-3 w-3 mr-1" />Edit</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -574,15 +837,94 @@ export default function DeploymentsClient() {
           </TabsContent>
 
           {/* Storage Tab */}
-          <TabsContent value="storage" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button><Upload className="h-4 w-4 mr-2" />Upload File</Button>
+          <TabsContent value="storage" className="mt-6 space-y-6">
+            {/* Storage Overview */}
+            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Blob Storage</h2>
+                  <p className="text-indigo-100 text-sm">File storage and CDN distribution</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Folder className="h-4 w-4 mr-2" />New Folder</Button>
+                  <Button className="bg-white text-indigo-700 hover:bg-indigo-50"><Upload className="h-4 w-4 mr-2" />Upload</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockBlobs.length}</p>
+                  <p className="text-sm text-indigo-100">Files</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">2.4 GB</p>
+                  <p className="text-sm text-indigo-100">Storage Used</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">45.2K</p>
+                  <p className="text-sm text-indigo-100">Downloads</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">12 GB</p>
+                  <p className="text-sm text-indigo-100">Bandwidth</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">99.9%</p>
+                  <p className="text-sm text-indigo-100">Availability</p>
+                </div>
+              </div>
             </div>
+
+            {/* Storage Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { type: 'Images', count: 45, size: '1.2 GB', icon: FileCode, color: 'pink' },
+                { type: 'Documents', count: 23, size: '450 MB', icon: FileText, color: 'blue' },
+                { type: 'Videos', count: 8, size: '680 MB', icon: MonitorPlay, color: 'purple' },
+                { type: 'Other', count: 12, size: '120 MB', icon: File, color: 'gray' },
+              ].map((ft, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg bg-${ft.color}-100 dark:bg-${ft.color}-900/30 flex items-center justify-center`}>
+                        <ft.icon className={`h-5 w-5 text-${ft.color}-600`} />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{ft.type}</p>
+                        <p className="text-xs text-gray-500">{ft.count} files • {ft.size}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Files Table */}
             <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>All Files</CardTitle>
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input placeholder="Search files..." className="pl-10 w-64" />
+                    </div>
+                    <Select>
+                      <SelectTrigger className="w-[130px]"><SelectValue placeholder="All Types" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="images">Images</SelectItem>
+                        <SelectItem value="docs">Documents</SelectItem>
+                        <SelectItem value="videos">Videos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {mockBlobs.map(blob => (
                     <div key={blob.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <input type="checkbox" className="rounded" />
                       <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
                         <File className="h-5 w-5 text-indigo-600" />
                       </div>
@@ -592,8 +934,11 @@ export default function DeploymentsClient() {
                       </div>
                       <Badge variant={blob.isPublic ? 'default' : 'outline'}>{blob.isPublic ? 'Public' : 'Private'}</Badge>
                       <span className="text-sm text-gray-500">{blob.downloadCount} downloads</span>
-                      <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -602,37 +947,231 @@ export default function DeploymentsClient() {
           </TabsContent>
 
           {/* Logs Tab */}
-          <TabsContent value="logs" className="mt-6">
+          <TabsContent value="logs" className="mt-6 space-y-6">
+            {/* Logs Overview Banner */}
+            <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Runtime Logs</h2>
+                  <p className="text-gray-400 text-sm">Real-time application logs and monitoring</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-green-600 text-white hover:bg-green-700"><Play className="h-4 w-4 mr-2" />Live Tail</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockBuildLogs.length}</p>
+                  <p className="text-sm text-gray-400">Total Logs</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-red-400">{mockBuildLogs.filter(l => l.level === 'error').length}</p>
+                  <p className="text-sm text-gray-400">Errors</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-amber-400">{mockBuildLogs.filter(l => l.level === 'warn').length}</p>
+                  <p className="text-sm text-gray-400">Warnings</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-green-400">{mockBuildLogs.filter(l => l.level === 'success').length}</p>
+                  <p className="text-sm text-gray-400">Success</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">3.2K</p>
+                  <p className="text-sm text-gray-400">Last Hour</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Log Filters */}
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Runtime Logs</CardTitle>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input placeholder="Search logs..." className="pl-10 w-80" />
+                    </div>
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Levels</SelectItem>
+                        <SelectItem value="error">Errors</SelectItem>
+                        <SelectItem value="warn">Warnings</SelectItem>
+                        <SelectItem value="info">Info</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select>
+                      <SelectTrigger className="w-32"><SelectValue placeholder="Source" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Sources</SelectItem>
+                        <SelectItem value="api">API Routes</SelectItem>
+                        <SelectItem value="edge">Edge Functions</SelectItem>
+                        <SelectItem value="build">Build</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input type="datetime-local" className="w-48" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />More Filters</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Logs Console */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 bg-gray-800 rounded-t-lg">
                 <div className="flex items-center gap-2">
-                  <Select defaultValue="all"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="error">Errors</SelectItem><SelectItem value="warn">Warnings</SelectItem></SelectContent></Select>
-                  <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Terminal className="h-4 w-4 text-green-400" />
+                  <span className="text-white font-medium">Console</span>
+                  <Badge className="bg-green-600 text-white">Live</Badge>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700"><Copy className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700"><Download className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700"><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px] bg-gray-900 rounded-lg p-4 font-mono text-sm">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[500px] bg-gray-900 p-4 font-mono text-sm">
                   {mockBuildLogs.map(log => (
-                    <div key={log.id} className="flex items-start gap-3 mb-2">
-                      <span className="text-gray-500 text-xs w-16">{log.timestamp}</span>
-                      <span className={getLogColor(log.level)}>[{log.level.toUpperCase()}]</span>
+                    <div key={log.id} className="flex items-start gap-3 mb-2 hover:bg-gray-800 p-1 rounded">
+                      <span className="text-gray-500 text-xs w-20 shrink-0">{log.timestamp}</span>
+                      <Badge className={`shrink-0 ${log.level === 'error' ? 'bg-red-600' : log.level === 'warn' ? 'bg-amber-600' : log.level === 'success' ? 'bg-green-600' : 'bg-blue-600'}`}>{log.level.toUpperCase()}</Badge>
+                      <span className="text-gray-400 text-xs shrink-0">[{log.step}]</span>
                       <span className="text-white">{log.message}</span>
                     </div>
                   ))}
                 </ScrollArea>
               </CardContent>
             </Card>
+
+            {/* Log Insights */}
+            <div className="grid grid-cols-3 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Error Frequency</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {['TypeError', 'ReferenceError', 'NetworkError', 'TimeoutError'].map((err, i) => {
+                      const counts = [12, 8, 5, 3]
+                      return (
+                        <div key={err} className="flex items-center gap-2">
+                          <span className="text-xs text-red-500 w-24">{err}</span>
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                            <div className="bg-red-500 h-2 rounded-full" style={{ width: `${(counts[i] / 12) * 100}%` }} />
+                          </div>
+                          <span className="text-xs font-medium w-6 text-right">{counts[i]}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Log Volume (24h)</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {['12am', '6am', '12pm', '6pm', 'Now'].map((time, i) => {
+                      const values = [15, 25, 85, 65, 45]
+                      return (
+                        <div key={time} className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500 w-12">{time}</span>
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${values[i]}%` }} />
+                          </div>
+                          <span className="text-xs font-medium w-10 text-right">{(values[i] * 40).toLocaleString()}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start"><AlertCircle className="h-4 w-4 mr-2" />View All Errors</Button>
+                  <Button variant="outline" className="w-full justify-start"><Bell className="h-4 w-4 mr-2" />Set Up Alerts</Button>
+                  <Button variant="outline" className="w-full justify-start"><BarChart3 className="h-4 w-4 mr-2" />Log Analytics</Button>
+                  <Button variant="outline" className="w-full justify-start"><Download className="h-4 w-4 mr-2" />Export Logs</Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Network className="h-5 w-5 text-gray-500" /><span className="text-sm">Bandwidth</span></div><p className="text-2xl font-bold mt-2">24.5 GB</p></CardContent></Card>
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Cpu className="h-5 w-5 text-gray-500" /><span className="text-sm">Execution</span></div><p className="text-2xl font-bold mt-2">1,234 hrs</p></CardContent></Card>
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><HardDrive className="h-5 w-5 text-gray-500" /><span className="text-sm">Build Cache</span></div><p className="text-2xl font-bold mt-2">92%</p></CardContent></Card>
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-gray-500" /><span className="text-sm">Page Views</span></div><p className="text-2xl font-bold mt-2">458K</p></CardContent></Card>
+          <TabsContent value="analytics" className="mt-6 space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Deployment Analytics</h2>
+                  <p className="text-blue-100 text-sm">Comprehensive performance insights</p>
+                </div>
+                <div className="flex gap-2">
+                  <Select>
+                    <SelectTrigger className="w-[150px] bg-white/20 border-white/30 text-white"><SelectValue placeholder="Last 30 Days" /></SelectTrigger>
+                    <SelectContent><SelectItem value="7">Last 7 Days</SelectItem><SelectItem value="30">Last 30 Days</SelectItem><SelectItem value="90">Last 90 Days</SelectItem></SelectContent>
+                  </Select>
+                  <Button className="bg-white text-blue-700 hover:bg-blue-50"><Download className="h-4 w-4 mr-2" />Export</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">24.5 GB</p>
+                  <p className="text-sm text-blue-100">Bandwidth</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">1,234 hrs</p>
+                  <p className="text-sm text-blue-100">Execution</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">92%</p>
+                  <p className="text-sm text-blue-100">Cache Hit</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">458K</p>
+                  <p className="text-sm text-blue-100">Page Views</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">2.3s</p>
+                  <p className="text-sm text-blue-100">Avg Load</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">99.99%</p>
+                  <p className="text-sm text-blue-100">Uptime</p>
+                </div>
+              </div>
             </div>
+
+            {/* Performance Metrics */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { label: 'First Contentful Paint', value: '0.8s', change: '-12%', good: true, icon: Gauge },
+                { label: 'Largest Contentful Paint', value: '1.2s', change: '-8%', good: true, icon: Timer },
+                { label: 'Cumulative Layout Shift', value: '0.05', change: '-15%', good: true, icon: Layers },
+                { label: 'Time to First Byte', value: '89ms', change: '-22%', good: true, icon: Zap },
+              ].map((metric, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <metric.icon className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs text-gray-500">{metric.label}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-bold">{metric.value}</p>
+                      <Badge className={metric.good ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{metric.change}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Charts Grid */}
             <div className="grid grid-cols-2 gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Deployments by Day</CardTitle></CardHeader>
@@ -641,7 +1180,7 @@ export default function DeploymentsClient() {
                     {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
                       <div key={day} className="flex items-center gap-3">
                         <span className="w-8 text-sm text-gray-500">{day}</span>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-3">
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4">
                           <div className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full" style={{ width: `${[85, 92, 78, 95, 88, 32, 15][i]}%` }} />
                         </div>
                         <span className="text-sm font-medium w-8">{[12, 15, 10, 18, 14, 3, 1][i]}</span>
@@ -651,30 +1190,171 @@ export default function DeploymentsClient() {
                 </CardContent>
               </Card>
               <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Bandwidth Usage</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((week, i) => {
+                      const values = [4.2, 5.8, 6.3, 8.2]
+                      return (
+                        <div key={week} className="flex items-center gap-3">
+                          <span className="w-16 text-sm text-gray-500">{week}</span>
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4">
+                            <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full" style={{ width: `${(values[i] / 10) * 100}%` }} />
+                          </div>
+                          <span className="text-sm font-medium w-16 text-right">{values[i]} GB</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Team Analytics */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Top Deployers</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {[{ name: 'Sarah Chen', deploys: 45 }, { name: 'Mike Johnson', deploys: 38 }, { name: 'Emily Davis', deploys: 32 }, { name: 'Alex Kim', deploys: 28 }].map((user, i) => (
+                    {[{ name: 'Sarah Chen', deploys: 45, successRate: 98 }, { name: 'Mike Johnson', deploys: 38, successRate: 95 }, { name: 'Emily Davis', deploys: 32, successRate: 100 }, { name: 'Alex Kim', deploys: 28, successRate: 96 }].map((user, i) => (
                       <div key={user.name} className="flex items-center gap-3">
-                        <span className="text-sm text-gray-500 w-4">{i + 1}</span>
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-200 text-gray-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}`}>{i + 1}</span>
                         <Avatar className="w-8 h-8"><AvatarFallback className="bg-purple-100 text-purple-700 text-xs">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-                        <span className="flex-1 font-medium">{user.name}</span>
+                        <div className="flex-1">
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.successRate}% success</p>
+                        </div>
                         <Badge variant="secondary">{user.deploys} deploys</Badge>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Environment Distribution</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { env: 'Production', count: 45, pct: 35, color: 'bg-green-500' },
+                      { env: 'Staging', count: 38, pct: 29, color: 'bg-blue-500' },
+                      { env: 'Preview', count: 35, pct: 27, color: 'bg-purple-500' },
+                      { env: 'Development', count: 12, pct: 9, color: 'bg-gray-500' },
+                    ].map(env => (
+                      <div key={env.env} className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${env.color}`} />
+                        <span className="flex-1 text-sm">{env.env}</span>
+                        <span className="text-sm font-medium">{env.count}</span>
+                        <Badge variant="outline">{env.pct}%</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Recent Activity */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { action: 'Deployed to production', user: 'Sarah Chen', time: '2 min ago', type: 'deploy' },
+                    { action: 'Rolled back staging', user: 'Mike Johnson', time: '15 min ago', type: 'rollback' },
+                    { action: 'Added new domain', user: 'Emily Davis', time: '1 hour ago', type: 'domain' },
+                    { action: 'Updated environment variables', user: 'Alex Kim', time: '2 hours ago', type: 'env' },
+                    { action: 'Created preview deployment', user: 'Sarah Chen', time: '3 hours ago', type: 'preview' },
+                  ].map((activity, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.type === 'deploy' ? 'bg-green-100' : activity.type === 'rollback' ? 'bg-amber-100' : activity.type === 'domain' ? 'bg-blue-100' : activity.type === 'env' ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                        {activity.type === 'deploy' && <Rocket className="h-4 w-4 text-green-600" />}
+                        {activity.type === 'rollback' && <RotateCcw className="h-4 w-4 text-amber-600" />}
+                        {activity.type === 'domain' && <Globe className="h-4 w-4 text-blue-600" />}
+                        {activity.type === 'env' && <Lock className="h-4 w-4 text-purple-600" />}
+                        {activity.type === 'preview' && <Eye className="h-4 w-4 text-gray-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{activity.action}</p>
+                        <p className="text-sm text-gray-500">by {activity.user}</p>
+                      </div>
+                      <span className="text-sm text-gray-400">{activity.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Protection Tab */}
-          <TabsContent value="protection" className="mt-6">
-            <div className="space-y-4">
-              {mockProtections.map(protection => (
-                <Card key={protection.id} className="border-gray-200 dark:border-gray-700">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+          <TabsContent value="protection" className="mt-6 space-y-6">
+            {/* Protection Overview Banner */}
+            <div className="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Deployment Protection</h2>
+                  <p className="text-red-100 text-sm">Security and access control for your deployments</p>
+                </div>
+                <Button className="bg-white text-red-700 hover:bg-red-50"><Shield className="h-4 w-4 mr-2" />Security Audit</Button>
+              </div>
+              <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockProtections.filter(p => p.enabled).length}</p>
+                  <p className="text-sm text-red-100">Active Rules</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">247</p>
+                  <p className="text-sm text-red-100">Blocked Attacks</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">A+</p>
+                  <p className="text-sm text-red-100">Security Score</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">100%</p>
+                  <p className="text-sm text-red-100">SSL Coverage</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-sm text-red-100">Vulnerabilities</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Status Cards */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { title: 'DDoS Protection', status: 'Active', icon: Shield, color: 'green' },
+                { title: 'SSL/TLS', status: 'A+ Grade', icon: Lock, color: 'green' },
+                { title: 'Web Application Firewall', status: 'Enabled', icon: AlertOctagon, color: 'green' },
+              ].map((sec, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg bg-${sec.color}-100 dark:bg-${sec.color}-900/30 flex items-center justify-center`}>
+                        <sec.icon className={`h-5 w-5 text-${sec.color}-600`} />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">{sec.title}</h4>
+                        <p className="text-sm text-green-600">{sec.status}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Protection Rules */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Protection Rules</CardTitle>
+                  <Button variant="outline"><Plus className="h-4 w-4 mr-2" />Add Rule</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {mockProtections.map(protection => (
+                    <div key={protection.id} className="flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
                           <Shield className="h-6 w-6 text-amber-600" />
@@ -684,12 +1364,34 @@ export default function DeploymentsClient() {
                           <p className="text-sm text-gray-500">{protection.type.replace('_', ' ')}</p>
                         </div>
                       </div>
-                      <Switch checked={protection.enabled} />
+                      <div className="flex items-center gap-4">
+                        <Badge className={protection.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{protection.enabled ? 'Enabled' : 'Disabled'}</Badge>
+                        <Switch checked={protection.enabled} />
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Access Control */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader><CardTitle>Access Control</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div><h4 className="font-medium">Password Protection</h4><p className="text-sm text-gray-500">Require password to access preview deployments</p></div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div><h4 className="font-medium">IP Allowlisting</h4><p className="text-sm text-gray-500">Restrict access to specific IP addresses</p></div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div><h4 className="font-medium">Vercel Authentication</h4><p className="text-sm text-gray-500">Require team member login to access</p></div>
+                  <Switch defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Settings Tab */}

@@ -410,6 +410,7 @@ export default function TicketsClient() {
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all')
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all')
   const [replyText, setReplyText] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -655,6 +656,7 @@ export default function TicketsClient() {
                 <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
                 <TabsTrigger value="agents">Agents</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -671,6 +673,66 @@ export default function TicketsClient() {
 
             {/* All Tickets Tab */}
             <TabsContent value="tickets" className="space-y-4">
+              {/* Support Overview Banner */}
+              <div className="bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Support Ticket Management</h2>
+                    <p className="text-orange-100 text-sm">Zendesk-level help desk operations</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                    <Button className="bg-white text-orange-700 hover:bg-orange-50"><Plus className="h-4 w-4 mr-2" />New Ticket</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-6 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.total}</p>
+                    <p className="text-xs text-orange-100">Total Tickets</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.open}</p>
+                    <p className="text-xs text-orange-100">Open</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.urgent}</p>
+                    <p className="text-xs text-orange-100">Urgent</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.avgResponseTime}</p>
+                    <p className="text-xs text-orange-100">Avg Response</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.csatScore}%</p>
+                    <p className="text-xs text-orange-100">CSAT Score</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.onlineAgents}</p>
+                    <p className="text-xs text-orange-100">Agents Online</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-6 gap-4 mb-4">
+                {[
+                  { name: 'New Ticket', icon: Plus, desc: 'Create ticket', color: 'orange' },
+                  { name: 'Assign', icon: Users, desc: 'Bulk assign', color: 'blue' },
+                  { name: 'Merge', icon: ArrowRight, desc: 'Merge tickets', color: 'green' },
+                  { name: 'Reports', icon: BarChart, desc: 'Analytics', color: 'purple' },
+                  { name: 'SLA Status', icon: Clock, desc: 'Check SLAs', color: 'red' },
+                  { name: 'Canned', icon: MessageSquare, desc: 'Responses', color: 'amber' },
+                ].map((action, i) => (
+                  <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer">
+                    <CardContent className="p-3 text-center">
+                      <action.icon className={`h-5 w-5 mx-auto mb-2 text-${action.color}-600`} />
+                      <h4 className="font-medium text-xs">{action.name}</h4>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <Button
                   variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -904,10 +966,118 @@ export default function TicketsClient() {
                   </Card>
                 </div>
               </div>
+
+              {/* System Status */}
+              <Card className="bg-gradient-to-r from-gray-800 to-gray-900 text-white border-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                      <span className="font-medium">All Support Systems Operational</span>
+                    </div>
+                    <span className="text-sm text-gray-400">Last sync: Just now</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Ticket Insights */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Priority Distribution</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {[
+                        { priority: 'Urgent', count: stats.urgent, color: 'red' },
+                        { priority: 'High', count: mockTickets.filter(t => t.priority === 'high').length, color: 'orange' },
+                        { priority: 'Normal', count: mockTickets.filter(t => t.priority === 'normal').length, color: 'blue' },
+                        { priority: 'Low', count: mockTickets.filter(t => t.priority === 'low').length, color: 'green' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
+                          <span className="text-sm flex-1">{item.priority}</span>
+                          <span className="font-medium">{item.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Status Overview</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {[
+                        { status: 'New', count: stats.newTickets, pct: Math.round((stats.newTickets / stats.total) * 100) },
+                        { status: 'Open', count: stats.open, pct: Math.round((stats.open / stats.total) * 100) },
+                        { status: 'Pending', count: stats.pending, pct: Math.round((stats.pending / stats.total) * 100) },
+                        { status: 'Solved', count: stats.solved, pct: Math.round((stats.solved / stats.total) * 100) },
+                      ].map((item, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>{item.status}</span><span>{item.count} ({item.pct}%)</span>
+                          </div>
+                          <Progress value={item.pct} className="h-1.5" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Quick Stats</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <p className="text-lg font-bold text-green-600">{stats.csatScore}%</p>
+                        <p className="text-xs text-gray-500">CSAT</p>
+                      </div>
+                      <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <p className="text-lg font-bold text-blue-600">{stats.avgResponseTime}</p>
+                        <p className="text-xs text-gray-500">Avg Response</p>
+                      </div>
+                      <div className="text-center p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <p className="text-lg font-bold text-orange-600">{stats.slaAtRisk}</p>
+                        <p className="text-xs text-gray-500">At Risk</p>
+                      </div>
+                      <div className="text-center p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <p className="text-lg font-bold text-purple-600">{stats.onlineAgents}</p>
+                        <p className="text-xs text-gray-500">Online</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Unassigned Tab */}
             <TabsContent value="unassigned" className="space-y-4">
+              {/* Unassigned Overview Banner */}
+              <div className="bg-gradient-to-r from-red-600 to-rose-600 rounded-xl p-6 text-white mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Unassigned Tickets</h2>
+                    <p className="text-red-100 text-sm">Tickets waiting for agent assignment</p>
+                  </div>
+                  <Button className="bg-white text-red-700 hover:bg-red-50"><Users className="h-4 w-4 mr-2" />Bulk Assign</Button>
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockTickets.filter(t => !t.assignee).length}</p>
+                    <p className="text-xs text-red-100">Unassigned</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockTickets.filter(t => !t.assignee && t.priority === 'urgent').length}</p>
+                    <p className="text-xs text-red-100">Urgent</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockTickets.filter(t => !t.assignee && t.sla.status === 'at-risk').length}</p>
+                    <p className="text-xs text-red-100">SLA At Risk</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.onlineAgents}</p>
+                    <p className="text-xs text-red-100">Available Agents</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-4">
                 {mockTickets.filter(t => !t.assignee).map(ticket => (
                   <Card key={ticket.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
@@ -952,6 +1122,60 @@ export default function TicketsClient() {
 
             {/* Agents Tab */}
             <TabsContent value="agents" className="space-y-4">
+              {/* Agents Overview Banner */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Support Team</h2>
+                    <p className="text-blue-100 text-sm">Agent workload and performance</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                    <Button className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Add Agent</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAgents.length}</p>
+                    <p className="text-xs text-blue-100">Total Agents</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAgents.filter(a => a.status === 'online').length}</p>
+                    <p className="text-xs text-blue-100">Online</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAgents.filter(a => a.status === 'busy').length}</p>
+                    <p className="text-xs text-blue-100">Busy</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{Math.round(mockAgents.reduce((sum, a) => sum + a.satisfaction, 0) / mockAgents.length)}%</p>
+                    <p className="text-xs text-blue-100">Avg CSAT</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAgents.reduce((sum, a) => sum + a.ticketsToday, 0)}</p>
+                    <p className="text-xs text-blue-100">Tickets Today</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agent Status Cards */}
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                {[
+                  { status: 'Online', count: mockAgents.filter(a => a.status === 'online').length, color: 'green' },
+                  { status: 'Busy', count: mockAgents.filter(a => a.status === 'busy').length, color: 'yellow' },
+                  { status: 'Away', count: mockAgents.filter(a => a.status === 'away').length, color: 'orange' },
+                  { status: 'Offline', count: mockAgents.filter(a => a.status === 'offline').length, color: 'gray' },
+                ].map((item, i) => (
+                  <Card key={i} className={`border-${item.color}-200 bg-${item.color}-50 dark:bg-${item.color}-900/20`}>
+                    <CardContent className="p-4 text-center">
+                      <div className={`w-3 h-3 rounded-full bg-${item.color}-500 mx-auto mb-2`} />
+                      <p className="text-2xl font-bold">{item.count}</p>
+                      <p className="text-sm text-gray-500">{item.status}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mockAgents.map(agent => (
                   <Card key={agent.id} className="bg-white dark:bg-gray-800">
@@ -998,6 +1222,67 @@ export default function TicketsClient() {
 
             {/* Analytics Tab */}
             <TabsContent value="analytics" className="space-y-6">
+              {/* Analytics Overview Banner */}
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Support Analytics</h2>
+                    <p className="text-purple-100 text-sm">Comprehensive performance insights</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-purple-700 hover:bg-purple-50"><BarChart className="h-4 w-4 mr-2" />Full Report</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-6 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.total}</p>
+                    <p className="text-xs text-purple-100">Total Volume</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.avgResponseTime}</p>
+                    <p className="text-xs text-purple-100">Avg Response</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.avgResolutionTime}</p>
+                    <p className="text-xs text-purple-100">Avg Resolution</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.csatScore}%</p>
+                    <p className="text-xs text-purple-100">CSAT Score</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{Math.round((stats.solved / stats.total) * 100)}%</p>
+                    <p className="text-xs text-purple-100">Resolution Rate</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.slaBreached}</p>
+                    <p className="text-xs text-purple-100">SLA Breaches</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Performance KPIs */}
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { label: 'First Response Time', value: stats.avgResponseTime, target: '15 min', status: 'good' },
+                  { label: 'Resolution Time', value: stats.avgResolutionTime, target: '4 hrs', status: 'warning' },
+                  { label: 'Customer Satisfaction', value: `${stats.csatScore}%`, target: '95%', status: 'good' },
+                  { label: 'SLA Compliance', value: `${Math.round(((stats.total - stats.slaBreached) / stats.total) * 100)}%`, target: '98%', status: 'warning' },
+                ].map((kpi, i) => (
+                  <Card key={i} className="bg-white dark:bg-gray-800">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-500">{kpi.label}</span>
+                        <Badge className={kpi.status === 'good' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>{kpi.status === 'good' ? 'On Target' : 'Needs Attention'}</Badge>
+                      </div>
+                      <p className="text-2xl font-bold">{kpi.value}</p>
+                      <p className="text-xs text-gray-500">Target: {kpi.target}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card className="bg-white dark:bg-gray-800">
                   <CardHeader>
@@ -1173,6 +1458,339 @@ export default function TicketsClient() {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+
+              {/* Weekly Trends */}
+              <Card className="bg-white dark:bg-gray-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    Weekly Ticket Trends
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-7 gap-4">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+                      const values = [34, 45, 52, 48, 61, 28, 22]
+                      const max = Math.max(...values)
+                      return (
+                        <div key={day} className="text-center">
+                          <div className="h-24 bg-gray-100 dark:bg-gray-800 rounded-lg relative overflow-hidden">
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-orange-500 to-amber-500 rounded-lg transition-all" style={{ height: `${(values[i] / max) * 100}%` }} />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">{day}</p>
+                          <p className="text-sm font-bold">{values[i]}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Analytics Insights */}
+              <div className="grid grid-cols-3 gap-6">
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Peak Hours</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {[
+                        { time: '9:00 AM - 11:00 AM', tickets: 45, color: 'red' },
+                        { time: '2:00 PM - 4:00 PM', tickets: 38, color: 'orange' },
+                        { time: '11:00 AM - 1:00 PM', tickets: 29, color: 'yellow' },
+                      ].map((hour, i) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">{hour.time}</span>
+                          <Badge className={`bg-${hour.color}-100 text-${hour.color}-800`}>{hour.tickets} tickets</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Resolution Breakdown</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {[
+                        { label: 'First Contact Resolution', value: 42, color: 'green' },
+                        { label: 'Escalated', value: 18, color: 'orange' },
+                        { label: 'Multi-Touch', value: 40, color: 'blue' },
+                      ].map((item, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>{item.label}</span>
+                            <span className="font-medium">{item.value}%</span>
+                          </div>
+                          <Progress value={item.value} className="h-1.5" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Customer Effort Score</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-green-600 mb-2">4.2</div>
+                      <p className="text-sm text-gray-500 mb-4">out of 5.0</p>
+                      <div className="flex justify-center gap-2">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Star key={star} className={`h-5 w-5 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Recent Activity Summary */}
+              <Card className="bg-gradient-to-r from-gray-800 to-gray-900 text-white border-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                      <span className="font-medium">Live Support Dashboard</span>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm">
+                      <span className="text-gray-400">Active Chats: <span className="text-white font-medium">12</span></span>
+                      <span className="text-gray-400">Queue: <span className="text-white font-medium">5</span></span>
+                      <span className="text-gray-400">Updated: <span className="text-white font-medium">Just now</span></span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="mt-6">
+              <div className="grid grid-cols-12 gap-6">
+                {/* Settings Sidebar */}
+                <Card className="col-span-3 h-fit border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'sla', icon: Clock, label: 'SLA Policies' },
+                        { id: 'routing', icon: ArrowRight, label: 'Routing' },
+                        { id: 'integrations', icon: Globe, label: 'Integrations' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'advanced', icon: Layers, label: 'Advanced' },
+                      ].map(item => (
+                        <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                          <item.icon className="h-4 w-4" /><span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Settings Content */}
+                <div className="col-span-9 space-y-6">
+                  {settingsTab === 'general' && (
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure default ticket behaviors</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="text-sm font-medium">Default Priority</label><Input defaultValue="Normal" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Auto-close after (days)</label><Input type="number" defaultValue="7" className="mt-1" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Auto-assign tickets</p><p className="text-sm text-gray-500">Automatically assign new tickets to available agents</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Enable CSAT surveys</p><p className="text-sm text-gray-500">Send satisfaction surveys after ticket resolution</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Agent collision detection</p><p className="text-sm text-gray-500">Show when multiple agents view same ticket</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Ticket merging</p><p className="text-sm text-gray-500">Allow merging duplicate tickets</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <Button className="bg-orange-600 hover:bg-orange-700">Save General Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'sla' && (
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>SLA Policies</CardTitle><CardDescription>Configure service level agreements</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
+                          {[
+                            { name: 'Urgent', response: '15 min', resolution: '4 hrs', color: 'red' },
+                            { name: 'High', response: '1 hr', resolution: '8 hrs', color: 'orange' },
+                            { name: 'Normal', response: '4 hrs', resolution: '24 hrs', color: 'blue' },
+                          ].map((sla, i) => (
+                            <Card key={i} className={`border-${sla.color}-200 bg-${sla.color}-50 dark:bg-${sla.color}-900/20`}>
+                              <CardContent className="p-4">
+                                <h4 className={`font-semibold text-${sla.color}-700 mb-3`}>{sla.name} Priority</h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between"><span>First Response</span><span className="font-medium">{sla.response}</span></div>
+                                  <div className="flex justify-between"><span>Resolution Time</span><span className="font-medium">{sla.resolution}</span></div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">SLA breach notifications</p><p className="text-sm text-gray-500">Alert when SLA is about to breach</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Business hours only</p><p className="text-sm text-gray-500">Calculate SLA during business hours</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <Button className="bg-orange-600 hover:bg-orange-700">Save SLA Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'routing' && (
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Ticket Routing</CardTitle><CardDescription>Configure automatic ticket assignment</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="text-sm font-medium">Routing Method</label><Input defaultValue="Round Robin" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Max Tickets per Agent</label><Input type="number" defaultValue="20" className="mt-1" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Skill-based routing</p><p className="text-sm text-gray-500">Route tickets based on agent skills</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Load balancing</p><p className="text-sm text-gray-500">Distribute tickets evenly among agents</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Priority routing</p><p className="text-sm text-gray-500">Route urgent tickets to senior agents</p></div>
+                            <Switch />
+                          </div>
+                        </div>
+                        <Button className="bg-orange-600 hover:bg-orange-700">Save Routing Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'integrations' && (
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Integrations</CardTitle><CardDescription>Connect with external tools and services</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { name: 'Slack', status: 'connected', icon: MessageSquare, desc: 'Team notifications' },
+                            { name: 'Jira', status: 'connected', icon: Bug, desc: 'Issue tracking' },
+                            { name: 'Salesforce', status: 'available', icon: Users, desc: 'CRM sync' },
+                            { name: 'Intercom', status: 'available', icon: MessageSquare, desc: 'Chat support' },
+                          ].map((integration, i) => (
+                            <Card key={i} className={`border ${integration.status === 'connected' ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <integration.icon className="h-5 w-5" />
+                                    <h4 className="font-medium">{integration.name}</h4>
+                                  </div>
+                                  <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{integration.status}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-3">{integration.desc}</p>
+                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full" size="sm">
+                                  {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'notifications' && (
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure alert preferences</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <Bell className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+                            <p className="font-medium">Email</p><p className="text-sm text-gray-500">Enabled</p>
+                          </CardContent></Card>
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <MessageSquare className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                            <p className="font-medium">Slack</p><p className="text-sm text-gray-500">Connected</p>
+                          </CardContent></Card>
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <Globe className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                            <p className="font-medium">Webhooks</p><p className="text-sm text-gray-500">2 Active</p>
+                          </CardContent></Card>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">New ticket alerts</p><p className="text-sm text-gray-500">Notify when new tickets arrive</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">SLA breach alerts</p><p className="text-sm text-gray-500">Alert before SLA breaches</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Customer replies</p><p className="text-sm text-gray-500">Notify on customer responses</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Escalation alerts</p><p className="text-sm text-gray-500">Notify on ticket escalations</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <Button className="bg-orange-600 hover:bg-orange-700">Save Notification Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'advanced' && (
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and automation</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="text-sm font-medium">Ticket ID Prefix</label><Input defaultValue="TKT-" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Archive after (days)</label><Input type="number" defaultValue="90" className="mt-1" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">AI-powered categorization</p><p className="text-sm text-gray-500">Automatically categorize tickets using AI</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Sentiment analysis</p><p className="text-sm text-gray-500">Detect customer sentiment in tickets</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Suggested responses</p><p className="text-sm text-gray-500">Show AI-suggested replies</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <h4 className="font-medium">Data Management</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export All Tickets</Button>
+                            <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Analytics</Button>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Danger Zone</h4>
+                          <p className="text-sm text-red-600 dark:text-red-300 mb-3">These actions are irreversible.</p>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All Resolved Tickets</Button>
+                        </div>
+                        <Button className="bg-orange-600 hover:bg-orange-700">Save Advanced Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             </TabsContent>
           </Tabs>

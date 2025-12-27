@@ -280,6 +280,7 @@ const mockDefects: Defect[] = [
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
   const [activeTab, setActiveTab] = useState('cases')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [status, setStatus] = useState<TestStatus | 'all'>('all')
   const [testType, setTestType] = useState<TestType | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -406,6 +407,158 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
           </div>
         </div>
 
+        {/* QA Overview Banner */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-6 text-white">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-bold">QA Testing Hub</h2>
+              <p className="text-green-100 text-sm">Comprehensive test management and execution</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+              <Button className="bg-white text-green-700 hover:bg-green-50"><PlayCircle className="h-4 w-4 mr-2" />Run All Tests</Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-8 gap-3">
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold">{totalTests}</p>
+              <p className="text-xs text-green-100">Test Cases</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-green-200">{overallPassRate.toFixed(0)}%</p>
+              <p className="text-xs text-green-100">Pass Rate</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold">{passedTests}</p>
+              <p className="text-xs text-green-100">Passed</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-red-300">{failedTests}</p>
+              <p className="text-xs text-green-100">Failed</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold">{automatedTests}</p>
+              <p className="text-xs text-green-100">Automated</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold">{activeRuns}</p>
+              <p className="text-xs text-green-100">Active Runs</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-red-300">{openDefects}</p>
+              <p className="text-xs text-green-100">Open Defects</p>
+            </div>
+            <div className="bg-white/20 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold">{mockMilestones.length}</p>
+              <p className="text-xs text-green-100">Milestones</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-6 gap-4">
+          {[
+            { label: 'Create Test', icon: Plus, color: 'green', action: () => setShowCreateTest(true) },
+            { label: 'Start Run', icon: PlayCircle, color: 'blue', action: () => {} },
+            { label: 'Report Bug', icon: Bug, color: 'red', action: () => {} },
+            { label: 'View Reports', icon: BarChart3, color: 'purple', action: () => setActiveTab('reports') },
+            { label: 'Import Tests', icon: Download, color: 'indigo', action: () => {} },
+            { label: 'Automation', icon: Zap, color: 'amber', action: () => {} },
+          ].map((action, i) => (
+            <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" onClick={action.action}>
+              <CardContent className="p-4 text-center">
+                <div className={`w-10 h-10 mx-auto mb-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 flex items-center justify-center`}>
+                  <action.icon className={`h-5 w-5 text-${action.color}-600`} />
+                </div>
+                <p className="text-sm font-medium">{action.label}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Test Coverage Summary */}
+        <div className="grid grid-cols-4 gap-4">
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardContent className="p-4">
+              <h4 className="text-sm font-medium text-gray-500 mb-3">Test Type Distribution</h4>
+              <div className="space-y-2">
+                {[
+                  { type: 'Unit', count: 156, pct: 45 },
+                  { type: 'Integration', count: 89, pct: 26 },
+                  { type: 'E2E', count: 67, pct: 19 },
+                  { type: 'Performance', count: 34, pct: 10 },
+                ].map(t => (
+                  <div key={t.type} className="flex items-center gap-2">
+                    <span className="w-20 text-xs">{t.type}</span>
+                    <Progress value={t.pct} className="h-2 flex-1" />
+                    <span className="text-xs font-medium w-8 text-right">{t.count}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardContent className="p-4">
+              <h4 className="text-sm font-medium text-gray-500 mb-3">Priority Breakdown</h4>
+              <div className="space-y-2">
+                {[
+                  { priority: 'Critical', count: 45, color: 'red' },
+                  { priority: 'High', count: 89, color: 'orange' },
+                  { priority: 'Medium', count: 156, color: 'yellow' },
+                  { priority: 'Low', count: 56, color: 'green' },
+                ].map(p => (
+                  <div key={p.priority} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full bg-${p.color}-500`} />
+                      <span className="text-sm">{p.priority}</span>
+                    </div>
+                    <span className="text-sm font-medium">{p.count}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardContent className="p-4">
+              <h4 className="text-sm font-medium text-gray-500 mb-3">Recent Execution</h4>
+              <div className="space-y-3">
+                {[
+                  { name: 'Login Suite', passed: 23, failed: 2, time: '5m ago' },
+                  { name: 'API Tests', passed: 45, failed: 0, time: '12m ago' },
+                  { name: 'Checkout Flow', passed: 12, failed: 1, time: '1h ago' },
+                ].map(run => (
+                  <div key={run.name} className="flex items-center justify-between text-sm">
+                    <span className="truncate">{run.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600">{run.passed}</span>
+                      <span className="text-gray-400">/</span>
+                      <span className="text-red-600">{run.failed}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardContent className="p-4">
+              <h4 className="text-sm font-medium text-gray-500 mb-3">Team Performance</h4>
+              <div className="space-y-3">
+                {[
+                  { name: 'Sarah Chen', tests: 45, rate: 98 },
+                  { name: 'Mike Johnson', tests: 38, rate: 95 },
+                  { name: 'Emily Davis', tests: 32, rate: 100 },
+                ].map(member => (
+                  <div key={member.name} className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6"><AvatarFallback className="text-xs bg-green-100 text-green-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                    <span className="flex-1 text-sm truncate">{member.name}</span>
+                    <Badge variant="outline" className="text-xs">{member.rate}%</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
           <Card>
@@ -504,6 +657,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <TabsTrigger value="reports" className="gap-2">
               <BarChart3 className="w-4 h-4" />
               Reports
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -658,15 +815,50 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
           </TabsContent>
 
           {/* Test Runs Tab */}
-          <TabsContent value="runs" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Test Runs</h3>
-                <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={() => setShowCreateRun(true)}>
-                  <Plus className="w-4 h-4" />
-                  Create Test Run
-                </Button>
+          <TabsContent value="runs" className="mt-6 space-y-6">
+            {/* Test Runs Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Test Runs</h2>
+                  <p className="text-blue-100 text-sm">Manage and execute test runs</p>
+                </div>
+                <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowCreateRun(true)}><Plus className="h-4 w-4 mr-2" />Create Run</Button>
               </div>
+              <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'active').length}</p><p className="text-xs text-blue-100">Active</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'completed').length}</p><p className="text-xs text-blue-100">Completed</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">87%</p><p className="text-xs text-blue-100">Avg Pass Rate</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">2.3h</p><p className="text-xs text-blue-100">Avg Duration</p></div>
+              </div>
+            </div>
+
+            {/* Run Status Cards */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { status: 'Active', count: mockRuns.filter(r => r.status === 'active').length, icon: PlayCircle, color: 'blue', desc: 'Currently running' },
+                { status: 'Completed', count: mockRuns.filter(r => r.status === 'completed').length, icon: CheckCircle2, color: 'green', desc: 'Successfully finished' },
+                { status: 'Scheduled', count: 2, icon: Calendar, color: 'purple', desc: 'Upcoming runs' },
+                { status: 'Failed', count: 1, icon: XCircle, color: 'red', desc: 'Needs attention' },
+              ].map((stat, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg bg-${stat.color}-100 dark:bg-${stat.color}-900/30 flex items-center justify-center`}>
+                        <stat.icon className={`h-5 w-5 text-${stat.color}-600`} />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{stat.count}</p>
+                        <p className="text-xs text-gray-500">{stat.status}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="space-y-4">
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {mockRuns.map((run) => {
@@ -792,48 +984,131 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
           </TabsContent>
 
           {/* Defects Tab */}
-          <TabsContent value="defects" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Defects & Issues</h3>
-                <Button className="bg-red-600 hover:bg-red-700 gap-2">
-                  <Plus className="w-4 h-4" />
-                  Report Defect
-                </Button>
+          <TabsContent value="defects" className="mt-6 space-y-6">
+            {/* Defects Overview Banner */}
+            <div className="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Defect Tracking</h2>
+                  <p className="text-red-100 text-sm">Monitor and resolve issues</p>
+                </div>
+                <Button className="bg-white text-red-700 hover:bg-red-50"><Plus className="h-4 w-4 mr-2" />Report Defect</Button>
               </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.length}</p><p className="text-xs text-red-100">Total</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'open').length}</p><p className="text-xs text-red-100">Open</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.severity === 'critical').length}</p><p className="text-xs text-red-100">Critical</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'resolved').length}</p><p className="text-xs text-red-100">Resolved</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">2.4d</p><p className="text-xs text-red-100">Avg Resolve</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">89%</p><p className="text-xs text-red-100">Fix Rate</p></div>
+              </div>
+            </div>
 
-              <Card>
-                <CardContent className="p-0">
-                  <div className="divide-y">
-                    {mockDefects.map((defect) => (
-                      <div key={defect.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-3">
-                            <Bug className={`w-5 h-5 ${defect.severity === 'critical' ? 'text-red-500' : defect.severity === 'major' ? 'text-orange-500' : 'text-yellow-500'}`} />
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs text-gray-500 font-mono">{defect.id.toUpperCase()}</span>
-                                <Badge className={getSeverityColor(defect.severity)}>{defect.severity}</Badge>
-                                <Badge variant="outline">{defect.status}</Badge>
-                              </div>
-                              <h4 className="font-medium">{defect.title}</h4>
-                              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                <span className="flex items-center gap-1">
-                                  <Link2 className="w-3 h-3" />
-                                  {defect.testCaseId}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Users className="w-3 h-3" />
-                                  {defect.assignedTo}
-                                </span>
-                                <span>{new Date(defect.createdAt).toLocaleDateString()}</span>
-                              </div>
+            {/* Severity Distribution */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { severity: 'Critical', count: mockDefects.filter(d => d.severity === 'critical').length, color: 'red', icon: AlertTriangle },
+                { severity: 'Major', count: mockDefects.filter(d => d.severity === 'major').length, color: 'orange', icon: Bug },
+                { severity: 'Minor', count: mockDefects.filter(d => d.severity === 'minor').length, color: 'yellow', icon: AlertTriangle },
+                { severity: 'Low', count: 2, color: 'green', icon: Bug },
+              ].map((sev, i) => (
+                <Card key={i} className={`border-${sev.color}-200 dark:border-${sev.color}-800`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg bg-${sev.color}-100 dark:bg-${sev.color}-900/30 flex items-center justify-center`}>
+                        <sev.icon className={`h-5 w-5 text-${sev.color}-600`} />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{sev.count}</p>
+                        <p className="text-xs text-gray-500">{sev.severity}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Defects List */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>All Defects</CardTitle>
+                  <div className="flex gap-2">
+                    <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search defects..." className="pl-10 w-64" /></div>
+                    <select className="px-4 py-2 border rounded-md bg-white dark:bg-gray-800"><option>All Severity</option><option>Critical</option><option>Major</option><option>Minor</option></select>
+                    <select className="px-4 py-2 border rounded-md bg-white dark:bg-gray-800"><option>All Status</option><option>Open</option><option>In Progress</option><option>Resolved</option></select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {mockDefects.map((defect) => (
+                    <div key={defect.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <Bug className={`w-5 h-5 ${defect.severity === 'critical' ? 'text-red-500' : defect.severity === 'major' ? 'text-orange-500' : 'text-yellow-500'}`} />
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs text-gray-500 font-mono">{defect.id.toUpperCase()}</span>
+                              <Badge className={getSeverityColor(defect.severity)}>{defect.severity}</Badge>
+                              <Badge variant="outline">{defect.status}</Badge>
+                            </div>
+                            <h4 className="font-medium">{defect.title}</h4>
+                            <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                              <span className="flex items-center gap-1"><Link2 className="w-3 h-3" />{defect.testCaseId}</span>
+                              <span className="flex items-center gap-1"><Users className="w-3 h-3" />{defect.assignedTo}</span>
+                              <span>{new Date(defect.createdAt).toLocaleDateString()}</span>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
                         </div>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Defect Insights */}
+            <div className="grid grid-cols-3 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Defects by Component</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[{ comp: 'Login Module', count: 5 }, { comp: 'API Gateway', count: 3 }, { comp: 'Dashboard', count: 2 }, { comp: 'Checkout', count: 2 }].map(c => (
+                      <div key={c.comp} className="flex items-center justify-between">
+                        <span className="text-sm">{c.comp}</span><Badge variant="outline">{c.count}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Resolution Time</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {[{ range: '< 1 day', pct: 35 }, { range: '1-3 days', pct: 40 }, { range: '3-7 days', pct: 15 }, { range: '> 7 days', pct: 10 }].map(r => (
+                      <div key={r.range} className="flex items-center gap-2">
+                        <span className="w-20 text-xs text-gray-500">{r.range}</span>
+                        <Progress value={r.pct} className="h-2 flex-1" />
+                        <span className="text-xs font-medium w-8 text-right">{r.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Top Reporters</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[{ name: 'Sarah Chen', count: 12 }, { name: 'Mike Johnson', count: 8 }, { name: 'Emily Davis', count: 6 }].map(r => (
+                      <div key={r.name} className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6"><AvatarFallback className="text-xs bg-red-100 text-red-700">{r.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                        <span className="flex-1 text-sm">{r.name}</span><Badge variant="outline">{r.count}</Badge>
                       </div>
                     ))}
                   </div>
@@ -843,13 +1118,93 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="mt-6">
+          <TabsContent value="reports" className="mt-6 space-y-6">
+            {/* Reports Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Test Reports & Analytics</h2>
+                  <p className="text-purple-100 text-sm">Comprehensive testing insights and metrics</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Button className="bg-white text-purple-700 hover:bg-purple-50"><Download className="h-4 w-4 mr-2" />Export PDF</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{overallPassRate.toFixed(0)}%</p>
+                  <p className="text-xs text-purple-100">Pass Rate</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{totalTests}</p>
+                  <p className="text-xs text-purple-100">Total Tests</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{((automatedTests / totalTests) * 100).toFixed(0)}%</p>
+                  <p className="text-xs text-purple-100">Automated</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">156</p>
+                  <p className="text-xs text-purple-100">Executions</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">24.5h</p>
+                  <p className="text-xs text-purple-100">Total Runtime</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">+12%</p>
+                  <p className="text-xs text-purple-100">Improvement</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Report Types */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { name: 'Summary', icon: FileText, desc: 'Overall test summary', color: 'blue' },
+                { name: 'Trends', icon: TrendingUp, desc: 'Historical trends', color: 'green' },
+                { name: 'Coverage', icon: Target, desc: 'Test coverage map', color: 'purple' },
+                { name: 'Defects', icon: Bug, desc: 'Defect analysis', color: 'red' },
+                { name: 'Custom', icon: PieChart, desc: 'Build custom report', color: 'amber' },
+              ].map((report, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-12 h-12 mx-auto mb-3 rounded-lg bg-${report.color}-100 dark:bg-${report.color}-900/30 flex items-center justify-center`}>
+                      <report.icon className={`h-6 w-6 text-${report.color}-600`} />
+                    </div>
+                    <h4 className="font-medium">{report.name}</h4>
+                    <p className="text-xs text-gray-500">{report.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pass Rate Trend</CardTitle>
-                  </CardHeader>
+                {/* Pass Rate by Week */}
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Pass Rate Trend (Last 8 Weeks)</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'].map((week, i) => {
+                        const rates = [82, 85, 84, 88, 86, 91, 89, 93]
+                        return (
+                          <div key={week} className="flex items-center gap-3">
+                            <span className="w-16 text-sm text-gray-500">{week}</span>
+                            <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4">
+                              <div className={`h-4 rounded-full ${rates[i] >= 90 ? 'bg-green-500' : rates[i] >= 80 ? 'bg-blue-500' : 'bg-yellow-500'}`} style={{ width: `${rates[i]}%` }} />
+                            </div>
+                            <span className={`text-sm font-medium w-12 text-right ${rates[i] >= 90 ? 'text-green-600' : ''}`}>{rates[i]}%</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Pass Rate by Suite</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       {mockSuites.map((suite) => (
@@ -977,6 +1332,329 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            </div>
+
+            {/* Scheduled Reports */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Scheduled Reports</CardTitle>
+                    <CardDescription>Automated report generation and delivery</CardDescription>
+                  </div>
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Schedule Report
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { name: 'Weekly Summary', schedule: 'Every Monday 9:00 AM', recipients: 5, format: 'PDF', status: 'active' },
+                    { name: 'Sprint Report', schedule: 'Every 2 weeks', recipients: 12, format: 'PDF + CSV', status: 'active' },
+                    { name: 'Defect Analysis', schedule: 'Daily 6:00 PM', recipients: 3, format: 'Email', status: 'paused' },
+                    { name: 'Coverage Metrics', schedule: 'Monthly 1st', recipients: 8, format: 'Excel', status: 'active' },
+                  ].map((report, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${report.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                          <Clock className={`h-5 w-5 ${report.status === 'active' ? 'text-green-600' : 'text-gray-500'}`} />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">{report.name}</h4>
+                          <p className="text-sm text-gray-500">{report.schedule}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-center">
+                          <p className="text-sm font-medium">{report.recipients}</p>
+                          <p className="text-xs text-gray-500">Recipients</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-medium">{report.format}</p>
+                          <p className="text-xs text-gray-500">Format</p>
+                        </div>
+                        <Badge className={report.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{report.status}</Badge>
+                        <Button variant="ghost" size="sm"><MoreHorizontal className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Report History */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Report History</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Input placeholder="Search reports..." className="w-64" />
+                    <Select>
+                      <SelectTrigger className="w-32"><SelectValue placeholder="All Types" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="summary">Summary</SelectItem>
+                        <SelectItem value="defects">Defects</SelectItem>
+                        <SelectItem value="coverage">Coverage</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { name: 'Sprint 23 Summary Report', type: 'Summary', generated: '2 hours ago', size: '2.4 MB', downloads: 12 },
+                    { name: 'Weekly Defect Analysis', type: 'Defects', generated: 'Yesterday', size: '1.8 MB', downloads: 8 },
+                    { name: 'Q4 Coverage Report', type: 'Coverage', generated: '3 days ago', size: '5.2 MB', downloads: 24 },
+                    { name: 'Regression Test Results', type: 'Summary', generated: '1 week ago', size: '3.1 MB', downloads: 15 },
+                    { name: 'Critical Path Analysis', type: 'Custom', generated: '2 weeks ago', size: '1.2 MB', downloads: 6 },
+                  ].map((report, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <h4 className="font-medium text-sm">{report.name}</h4>
+                          <p className="text-xs text-gray-500">{report.generated} • {report.size}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Badge variant="outline">{report.type}</Badge>
+                        <span className="text-sm text-gray-500">{report.downloads} downloads</span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm"><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm"><Share2 className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Report Insights */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Most Viewed Reports</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {[
+                      { name: 'Weekly Summary', views: 156 },
+                      { name: 'Sprint Report', views: 98 },
+                      { name: 'Coverage Analysis', views: 74 },
+                    ].map((report, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <span>{i + 1}. {report.name}</span>
+                        <span className="text-gray-500">{report.views} views</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Export Statistics</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-red-500" />PDF</span>
+                      <span className="font-medium">234</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-green-500" />Excel</span>
+                      <span className="font-medium">156</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-blue-500" />CSV</span>
+                      <span className="font-medium">89</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Report Actions</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start text-sm"><Upload className="h-4 w-4 mr-2" />Import Template</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm"><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm"><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit border-gray-200 dark:border-gray-700">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'environments', icon: Layers, label: 'Environments' },
+                      { id: 'integrations', icon: Link2, label: 'Integrations' },
+                      { id: 'automation', icon: Zap, label: 'Automation' },
+                      { id: 'notifications', icon: MessageSquare, label: 'Notifications' },
+                      { id: 'advanced', icon: Code, label: 'Advanced' },
+                    ].map(item => (
+                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-green-100 dark:bg-green-900/30 text-green-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                        <item.icon className="h-4 w-4" /><span className="text-sm font-medium">{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </CardContent>
+              </Card>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure your QA testing environment</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">Project Name</label><Input defaultValue="FreeFlow QA Suite" className="mt-1" /></div>
+                        <div><label className="text-sm font-medium">Default Test Owner</label><Input defaultValue="qa-team@company.com" className="mt-1" /></div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">Default Priority</label>
+                          <select className="w-full px-4 py-2 border rounded-md mt-1 bg-white dark:bg-gray-800">
+                            <option>Medium</option><option>High</option><option>Low</option><option>Critical</option>
+                          </select>
+                        </div>
+                        <div><label className="text-sm font-medium">Test Case Prefix</label><Input defaultValue="TC_" className="mt-1" /></div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Auto-assign Test Cases</h4><p className="text-sm text-gray-500">Automatically assign test cases to team members</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Require Approval</h4><p className="text-sm text-gray-500">Require approval before closing test runs</p></div><input type="checkbox" className="toggle" /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Track Test History</h4><p className="text-sm text-gray-500">Maintain history of all test executions</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'environments' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><div className="flex items-center justify-between"><div><CardTitle>Test Environments</CardTitle><CardDescription>Manage testing environments and configurations</CardDescription></div><Button><Plus className="h-4 w-4 mr-2" />Add Environment</Button></div></CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'Development', url: 'https://dev.app.com', status: 'active', browser: 'Chrome 120', os: 'Windows 11' },
+                        { name: 'Staging', url: 'https://staging.app.com', status: 'active', browser: 'Firefox 121', os: 'macOS Sonoma' },
+                        { name: 'Production', url: 'https://app.com', status: 'active', browser: 'Safari 17', os: 'iOS 17' },
+                        { name: 'QA', url: 'https://qa.app.com', status: 'inactive', browser: 'Edge 120', os: 'Windows 11' },
+                      ].map(env => (
+                        <div key={env.name} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${env.status === 'active' ? 'bg-green-100' : 'bg-gray-100'}`}><Layers className={`h-5 w-5 ${env.status === 'active' ? 'text-green-600' : 'text-gray-400'}`} /></div>
+                            <div><h4 className="font-medium">{env.name}</h4><p className="text-sm text-gray-500">{env.url}</p></div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right text-sm"><p>{env.browser}</p><p className="text-gray-500">{env.os}</p></div>
+                            <Badge className={env.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{env.status}</Badge>
+                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Integrations</CardTitle><CardDescription>Connect with external tools and services</CardDescription></CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'Jira', desc: 'Link defects to Jira issues', status: 'connected', icon: Bug },
+                        { name: 'GitHub', desc: 'Sync with GitHub issues and PRs', status: 'connected', icon: GitBranch },
+                        { name: 'Slack', desc: 'Send notifications to Slack channels', status: 'disconnected', icon: MessageSquare },
+                        { name: 'Jenkins', desc: 'Trigger tests from CI/CD pipelines', status: 'connected', icon: Terminal },
+                        { name: 'Selenium Grid', desc: 'Run tests on Selenium Grid', status: 'connected', icon: Layers },
+                      ].map(int => (
+                        <div key={int.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center border"><int.icon className="h-5 w-5 text-gray-600" /></div>
+                            <div><h4 className="font-medium">{int.name}</h4><p className="text-sm text-gray-500">{int.desc}</p></div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge className={int.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{int.status}</Badge>
+                            <Button variant={int.status === 'connected' ? 'outline' : 'default'} size="sm">{int.status === 'connected' ? 'Configure' : 'Connect'}</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'automation' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Automation Settings</CardTitle><CardDescription>Configure automated test execution</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">Default Framework</label>
+                          <select className="w-full px-4 py-2 border rounded-md mt-1 bg-white dark:bg-gray-800">
+                            <option>Selenium</option><option>Cypress</option><option>Playwright</option><option>Puppeteer</option>
+                          </select>
+                        </div>
+                        <div><label className="text-sm font-medium">Parallel Execution</label>
+                          <select className="w-full px-4 py-2 border rounded-md mt-1 bg-white dark:bg-gray-800">
+                            <option>4 threads</option><option>8 threads</option><option>16 threads</option><option>32 threads</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Auto-retry Failed Tests</h4><p className="text-sm text-gray-500">Automatically retry failed tests up to 3 times</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Screenshot on Failure</h4><p className="text-sm text-gray-500">Capture screenshots when tests fail</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Video Recording</h4><p className="text-sm text-gray-500">Record video of test execution</p></div><input type="checkbox" className="toggle" /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Headless Mode</h4><p className="text-sm text-gray-500">Run browsers in headless mode</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                      </div>
+                      <div><label className="text-sm font-medium">Timeout (seconds)</label><Input type="number" defaultValue="30" className="mt-1 w-32" /></div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure alerts and notifications</CardDescription></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Test Run Completed</h4><p className="text-sm text-gray-500">Notify when a test run completes</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Test Failure</h4><p className="text-sm text-gray-500">Notify immediately when a test fails</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Defect Created</h4><p className="text-sm text-gray-500">Notify when a new defect is logged</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Daily Summary</h4><p className="text-sm text-gray-500">Send daily test summary report</p></div><input type="checkbox" className="toggle" /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Milestone Reached</h4><p className="text-sm text-gray-500">Notify when milestone targets are met</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                      </div>
+                      <div><label className="text-sm font-medium">Notification Email</label><Input type="email" defaultValue="qa-alerts@company.com" className="mt-1" /></div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Configure advanced QA options</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">Data Retention (days)</label><Input type="number" defaultValue="365" className="mt-1" /></div>
+                        <div><label className="text-sm font-medium">Max Attachments Size (MB)</label><Input type="number" defaultValue="50" className="mt-1" /></div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">API Access</h4><p className="text-sm text-gray-500">Enable API access for external tools</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Require Test Steps</h4><p className="text-sm text-gray-500">Require detailed steps for all test cases</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><h4 className="font-medium">Version Control</h4><p className="text-sm text-gray-500">Track version history for test cases</p></div><input type="checkbox" className="toggle" defaultChecked /></div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+                        <h4 className="font-medium text-red-700 mb-2">Danger Zone</h4>
+                        <div className="flex items-center justify-between">
+                          <div><p className="text-sm text-red-600">Delete all test data</p><p className="text-xs text-red-500">This action cannot be undone</p></div>
+                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
           </TabsContent>

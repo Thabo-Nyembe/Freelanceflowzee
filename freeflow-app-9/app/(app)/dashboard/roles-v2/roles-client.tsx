@@ -396,6 +396,7 @@ export default function RolesClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [typeFilter, setTypeFilter] = useState<RoleType | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Computed stats
   const stats = useMemo(() => {
@@ -536,6 +537,68 @@ export default function RolesClient() {
 
             {/* Dashboard Tab */}
             <TabsContent value="dashboard" className="space-y-6">
+              {/* IAM Overview Banner */}
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Identity & Access Management Overview</h2>
+                    <p className="text-purple-100 text-sm">Enterprise-grade role-based access control</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button className="bg-white text-purple-700 hover:bg-purple-50"><Plus className="h-4 w-4 mr-2" />New Role</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-6 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.totalRoles}</p>
+                    <p className="text-xs text-purple-100">Total Roles</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.activeRoles}</p>
+                    <p className="text-xs text-purple-100">Active Roles</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</p>
+                    <p className="text-xs text-purple-100">Total Users</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.totalPermissions}</p>
+                    <p className="text-xs text-purple-100">Permissions</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.activePolicies}</p>
+                    <p className="text-xs text-purple-100">Active Policies</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">99.9%</p>
+                    <p className="text-xs text-purple-100">Uptime</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-6 gap-4">
+                {[
+                  { name: 'Create Role', icon: Plus, desc: 'Add new role', color: 'purple' },
+                  { name: 'Assign User', icon: UserPlus, desc: 'User to role', color: 'blue' },
+                  { name: 'Add Policy', icon: FolderLock, desc: 'Access policy', color: 'green' },
+                  { name: 'Audit Log', icon: FileText, desc: 'View activity', color: 'amber' },
+                  { name: 'Security', icon: ShieldCheck, desc: 'Check status', color: 'red' },
+                  { name: 'Reports', icon: BarChart3, desc: 'Analytics', color: 'indigo' },
+                ].map((action, i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer">
+                    <CardContent className="p-4 text-center">
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-${action.color}-100 dark:bg-${action.color}-900/30 flex items-center justify-center`}>
+                        <action.icon className={`h-6 w-6 text-${action.color}-600`} />
+                      </div>
+                      <h4 className="font-medium text-sm">{action.name}</h4>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Role Distribution */}
                 <Card className="lg:col-span-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
@@ -637,10 +700,177 @@ export default function RolesClient() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Role Insights */}
+              <div className="grid grid-cols-3 gap-6">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Top Assigned Roles</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {mockRoles.slice(0, 4).sort((a, b) => b.totalUsers - a.totalUsers).map((role, i) => (
+                        <div key={i} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-500">{i + 1}.</span>
+                            <span className="text-sm">{role.name}</span>
+                          </div>
+                          <span className="text-sm font-bold">{role.totalUsers}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Security Compliance</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { name: 'MFA Enforcement', value: 89, color: 'green' },
+                        { name: 'Session Security', value: 95, color: 'green' },
+                        { name: 'Role Audit Coverage', value: 78, color: 'yellow' },
+                        { name: 'Policy Compliance', value: 92, color: 'green' },
+                      ].map((item, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>{item.name}</span>
+                            <span className={`font-bold text-${item.color}-600`}>{item.value}%</span>
+                          </div>
+                          <Progress value={item.value} className="h-1.5" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Button variant="outline" className="w-full justify-start text-sm"><Plus className="w-4 h-4 mr-2" />Create New Role</Button>
+                      <Button variant="outline" className="w-full justify-start text-sm"><UserPlus className="w-4 h-4 mr-2" />Assign Users</Button>
+                      <Button variant="outline" className="w-full justify-start text-sm"><Download className="w-4 h-4 mr-2" />Export Report</Button>
+                      <Button variant="outline" className="w-full justify-start text-sm"><RefreshCw className="w-4 h-4 mr-2" />Sync Directory</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Role Analytics Summary */}
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { label: 'Avg Users/Role', value: Math.round(stats.totalUsers / stats.totalRoles), trend: '+12%', color: 'purple' },
+                  { label: 'Delegation Rate', value: `${Math.round((mockRoles.filter(r => r.canDelegate).length / mockRoles.length) * 100)}%`, trend: '+5%', color: 'blue' },
+                  { label: 'Custom Roles', value: stats.customRoles, trend: '+3', color: 'green' },
+                  { label: 'Active Sessions', value: '1,245', trend: '-8%', color: 'amber' },
+                ].map((item, i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">{item.label}</span>
+                        <Badge className={`text-xs ${item.trend.startsWith('+') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{item.trend}</Badge>
+                      </div>
+                      <p className={`text-2xl font-bold mt-2 text-${item.color}-600`}>{item.value}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Access Trends */}
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-purple-600" />
+                    Access Trends (Last 7 Days)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-7 gap-4">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+                      const values = [45, 62, 78, 85, 72, 35, 28]
+                      return (
+                        <div key={day} className="text-center">
+                          <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-lg relative overflow-hidden">
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-purple-500 to-indigo-500 rounded-lg" style={{ height: `${values[i]}%` }} />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">{day}</p>
+                          <p className="text-xs font-bold">{values[i]}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Health */}
+              <Card className="bg-gradient-to-r from-gray-800 to-gray-900 text-white border-0 shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                      <span className="font-medium">All IAM Systems Operational</span>
+                    </div>
+                    <span className="text-sm text-gray-400">Last sync: 2 minutes ago</span>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Roles Tab */}
             <TabsContent value="roles" className="space-y-6">
+              {/* Roles Overview Banner */}
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Role Management</h2>
+                    <p className="text-indigo-100 text-sm">Configure and manage access roles</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-indigo-700 hover:bg-indigo-50"><Plus className="h-4 w-4 mr-2" />Create Role</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.systemRoles}</p>
+                    <p className="text-xs text-indigo-100">System Roles</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.customRoles}</p>
+                    <p className="text-xs text-indigo-100">Custom Roles</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.activeRoles}</p>
+                    <p className="text-xs text-indigo-100">Active</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockRoles.filter(r => r.status === 'inactive').length}</p>
+                    <p className="text-xs text-indigo-100">Inactive</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockRoles.filter(r => r.canDelegate).length}</p>
+                    <p className="text-xs text-indigo-100">Delegatable</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Role Types Distribution */}
+              <div className="grid grid-cols-6 gap-4">
+                {[
+                  { type: 'admin', count: mockRoles.filter(r => r.type === 'admin').length, color: 'red', icon: Crown },
+                  { type: 'manager', count: mockRoles.filter(r => r.type === 'manager').length, color: 'orange', icon: Users },
+                  { type: 'user', count: mockRoles.filter(r => r.type === 'user').length, color: 'blue', icon: UserCheck },
+                  { type: 'viewer', count: mockRoles.filter(r => r.type === 'viewer').length, color: 'green', icon: Eye },
+                  { type: 'custom', count: mockRoles.filter(r => r.type === 'custom').length, color: 'purple', icon: Shield },
+                  { type: 'service', count: mockRoles.filter(r => r.type === 'service').length, color: 'gray', icon: KeyRound },
+                ].map((item, i) => (
+                  <Card key={i} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all ${typeFilter === item.type ? 'ring-2 ring-purple-500' : ''}`} onClick={() => setTypeFilter(item.type as any)}>
+                    <CardContent className="p-4 text-center">
+                      <item.icon className={`h-6 w-6 mx-auto mb-2 text-${item.color}-600`} />
+                      <p className="text-2xl font-bold">{item.count}</p>
+                      <p className="text-xs text-gray-500 capitalize">{item.type}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               {/* Search and Filter */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
@@ -736,6 +966,63 @@ export default function RolesClient() {
 
             {/* Permissions Tab */}
             <TabsContent value="permissions" className="space-y-6">
+              {/* Permissions Overview Banner */}
+              <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Permission Management</h2>
+                    <p className="text-amber-100 text-sm">Fine-grained access control configuration</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button className="bg-white text-amber-700 hover:bg-amber-50"><Plus className="h-4 w-4 mr-2" />Add Permission</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{stats.totalPermissions}</p>
+                    <p className="text-xs text-amber-100">Total</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{Object.keys(permissionsByCategory).length}</p>
+                    <p className="text-xs text-amber-100">Categories</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPermissions.filter(p => p.isGranted).length}</p>
+                    <p className="text-xs text-amber-100">Granted</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPermissions.filter(p => !p.isGranted).length}</p>
+                    <p className="text-xs text-amber-100">Denied</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPermissions.filter(p => p.conditions && p.conditions.length > 0).length}</p>
+                    <p className="text-xs text-amber-100">Conditional</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Permission Categories */}
+              <div className="grid grid-cols-4 gap-4">
+                {Object.entries(permissionsByCategory).slice(0, 4).map(([category, perms], i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                          <FolderLock className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">{category}</h4>
+                          <p className="text-xs text-gray-500">{perms.length} permissions</p>
+                        </div>
+                      </div>
+                      <Progress value={(perms.filter(p => p.isGranted).length / perms.length) * 100} className="h-2" />
+                      <p className="text-xs text-gray-500 mt-1">{perms.filter(p => p.isGranted).length} granted</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -786,6 +1073,60 @@ export default function RolesClient() {
 
             {/* Assignments Tab */}
             <TabsContent value="assignments" className="space-y-6">
+              {/* Assignments Overview Banner */}
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">User Role Assignments</h2>
+                    <p className="text-blue-100 text-sm">Manage user-to-role mappings</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserAssignments.length}</p>
+                    <p className="text-xs text-blue-100">Total</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserAssignments.filter(a => a.status === 'active').length}</p>
+                    <p className="text-xs text-blue-100">Active</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserAssignments.filter(a => a.status === 'expired').length}</p>
+                    <p className="text-xs text-blue-100">Expired</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserAssignments.filter(a => a.expiresAt).length}</p>
+                    <p className="text-xs text-blue-100">Temporary</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{new Set(mockUserAssignments.map(a => a.roleName)).size}</p>
+                    <p className="text-xs text-blue-100">Roles Used</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Assignment Status Cards */}
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { status: 'Active', count: mockUserAssignments.filter(a => a.status === 'active').length, color: 'green', icon: UserCheck },
+                  { status: 'Expired', count: mockUserAssignments.filter(a => a.status === 'expired').length, color: 'red', icon: UserX },
+                  { status: 'Suspended', count: mockUserAssignments.filter(a => a.status === 'suspended').length, color: 'orange', icon: AlertTriangle },
+                  { status: 'Pending', count: 0, color: 'blue', icon: Clock },
+                ].map((item, i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardContent className="p-4 text-center">
+                      <item.icon className={`h-8 w-8 mx-auto mb-2 text-${item.color}-600`} />
+                      <p className="text-2xl font-bold">{item.count}</p>
+                      <p className="text-sm text-gray-500">{item.status}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -796,10 +1137,10 @@ export default function RolesClient() {
                       </CardTitle>
                       <CardDescription>Manage role assignments for users</CardDescription>
                     </div>
-                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Assign Role
-                    </Button>
+                    <div className="flex gap-2">
+                      <Input placeholder="Search users..." className="w-64" />
+                      <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -846,20 +1187,75 @@ export default function RolesClient() {
 
             {/* Policies Tab */}
             <TabsContent value="policies" className="space-y-6">
+              {/* Policies Overview Banner */}
+              <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Access Policies</h2>
+                    <p className="text-green-100 text-sm">Conditional access and security rules</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Evaluate</Button>
+                    <Button className="bg-white text-green-700 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />Add Policy</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPolicies.length}</p>
+                    <p className="text-xs text-green-100">Total</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.active).length}</p>
+                    <p className="text-xs text-green-100">Active</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.type === 'allow').length}</p>
+                    <p className="text-xs text-green-100">Allow</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.type === 'deny').length}</p>
+                    <p className="text-xs text-green-100">Deny</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.type === 'conditional').length}</p>
+                    <p className="text-xs text-green-100">Conditional</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Policy Type Cards */}
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { type: 'Allow', desc: 'Grant access when conditions match', color: 'green', count: mockPolicies.filter(p => p.type === 'allow').length },
+                  { type: 'Deny', desc: 'Block access explicitly', color: 'red', count: mockPolicies.filter(p => p.type === 'deny').length },
+                  { type: 'Conditional', desc: 'Context-aware access decisions', color: 'blue', count: mockPolicies.filter(p => p.type === 'conditional').length },
+                ].map((item, i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className={`font-semibold text-${item.color}-600`}>{item.type} Policies</h4>
+                        <span className="text-2xl font-bold">{item.count}</span>
+                      </div>
+                      <p className="text-sm text-gray-500">{item.desc}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                        Access Policies
+                        Policy Rules
                       </CardTitle>
                       <CardDescription>Configure conditional access and security policies</CardDescription>
                     </div>
-                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Policy
-                    </Button>
+                    <div className="flex gap-2">
+                      <Input placeholder="Search policies..." className="w-64" />
+                      <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -914,13 +1310,72 @@ export default function RolesClient() {
 
             {/* Audit Log Tab */}
             <TabsContent value="audit" className="space-y-6">
+              {/* Audit Overview Banner */}
+              <div className="bg-gradient-to-r from-slate-600 to-gray-700 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">Audit Trail</h2>
+                    <p className="text-slate-200 text-sm">Complete activity log and compliance tracking</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-slate-700 hover:bg-slate-50"><Filter className="h-4 w-4 mr-2" />Filter</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAuditLogs.length}</p>
+                    <p className="text-xs text-slate-200">Total Events</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAuditLogs.filter(l => l.success).length}</p>
+                    <p className="text-xs text-slate-200">Successful</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockAuditLogs.filter(l => !l.success).length}</p>
+                    <p className="text-xs text-slate-200">Failed</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{new Set(mockAuditLogs.map(l => l.actor)).size}</p>
+                    <p className="text-xs text-slate-200">Actors</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">24h</p>
+                    <p className="text-xs text-slate-200">Retention</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Audit Stats */}
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { label: 'Role Changes', count: mockAuditLogs.filter(l => l.targetType === 'role').length, icon: Shield, color: 'purple' },
+                  { label: 'User Changes', count: mockAuditLogs.filter(l => l.targetType === 'user').length, icon: Users, color: 'blue' },
+                  { label: 'Permission Changes', count: mockAuditLogs.filter(l => l.targetType === 'permission').length, icon: Key, color: 'amber' },
+                  { label: 'Policy Changes', count: mockAuditLogs.filter(l => l.targetType === 'policy').length, icon: FolderLock, color: 'green' },
+                ].map((item, i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardContent className="p-4 text-center">
+                      <item.icon className={`h-6 w-6 mx-auto mb-2 text-${item.color}-600`} />
+                      <p className="text-2xl font-bold">{item.count}</p>
+                      <p className="text-sm text-gray-500">{item.label}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-indigo-600" />
-                    Audit Trail
-                  </CardTitle>
-                  <CardDescription>Complete history of role and permission changes</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-indigo-600" />
+                        Activity Log
+                      </CardTitle>
+                      <CardDescription>Complete history of role and permission changes</CardDescription>
+                    </div>
+                    <Input placeholder="Search events..." className="w-64" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[500px]">
@@ -962,20 +1417,74 @@ export default function RolesClient() {
 
             {/* Groups Tab */}
             <TabsContent value="groups" className="space-y-6">
+              {/* Groups Overview Banner */}
+              <div className="bg-gradient-to-r from-rose-600 to-pink-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">User Groups</h2>
+                    <p className="text-rose-100 text-sm">Organize users for bulk role management</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button className="bg-white text-rose-700 hover:bg-rose-50"><Plus className="h-4 w-4 mr-2" />Create Group</Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserGroups.length}</p>
+                    <p className="text-xs text-rose-100">Total Groups</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserGroups.filter(g => g.status === 'active').length}</p>
+                    <p className="text-xs text-rose-100">Active</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserGroups.reduce((sum, g) => sum + g.memberCount, 0)}</p>
+                    <p className="text-xs text-rose-100">Total Members</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{mockUserGroups.filter(g => g.isSystem).length}</p>
+                    <p className="text-xs text-rose-100">System Groups</p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold">{new Set(mockUserGroups.flatMap(g => g.roles)).size}</p>
+                    <p className="text-xs text-rose-100">Roles Linked</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Group Status Cards */}
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { label: 'Active Groups', count: mockUserGroups.filter(g => g.status === 'active').length, icon: CheckCircle, color: 'green' },
+                  { label: 'Inactive Groups', count: mockUserGroups.filter(g => g.status === 'inactive').length, icon: AlertCircle, color: 'gray' },
+                  { label: 'System Groups', count: mockUserGroups.filter(g => g.isSystem).length, icon: Crown, color: 'amber' },
+                  { label: 'Custom Groups', count: mockUserGroups.filter(g => !g.isSystem).length, icon: UsersRound, color: 'purple' },
+                ].map((item, i) => (
+                  <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardContent className="p-4 text-center">
+                      <item.icon className={`h-6 w-6 mx-auto mb-2 text-${item.color}-600`} />
+                      <p className="text-2xl font-bold">{item.count}</p>
+                      <p className="text-sm text-gray-500">{item.label}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <UsersRound className="w-5 h-5 text-indigo-600" />
-                        User Groups
+                        Group Directory
                       </CardTitle>
                       <CardDescription>Manage user groups for bulk role assignments</CardDescription>
                     </div>
-                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Group
-                    </Button>
+                    <div className="flex gap-2">
+                      <Input placeholder="Search groups..." className="w-64" />
+                      <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1028,148 +1537,268 @@ export default function RolesClient() {
             </TabsContent>
 
             {/* Settings Tab */}
-            <TabsContent value="settings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-indigo-600" />
-                      Role Settings
-                    </CardTitle>
-                    <CardDescription>Configure default role behaviors</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Auto-assign default role</p>
-                        <p className="text-sm text-gray-500">Automatically assign default role to new users</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Role inheritance</p>
-                        <p className="text-sm text-gray-500">Allow roles to inherit permissions from parent roles</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Delegation enabled</p>
-                        <p className="text-sm text-gray-500">Allow roles with delegation flag to assign roles</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Role expiration</p>
-                        <p className="text-sm text-gray-500">Enable time-limited role assignments</p>
-                      </div>
-                      <Switch />
-                    </div>
+            <TabsContent value="settings" className="mt-6">
+              <div className="grid grid-cols-12 gap-6">
+                {/* Settings Sidebar */}
+                <Card className="col-span-3 h-fit bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'security', icon: ShieldCheck, label: 'Security' },
+                        { id: 'permissions', icon: Key, label: 'Permissions' },
+                        { id: 'integrations', icon: Globe, label: 'Integrations' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'advanced', icon: Layers, label: 'Advanced' },
+                      ].map(item => (
+                        <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                          <item.icon className="h-4 w-4" /><span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Fingerprint className="w-5 h-5 text-indigo-600" />
-                      Security Settings
-                    </CardTitle>
-                    <CardDescription>Configure authentication and security options</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Require MFA for admins</p>
-                        <p className="text-sm text-gray-500">Force multi-factor authentication for admin roles</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Session timeout</p>
-                        <p className="text-sm text-gray-500">Automatically log out inactive users</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">IP restrictions</p>
-                        <p className="text-sm text-gray-500">Limit access based on IP addresses</p>
-                      </div>
-                      <Switch />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Audit all actions</p>
-                        <p className="text-sm text-gray-500">Log all role and permission changes</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Settings Content */}
+                <div className="col-span-9 space-y-6">
+                  {settingsTab === 'general' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure default role behaviors and inheritance</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="text-sm font-medium">Default Role</label><Input defaultValue="Standard User" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Role Hierarchy Depth</label><Input type="number" defaultValue="5" className="mt-1" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Auto-assign default role</p><p className="text-sm text-gray-500">Automatically assign default role to new users</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Role inheritance</p><p className="text-sm text-gray-500">Allow roles to inherit permissions from parent roles</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Delegation enabled</p><p className="text-sm text-gray-500">Allow roles with delegation flag to assign roles</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Role expiration</p><p className="text-sm text-gray-500">Enable time-limited role assignments</p></div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Conflict resolution</p><p className="text-sm text-gray-500">Use most permissive role when conflicts occur</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <Button className="bg-purple-600 hover:bg-purple-700">Save General Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Bell className="w-5 h-5 text-indigo-600" />
-                      Notifications
-                    </CardTitle>
-                    <CardDescription>Configure notification preferences</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Role changes</p>
-                        <p className="text-sm text-gray-500">Notify when roles are modified</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Permission denials</p>
-                        <p className="text-sm text-gray-500">Alert on permission denial events</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Policy violations</p>
-                        <p className="text-sm text-gray-500">Notify on access policy violations</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </CardContent>
-                </Card>
+                  {settingsTab === 'security' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader><CardTitle>Security Settings</CardTitle><CardDescription>Configure authentication and access security</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <ShieldCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                            <p className="font-medium">MFA Enabled</p><p className="text-2xl font-bold text-green-600">89%</p>
+                          </CardContent></Card>
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <Lock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                            <p className="font-medium">Secure Sessions</p><p className="text-2xl font-bold text-blue-600">1,245</p>
+                          </CardContent></Card>
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+                            <p className="font-medium">Security Alerts</p><p className="text-2xl font-bold text-orange-600">3</p>
+                          </CardContent></Card>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Require MFA for admins</p><p className="text-sm text-gray-500">Force multi-factor authentication for admin roles</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Session timeout (30 min)</p><p className="text-sm text-gray-500">Automatically log out inactive users</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">IP restrictions</p><p className="text-sm text-gray-500">Limit access based on IP addresses</p></div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Device fingerprinting</p><p className="text-sm text-gray-500">Track and verify user devices</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Audit all actions</p><p className="text-sm text-gray-500">Log all role and permission changes</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <Button className="bg-purple-600 hover:bg-purple-700">Save Security Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Download className="w-5 h-5 text-indigo-600" />
-                      Data Management
-                    </CardTitle>
-                    <CardDescription>Export and backup options</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Roles & Permissions
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Export Audit Logs
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Users className="w-4 h-4 mr-2" />
-                      Export User Assignments
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Sync with Directory
-                    </Button>
-                  </CardContent>
-                </Card>
+                  {settingsTab === 'permissions' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader><CardTitle>Permission Settings</CardTitle><CardDescription>Configure default permission behaviors</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="text-sm font-medium">Default Access Level</label><Input defaultValue="Read" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Permission Scope</label><Input defaultValue="Project" className="mt-1" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Implicit deny</p><p className="text-sm text-gray-500">Deny access when no explicit permission exists</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Permission caching</p><p className="text-sm text-gray-500">Cache permissions for faster access checks</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Resource-level permissions</p><p className="text-sm text-gray-500">Enable fine-grained resource permissions</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Conditional access</p><p className="text-sm text-gray-500">Enable time/location-based permissions</p></div>
+                            <Switch />
+                          </div>
+                        </div>
+                        <Button className="bg-purple-600 hover:bg-purple-700">Save Permission Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'integrations' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader><CardTitle>Identity Integrations</CardTitle><CardDescription>Connect with identity providers and directories</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { name: 'Okta', status: 'connected', icon: '🔐', users: 1245 },
+                            { name: 'Azure AD', status: 'connected', icon: '☁️', users: 890 },
+                            { name: 'Google Workspace', status: 'available', icon: '🟢', users: 0 },
+                            { name: 'LDAP', status: 'available', icon: '📁', users: 0 },
+                          ].map((integration, i) => (
+                            <Card key={i} className={`border ${integration.status === 'connected' ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-2xl">{integration.icon}</span>
+                                    <h4 className="font-medium">{integration.name}</h4>
+                                  </div>
+                                  <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{integration.status}</Badge>
+                                </div>
+                                {integration.status === 'connected' && <p className="text-sm text-gray-500">{integration.users} users synced</p>}
+                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full mt-3" size="sm">
+                                  {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Auto-sync users</p><p className="text-sm text-gray-500">Automatically sync users from identity providers</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">SCIM provisioning</p><p className="text-sm text-gray-500">Enable SCIM for user provisioning</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'notifications' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure alerts and notification preferences</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <Bell className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                            <p className="font-medium">Email Alerts</p><p className="text-sm text-gray-500">Enabled</p>
+                          </CardContent></Card>
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <AlertCircle className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                            <p className="font-medium">Slack</p><p className="text-sm text-gray-500">Connected</p>
+                          </CardContent></Card>
+                          <Card className="border"><CardContent className="p-4 text-center">
+                            <Globe className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                            <p className="font-medium">Webhooks</p><p className="text-sm text-gray-500">3 Active</p>
+                          </CardContent></Card>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Role changes</p><p className="text-sm text-gray-500">Notify when roles are created, modified, or deleted</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Permission denials</p><p className="text-sm text-gray-500">Alert on permission denial events</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Policy violations</p><p className="text-sm text-gray-500">Notify on access policy violations</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">User assignments</p><p className="text-sm text-gray-500">Notify when users are assigned to roles</p></div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Security alerts</p><p className="text-sm text-gray-500">Immediate alerts for security events</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <Button className="bg-purple-600 hover:bg-purple-700">Save Notification Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'advanced' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and data management</CardDescription></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="text-sm font-medium">Cache TTL (seconds)</label><Input type="number" defaultValue="300" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Max Roles per User</label><Input type="number" defaultValue="10" className="mt-1" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">Debug mode</p><p className="text-sm text-gray-500">Enable detailed logging for troubleshooting</p></div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div><p className="font-medium">API rate limiting</p><p className="text-sm text-gray-500">Limit API calls for role operations</p></div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <h4 className="font-medium">Data Management</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
+                            <Button variant="outline" className="justify-start"><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
+                            <Button variant="outline" className="justify-start"><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
+                            <Button variant="outline" className="justify-start"><RefreshCw className="w-4 h-4 mr-2" />Sync with Directory</Button>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Danger Zone</h4>
+                          <p className="text-sm text-red-600 dark:text-red-300 mb-3">These actions are irreversible. Proceed with caution.</p>
+                          <div className="flex gap-3">
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset All Permissions</Button>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Clear Audit Logs</Button>
+                          </div>
+                        </div>
+                        <Button className="bg-purple-600 hover:bg-purple-700">Save Advanced Settings</Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             </TabsContent>
           </Tabs>

@@ -465,6 +465,80 @@ export default function MarketplaceClient() {
 
           {/* Browse Tab */}
           <TabsContent value="browse" className="mt-6 space-y-6">
+            {/* Marketplace Stats Banner */}
+            <div className="bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-1">Marketplace Hub</h2>
+                  <p className="text-violet-200">Discover apps to supercharge your workflow</p>
+                </div>
+                <div className="flex items-center gap-8">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{mockProducts.length}</div>
+                    <p className="text-violet-200 text-sm">Total Apps</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">12</div>
+                    <p className="text-violet-200 text-sm">Installed</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">4.8</div>
+                    <p className="text-violet-200 text-sm">Avg Rating</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Categories */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                { name: 'Productivity', icon: Zap, count: 24, color: 'bg-blue-100 text-blue-600' },
+                { name: 'Analytics', icon: BarChart3, count: 18, color: 'bg-green-100 text-green-600' },
+                { name: 'Marketing', icon: Megaphone, count: 15, color: 'bg-orange-100 text-orange-600' },
+                { name: 'Security', icon: Shield, count: 12, color: 'bg-red-100 text-red-600' },
+                { name: 'Automation', icon: RefreshCw, count: 20, color: 'bg-purple-100 text-purple-600' },
+                { name: 'Development', icon: Code, count: 22, color: 'bg-cyan-100 text-cyan-600' },
+              ].map((cat) => (
+                <button key={cat.name} className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all text-left">
+                  <div className={`w-10 h-10 ${cat.color} rounded-lg flex items-center justify-center mb-3`}>
+                    <cat.icon className="w-5 h-5" />
+                  </div>
+                  <p className="font-medium text-gray-900 dark:text-white">{cat.name}</p>
+                  <p className="text-sm text-gray-500">{cat.count} apps</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Trending Apps */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-violet-600" />
+                  Trending This Week
+                </CardTitle>
+                <Button variant="ghost" size="sm">View All</Button>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {mockProducts.slice(0, 5).map((product, idx) => (
+                    <div key={product.id} className="flex-shrink-0 w-48 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg font-bold text-violet-600">#{idx + 1}</span>
+                        <Badge variant="outline" className="text-xs">{product.category}</Badge>
+                      </div>
+                      <p className="font-medium text-gray-900 dark:text-white mb-1">{product.name}</p>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                        <span>{product.rating}</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="text-gray-500">{product.downloads.toLocaleString()} installs</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex flex-wrap items-center gap-4">
@@ -539,7 +613,76 @@ export default function MarketplaceClient() {
           </TabsContent>
 
           {/* Featured Tab */}
-          <TabsContent value="featured" className="mt-6">
+          <TabsContent value="featured" className="mt-6 space-y-8">
+            {/* Editor's Pick Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
+              <div className="flex items-center gap-3 mb-4">
+                <Crown className="h-8 w-8" />
+                <div>
+                  <h2 className="text-xl font-bold">Editor's Choice Apps</h2>
+                  <p className="text-amber-100 text-sm">Handpicked by our expert team for exceptional quality</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">12</p>
+                  <p className="text-sm text-amber-100">Featured Apps</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">4.9</p>
+                  <p className="text-sm text-amber-100">Avg Rating</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">156K</p>
+                  <p className="text-sm text-amber-100">Total Installs</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">98%</p>
+                  <p className="text-sm text-amber-100">Satisfaction</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Spotlight */}
+            <Card className="border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="grid grid-cols-2">
+                <div className="bg-gradient-to-br from-violet-600 to-purple-700 p-8 flex flex-col justify-center">
+                  <Badge className="w-fit bg-white/20 text-white mb-4"><Zap className="h-3 w-3 mr-1" />App of the Week</Badge>
+                  <h2 className="text-2xl font-bold text-white mb-2">Analytics Pro Suite</h2>
+                  <p className="text-violet-200 mb-4">The most comprehensive analytics solution for growing businesses. Track, analyze, and optimize your entire operation.</p>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="flex">{[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />)}</div>
+                    <span className="text-white">4.9 (2,847 reviews)</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button className="bg-white text-violet-600 hover:bg-violet-50"><Download className="h-4 w-4 mr-2" />Install Now</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10">Learn More</Button>
+                  </div>
+                </div>
+                <div className="p-8">
+                  <h3 className="font-semibold mb-4">Key Features</h3>
+                  <div className="space-y-3">
+                    {['Real-time dashboard with 50+ metrics', 'AI-powered insights and predictions', 'Custom report builder', 'Team collaboration tools', 'API access & webhooks', '24/7 priority support'].map((feature, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Starting at</p>
+                        <p className="text-2xl font-bold">$49<span className="text-sm font-normal text-gray-500">/month</span></p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-700">14-day free trial</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Featured Apps Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {mockProducts.filter(p => p.isFeatured).map(product => (
                 <Card key={product.id} className="border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow">
@@ -570,6 +713,72 @@ export default function MarketplaceClient() {
                 </Card>
               ))}
             </div>
+
+            {/* Featured Vendor Spotlight */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5 text-amber-500" />Featured Vendor of the Month</CardTitle>
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">Top Partner</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-start gap-6">
+                  <Avatar className="h-20 w-20"><AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-500 text-white text-2xl">TP</AvatarFallback></Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold">TechPro Solutions</h3>
+                      <Shield className="h-5 w-5 text-blue-500" />
+                      <Badge className="bg-violet-100 text-violet-700">Elite Partner</Badge>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">Industry-leading provider of enterprise productivity and security solutions. Trusted by over 10,000 businesses worldwide.</p>
+                    <div className="grid grid-cols-5 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+                      <div className="text-center"><p className="text-xl font-bold">15</p><p className="text-xs text-gray-500">Products</p></div>
+                      <div className="text-center"><p className="text-xl font-bold">4.9</p><p className="text-xs text-gray-500">Avg Rating</p></div>
+                      <div className="text-center"><p className="text-xl font-bold">45K</p><p className="text-xs text-gray-500">Customers</p></div>
+                      <div className="text-center"><p className="text-xl font-bold">$2.3M</p><p className="text-xs text-gray-500">Revenue</p></div>
+                      <div className="text-center"><p className="text-xl font-bold">&lt;2hr</p><p className="text-xs text-gray-500">Response</p></div>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
+                      <Button variant="outline"><Mail className="h-4 w-4 mr-2" />Contact</Button>
+                      <Button variant="outline"><Heart className="h-4 w-4 mr-2" />Follow</Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Rising Stars */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-orange-500" />Rising Stars</CardTitle>
+                <p className="text-sm text-gray-500">New apps gaining traction this month</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { name: 'DataSync Pro', growth: '+245%', installs: '2.3K', category: 'Integration' },
+                    { name: 'AI Writer', growth: '+189%', installs: '1.8K', category: 'AI Tools' },
+                    { name: 'SecureVault', growth: '+156%', installs: '1.5K', category: 'Security' },
+                  ].map((app, i) => (
+                    <div key={i} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center"><Package className="h-6 w-6 text-white" /></div>
+                        <div>
+                          <h4 className="font-semibold">{app.name}</h4>
+                          <Badge variant="outline" className="text-xs">{app.category}</Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">{app.installs} installs</span>
+                        <Badge className="bg-green-100 text-green-700"><TrendingUp className="h-3 w-3 mr-1" />{app.growth}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Collections Tab */}
@@ -596,48 +805,227 @@ export default function MarketplaceClient() {
           </TabsContent>
 
           {/* Vendors Tab */}
-          <TabsContent value="vendors" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockVendors.map(vendor => (
-                <Card key={vendor.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4 mb-4">
-                      <Avatar className="h-16 w-16"><AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xl">{vendor.name.charAt(0)}</AvatarFallback></Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg">{vendor.name}</h3>
-                          {vendor.isVerified && <Shield className="h-4 w-4 text-blue-500" />}
-                          {vendor.isFeatured && <Badge className="bg-amber-100 text-amber-700"><Crown className="h-3 w-3 mr-1" />Featured</Badge>}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500"><MapPin className="h-3 w-3" />{vendor.location}</div>
-                      </div>
+          <TabsContent value="vendors" className="mt-6 space-y-6">
+            {/* Vendor Stats Overview */}
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Vendor Ecosystem</h2>
+                  <p className="text-indigo-200 text-sm">Partner network performance overview</p>
+                </div>
+                <Button variant="outline" className="border-white/50 text-white hover:bg-white/10">
+                  <Plus className="h-4 w-4 mr-2" />Apply as Vendor
+                </Button>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockVendors.length}</p>
+                  <p className="text-sm text-indigo-100">Total Vendors</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockVendors.filter(v => v.isVerified).length}</p>
+                  <p className="text-sm text-indigo-100">Verified</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">4.7</p>
+                  <p className="text-sm text-indigo-100">Avg Rating</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">$1.2M</p>
+                  <p className="text-sm text-indigo-100">Total Revenue</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">48</p>
+                  <p className="text-sm text-indigo-100">Products</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">&lt;4hr</p>
+                  <p className="text-sm text-indigo-100">Avg Response</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Vendor Tiers */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { tier: 'Elite', icon: Crown, color: 'from-amber-500 to-orange-500', count: 2, perks: 'Priority placement, reduced fees' },
+                { tier: 'Gold', icon: Award, color: 'from-yellow-500 to-amber-500', count: 5, perks: 'Featured listings, analytics' },
+                { tier: 'Silver', icon: Shield, color: 'from-gray-400 to-gray-500', count: 12, perks: 'Standard features, support' },
+                { tier: 'Bronze', icon: Users, color: 'from-orange-700 to-amber-700', count: 28, perks: 'Basic marketplace access' },
+              ].map((t, i) => (
+                <Card key={i} className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${t.color} flex items-center justify-center mb-3`}>
+                      <t.icon className="h-5 w-5 text-white" />
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{vendor.description}</p>
-                    <div className="grid grid-cols-4 gap-4 text-center mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div><p className="text-xl font-bold">{vendor.productCount}</p><p className="text-xs text-gray-500">Products</p></div>
-                      <div><p className="text-xl font-bold">{vendor.rating}</p><p className="text-xs text-gray-500">Rating</p></div>
-                      <div><p className="text-xl font-bold">{(vendor.totalSales / 1000).toFixed(1)}K</p><p className="text-xs text-gray-500">Sales</p></div>
-                      <div><p className="text-xl font-bold">${(vendor.totalRevenue / 1000).toFixed(0)}K</p><p className="text-xs text-gray-500">Revenue</p></div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                      <Clock className="h-4 w-4" /><span>Response time: {vendor.responseTime}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1"><Mail className="h-4 w-4 mr-2" />Contact</Button>
-                      <Button className="flex-1"><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
-                    </div>
+                    <h4 className="font-semibold">{t.tier} Partners</h4>
+                    <p className="text-2xl font-bold">{t.count}</p>
+                    <p className="text-xs text-gray-500 mt-1">{t.perks}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Vendor Directory */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Vendor Directory</CardTitle>
+                  <div className="flex gap-2">
+                    <Select>
+                      <SelectTrigger className="w-[150px]"><SelectValue placeholder="All Tiers" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Tiers</SelectItem>
+                        <SelectItem value="elite">Elite</SelectItem>
+                        <SelectItem value="gold">Gold</SelectItem>
+                        <SelectItem value="silver">Silver</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select>
+                      <SelectTrigger className="w-[150px]"><SelectValue placeholder="Sort By" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="revenue">Revenue</SelectItem>
+                        <SelectItem value="rating">Rating</SelectItem>
+                        <SelectItem value="products">Products</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {mockVendors.map(vendor => (
+                    <div key={vendor.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-16 w-16"><AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xl">{vendor.name.charAt(0)}</AvatarFallback></Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{vendor.name}</h3>
+                            {vendor.isVerified && <Shield className="h-4 w-4 text-blue-500" />}
+                            {vendor.isFeatured && <Badge className="bg-amber-100 text-amber-700"><Crown className="h-3 w-3 mr-1" />Featured</Badge>}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{vendor.location}</span>
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Response: {vendor.responseTime}</span>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{vendor.description}</p>
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                              <span className="font-medium">{vendor.rating}</span>
+                            </div>
+                            <span className="text-sm text-gray-500">{vendor.productCount} products</span>
+                            <span className="text-sm text-gray-500">{(vendor.totalSales / 1000).toFixed(1)}K sales</span>
+                            <span className="text-sm font-medium text-green-600">${(vendor.totalRevenue / 1000).toFixed(0)}K revenue</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm"><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm"><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Vendor Performance Leaderboard */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5 text-amber-500" />Top Sellers</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockVendors.sort((a, b) => b.totalRevenue - a.totalRevenue).slice(0, 5).map((v, i) => (
+                      <div key={v.id} className="flex items-center gap-3">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-200 text-gray-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}`}>{i + 1}</span>
+                        <Avatar className="h-8 w-8"><AvatarFallback className="bg-violet-100 text-violet-700 text-xs">{v.name.charAt(0)}</AvatarFallback></Avatar>
+                        <div className="flex-1"><p className="font-medium">{v.name}</p><p className="text-xs text-gray-500">{v.productCount} products</p></div>
+                        <span className="font-semibold text-green-600">${(v.totalRevenue / 1000).toFixed(0)}K</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Star className="h-5 w-5 text-amber-500" />Highest Rated</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockVendors.sort((a, b) => b.rating - a.rating).slice(0, 5).map((v, i) => (
+                      <div key={v.id} className="flex items-center gap-3">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-200 text-gray-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}`}>{i + 1}</span>
+                        <Avatar className="h-8 w-8"><AvatarFallback className="bg-violet-100 text-violet-700 text-xs">{v.name.charAt(0)}</AvatarFallback></Avatar>
+                        <div className="flex-1"><p className="font-medium">{v.name}</p><p className="text-xs text-gray-500">{v.totalSales} reviews</p></div>
+                        <div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-semibold">{v.rating}</span></div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Reviews Tab */}
-          <TabsContent value="reviews" className="mt-6">
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockReviews.length}</p><p className="text-sm text-gray-500">Total Reviews</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-amber-500">4.7</p><p className="text-sm text-gray-500">Average Rating</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">92%</p><p className="text-sm text-gray-500">Positive Reviews</p></CardContent></Card>
+          <TabsContent value="reviews" className="mt-6 space-y-6">
+            {/* Reviews Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Review Management</h2>
+                  <p className="text-amber-100 text-sm">Monitor and respond to customer feedback</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-amber-700 hover:bg-amber-50"><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockReviews.length}</p>
+                  <p className="text-sm text-amber-100">Total Reviews</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">4.7</p>
+                  <p className="text-sm text-amber-100">Avg Rating</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">92%</p>
+                  <p className="text-sm text-amber-100">Positive</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockReviews.filter(r => r.status === 'pending').length}</p>
+                  <p className="text-sm text-amber-100">Pending</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockReviews.filter(r => r.response).length}</p>
+                  <p className="text-sm text-amber-100">Responded</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">2.3h</p>
+                  <p className="text-sm text-amber-100">Avg Response</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Rating Distribution */}
+            <div className="grid grid-cols-5 gap-4">
+              {[5, 4, 3, 2, 1].map(stars => {
+                const counts = [156, 89, 23, 8, 4]
+                const pct = [56, 32, 8, 3, 1]
+                return (
+                  <Card key={stars} className="border-gray-200 dark:border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        {[...Array(stars)].map((_, i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
+                        {[...Array(5-stars)].map((_, i) => <Star key={i} className="h-4 w-4 text-gray-300" />)}
+                      </div>
+                      <p className="text-xl font-bold">{counts[5-stars]}</p>
+                      <p className="text-xs text-gray-500">{pct[5-stars]}% of reviews</p>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
@@ -674,62 +1062,304 @@ export default function MarketplaceClient() {
           </TabsContent>
 
           {/* Orders Tab */}
-          <TabsContent value="orders" className="mt-6">
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockOrders.length}</p><p className="text-sm text-gray-500">Total Orders</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">{mockOrders.filter(o => o.status === 'completed').length}</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-amber-500">{mockOrders.filter(o => o.status === 'pending' || o.status === 'processing').length}</p><p className="text-sm text-gray-500">Pending</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">${mockOrders.reduce((sum, o) => sum + o.amount, 0)}</p><p className="text-sm text-gray-500">Total Revenue</p></CardContent></Card>
+          <TabsContent value="orders" className="mt-6 space-y-6">
+            {/* Orders Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Order Management</h2>
+                  <p className="text-emerald-200 text-sm">Track and manage all marketplace transactions</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50"><FileText className="h-4 w-4 mr-2" />Generate Report</Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockOrders.length}</p>
+                  <p className="text-sm text-emerald-100">Total Orders</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'completed').length}</p>
+                  <p className="text-sm text-emerald-100">Completed</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'pending').length}</p>
+                  <p className="text-sm text-emerald-100">Pending</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'processing').length}</p>
+                  <p className="text-sm text-emerald-100">Processing</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">${mockOrders.reduce((sum, o) => sum + o.amount, 0)}</p>
+                  <p className="text-sm text-emerald-100">Revenue</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold">$32.40</p>
+                  <p className="text-sm text-emerald-100">Avg Order</p>
+                </div>
+              </div>
             </div>
+
+            {/* Order Filters & Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input placeholder="Search orders..." className="pl-10 w-64" />
+                    </div>
+                    <Select>
+                      <SelectTrigger className="w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="refunded">Refunded</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select>
+                      <SelectTrigger className="w-[130px]"><SelectValue placeholder="Payment" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Methods</SelectItem>
+                        <SelectItem value="card">Credit Card</SelectItem>
+                        <SelectItem value="paypal">PayPal</SelectItem>
+                        <SelectItem value="crypto">Crypto</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input type="date" className="w-[150px]" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />Filters</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Orders Table */}
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800">
-                      <tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th><th className="px-4 py-3"></th></tr>
+                      <tr>
+                        <th className="px-4 py-3 text-left"><input type="checkbox" className="rounded" /></th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {mockOrders.map(order => (
                         <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="px-4 py-4"><span className="font-mono text-sm">{order.orderNumber}</span></td>
-                          <td className="px-4 py-4"><div><p className="font-medium">{order.product.name}</p><p className="text-xs text-gray-500">{order.product.vendor}</p></div></td>
-                          <td className="px-4 py-4"><div><p className="font-medium">{order.customer.name}</p><p className="text-xs text-gray-500">{order.customer.email}</p></div></td>
-                          <td className="px-4 py-4"><span className="font-semibold">${order.amount}</span><span className="text-xs text-gray-500 ml-1">/{order.paymentMethod}</span></td>
+                          <td className="px-4 py-4"><input type="checkbox" className="rounded" /></td>
+                          <td className="px-4 py-4">
+                            <span className="font-mono text-sm text-violet-600">{order.orderNumber}</span>
+                            <p className="text-xs text-gray-500">{order.paymentMethod}</p>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center"><Package className="h-5 w-5 text-white" /></div>
+                              <div><p className="font-medium">{order.product.name}</p><p className="text-xs text-gray-500">{order.product.vendor}</p></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8"><AvatarFallback className="bg-gray-100 text-gray-600 text-xs">{order.customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                              <div><p className="font-medium">{order.customer.name}</p><p className="text-xs text-gray-500">{order.customer.email}</p></div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4"><span className="font-semibold">${order.amount}</span></td>
+                          <td className="px-4 py-4"><span className="text-green-600 font-medium">${(order.amount * 0.15).toFixed(2)}</span></td>
                           <td className="px-4 py-4"><Badge className={getStatusColor(order.status)}>{order.status}</Badge></td>
                           <td className="px-4 py-4 text-sm text-gray-500">{order.date}</td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="sm" onClick={() => { setSelectedOrder(order); setShowOrderDialog(true) }}><Eye className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedOrder(order); setShowOrderDialog(true) }}><Eye className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm"><FileText className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm"><MoreHorizontal className="h-4 w-4" /></Button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                <div className="flex items-center justify-between p-4 border-t">
+                  <p className="text-sm text-gray-500">Showing 1-{mockOrders.length} of {mockOrders.length} orders</p>
+                  <div className="flex gap-1">
+                    <Button variant="outline" size="sm" disabled>Previous</Button>
+                    <Button variant="outline" size="sm" className="bg-violet-50 text-violet-700">1</Button>
+                    <Button variant="outline" size="sm">2</Button>
+                    <Button variant="outline" size="sm">3</Button>
+                    <Button variant="outline" size="sm">Next</Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><PieChart className="h-5 w-5 text-violet-500" /><span className="text-sm">Conversion Rate</span></div><p className="text-2xl font-bold mt-2">3.2%</p><p className="text-xs text-green-600">+0.4% from last month</p></CardContent></Card>
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Activity className="h-5 w-5 text-blue-500" /><span className="text-sm">Page Views</span></div><p className="text-2xl font-bold mt-2">45.2K</p><p className="text-xs text-green-600">+12% from last month</p></CardContent></Card>
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Target className="h-5 w-5 text-green-500" /><span className="text-sm">Install Rate</span></div><p className="text-2xl font-bold mt-2">8.7%</p><p className="text-xs text-green-600">+1.2% from last month</p></CardContent></Card>
-              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Clock className="h-5 w-5 text-amber-500" /><span className="text-sm">Avg Session</span></div><p className="text-2xl font-bold mt-2">4m 32s</p><p className="text-xs text-green-600">+23s from last month</p></CardContent></Card>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
+            {/* Order Insights */}
+            <div className="grid grid-cols-3 gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Revenue by Category</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-sm">Revenue by Day</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+                      const values = [65, 85, 70, 90, 75, 45, 30]
+                      return (
+                        <div key={day} className="flex items-center gap-2">
+                          <span className="w-8 text-xs text-gray-500">{day}</span>
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                            <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${values[i]}%` }} />
+                          </div>
+                          <span className="text-xs font-medium w-12 text-right">${(values[i] * 50).toLocaleString()}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Payment Methods</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {[{ name: 'Analytics', value: 35, color: 'bg-purple-500' }, { name: 'Productivity', value: 28, color: 'bg-blue-500' }, { name: 'Security', value: 20, color: 'bg-red-500' }, { name: 'Marketing', value: 12, color: 'bg-orange-500' }, { name: 'Other', value: 5, color: 'bg-gray-500' }].map(cat => (
-                      <div key={cat.name} className="flex items-center gap-3">
-                        <span className="w-24 text-sm">{cat.name}</span>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-3"><div className={`${cat.color} h-full rounded-full`} style={{ width: `${cat.value}%` }} /></div>
-                        <span className="w-12 text-sm font-medium text-right">{cat.value}%</span>
+                    {[
+                      { method: 'Credit Card', pct: 58, icon: CreditCard, color: 'bg-blue-500' },
+                      { method: 'PayPal', pct: 28, icon: Wallet, color: 'bg-indigo-500' },
+                      { method: 'Crypto', pct: 10, icon: Bitcoin, color: 'bg-orange-500' },
+                      { method: 'Other', pct: 4, icon: MoreHorizontal, color: 'bg-gray-500' },
+                    ].map(pm => (
+                      <div key={pm.method} className="flex items-center gap-3">
+                        <div className={`w-8 h-8 ${pm.color} rounded-lg flex items-center justify-center`}><pm.icon className="h-4 w-4 text-white" /></div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1"><span className="text-sm">{pm.method}</span><span className="text-sm font-medium">{pm.pct}%</span></div>
+                          <Progress value={pm.pct} className="h-1.5" />
+                        </div>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start"><RefreshCw className="h-4 w-4 mr-2" />Process Pending Orders</Button>
+                  <Button variant="outline" className="w-full justify-start"><FileText className="h-4 w-4 mr-2" />Generate Invoices</Button>
+                  <Button variant="outline" className="w-full justify-start"><DollarSign className="h-4 w-4 mr-2" />Process Payouts</Button>
+                  <Button variant="outline" className="w-full justify-start"><Send className="h-4 w-4 mr-2" />Send Notifications</Button>
+                  <Button variant="outline" className="w-full justify-start"><Download className="h-4 w-4 mr-2" />Export to CSV</Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6 space-y-6">
+            {/* Analytics Overview */}
+            <div className="bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">Marketplace Analytics</h2>
+                  <p className="text-violet-200 text-sm">Performance insights and trends</p>
+                </div>
+                <select className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-sm">
+                  <option>Last 30 Days</option>
+                  <option>Last 7 Days</option>
+                  <option>Last 90 Days</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white/10 rounded-lg p-4">
+                  <p className="text-violet-200 text-sm mb-1">Total Revenue</p>
+                  <p className="text-2xl font-bold">$124,580</p>
+                  <p className="text-green-300 text-xs">+18.2% vs last period</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-4">
+                  <p className="text-violet-200 text-sm mb-1">Total Transactions</p>
+                  <p className="text-2xl font-bold">3,847</p>
+                  <p className="text-green-300 text-xs">+12.5% vs last period</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-4">
+                  <p className="text-violet-200 text-sm mb-1">Avg Order Value</p>
+                  <p className="text-2xl font-bold">$32.38</p>
+                  <p className="text-green-300 text-xs">+5.1% vs last period</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-4">
+                  <p className="text-violet-200 text-sm mb-1">Active Users</p>
+                  <p className="text-2xl font-bold">12.4K</p>
+                  <p className="text-green-300 text-xs">+8.3% vs last period</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-4">
+                  <p className="text-violet-200 text-sm mb-1">Churn Rate</p>
+                  <p className="text-2xl font-bold">2.1%</p>
+                  <p className="text-green-300 text-xs">-0.4% vs last period</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4">
+              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><PieChart className="h-5 w-5 text-violet-500" /><span className="text-sm">Conversion Rate</span></div><p className="text-2xl font-bold mt-2">3.2%</p><p className="text-xs text-green-600">+0.4% from last month</p></CardContent></Card>
+              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Activity className="h-5 w-5 text-blue-500" /><span className="text-sm">Page Views</span></div><p className="text-2xl font-bold mt-2">45.2K</p><p className="text-xs text-green-600">+12% from last month</p></CardContent></Card>
+              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Target className="h-5 w-5 text-green-500" /><span className="text-sm">Install Rate</span></div><p className="text-2xl font-bold mt-2">8.7%</p><p className="text-xs text-green-600">+1.2% from last month</p></CardContent></Card>
+              <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Clock className="h-5 w-5 text-amber-500" /><span className="text-sm">Avg Session</span></div><p className="text-2xl font-bold mt-2">4m 32s</p><p className="text-xs text-green-600">+23s from last month</p></CardContent></Card>
+            </div>
+
+            {/* Revenue & Trends */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-violet-600" />
+                    Revenue Trend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => {
+                    const values = [65, 78, 82, 90, 88, 45, 38]
+                    const amounts = [4250, 5120, 5380, 5920, 5780, 2940, 2480]
+                    return (
+                      <div key={day} className="flex items-center gap-4">
+                        <span className="w-10 text-sm text-gray-500">{day}</span>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+                          <div className="bg-violet-500 h-3 rounded-full" style={{ width: `${values[idx]}%` }} />
+                        </div>
+                        <span className="w-20 text-sm font-medium text-right">${amounts[idx].toLocaleString()}</span>
+                      </div>
+                    )
+                  })}
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Revenue by Category</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[{ name: 'Analytics', value: 35, amount: 43603, color: 'bg-purple-500' }, { name: 'Productivity', value: 28, amount: 34882, color: 'bg-blue-500' }, { name: 'Security', value: 20, amount: 24916, color: 'bg-red-500' }, { name: 'Marketing', value: 12, amount: 14950, color: 'bg-orange-500' }, { name: 'Other', value: 5, amount: 6229, color: 'bg-gray-500' }].map(cat => (
+                      <div key={cat.name} className="flex items-center gap-3">
+                        <span className="w-24 text-sm">{cat.name}</span>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-3"><div className={`${cat.color} h-full rounded-full`} style={{ width: `${cat.value}%` }} /></div>
+                        <span className="w-20 text-sm font-medium text-right">${cat.amount.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* App Performance & User Behavior */}
+            <div className="grid grid-cols-3 gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Top Performing Apps</CardTitle></CardHeader>
                 <CardContent>
@@ -741,6 +1371,107 @@ export default function MarketplaceClient() {
                         <Badge variant="outline">{(product.downloads / 1000).toFixed(0)}K</Badge>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>User Acquisition</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { source: 'Organic Search', users: 4520, pct: 42 },
+                    { source: 'Direct', users: 2840, pct: 26 },
+                    { source: 'Referrals', users: 1680, pct: 16 },
+                    { source: 'Social Media', users: 980, pct: 9 },
+                    { source: 'Email', users: 780, pct: 7 },
+                  ].map((src) => (
+                    <div key={src.source} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{src.source}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{src.users.toLocaleString()}</span>
+                        <Badge variant="outline" className="text-xs">{src.pct}%</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Retention Metrics</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-600">87%</p>
+                      <p className="text-xs text-gray-500">Day 1 Retention</p>
+                    </div>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-blue-600">64%</p>
+                      <p className="text-xs text-gray-500">Day 7 Retention</p>
+                    </div>
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-purple-600">48%</p>
+                      <p className="text-xs text-gray-500">Day 30 Retention</p>
+                    </div>
+                    <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-amber-600">35%</p>
+                      <p className="text-xs text-gray-500">Day 90 Retention</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity & Insights */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Recent Transactions</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { app: 'Analytics Pro', user: 'john@example.com', amount: 49, time: '2 min ago' },
+                      { app: 'Security Suite', user: 'sarah@company.io', amount: 99, time: '15 min ago' },
+                      { app: 'Marketing Tools', user: 'mike@startup.co', amount: 29, time: '1 hr ago' },
+                      { app: 'Automation Hub', user: 'lisa@agency.com', amount: 79, time: '2 hrs ago' },
+                      { app: 'Dev Toolkit', user: 'alex@dev.io', amount: 149, time: '3 hrs ago' },
+                    ].map((tx, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{tx.app}</p>
+                          <p className="text-sm text-gray-500">{tx.user}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-green-600">${tx.amount}</p>
+                          <p className="text-xs text-gray-500">{tx.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>AI Insights</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="w-4 h-4 text-green-600" />
+                      <span className="font-medium text-green-700 dark:text-green-400">Growth Opportunity</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Analytics apps are trending 40% higher than last month. Consider featuring more analytics tools.</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-4 h-4 text-blue-600" />
+                      <span className="font-medium text-blue-700 dark:text-blue-400">Conversion Tip</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Users who view 3+ apps have 2.5x higher conversion rate. Consider app recommendations.</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                      <span className="font-medium text-amber-700 dark:text-amber-400">Attention Needed</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">5 apps have ratings below 3.5 stars. Review quality and consider removal.</p>
                   </div>
                 </CardContent>
               </Card>
