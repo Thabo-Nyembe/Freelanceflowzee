@@ -316,6 +316,7 @@ const mockStats: InventoryStats = {
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {
   const [activeTab, setActiveTab] = useState('products')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'draft' | 'archived'>('all')
   const [locationFilter, setLocationFilter] = useState<string>('all')
@@ -452,6 +453,21 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       </div>
 
       <div className="max-w-[1800px] mx-auto px-6 py-6">
+        {/* System Status Bar */}
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-3 mb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">System Online</span>
+            </div>
+            <span className="text-sm text-gray-500">Last sync: 2 minutes ago</span>
+          </div>
+          <button className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Sync Now
+          </button>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border dark:border-gray-700 mb-6">
             <TabsTrigger value="products" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 dark:data-[state=active]:bg-blue-900/30">
@@ -478,10 +494,38 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <History className="w-4 h-4 mr-2" />
               History
             </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 dark:data-[state=active]:bg-blue-900/30">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-4">
+            {/* Quick Actions Bar */}
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Inventory Overview</h3>
+                  <p className="text-blue-100 text-sm">Real-time stock tracking across all locations</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium">
+                    <Plus className="w-4 h-4" />
+                    Add Product
+                  </button>
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium">
+                    <QrCode className="w-4 h-4" />
+                    Scan Barcode
+                  </button>
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium">
+                    <ArrowRightLeft className="w-4 h-4" />
+                    Transfer Stock
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Filters */}
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
@@ -525,6 +569,168 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   <Download className="w-4 h-4" />
                   Export
                 </button>
+              </div>
+            </div>
+
+            {/* Inventory Analytics Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Package className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total SKUs</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockProducts.length}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <TrendingUp className="w-4 h-4 text-green-500" />
+                  <span className="text-green-600">+12 this week</span>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <PackageCheck className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">In Stock</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">1,847</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <span className="text-gray-500">98.5% in stock rate</span>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Low Stock</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">23</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4 text-yellow-500" />
+                  <span className="text-yellow-600">Needs reorder</span>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                    <PackageX className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Out of Stock</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <Truck className="w-4 h-4 text-blue-500" />
+                  <span className="text-blue-600">3 on order</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Inventory Velocity & Turnover */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-blue-600" />
+                  Inventory Turnover
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">This Month</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">4.2x</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Last Month</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">3.8x</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">YTD Average</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">4.0x</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-green-600" />
+                  Inventory Value
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Total Value</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">$847,234</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Cost of Goods</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">$623,450</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Profit Margin</span>
+                    <span className="font-semibold text-green-600">26.4%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <Warehouse className="w-4 h-4 text-purple-600" />
+                  Warehouse Capacity
+                </h4>
+                <div className="space-y-3">
+                  {mockLocations.slice(0, 3).map((loc) => (
+                    <div key={loc.id} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">{loc.name}</span>
+                        <span className="text-gray-900 dark:text-white">{Math.floor(Math.random() * 30 + 60)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+                        <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${Math.floor(Math.random() * 30 + 60)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <History className="w-4 h-4 text-blue-600" />
+                Recent Inventory Activity
+              </h4>
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {[
+                  { action: 'Received', product: 'iPhone 15 Pro', qty: 50, time: '2 min ago', type: 'in' },
+                  { action: 'Shipped', product: 'MacBook Air M3', qty: 12, time: '15 min ago', type: 'out' },
+                  { action: 'Transferred', product: 'AirPods Pro', qty: 30, time: '1 hr ago', type: 'transfer' },
+                  { action: 'Adjusted', product: 'Magic Mouse', qty: -5, time: '2 hrs ago', type: 'adjust' },
+                  { action: 'Received', product: 'iPad Pro 12.9"', qty: 25, time: '3 hrs ago', type: 'in' },
+                ].map((activity, idx) => (
+                  <div key={idx} className="flex-shrink-0 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg min-w-[200px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        activity.type === 'in' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        activity.type === 'out' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                        activity.type === 'transfer' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      }`}>
+                        {activity.action}
+                      </span>
+                      <span className="text-xs text-gray-500">{activity.time}</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.product}</p>
+                    <p className="text-sm text-gray-500">
+                      {activity.qty > 0 ? '+' : ''}{activity.qty} units
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -916,6 +1122,432 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   ))}
                 </tbody>
               </table>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Fishbowl Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sticky top-4">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-4">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: Settings },
+                      { id: 'locations', label: 'Locations', icon: MapPin },
+                      { id: 'tracking', label: 'Tracking', icon: Barcode },
+                      { id: 'reorder', label: 'Reorder Rules', icon: RefreshCw },
+                      { id: 'notifications', label: 'Notifications', icon: Bell },
+                      { id: 'advanced', label: 'Advanced', icon: Zap },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Inventory Configuration</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Default Stock Unit</p>
+                            <p className="text-sm text-gray-500">Base unit for inventory counts</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>Each</option>
+                            <option>Box</option>
+                            <option>Case</option>
+                            <option>Pallet</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Negative Inventory</p>
+                            <p className="text-sm text-gray-500">Allow stock to go below zero</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-600">
+                            <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-SKU Generation</p>
+                            <p className="text-sm text-gray-500">Automatically generate SKUs for new products</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Track Serial Numbers</p>
+                            <p className="text-sm text-gray-500">Enable serial number tracking for products</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Costing Method</h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        {[
+                          { name: 'FIFO', desc: 'First In, First Out', active: true },
+                          { name: 'LIFO', desc: 'Last In, First Out', active: false },
+                          { name: 'Average', desc: 'Weighted Average Cost', active: false },
+                        ].map((method) => (
+                          <button
+                            key={method.name}
+                            className={`p-4 rounded-lg border-2 text-left ${
+                              method.active
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            <p className="font-semibold text-gray-900 dark:text-white">{method.name}</p>
+                            <p className="text-sm text-gray-500">{method.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Locations Settings */}
+                {settingsTab === 'locations' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Warehouse Locations</h3>
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Add Location
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {mockLocations.map((loc) => (
+                          <div key={loc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <Warehouse className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{loc.name}</p>
+                                <p className="text-sm text-gray-500">{loc.address}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                loc.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600'
+                              }`}>
+                                {loc.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                              <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg">
+                                <Edit className="w-4 h-4 text-gray-500" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Bin/Zone Management</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Bin Locations</p>
+                            <p className="text-sm text-gray-500">Track inventory by specific bin locations</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Zone-based Picking</p>
+                            <p className="text-sm text-gray-500">Organize picking by warehouse zones</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tracking Settings */}
+                {settingsTab === 'tracking' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Barcode Configuration</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Barcode Format</p>
+                            <p className="text-sm text-gray-500">Default barcode symbology</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>Code 128</option>
+                            <option>Code 39</option>
+                            <option>EAN-13</option>
+                            <option>UPC-A</option>
+                            <option>QR Code</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-generate Barcodes</p>
+                            <p className="text-sm text-gray-500">Create barcodes for new products</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Print Labels on Receive</p>
+                            <p className="text-sm text-gray-500">Auto-print labels when receiving inventory</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-600">
+                            <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Lot & Batch Tracking</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Lot Tracking</p>
+                            <p className="text-sm text-gray-500">Track inventory by lot numbers</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Expiration Date Tracking</p>
+                            <p className="text-sm text-gray-500">Monitor product expiration dates</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">FEFO Picking</p>
+                            <p className="text-sm text-gray-500">First Expired, First Out picking method</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reorder Rules Settings */}
+                {settingsTab === 'reorder' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Auto-Reorder Settings</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Auto-Reorder</p>
+                            <p className="text-sm text-gray-500">Automatically create POs when stock is low</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Default Reorder Point</p>
+                            <p className="text-sm text-gray-500">Default safety stock level</p>
+                          </div>
+                          <input type="number" defaultValue="10" className="w-24 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Lead Time (Days)</p>
+                            <p className="text-sm text-gray-500">Default supplier lead time</p>
+                          </div>
+                          <input type="number" defaultValue="7" className="w-24 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Economic Order Quantity</p>
+                            <p className="text-sm text-gray-500">Calculate optimal order quantities</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Demand Forecasting</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Forecast Period</p>
+                          <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500">
+                            <option>30 Days</option>
+                            <option>60 Days</option>
+                            <option>90 Days</option>
+                          </select>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Safety Stock %</p>
+                          <input type="number" defaultValue="15" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stock Alerts</h3>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'Low Stock Alert', email: true, push: true },
+                          { name: 'Out of Stock Alert', email: true, push: true },
+                          { name: 'Reorder Point Reached', email: true, push: false },
+                          { name: 'Expiring Products', email: true, push: true },
+                          { name: 'Transfer Completed', email: false, push: true },
+                          { name: 'PO Received', email: true, push: true },
+                        ].map((notif) => (
+                          <div key={notif.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span className="font-medium text-gray-900 dark:text-white">{notif.name}</span>
+                            <div className="flex items-center gap-4">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.email} className="w-4 h-4 accent-blue-600" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Email</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.push} className="w-4 h-4 accent-blue-600" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Push</span>
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Schedule</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Daily Inventory Summary</p>
+                            <p className="text-sm text-gray-500">Receive daily stock summary email</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Weekly Analytics Report</p>
+                            <p className="text-sm text-gray-500">Weekly inventory performance report</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integration Settings</h3>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">API Key</p>
+                          <div className="flex items-center gap-2">
+                            <input type="password" defaultValue="inv_live_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
+                            <button className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                              <RefreshCw className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Webhook Notifications</p>
+                            <p className="text-sm text-gray-500">Send updates to external systems</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Webhook URL</p>
+                          <input type="url" placeholder="https://your-domain.com/webhooks/inventory" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Import/Export</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-left">
+                          <Upload className="w-6 h-6 text-blue-600 mb-2" />
+                          <p className="font-medium text-gray-900 dark:text-white">Import Inventory</p>
+                          <p className="text-sm text-gray-500">Upload CSV or Excel file</p>
+                        </button>
+                        <button className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-left">
+                          <Download className="w-6 h-6 text-blue-600 mb-2" />
+                          <p className="font-medium text-gray-900 dark:text-white">Export Inventory</p>
+                          <p className="text-sm text-gray-500">Download all inventory data</p>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-4">Danger Zone</h3>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Reset Inventory Counts</p>
+                          <p className="text-sm text-gray-500">Set all inventory counts to zero</p>
+                        </div>
+                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                          Reset All
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

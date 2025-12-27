@@ -134,6 +134,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const [selectedEnvelope, setSelectedEnvelope] = useState<Envelope | null>(null)
   const [showNewContract, setShowNewContract] = useState(false)
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { contracts, loading, error } = useContracts({ status: 'all' })
   const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
@@ -536,6 +537,129 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 </div>
               </CardContent>
             </Card>
+
+            {/* Signing Velocity & Performance */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                    Signing Velocity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">2.4h</div>
+                      <p className="text-xs text-gray-500">Average Time to First View</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">18h</div>
+                      <p className="text-xs text-gray-500">Average Time to Sign</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-purple-600">94%</div>
+                      <p className="text-xs text-gray-500">First-Touch Completion</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">Daily Signing Trend</h4>
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => (
+                      <div key={day} className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-8">{day}</span>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className="bg-purple-500 h-2 rounded-full"
+                            style={{ width: `${[85, 92, 78, 95, 88, 45, 35][idx]}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-600 w-8">{[24, 31, 22, 35, 28, 12, 9][idx]}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Fingerprint className="h-5 w-5 text-purple-600" />
+                    Authentication Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    {[
+                      { method: 'Email Authentication', count: 245, rate: 99.2, color: 'bg-blue-500' },
+                      { method: 'SMS Verification', count: 89, rate: 98.5, color: 'bg-green-500' },
+                      { method: 'Access Code', count: 45, rate: 100, color: 'bg-purple-500' },
+                      { method: 'ID Verification', count: 28, rate: 96.4, color: 'bg-orange-500' },
+                      { method: 'Knowledge-Based Auth', count: 12, rate: 91.7, color: 'bg-red-500' }
+                    ].map(auth => (
+                      <div key={auth.method} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className={`w-2 h-8 ${auth.color} rounded-full`} />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">{auth.method}</span>
+                            <span className="text-xs text-gray-500">{auth.count} uses</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Progress value={auth.rate} className="h-1 flex-1" />
+                            <span className="text-xs text-green-600">{auth.rate}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Compliance & Audit */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-purple-600" />
+                  Compliance Dashboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <span className="text-sm font-medium text-green-800 dark:text-green-300">ESIGN Compliant</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-700 dark:text-green-400">100%</div>
+                    <p className="text-xs text-green-600">All envelopes meet requirements</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileCheck className="h-5 w-5 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-300">UETA Compliant</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">100%</div>
+                    <p className="text-xs text-blue-600">Full electronic consent captured</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="h-5 w-5 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-800 dark:text-purple-300">21 CFR Part 11</span>
+                    </div>
+                    <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">Enabled</div>
+                    <p className="text-xs text-purple-600">FDA compliant signatures</p>
+                  </div>
+                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe className="h-5 w-5 text-orange-600" />
+                      <span className="text-sm font-medium text-orange-800 dark:text-orange-300">eIDAS Qualified</span>
+                    </div>
+                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-400">Active</div>
+                    <p className="text-xs text-orange-600">EU legal compliance</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Envelopes Tab */}
@@ -784,143 +908,653 @@ export default function ContractsClient({ initialContracts }: { initialContracts
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - DocuSign Level */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Signature Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Sequential Signing</p>
-                      <p className="text-sm text-gray-500">Recipients sign in specified order</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Allow Decline</p>
-                      <p className="text-sm text-gray-500">Recipients can decline to sign</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Require Comments on Decline</p>
-                      <p className="text-sm text-gray-500">Require reason when declining</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-1">
+                <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Settings</h3>
+                {[
+                  { id: 'general', label: 'General', icon: Settings },
+                  { id: 'signing', label: 'Signing', icon: PenTool },
+                  { id: 'security', label: 'Security', icon: Shield },
+                  { id: 'branding', label: 'Branding', icon: Palette },
+                  { id: 'notifications', label: 'Notifications', icon: Bell },
+                  { id: 'advanced', label: 'Advanced', icon: Sliders },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSettingsTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                      settingsTab === item.id
+                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Authentication</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Email Verification</p>
-                        <p className="text-sm text-gray-500">Verify via email link</p>
-                      </div>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">SMS Authentication</p>
-                        <p className="text-sm text-gray-500">Send code via SMS</p>
-                      </div>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Fingerprint className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">ID Verification</p>
-                        <p className="text-sm text-gray-500">Verify government ID</p>
-                      </div>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Account Settings</CardTitle>
+                        <CardDescription>General account configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Organization Name</Label>
+                            <Input defaultValue="Acme Corp Legal" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="pst">
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="text-sm text-gray-500">Total Envelopes</p>
+                            <p className="text-2xl font-bold">2,456</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Completed</p>
+                            <p className="text-2xl font-bold text-green-600">2,189</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Pending</p>
+                            <p className="text-2xl font-bold text-yellow-600">267</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Envelope Sent</p>
-                      <p className="text-sm text-gray-500">When envelope is sent</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Signature Complete</p>
-                      <p className="text-sm text-gray-500">When someone signs</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Envelope Complete</p>
-                      <p className="text-sm text-gray-500">When all have signed</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Envelope Declined</p>
-                      <p className="text-sm text-gray-500">When someone declines</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>User Management</CardTitle>
+                        <CardDescription>Manage team members</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-purple-600">8</p>
+                            <p className="text-sm text-gray-500">Admins</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">24</p>
+                            <p className="text-sm text-gray-500">Senders</p>
+                          </div>
+                          <div className="p-4 border rounded-lg text-center">
+                            <p className="text-2xl font-bold text-gray-600">12</p>
+                            <p className="text-sm text-gray-500">Viewers</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Invite User
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reminders</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto Reminders</p>
-                      <p className="text-sm text-gray-500">Send automatic reminders</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reminder Frequency</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                      <option>Every 3 days</option>
-                      <option>Every 5 days</option>
-                      <option>Every 7 days</option>
-                      <option>Once a week</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Reminders</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                      <option>3 reminders</option>
-                      <option>5 reminders</option>
-                      <option>Unlimited</option>
-                    </select>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Default Envelope Settings</CardTitle>
+                        <CardDescription>Configure default behaviors</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Expiration</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="14">14 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="never">Never</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sequential Signing</p>
+                            <p className="text-sm text-gray-500">Sign in specified order</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Signing Settings */}
+                {settingsTab === 'signing' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Signature Preferences</CardTitle>
+                        <CardDescription>Configure signing options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Draw Signature</p>
+                            <p className="text-sm text-gray-500">Sign by drawing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Type Signature</p>
+                            <p className="text-sm text-gray-500">Sign by typing name</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Upload Signature</p>
+                            <p className="text-sm text-gray-500">Upload signature image</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Initials</p>
+                            <p className="text-sm text-gray-500">Initial each page</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Recipient Options</CardTitle>
+                        <CardDescription>Configure recipient settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Decline</p>
+                            <p className="text-sm text-gray-500">Recipients can decline</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Decline Reason</p>
+                            <p className="text-sm text-gray-500">Comment required on decline</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Delegation</p>
+                            <p className="text-sm text-gray-500">Forward to another signer</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Reminders</CardTitle>
+                        <CardDescription>Automatic reminder settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto Reminders</p>
+                            <p className="text-sm text-gray-500">Send automatic reminders</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Reminder Frequency</Label>
+                          <Select defaultValue="3">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">Every day</SelectItem>
+                              <SelectItem value="3">Every 3 days</SelectItem>
+                              <SelectItem value="7">Every week</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Max Reminders</Label>
+                          <Select defaultValue="5">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3 reminders</SelectItem>
+                              <SelectItem value="5">5 reminders</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Authentication Methods</CardTitle>
+                        <CardDescription>Verify signer identity</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Mail className="w-5 h-5 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Email Verification</p>
+                              <p className="text-sm text-gray-500">Click link in email</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Phone className="w-5 h-5 text-purple-600" />
+                            <div>
+                              <p className="font-medium">SMS Authentication</p>
+                              <p className="text-sm text-gray-500">Code via text message</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Fingerprint className="w-5 h-5 text-purple-600" />
+                            <div>
+                              <p className="font-medium">ID Verification</p>
+                              <p className="text-sm text-gray-500">Verify government ID</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Key className="w-5 h-5 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Access Code</p>
+                              <p className="text-sm text-gray-500">Require access code</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Encryption & Compliance</CardTitle>
+                        <CardDescription>Security standards</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span>256-bit AES Encryption</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span>SOC 2 Type II</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span>GDPR Compliant</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span>HIPAA Ready</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Audit Trail</p>
+                            <p className="text-sm text-gray-500">Detailed activity logging</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Logging</p>
+                            <p className="text-sm text-gray-500">Track signing locations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage access permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Restrictions</p>
+                            <p className="text-sm text-gray-500">Limit by IP address</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">SSO Required</p>
+                            <p className="text-sm text-gray-500">Single Sign-On only</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Session Timeout</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="15">15 minutes</SelectItem>
+                              <SelectItem value="30">30 minutes</SelectItem>
+                              <SelectItem value="60">1 hour</SelectItem>
+                              <SelectItem value="480">8 hours</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Branding Settings */}
+                {settingsTab === 'branding' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Branding</CardTitle>
+                        <CardDescription>Customize email appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Logo</Label>
+                          <div className="mt-2 border-2 border-dashed rounded-lg p-8 text-center">
+                            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-500">Upload logo (max 2MB)</p>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Brand Color</Label>
+                          <Input type="color" defaultValue="#7c3aed" className="mt-1 h-10 w-20" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom Footer</p>
+                            <p className="text-sm text-gray-500">Add company info</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Signing Experience</CardTitle>
+                        <CardDescription>Customize signing page</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom Welcome Message</p>
+                            <p className="text-sm text-gray-500">Personalized greeting</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Hide DocuSign Branding</p>
+                            <p className="text-sm text-gray-500">White-label experience</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom Redirect URL</p>
+                            <p className="text-sm text-gray-500">After signing complete</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Certificate of Completion</CardTitle>
+                        <CardDescription>Customize completion docs</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Summary</p>
+                            <p className="text-sm text-gray-500">Signing summary page</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Audit Trail</p>
+                            <p className="text-sm text-gray-500">Detailed activity log</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Envelope Sent</p>
+                            <p className="text-sm text-gray-500">When envelope is sent</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Signature Complete</p>
+                            <p className="text-sm text-gray-500">When recipient signs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Envelope Complete</p>
+                            <p className="text-sm text-gray-500">When all sign</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Envelope Declined</p>
+                            <p className="text-sm text-gray-500">When declined</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Envelope Voided</p>
+                            <p className="text-sm text-gray-500">When voided</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhook Notifications</CardTitle>
+                        <CardDescription>Real-time event notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Webhooks</p>
+                            <p className="text-sm text-gray-500">Send events to URL</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://api.example.com/webhooks" className="mt-1 font-mono" />
+                        </div>
+                        <div>
+                          <Label>Events to Send</Label>
+                          <div className="mt-2 space-y-2">
+                            {['envelope-sent', 'envelope-signed', 'envelope-completed', 'envelope-declined'].map((event) => (
+                              <div key={event} className="flex items-center gap-2">
+                                <Switch defaultChecked />
+                                <span className="font-mono text-sm">{event}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Developer API settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">API Key</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
+                            ds_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <div>
+                          <Label>Environment</Label>
+                          <Select defaultValue="production">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sandbox">Sandbox</SelectItem>
+                              <SelectItem value="production">Production</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Export and retention</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export Data</span>
+                          </Button>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                            <Upload className="w-5 h-5" />
+                            <span>Import Templates</span>
+                          </Button>
+                        </div>
+                        <div>
+                          <Label>Data Retention</Label>
+                          <Select defaultValue="7years">
+                            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1year">1 year</SelectItem>
+                              <SelectItem value="3years">3 years</SelectItem>
+                              <SelectItem value="7years">7 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
+                              <p className="text-sm text-red-600">Remove draft envelopes</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Void All Pending</p>
+                              <p className="text-sm text-red-600">Cancel pending envelopes</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Void
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Reset Account</p>
+                              <p className="text-sm text-red-600">Delete all data</p>
+                            </div>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

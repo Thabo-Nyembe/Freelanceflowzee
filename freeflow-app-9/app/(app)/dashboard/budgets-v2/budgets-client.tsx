@@ -19,7 +19,8 @@ import {
   Heart, Zap, GraduationCap, Briefcase, Gift, Music, Film, Gamepad2,
   Building2, Landmark, CreditCardIcon, Coins, TrendingDown as TrendingDownIcon,
   Clock, Bell, MoreVertical, Repeat, ArrowLeftRight, Search, ExternalLink,
-  FileText, Lock, Unlock, ChevronDown, Trash2, Edit3, Copy, CheckCircle2
+  FileText, Lock, Unlock, ChevronDown, Trash2, Edit3, Copy, CheckCircle2,
+  Folder, Cog, Upload, MoreHorizontal
 } from 'lucide-react'
 import { useBudgets, type Budget, type BudgetType, type BudgetStatus } from '@/lib/hooks/use-budgets'
 
@@ -208,6 +209,7 @@ const getAccountIcon = (type: Account['type']) => {
 
 export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budget[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [typeFilter, setTypeFilter] = useState<BudgetType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<BudgetStatus | 'all'>('all')
@@ -500,6 +502,60 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Quick Stats Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-1">{monthNames[currentMonth.getMonth()]} Budget Overview</h2>
+                  <p className="text-purple-100">Track your spending and stay on budget</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{formatCurrency(totalIncome)}</div>
+                    <p className="text-purple-200 text-sm">Income</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{formatCurrency(totalExpenses)}</div>
+                    <p className="text-purple-200 text-sm">Spent</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{formatCurrency(totalIncome - totalExpenses)}</div>
+                    <p className="text-purple-200 text-sm">Remaining</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 bg-white/20 rounded-full h-3">
+                <div
+                  className="bg-white h-3 rounded-full transition-all"
+                  style={{ width: `${Math.min((totalExpenses / totalIncome) * 100, 100)}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between mt-2 text-sm">
+                <span className="text-purple-200">{Math.round((totalExpenses / totalIncome) * 100)}% of budget used</span>
+                <span className="text-purple-200">{Math.round((1 - totalExpenses / totalIncome) * 100)}% remaining</span>
+              </div>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="flex items-center gap-4">
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Transaction
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <ArrowLeftRight className="w-4 h-4" />
+                Transfer Funds
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <Repeat className="w-4 h-4" />
+                Scheduled
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <FileText className="w-4 h-4" />
+                Reports
+              </Button>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Spending Overview */}
               <Card className="lg:col-span-2">
@@ -618,6 +674,254 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       </div>
                     )
                   })}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Spending Insights & Trends */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    Spending Trend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => {
+                    const values = [85, 62, 45, 92, 78, 120, 95]
+                    const amounts = [245, 180, 130, 265, 225, 345, 275]
+                    return (
+                      <div key={day} className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500 w-8">{day}</span>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${values[idx] > 100 ? 'bg-red-500' : 'bg-purple-500'}`}
+                            style={{ width: `${Math.min(values[idx], 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-16 text-right">${amounts[idx]}</span>
+                      </div>
+                    )
+                  })}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <Target className="h-5 w-5 text-green-600" />
+                    Budget Health
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center py-4">
+                    <div className="text-5xl font-bold text-green-600">87</div>
+                    <p className="text-sm text-gray-500">Budget Score</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Categories on track</span>
+                      <span className="font-semibold text-green-600">12/15</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Approaching limit</span>
+                      <span className="font-semibold text-yellow-600">2</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Overspent</span>
+                      <span className="font-semibold text-red-600">1</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <PiggyBank className="h-5 w-5 text-blue-600" />
+                    Savings Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockGoals.slice(0, 3).map(goal => (
+                    <div key={goal.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-gray-900 dark:text-white">{goal.name}</span>
+                        <span className="text-sm text-gray-500">{Math.round((goal.current / goal.target) * 100)}%</span>
+                      </div>
+                      <Progress value={(goal.current / goal.target) * 100} className="h-2" />
+                      <div className="flex items-center justify-between mt-2 text-sm">
+                        <span className="text-gray-500">{formatCurrency(goal.current)}</span>
+                        <span className="text-gray-900 dark:text-white">{formatCurrency(goal.target)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Monthly Overview & Cash Flow */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                    Monthly Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <ArrowDownRight className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
+                      <p className="text-sm text-gray-500">Income</p>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <ArrowUpRight className="h-6 w-6 text-red-600 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExpenses)}</div>
+                      <p className="text-sm text-gray-500">Expenses</p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <DollarSign className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalIncome - totalExpenses)}</div>
+                      <p className="text-sm text-gray-500">Net</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900 dark:text-white">Top Spending Categories</h4>
+                    {mockCategories.filter(c => c.isGroup).sort((a, b) => b.spent - a.spent).slice(0, 4).map(cat => (
+                      <div key={cat.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <cat.icon className={`h-4 w-4 text-${cat.color}-600`} />
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{cat.name}</span>
+                        </div>
+                        <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(cat.spent)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                    Cash Flow Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    {[
+                      { month: 'Oct', income: 8500, expenses: 7200 },
+                      { month: 'Nov', income: 8500, expenses: 6800 },
+                      { month: 'Dec', income: 9200, expenses: 8100 },
+                      { month: 'Jan', income: 8500, expenses: 7500 },
+                    ].map((data) => (
+                      <div key={data.month} className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-900 dark:text-white">{data.month}</span>
+                          <span className={`font-medium ${data.income - data.expenses > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {data.income - data.expenses > 0 ? '+' : ''}{formatCurrency(data.income - data.expenses)}
+                          </span>
+                        </div>
+                        <div className="flex gap-1 h-4">
+                          <div className="bg-green-500 rounded" style={{ width: `${(data.income / 10000) * 100}%` }} title={`Income: ${formatCurrency(data.income)}`} />
+                          <div className="bg-red-400 rounded" style={{ width: `${(data.expenses / 10000) * 100}%` }} title={`Expenses: ${formatCurrency(data.expenses)}`} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm pt-4 border-t dark:border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded" />
+                      <span className="text-gray-500">Income</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-red-400 rounded" />
+                      <span className="text-gray-500">Expenses</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Upcoming Bills & Insights */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-purple-600" />
+                    Upcoming Bills
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Rent Payment', amount: 1500, due: 'Jan 1', category: 'Housing', daysUntil: 6 },
+                      { name: 'Electric Bill', amount: 125, due: 'Jan 5', category: 'Utilities', daysUntil: 10 },
+                      { name: 'Internet Service', amount: 75, due: 'Jan 8', category: 'Utilities', daysUntil: 13 },
+                      { name: 'Car Insurance', amount: 180, due: 'Jan 15', category: 'Transportation', daysUntil: 20 },
+                      { name: 'Gym Membership', amount: 50, due: 'Jan 15', category: 'Health', daysUntil: 20 },
+                    ].map((bill, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-lg ${bill.daysUntil <= 7 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
+                            <Receipt className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{bill.name}</p>
+                            <p className="text-sm text-gray-500">{bill.category} • Due {bill.due}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(bill.amount)}</p>
+                          <p className={`text-xs ${bill.daysUntil <= 7 ? 'text-red-500' : 'text-gray-500'}`}>
+                            {bill.daysUntil} days left
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-yellow-600" />
+                    Smart Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="font-medium text-green-700 dark:text-green-400">Great job!</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">You spent 15% less on dining out this month</p>
+                  </div>
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                      <span className="font-medium text-yellow-700 dark:text-yellow-400">Heads up</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Entertainment budget is 85% spent with 8 days left</p>
+                  </div>
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Target className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-blue-700 dark:text-blue-400">Goal Update</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">You're on track to hit your vacation fund goal by March</p>
+                  </div>
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="h-4 w-4 text-purple-600" />
+                      <span className="font-medium text-purple-700 dark:text-purple-400">Trend</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Your average daily spending is down 8% this week</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -967,99 +1271,420 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Budget Preferences</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Auto-assign income', desc: 'Automatically assign new income to categories', enabled: true },
-                    { label: 'Rollover available', desc: 'Carry over unused money to next month', enabled: true },
-                    { label: 'Weekly spending reports', desc: 'Get email summaries of your spending', enabled: false },
-                    { label: 'Goal notifications', desc: 'Notify when goals are reached', enabled: true },
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{setting.label}</p>
-                        <p className="text-sm text-gray-500">{setting.desc}</p>
-                      </div>
-                      <Switch defaultChecked={setting.enabled} />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+          {/* Settings Tab - Adaptive Insights Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sticky top-4">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-4">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: Settings },
+                      { id: 'categories', label: 'Categories', icon: Folder },
+                      { id: 'automation', label: 'Automation', icon: Zap },
+                      { id: 'integrations', label: 'Integrations', icon: Building2 },
+                      { id: 'notifications', label: 'Notifications', icon: Bell },
+                      { id: 'advanced', label: 'Advanced', icon: Cog },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Currency & Format</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Currency</label>
-                    <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                      <option value="USD">USD - US Dollar ($)</option>
-                      <option value="EUR">EUR - Euro (€)</option>
-                      <option value="GBP">GBP - British Pound (£)</option>
-                    </select>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Budget Preferences</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Budget Cycle</p>
+                            <p className="text-sm text-gray-500">Define your budget period</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>Monthly</option>
+                            <option>Bi-weekly</option>
+                            <option>Weekly</option>
+                            <option>Quarterly</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Rollover Funds</p>
+                            <p className="text-sm text-gray-500">Carry over unused money to next period</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Zero-based Budgeting</p>
+                            <p className="text-sm text-gray-500">Assign every dollar a job</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Track Credit Cards</p>
+                            <p className="text-sm text-gray-500">Include credit cards in budget tracking</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Currency & Format</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Currency</label>
+                            <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                              <option value="USD">USD - US Dollar ($)</option>
+                              <option value="EUR">EUR - Euro (€)</option>
+                              <option value="GBP">GBP - British Pound (£)</option>
+                              <option value="CAD">CAD - Canadian Dollar (C$)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Date Format</label>
+                            <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                              <option>MM/DD/YYYY</option>
+                              <option>DD/MM/YYYY</option>
+                              <option>YYYY-MM-DD</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Date Format</label>
-                    <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                      <option value="mdy">MM/DD/YYYY</option>
-                      <option value="dmy">DD/MM/YYYY</option>
-                      <option value="ymd">YYYY-MM-DD</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">First Day of Week</label>
-                    <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                      <option value="sunday">Sunday</option>
-                      <option value="monday">Monday</option>
-                    </select>
-                  </div>
-                </CardContent>
-              </Card>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Data & Export</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Transactions (CSV)
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Generate Monthly Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Sync All Accounts
-                  </Button>
-                </CardContent>
-              </Card>
+                {/* Categories Settings */}
+                {settingsTab === 'categories' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Budget Categories</CardTitle>
+                        <Button size="sm" className="gap-2">
+                          <Plus className="w-4 h-4" />
+                          Add Category
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {mockCategories.filter(c => c.isGroup).map((group) => (
+                          <div key={group.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{group.name}</h4>
+                              <Button variant="ghost" size="sm">
+                                <Edit3 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-600">
+                              {mockCategories.filter(c => c.group === group.name && !c.isGroup).map((cat) => (
+                                <div key={cat.id} className="flex items-center justify-between py-2">
+                                  <span className="text-gray-600 dark:text-gray-400">{cat.name}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-500">{formatCurrency(cat.budgeted)}</span>
+                                    <Button variant="ghost" size="sm">
+                                      <MoreHorizontal className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Category Rules</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-categorize Transactions</p>
+                            <p className="text-sm text-gray-500">Learn from past categorizations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Split Transactions</p>
+                            <p className="text-sm text-gray-500">Allow splitting transactions across categories</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subscription</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold">Pro Plan</span>
-                      <Badge className="bg-white/20 text-white border-0">Active</Badge>
-                    </div>
-                    <p className="text-sm text-white/80">Unlimited accounts • Goals • Reports</p>
+                {/* Automation Settings */}
+                {settingsTab === 'automation' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Scheduled Transactions</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-enter Scheduled</p>
+                            <p className="text-sm text-gray-500">Automatically enter recurring transactions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Days Before Due</p>
+                            <p className="text-sm text-gray-500">How many days before to auto-enter</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>1 day</option>
+                            <option>3 days</option>
+                            <option>7 days</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-assign Income</p>
+                            <p className="text-sm text-gray-500">Distribute income to underfunded categories</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Smart Rules</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Coffee purchases → Coffee Budget', pattern: 'Starbucks, Dunkin', active: true },
+                          { name: 'Grocery stores → Groceries', pattern: 'Whole Foods, Trader Joe\'s', active: true },
+                          { name: 'Gas stations → Transportation', pattern: 'Shell, Chevron, BP', active: true },
+                        ].map((rule, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{rule.name}</p>
+                              <p className="text-sm text-gray-500">Pattern: {rule.pattern}</p>
+                            </div>
+                            <Switch defaultChecked={rule.active} />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Rule
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Your plan renews on January 1, 2025
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Accounts</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockAccounts.map((account) => (
+                          <div key={account.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <Building2 className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{account.name}</p>
+                                <p className="text-sm text-gray-500">{account.institution}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline" className="text-green-600 border-green-600">Connected</Badge>
+                              <Button variant="ghost" size="sm">
+                                <RefreshCw className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Link New Account
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Import & Export</CardTitle>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-2 gap-4">
+                        <Button variant="outline" className="justify-start">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Import from CSV
+                        </Button>
+                        <Button variant="outline" className="justify-start">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export to CSV
+                        </Button>
+                        <Button variant="outline" className="justify-start">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Import from QIF
+                        </Button>
+                        <Button variant="outline" className="justify-start">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Export Reports
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Budget Alerts</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Category overspending', desc: 'Alert when spending exceeds budget', email: true, push: true },
+                          { name: 'Low balance warning', desc: 'Alert when account balance is low', email: true, push: true },
+                          { name: 'Upcoming bills', desc: 'Reminder for scheduled transactions', email: true, push: false },
+                          { name: 'Goal progress', desc: 'Updates on savings goals', email: false, push: true },
+                          { name: 'Weekly summary', desc: 'Weekly spending digest', email: true, push: false },
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.name}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.email} className="w-4 h-4 accent-blue-600" />
+                                <span className="text-sm text-gray-600">Email</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.push} className="w-4 h-4 accent-blue-600" />
+                                <span className="text-sm text-gray-600">Push</span>
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Threshold Settings</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Overspending Threshold</p>
+                            <p className="text-sm text-gray-500">Alert at this % of budget</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input type="number" defaultValue="90" className="w-20 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                            <span>%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Low Balance Amount</p>
+                            <p className="text-sm text-gray-500">Alert when account drops below</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span>$</span>
+                            <input type="number" defaultValue="100" className="w-24 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">API Key</p>
+                          <div className="flex items-center gap-2">
+                            <input type="password" defaultValue="budget_api_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable API Access</p>
+                            <p className="text-sm text-gray-500">Allow external integrations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Button variant="outline" className="w-full justify-start">
+                          <Download className="w-4 h-4 mr-2" />
+                          Download All Data
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Generate Full Report
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset All Budgets</p>
+                            <p className="text-sm text-gray-500">Clear all budget data and start fresh</p>
+                          </div>
+                          <Button variant="destructive">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

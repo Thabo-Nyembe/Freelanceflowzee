@@ -399,6 +399,7 @@ const mockDisputes: Dispute[] = [
 
 export default function EscrowClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<ConnectedAccount | null>(null)
@@ -551,6 +552,25 @@ export default function EscrowClient() {
           </div>
         </div>
 
+        {/* Quick Stats Bar */}
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">System Online</span>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Last sync: <span className="font-medium text-gray-900 dark:text-white">2 minutes ago</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="px-3 py-1.5 text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Sync Now
+            </button>
+          </div>
+        </div>
+
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between">
@@ -565,6 +585,7 @@ export default function EscrowClient() {
                   <span className="ml-2 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">{pendingDisputes}</span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="settings" className="rounded-lg">Settings</TabsTrigger>
             </TabsList>
           </div>
 
@@ -687,6 +708,162 @@ export default function EscrowClient() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Velocity & Risk Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-emerald-600" />
+                    Transaction Velocity
+                  </h3>
+                  <select className="text-sm px-3 py-1 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                    <option>Last 7 days</option>
+                    <option>Last 30 days</option>
+                    <option>Last 90 days</option>
+                  </select>
+                </div>
+                <div className="space-y-4">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => {
+                    const values = [45, 62, 38, 75, 58, 22, 15]
+                    const amounts = ['$12,450', '$18,300', '$9,200', '$24,600', '$15,800', '$5,400', '$3,200']
+                    return (
+                      <div key={day} className="flex items-center gap-4">
+                        <span className="text-sm text-gray-500 w-12">{day}</span>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+                          <div
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-3 rounded-full"
+                            style={{ width: `${values[idx]}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-20 text-right">{amounts[idx]}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-emerald-600" />
+                    Risk Monitoring
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                      <div className="text-3xl font-bold text-green-600">98.5%</div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Transactions Safe</p>
+                    </div>
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                      <div className="text-3xl font-bold text-yellow-600">3</div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Flagged Today</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Velocity Check', status: 'pass', detail: '24 txns/hour (limit: 100)' },
+                      { label: 'Geographic Risk', status: 'pass', detail: 'All regions normal' },
+                      { label: 'Amount Anomaly', status: 'warning', detail: '1 unusual amount detected' },
+                      { label: 'Account Verification', status: 'pass', detail: '100% verified' },
+                    ].map((check) => (
+                      <div key={check.label} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {check.status === 'pass' ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                          )}
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{check.label}</p>
+                            <p className="text-xs text-gray-500">{check.detail}</p>
+                          </div>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          check.status === 'pass'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {check.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fee Analytics & Milestones */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Percent className="w-5 h-5 text-emerald-600" />
+                  Fee Analytics
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2 border-b dark:border-gray-700">
+                    <span className="text-sm text-gray-500">Total Fees Collected</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">$8,432.50</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b dark:border-gray-700">
+                    <span className="text-sm text-gray-500">Average Fee %</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">2.8%</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b dark:border-gray-700">
+                    <span className="text-sm text-gray-500">Fee Waivers</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">$245.00</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-gray-500">Net Fees MTD</span>
+                    <span className="font-semibold text-emerald-600">$8,187.50</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-emerald-600" />
+                  Milestone Escrow Tracker
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    { project: 'Website Redesign', amount: '$15,000', milestone: 'Phase 2', progress: 60, status: 'in_progress' },
+                    { project: 'Mobile App Dev', amount: '$45,000', milestone: 'Final Delivery', progress: 95, status: 'pending_release' },
+                    { project: 'SEO Campaign', amount: '$5,000', milestone: 'Month 3', progress: 33, status: 'in_progress' },
+                    { project: 'Logo Design', amount: '$2,500', milestone: 'Revision 2', progress: 80, status: 'in_dispute' },
+                  ].map((item) => (
+                    <div key={item.project} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-medium text-gray-900 dark:text-white">{item.project}</p>
+                          <span className="text-sm font-semibold text-emerald-600">{item.amount}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full ${
+                                item.status === 'in_dispute' ? 'bg-red-500' :
+                                item.status === 'pending_release' ? 'bg-yellow-500' : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${item.progress}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-500">{item.milestone}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            item.status === 'in_dispute' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                            item.status === 'pending_release' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          }`}>
+                            {item.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -998,6 +1175,470 @@ export default function EscrowClient() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Escrow.com Level */}
+          <TabsContent value="settings" className="space-y-6 mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-4">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: Settings },
+                      { id: 'payments', label: 'Payments', icon: CreditCard },
+                      { id: 'security', label: 'Security', icon: Shield },
+                      { id: 'compliance', label: 'Compliance', icon: ShieldCheck },
+                      { id: 'notifications', label: 'Notifications', icon: Mail },
+                      { id: 'advanced', label: 'Advanced', icon: Zap },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Platform Configuration</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Platform Fee Rate</p>
+                            <p className="text-sm text-gray-500">Default fee charged on transactions</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input type="number" defaultValue="2.9" className="w-20 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                            <span className="text-gray-500">%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Fixed Fee</p>
+                            <p className="text-sm text-gray-500">Additional fixed fee per transaction</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">$</span>
+                            <input type="number" defaultValue="0.30" step="0.01" className="w-20 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Default Currency</p>
+                            <p className="text-sm text-gray-500">Primary currency for transactions</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>USD - US Dollar</option>
+                            <option>EUR - Euro</option>
+                            <option>GBP - British Pound</option>
+                            <option>CAD - Canadian Dollar</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-release Funds</p>
+                            <p className="text-sm text-gray-500">Automatically release after inspection period</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Escrow Periods</h3>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Inspection Period</p>
+                            <div className="flex items-center gap-2">
+                              <input type="number" defaultValue="3" className="w-16 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                              <span className="text-sm text-gray-600 dark:text-gray-300">days</span>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Dispute Window</p>
+                            <div className="flex items-center gap-2">
+                              <input type="number" defaultValue="7" className="w-16 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                              <span className="text-sm text-gray-600 dark:text-gray-300">days</span>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Max Hold Period</p>
+                            <div className="flex items-center gap-2">
+                              <input type="number" defaultValue="30" className="w-16 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                              <span className="text-sm text-gray-600 dark:text-gray-300">days</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payments Settings */}
+                {settingsTab === 'payments' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Payout Settings</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Automatic Payouts</p>
+                            <p className="text-sm text-gray-500">Enable scheduled automatic payouts</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Payout Schedule</p>
+                            <p className="text-sm text-gray-500">How often to process payouts</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>Daily</option>
+                            <option>Weekly</option>
+                            <option>Bi-weekly</option>
+                            <option>Monthly</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Minimum Payout Amount</p>
+                            <p className="text-sm text-gray-500">Minimum balance for payouts</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">$</span>
+                            <input type="number" defaultValue="100" className="w-24 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Instant Payouts</p>
+                            <p className="text-sm text-gray-500">Allow instant payouts for eligible accounts</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Payment Methods</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { name: 'Credit/Debit Cards', enabled: true, icon: CreditCard },
+                          { name: 'Bank Transfers (ACH)', enabled: true, icon: Building },
+                          { name: 'Wire Transfers', enabled: true, icon: Send },
+                          { name: 'Cryptocurrency', enabled: false, icon: Wallet },
+                        ].map((method) => (
+                          <div key={method.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <method.icon className="w-5 h-5 text-emerald-600" />
+                              <span className="font-medium text-gray-900 dark:text-white">{method.name}</span>
+                            </div>
+                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full ${method.enabled ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${method.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Fraud Prevention</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Fraud Detection</p>
+                            <p className="text-sm text-gray-500">Enable AI-powered fraud detection</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Risk Threshold</p>
+                            <p className="text-sm text-gray-500">Block transactions above this risk score</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>High (75+)</option>
+                            <option>Medium (50+)</option>
+                            <option>Low (25+)</option>
+                            <option>Custom</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Velocity Checks</p>
+                            <p className="text-sm text-gray-500">Limit rapid successive transactions</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Verification Requirements</h3>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'Identity Verification (KYC)', enabled: true, required: true },
+                          { name: 'Bank Account Verification', enabled: true, required: true },
+                          { name: 'Phone Number Verification', enabled: true, required: false },
+                          { name: 'Business Verification', enabled: true, required: false },
+                        ].map((req) => (
+                          <div key={req.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{req.name}</p>
+                              {req.required && <span className="text-xs text-red-500">Required</span>}
+                            </div>
+                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full ${req.enabled ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${req.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Compliance Settings */}
+                {settingsTab === 'compliance' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AML/KYC Compliance</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">AML Screening</p>
+                            <p className="text-sm text-gray-500">Screen against sanctions and PEP lists</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enhanced Due Diligence</p>
+                            <p className="text-sm text-gray-500">Additional verification for high-risk accounts</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Transaction Monitoring</p>
+                            <p className="text-sm text-gray-500">Continuous monitoring for suspicious activity</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reporting Thresholds</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">CTR Threshold (USD)</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">$</span>
+                            <input type="number" defaultValue="10000" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">SAR Threshold (USD)</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">$</span>
+                            <input type="number" defaultValue="5000" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Compliance Status</h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <p className="font-medium text-gray-900 dark:text-white">PCI DSS</p>
+                          <p className="text-xs text-green-600">Level 1 Certified</p>
+                        </div>
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <p className="font-medium text-gray-900 dark:text-white">SOC 2</p>
+                          <p className="text-xs text-green-600">Type II Compliant</p>
+                        </div>
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <p className="font-medium text-gray-900 dark:text-white">GDPR</p>
+                          <p className="text-xs text-green-600">Data Protected</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Transaction Notifications</h3>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'New Payment Received', email: true, sms: false, push: true },
+                          { name: 'Payout Completed', email: true, sms: true, push: true },
+                          { name: 'Funds Released', email: true, sms: false, push: true },
+                          { name: 'Dispute Opened', email: true, sms: true, push: true },
+                          { name: 'Refund Processed', email: true, sms: false, push: true },
+                        ].map((notif) => (
+                          <div key={notif.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span className="font-medium text-gray-900 dark:text-white">{notif.name}</span>
+                            <div className="flex items-center gap-4">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.email} className="w-4 h-4 accent-emerald-600" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Email</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.sms} className="w-4 h-4 accent-emerald-600" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">SMS</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" defaultChecked={notif.push} className="w-4 h-4 accent-emerald-600" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Push</span>
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Alert Thresholds</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Large Transaction Alert</p>
+                            <p className="text-sm text-gray-500">Notify for transactions above threshold</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">$</span>
+                            <input type="number" defaultValue="10000" className="w-28 px-3 py-2 border rounded-lg text-right dark:bg-gray-700 dark:border-gray-600" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Daily Summary</p>
+                            <p className="text-sm text-gray-500">Receive daily transaction summary</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">API Configuration</h3>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">API Key</p>
+                          <div className="flex items-center gap-2">
+                            <input type="password" defaultValue="ek_live_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
+                            <button className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                              <RefreshCw className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Webhook URL</p>
+                          <input type="url" placeholder="https://your-domain.com/webhooks/escrow" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500" />
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Test Mode</p>
+                            <p className="text-sm text-gray-500">Enable sandbox environment</p>
+                          </div>
+                          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-600">
+                            <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Management</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Data Retention Period</p>
+                            <p className="text-sm text-gray-500">How long to keep transaction data</p>
+                          </div>
+                          <select className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <option>1 Year</option>
+                            <option>3 Years</option>
+                            <option>5 Years</option>
+                            <option>7 Years (Compliance)</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Export Data</p>
+                            <p className="text-sm text-gray-500">Download all transaction data</p>
+                          </div>
+                          <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Export CSV
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-4">Danger Zone</h3>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Disable Escrow Service</p>
+                          <p className="text-sm text-gray-500">Temporarily disable all escrow transactions</p>
+                        </div>
+                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                          Disable Service
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

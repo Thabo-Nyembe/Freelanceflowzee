@@ -1398,7 +1398,7 @@ export default function PricingClient({
                             <Badge className="bg-green-100 text-green-700">Active</Badge>
                           </div>
                           <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
-                            STRIPE_KEY_PLACEHOLDER
+                            ••••••••••••••••••••••••
                           </code>
                         </div>
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">

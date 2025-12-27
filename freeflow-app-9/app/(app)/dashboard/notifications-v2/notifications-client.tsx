@@ -1757,7 +1757,7 @@ export default function NotificationsClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
+                            <Input type="password" value="••••••••••••••••••••••••" readOnly className="font-mono" />
                             <Button variant="outline" size="sm">
                               <Copy className="h-4 w-4" />
                             </Button>
