@@ -433,6 +433,7 @@ const mockQuota: StorageQuota = {
 
 export default function CloudStorageClient() {
   const [activeTab, setActiveTab] = useState('files')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFile, setSelectedFile] = useState<CloudFile | null>(null)
@@ -643,10 +644,67 @@ export default function CloudStorageClient() {
               <Trash2 className="w-4 h-4 mr-2" />
               Trash
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-sky-100 dark:data-[state=active]:bg-sky-900">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Files Tab */}
-          <TabsContent value="files" className="mt-6">
+          <TabsContent value="files" className="mt-6 space-y-6">
+            {/* Files Overview Banner */}
+            <div className="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Cloud className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">My Files</h2>
+                    <p className="text-sky-100">All your files in one secure location • {stats.storageUsed.toFixed(1)} GB used</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.totalFiles}</p>
+                    <p className="text-sm text-sky-200">Files</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.totalFolders}</p>
+                    <p className="text-sm text-sky-200">Folders</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.sharedFiles}</p>
+                    <p className="text-sm text-sky-200">Shared</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { label: 'Upload', icon: Upload, color: 'from-sky-500 to-blue-500' },
+                { label: 'New Folder', icon: FolderPlus, color: 'from-indigo-500 to-purple-500' },
+                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500' },
+                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500' },
+                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500' },
+                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500' },
+                { label: 'Sync', icon: RefreshCw, color: 'from-blue-500 to-indigo-500' },
+                { label: 'Scan', icon: FileText, color: 'from-gray-500 to-gray-600' }
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Sidebar */}
               <Card className="lg:col-span-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -828,7 +886,26 @@ export default function CloudStorageClient() {
           </TabsContent>
 
           {/* Starred Tab */}
-          <TabsContent value="starred" className="mt-6">
+          <TabsContent value="starred" className="mt-6 space-y-6">
+            {/* Starred Banner */}
+            <div className="bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Star className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Starred Files</h2>
+                    <p className="text-yellow-100">Quick access to your important files</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold">{starredFiles.length}</p>
+                  <p className="text-sm text-yellow-200">Starred</p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {starredFiles.map(file => {
                 const FileIcon = getFileIcon(file.type)
@@ -855,7 +932,32 @@ export default function CloudStorageClient() {
           </TabsContent>
 
           {/* Shared Tab */}
-          <TabsContent value="shared" className="mt-6">
+          <TabsContent value="shared" className="mt-6 space-y-6">
+            {/* Shared Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Share2 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Shared Files</h2>
+                    <p className="text-green-100">Files shared with you and by you</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.sharedFiles}</p>
+                    <p className="text-sm text-green-200">Shared</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockFiles.filter(f => f.sharedWith.length > 0).length}</p>
+                    <p className="text-sm text-green-200">By Me</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                 <CardHeader>
@@ -916,7 +1018,26 @@ export default function CloudStorageClient() {
           </TabsContent>
 
           {/* Recent Tab */}
-          <TabsContent value="recent" className="mt-6">
+          <TabsContent value="recent" className="mt-6 space-y-6">
+            {/* Recent Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Clock className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Recent Files</h2>
+                    <p className="text-purple-100">Files you recently viewed or modified</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold">{mockFiles.length}</p>
+                  <p className="text-sm text-purple-200">Recent</p>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg">Recently Accessed</CardTitle>
@@ -948,7 +1069,32 @@ export default function CloudStorageClient() {
           </TabsContent>
 
           {/* Transfers Tab */}
-          <TabsContent value="transfers" className="mt-6">
+          <TabsContent value="transfers" className="mt-6 space-y-6">
+            {/* Transfers Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Activity className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Transfers</h2>
+                    <p className="text-orange-100">Monitor uploads and downloads in progress</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTransfers.filter(t => t.status === 'uploading' || t.status === 'downloading').length}</p>
+                    <p className="text-sm text-orange-200">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTransfers.filter(t => t.status === 'completed').length}</p>
+                    <p className="text-sm text-orange-200">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -1004,7 +1150,45 @@ export default function CloudStorageClient() {
           </TabsContent>
 
           {/* Trash Tab */}
-          <TabsContent value="trash" className="mt-6">
+          <TabsContent value="trash" className="mt-6 space-y-6">
+            {/* Trash Overview Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Trash2 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Trash</h2>
+                    <p className="text-red-100">Recover deleted files within 30 days</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-gray-500/20 text-gray-300 border-gray-500/30">Empty</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Retention Policy
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Trash Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: RotateCcw, label: 'Restore All', desc: 'Recover all files', color: 'text-green-500' },
+                { icon: Trash2, label: 'Empty Trash', desc: 'Delete permanently', color: 'text-red-500' },
+                { icon: Search, label: 'Search Trash', desc: 'Find deleted files', color: 'text-blue-500' },
+                { icon: Clock, label: 'Auto-Delete', desc: 'Retention settings', color: 'text-purple-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105 bg-white/80 dark:bg-gray-800/80">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
@@ -1025,6 +1209,393 @@ export default function CloudStorageClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Storage Settings</h2>
+                    <p className="text-gray-300">Configure sync, sharing, and storage preferences</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Synced</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Data
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Sidebar Layout */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'sync', icon: RefreshCw, label: 'Sync', desc: 'Sync options' },
+                        { id: 'sharing', icon: Share2, label: 'Sharing', desc: 'Share settings' },
+                        { id: 'security', icon: Shield, label: 'Security', desc: 'Protection' },
+                        { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alert prefs' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div className="text-left">
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-sky-600" />
+                        General Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Storage Name</label>
+                        <Input defaultValue="My Cloud Storage" className="max-w-md" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default View</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>Grid View</option>
+                          <option>List View</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show Hidden Files</p>
+                          <p className="text-sm text-gray-500">Display files starting with dot</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show File Extensions</p>
+                          <p className="text-sm text-gray-500">Display file type extensions</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show Thumbnails</p>
+                          <p className="text-sm text-gray-500">Generate previews for images and videos</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Confirm Before Delete</p>
+                          <p className="text-sm text-gray-500">Ask before moving files to trash</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Sync Settings */}
+                {settingsTab === 'sync' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <RefreshCw className="w-5 h-5 text-blue-600" />
+                        Sync Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-sync</p>
+                          <p className="text-sm text-gray-500">Automatically sync files when changes detected</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Sync on WiFi Only</p>
+                          <p className="text-sm text-gray-500">Pause sync on mobile data</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sync Frequency</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>Real-time</option>
+                          <option>Every 5 minutes</option>
+                          <option>Every 15 minutes</option>
+                          <option>Every hour</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Selective Sync</p>
+                          <p className="text-sm text-gray-500">Choose specific folders to sync</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Smart Sync</p>
+                          <p className="text-sm text-gray-500">Download files only when accessed</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Pause Sync</p>
+                          <p className="text-sm text-gray-500">Temporarily stop all sync activities</p>
+                        </div>
+                        <Button variant="outline" size="sm">Pause</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Sharing Settings */}
+                {settingsTab === 'sharing' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Share2 className="w-5 h-5 text-purple-600" />
+                        Sharing Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Share Permission</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>View Only</option>
+                          <option>Can Comment</option>
+                          <option>Can Edit</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Allow Public Links</p>
+                          <p className="text-sm text-gray-500">Create shareable links anyone can access</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Link Expiration</p>
+                          <p className="text-sm text-gray-500">Auto-expire shared links after time</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Password Protect Links</p>
+                          <p className="text-sm text-gray-500">Require password to access shared files</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Download Permission</p>
+                          <p className="text-sm text-gray-500">Allow viewers to download shared files</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Track Link Views</p>
+                          <p className="text-sm text-gray-500">Log when shared links are accessed</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-green-600" />
+                        Security Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                          <p className="text-sm text-gray-500">Require 2FA for account access</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Encryption at Rest</p>
+                          <p className="text-sm text-gray-500">Encrypt stored files</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">AES-256</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">End-to-End Encryption</p>
+                          <p className="text-sm text-gray-500">Zero-knowledge encryption for sensitive files</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Remote Wipe</p>
+                          <p className="text-sm text-gray-500">Allow remote data deletion</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Activity Logging</p>
+                          <p className="text-sm text-gray-500">Track all file access and changes</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-orange-600" />
+                        Notification Preferences
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { label: 'File Uploads', desc: 'Notify when uploads complete', enabled: true },
+                        { label: 'File Downloads', desc: 'Notify when downloads complete', enabled: false },
+                        { label: 'Sharing Activity', desc: 'When files are shared with you', enabled: true },
+                        { label: 'Comments', desc: 'When someone comments on your files', enabled: true },
+                        { label: 'Storage Alerts', desc: 'When storage is almost full', enabled: true },
+                        { label: 'Sync Errors', desc: 'When sync issues occur', enabled: true },
+                        { label: 'Security Alerts', desc: 'Suspicious activity detected', enabled: true },
+                      ].map((setting, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{setting.label}</p>
+                            <p className="text-sm text-gray-500">{setting.desc}</p>
+                          </div>
+                          <input type="checkbox" className="w-5 h-5" defaultChecked={setting.enabled} />
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-yellow-600" />
+                        Advanced Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Trash Retention</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>7 days</option>
+                          <option>30 days</option>
+                          <option>90 days</option>
+                          <option>Forever</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">File Versioning</p>
+                          <p className="text-sm text-gray-500">Keep previous versions of files</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Duplicate Detection</p>
+                          <p className="text-sm text-gray-500">Warn when uploading duplicate files</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">API Access</p>
+                          <p className="text-sm text-gray-500">Enable third-party app access</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                          <p className="text-sm text-gray-500">Enable verbose logging</p>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Clear All Caches</p>
+                              <p className="text-sm text-red-600">Remove all cached data</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Clear
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Files</p>
+                              <p className="text-sm text-red-600">Permanently delete all stored files</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

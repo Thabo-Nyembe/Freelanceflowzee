@@ -180,6 +180,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   const [expandedAccounts, setExpandedAccounts] = useState<string[]>(['asset', 'liability', 'equity'])
   const [transactionFilter, setTransactionFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { records } = useFinancial({})
   const displayRecords = records.length > 0 ? records : initialFinancial
@@ -375,10 +376,35 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               <Landmark className="w-4 h-4 mr-2" />
               Banking
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-4 py-2">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Financial Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <DollarSign className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Financial Overview</h2>
+                    <p className="text-emerald-100">Net Income: {formatCurrency(netIncome)} this period</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Reports
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Transactions */}
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -1121,6 +1147,553 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Financial Settings</h2>
+                    <p className="text-emerald-100">Configure accounting, reporting, and integration preferences</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Configured</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'accounting', icon: FileText, label: 'Accounting', desc: 'Chart of accounts' },
+                      { id: 'reporting', icon: BarChart3, label: 'Reporting', desc: 'Report options' },
+                      { id: 'banking', icon: Landmark, label: 'Banking', desc: 'Bank connections' },
+                      { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alert settings' },
+                      { id: 'advanced', icon: RefreshCw, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Company Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Company Name</label>
+                          <input type="text" defaultValue="Acme Corporation" className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tax ID</label>
+                          <input type="text" defaultValue="12-3456789" className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fiscal Year Start</label>
+                          <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>January</option>
+                            <option>April</option>
+                            <option>July</option>
+                            <option>October</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Base Currency</label>
+                          <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>USD - US Dollar</option>
+                            <option>EUR - Euro</option>
+                            <option>GBP - British Pound</option>
+                            <option>ZAR - South African Rand</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Display Preferences</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Number Format</p>
+                            <p className="text-sm text-gray-500">Choose decimal and thousands separators</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>1,234.56</option>
+                            <option>1.234,56</option>
+                            <option>1 234.56</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Date Format</p>
+                            <p className="text-sm text-gray-500">Choose your preferred date format</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>MM/DD/YYYY</option>
+                            <option>DD/MM/YYYY</option>
+                            <option>YYYY-MM-DD</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Negative Numbers</p>
+                            <p className="text-sm text-gray-500">How to display negative amounts</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>-$100.00</option>
+                            <option>($100.00)</option>
+                            <option>$100.00-</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Accounting Settings */}
+                {settingsTab === 'accounting' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Accounting Method</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <input type="radio" name="method" defaultChecked className="w-4 h-4 text-emerald-600" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Accrual Basis</p>
+                              <p className="text-sm text-gray-500">Record revenue when earned, expenses when incurred</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-emerald-100 text-emerald-700">Recommended</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <input type="radio" name="method" className="w-4 h-4 text-emerald-600" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Cash Basis</p>
+                              <p className="text-sm text-gray-500">Record revenue when received, expenses when paid</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Default Accounts</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Accounts Receivable</label>
+                          <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>1100 - Accounts Receivable</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Accounts Payable</label>
+                          <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>2000 - Accounts Payable</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Retained Earnings</label>
+                          <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>3100 - Retained Earnings</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sales Revenue</label>
+                          <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>4000 - Sales Revenue</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Auto-Categorization</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">AI Categorization</p>
+                            <p className="text-sm text-gray-500">Automatically categorize transactions using AI</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Learn from Corrections</p>
+                            <p className="text-sm text-gray-500">Improve AI based on manual corrections</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reporting Settings */}
+                {settingsTab === 'reporting' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Templates</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <LineChart className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Profit & Loss Statement</p>
+                              <p className="text-sm text-gray-500">Income statement template</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Customize</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                              <PieChart className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Balance Sheet</p>
+                              <p className="text-sm text-gray-500">Assets and liabilities report</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Customize</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                              <TrendingUp className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Cash Flow Statement</p>
+                              <p className="text-sm text-gray-500">Cash movement report</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Customize</Button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scheduled Reports</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Monthly Summary</p>
+                            <p className="text-sm text-gray-500">Email monthly financial summary</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Quarterly Reports</p>
+                            <p className="text-sm text-gray-500">Generate quarterly statements</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Annual Tax Package</p>
+                            <p className="text-sm text-gray-500">Prepare year-end tax documents</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Banking Settings */}
+                {settingsTab === 'banking' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Connected Banks</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <Building2 className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Chase Business Checking</p>
+                              <p className="text-sm text-gray-500">Last synced: 5 minutes ago</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                            <Button variant="outline" size="sm">Disconnect</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                              <CreditCard className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">American Express Business</p>
+                              <p className="text-sm text-gray-500">Last synced: 2 hours ago</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                            <Button variant="outline" size="sm">Disconnect</Button>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Connect Another Bank
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sync Settings</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-Sync Frequency</p>
+                            <p className="text-sm text-gray-500">How often to sync transactions</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>Every 15 minutes</option>
+                            <option>Every hour</option>
+                            <option>Every 6 hours</option>
+                            <option>Daily</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Import Historical Data</p>
+                            <p className="text-sm text-gray-500">Sync past transactions</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>Last 90 days</option>
+                            <option>Last 6 months</option>
+                            <option>Last year</option>
+                            <option>All available</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Transaction Alerts</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Large Transaction Alerts</p>
+                            <p className="text-sm text-gray-500">Notify for transactions over threshold</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <input type="text" defaultValue="$1,000" className="w-24 px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm" />
+                            <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Low Balance Alert</p>
+                            <p className="text-sm text-gray-500">Warn when account balance is low</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <input type="text" defaultValue="$5,000" className="w-24 px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm" />
+                            <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Duplicate Transaction Warning</p>
+                            <p className="text-sm text-gray-500">Alert for potential duplicate entries</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Notifications</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Weekly Summary Email</p>
+                            <p className="text-sm text-gray-500">Receive weekly financial overview</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Budget Variance Alerts</p>
+                            <p className="text-sm text-gray-500">Alert when budget exceeds threshold</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Invoice Due Reminders</p>
+                            <p className="text-sm text-gray-500">Remind about upcoming due dates</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Management</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Automatic Backups</p>
+                            <p className="text-sm text-gray-500">Backup financial data daily</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Data Retention Period</p>
+                            <p className="text-sm text-gray-500">How long to keep historical data</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+                            <option>7 years</option>
+                            <option>10 years</option>
+                            <option>Forever</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Trail</p>
+                            <p className="text-sm text-gray-500">Log all changes to financial records</p>
+                          </div>
+                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integrations</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                              <FileText className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">QuickBooks Export</p>
+                              <p className="text-sm text-gray-500">Export data to QuickBooks format</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <FileText className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Xero Integration</p>
+                              <p className="text-sm text-gray-500">Sync with Xero accounting</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                              <Share2 className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">API Access</p>
+                              <p className="text-sm text-gray-500">Enable programmatic access</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Manage Keys</Button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-red-200 dark:border-red-900 p-6">
+                      <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Danger Zone</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Close Fiscal Year</p>
+                            <p className="text-sm text-gray-500">Lock previous year's transactions</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Close Year</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset All Data</p>
+                            <p className="text-sm text-gray-500">Permanently delete all financial data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset Data</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>

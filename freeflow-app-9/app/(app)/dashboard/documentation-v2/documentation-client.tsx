@@ -310,6 +310,7 @@ export default function DocumentationClient() {
   const [expandedPages, setExpandedPages] = useState<string[]>(['page1'])
   const [selectedChangelog, setSelectedChangelog] = useState<DocChangelog | null>(null)
   const [selectedLocale, setSelectedLocale] = useState<DocLocale | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const stats = useMemo(() => ({
     totalSpaces: mockSpaces.length,
@@ -457,6 +458,51 @@ export default function DocumentationClient() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Dashboard Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <BookOpen className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Documentation Hub</h2>
+                    <p className="text-purple-100">{stats.totalPages} pages across {stats.totalSpaces} spaces</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                    <p className="text-purple-100 text-sm">Total Views</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Page
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'New Page', desc: 'Create documentation', color: 'text-purple-500' },
+                { icon: FolderOpen, label: 'New Space', desc: 'Add new space', color: 'text-blue-500' },
+                { icon: Upload, label: 'Import', desc: 'Import docs', color: 'text-green-500' },
+                { icon: Search, label: 'Search', desc: 'Find content', color: 'text-orange-500' },
+                { icon: GitBranch, label: 'Git Sync', desc: 'Sync with repo', color: 'text-indigo-500' },
+                { icon: Languages, label: 'Translate', desc: 'Add translation', color: 'text-pink-500' },
+                { icon: Sparkles, label: 'AI Assist', desc: 'AI writing help', color: 'text-amber-500' },
+                { icon: Download, label: 'Export', desc: 'Export docs', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2">
                 <CardHeader>
@@ -549,6 +595,27 @@ export default function DocumentationClient() {
 
           {/* Spaces Tab */}
           <TabsContent value="spaces" className="space-y-6">
+            {/* Spaces Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <FolderOpen className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Documentation Spaces</h2>
+                    <p className="text-blue-100">{stats.totalSpaces} spaces with {stats.totalPages} total pages</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowNewSpace(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Space
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockSpaces.map(space => (
                 <Card key={space.id} className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => setSelectedSpace(space)}>
@@ -596,6 +663,28 @@ export default function DocumentationClient() {
 
           {/* Pages Tab */}
           <TabsContent value="pages" className="space-y-6">
+            {/* Pages Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <FileText className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">All Pages</h2>
+                    <p className="text-emerald-100">{stats.publishedPages} published, {stats.draftPages} drafts</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-white/20 text-white border-white/30">{stats.avgReadTime} avg read</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Page
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-6">
               <Card className="w-64 flex-shrink-0">
                 <CardHeader>
@@ -711,6 +800,27 @@ export default function DocumentationClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Layout className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Documentation Templates</h2>
+                    <p className="text-amber-100">{mockTemplates.length} templates available</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Template
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockTemplates.map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-all cursor-pointer group">
@@ -864,9 +974,24 @@ export default function DocumentationClient() {
 
           {/* Localization Tab */}
           <TabsContent value="localization" className="space-y-6">
+            {/* Localization Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Languages className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Localization</h2>
+                    <p className="text-pink-100">{stats.languages} languages, {stats.avgTranslation}% avg completion</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Localization</h2>
+                <h2 className="text-2xl font-bold">Language Management</h2>
                 <p className="text-gray-500">Manage multi-language documentation</p>
               </div>
               <Button>
@@ -973,6 +1098,28 @@ export default function DocumentationClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <TrendingUp className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Documentation Analytics</h2>
+                    <p className="text-violet-100">{stats.satisfaction}% reader satisfaction</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-white/20 text-white border-white/30">{stats.totalViews.toLocaleString()} views</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Report
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
                 { label: 'Total Views', value: stats.totalViews.toLocaleString(), change: '+12%', icon: Eye },
@@ -1027,131 +1174,543 @@ export default function DocumentationClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
+                  </div>
                   <div>
-                    <Label>Default Space</Label>
-                    <Select defaultValue="space1">
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {mockSpaces.map(space => (
-                          <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <h2 className="text-2xl font-bold">Documentation Settings</h2>
+                    <p className="text-purple-100">Configure spaces, editor, SEO, and integration preferences</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Enable Comments</Label>
-                      <p className="text-sm text-gray-500">Allow readers to comment on pages</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Page Feedback</Label>
-                      <p className="text-sm text-gray-500">Show helpful/not helpful buttons</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Configured</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <GitBranch className="h-5 w-5 text-purple-600" />
-                    Integrations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {mockIntegrations.map(int => (
-                      <div key={int.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <int.icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'editor', icon: PenTool, label: 'Editor', desc: 'Writing preferences' },
+                      { id: 'seo', icon: Globe, label: 'SEO & Meta', desc: 'Search optimization' },
+                      { id: 'integrations', icon: GitBranch, label: 'Integrations', desc: 'Connected services' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert settings' },
+                      { id: 'advanced', icon: Database, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </Card>
+              </div>
+
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Space Defaults</CardTitle>
+                        <CardDescription>Configure default settings for documentation spaces</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <p className="font-medium">{int.name}</p>
-                            {int.last_sync && <p className="text-xs text-gray-500">Last sync: {int.last_sync}</p>}
+                            <Label>Default Space</Label>
+                            <Select defaultValue="space1">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {mockSpaces.map(space => (
+                                  <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Default Visibility</Label>
+                            <Select defaultValue="public">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="public">Public</SelectItem>
+                                <SelectItem value="internal">Internal</SelectItem>
+                                <SelectItem value="private">Private</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
-                        <Badge className={int.status === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}>
-                          {int.status}
-                        </Badge>
-                      </div>
-                    ))}
-                    <Button variant="outline" className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Integration
-                    </Button>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Enable Comments</Label>
+                            <p className="text-sm text-gray-500">Allow readers to comment on pages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Page Feedback</Label>
+                            <p className="text-sm text-gray-500">Show helpful/not helpful buttons</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Reading Time</Label>
+                            <p className="text-sm text-gray-500">Display estimated reading time</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Display Settings</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Table of Contents</Label>
+                            <p className="text-sm text-gray-500">Show TOC on pages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Breadcrumbs</Label>
+                            <p className="text-sm text-gray-500">Show navigation breadcrumbs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Page Contributors</Label>
+                            <p className="text-sm text-gray-500">Display contributor avatars</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>SEO Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Auto-generate Meta</Label>
-                      <p className="text-sm text-gray-500">Generate SEO meta from content</p>
-                    </div>
-                    <Switch defaultChecked />
+                {/* Editor Settings */}
+                {settingsTab === 'editor' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Editor Preferences</CardTitle>
+                        <CardDescription>Customize the documentation editor experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Editor Mode</Label>
+                            <Select defaultValue="wysiwyg">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="wysiwyg">WYSIWYG Editor</SelectItem>
+                                <SelectItem value="markdown">Markdown</SelectItem>
+                                <SelectItem value="split">Split View</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Font Size</Label>
+                            <Select defaultValue="16">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="14">14px</SelectItem>
+                                <SelectItem value="16">16px</SelectItem>
+                                <SelectItem value="18">18px</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Auto-save</Label>
+                            <p className="text-sm text-gray-500">Automatically save drafts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Spell Check</Label>
+                            <p className="text-sm text-gray-500">Enable spell checking in editor</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Code Highlighting</Label>
+                            <p className="text-sm text-gray-500">Syntax highlighting for code blocks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>AI Assistant</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>AI Writing Suggestions</Label>
+                            <p className="text-sm text-gray-500">Get AI-powered writing suggestions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Auto-complete</Label>
+                            <p className="text-sm text-gray-500">AI-powered sentence completion</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Grammar Correction</Label>
+                            <p className="text-sm text-gray-500">Automatic grammar fixes</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Sitemap</Label>
-                      <p className="text-sm text-gray-500">Generate XML sitemap</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Robots.txt</Label>
-                      <p className="text-sm text-gray-500">Allow search engine indexing</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>New Comments</Label>
-                      <p className="text-sm text-gray-500">Notify on new comments</p>
-                    </div>
-                    <Switch defaultChecked />
+                {/* SEO Settings */}
+                {settingsTab === 'seo' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Search Engine Optimization</CardTitle>
+                        <CardDescription>Configure SEO settings for better discoverability</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Auto-generate Meta</Label>
+                            <p className="text-sm text-gray-500">Generate SEO meta from content</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>XML Sitemap</Label>
+                            <p className="text-sm text-gray-500">Generate XML sitemap automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Robots.txt</Label>
+                            <p className="text-sm text-gray-500">Allow search engine indexing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Open Graph Tags</Label>
+                            <p className="text-sm text-gray-500">Generate social media preview tags</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Custom Domain</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Custom Domain URL</Label>
+                          <Input placeholder="docs.example.com" className="mt-1" />
+                          <p className="text-xs text-gray-500 mt-1">Point your CNAME to docs.kazi.com</p>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>SSL Certificate</Label>
+                            <p className="text-sm text-gray-500">Auto-provision SSL</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Active</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Page Updates</Label>
-                      <p className="text-sm text-gray-500">Notify when watched pages update</p>
-                    </div>
-                    <Switch defaultChecked />
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <GitBranch className="h-5 w-5 text-purple-600" />
+                          Connected Services
+                        </CardTitle>
+                        <CardDescription>Manage integrations with external services</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {mockIntegrations.map(int => (
+                            <div key={int.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white dark:bg-gray-700 rounded-lg">
+                                  <int.icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{int.name}</p>
+                                  {int.last_sync && <p className="text-xs text-gray-500">Last sync: {int.last_sync}</p>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge className={int.status === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}>
+                                  {int.status}
+                                </Badge>
+                                <Button variant="outline" size="sm">Configure</Button>
+                              </div>
+                            </div>
+                          ))}
+                          <Button variant="outline" className="w-full">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Integration
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Git Sync</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Enable Git Sync</Label>
+                            <p className="text-sm text-gray-500">Sync documentation with Git repository</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Repository URL</Label>
+                            <Input placeholder="github.com/org/repo" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Branch</Label>
+                            <Input placeholder="main" className="mt-1" defaultValue="main" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Auto-sync on Push</Label>
+                            <p className="text-sm text-gray-500">Automatically sync when changes pushed</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Translation Updates</Label>
-                      <p className="text-sm text-gray-500">Notify on translation changes</p>
-                    </div>
-                    <Switch defaultChecked />
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure when to receive email notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>New Comments</Label>
+                            <p className="text-sm text-gray-500">Notify on new comments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Page Updates</Label>
+                            <p className="text-sm text-gray-500">Notify when watched pages update</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Translation Updates</Label>
+                            <p className="text-sm text-gray-500">Notify on translation changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Weekly Digest</Label>
+                            <p className="text-sm text-gray-500">Receive weekly documentation summary</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>In-App Notifications</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Mentions</Label>
+                            <p className="text-sm text-gray-500">Notify when mentioned</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Edit Suggestions</Label>
+                            <p className="text-sm text-gray-500">Notify on suggested edits</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Review Requests</Label>
+                            <p className="text-sm text-gray-500">Notify when review is requested</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Configure data retention and backups</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Automatic Backups</Label>
+                            <p className="text-sm text-gray-500">Daily backup of all documentation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Version Retention</Label>
+                            <p className="text-sm text-gray-500">How long to keep page versions</p>
+                          </div>
+                          <Select defaultValue="forever">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Audit Logging</Label>
+                            <p className="text-sm text-gray-500">Log all changes to documentation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Enable API Access</Label>
+                            <p className="text-sm text-gray-500">Allow programmatic access to docs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input value="doc_••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Webhook Notifications</Label>
+                            <p className="text-sm text-gray-500">Send webhooks on doc changes</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Export All Data</Label>
+                            <p className="text-sm text-gray-500">Download complete documentation backup</p>
+                          </div>
+                          <Button variant="outline">Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Delete All Documentation</Label>
+                            <p className="text-sm text-gray-500">Permanently delete all docs</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
