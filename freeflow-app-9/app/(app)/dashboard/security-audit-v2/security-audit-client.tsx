@@ -375,6 +375,7 @@ export default function SecurityAuditClient() {
   const [selectedVulnerability, setSelectedVulnerability] = useState<Vulnerability | null>(null)
   const [selectedAudit, setSelectedAudit] = useState<SecurityAudit | null>(null)
   const [showScanDialog, setShowScanDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Compute stats
   const vulnerabilityStats = useMemo(() => {
@@ -550,7 +551,72 @@ export default function SecurityAuditClient() {
           </TabsList>
 
           {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="mt-6">
+          <TabsContent value="dashboard" className="mt-6 space-y-6">
+            {/* Dashboard Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-700 via-blue-700 to-indigo-700 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Security Command Center</h2>
+                  <p className="text-blue-100">Real-time security posture and vulnerability management</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export Report
+                  </Button>
+                  <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowScanDialog(true)}>
+                    <Scan className="w-4 h-4 mr-2" />New Scan
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">82%</div>
+                  <div className="text-sm text-blue-100">Security Score</div>
+                  <div className="text-xs text-green-300 mt-1">↑ 5% vs last month</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-red-300">{vulnerabilityStats.critical}</div>
+                  <div className="text-sm text-blue-100">Critical</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-orange-300">{vulnerabilityStats.high}</div>
+                  <div className="text-sm text-blue-100">High</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.open}</div>
+                  <div className="text-sm text-blue-100">Open Issues</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">89%</div>
+                  <div className="text-sm text-blue-100">Compliance</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">156</div>
+                  <div className="text-sm text-blue-100">Assets</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-6 gap-4">
+              {[
+                { icon: Scan, label: 'Run Scan', desc: 'Start scan', color: 'blue' },
+                { icon: Bug, label: 'Vulnerabilities', desc: 'View all', color: 'red' },
+                { icon: FileCheck, label: 'Compliance', desc: 'Check status', color: 'green' },
+                { icon: Server, label: 'Assets', desc: 'Manage', color: 'purple' },
+                { icon: FileText, label: 'Reports', desc: 'Generate', color: 'orange' },
+                { icon: AlertTriangle, label: 'Alerts', desc: 'View active', color: 'amber' }
+              ].map(action => (
+                <Card key={action.label} className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center border-gray-200 dark:border-gray-700">
+                  <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 mx-auto w-fit group-hover:scale-110 transition-transform`}>
+                    <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                  </div>
+                  <p className="text-sm font-medium mt-2 text-gray-900 dark:text-white">{action.label}</p>
+                  <p className="text-xs text-gray-500">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Vulnerability Breakdown */}
               <Card className="col-span-8 border-gray-200 dark:border-gray-700">
@@ -720,11 +786,137 @@ export default function SecurityAuditClient() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Trending Vulnerabilities */}
+              <Card className="col-span-6 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Trending Vulnerabilities</CardTitle>
+                    <Badge className="bg-red-100 text-red-700">Live</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Log4j RCE', trend: '+45%', severity: 'critical', affected: 12 },
+                      { name: 'OpenSSL Heartbleed', trend: '+23%', severity: 'high', affected: 8 },
+                      { name: 'Spring4Shell', trend: '+18%', severity: 'critical', affected: 5 },
+                      { name: 'Apache Struts', trend: '+12%', severity: 'high', affected: 3 }
+                    ].map((vuln, i) => (
+                      <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${vuln.severity === 'critical' ? 'bg-red-100' : 'bg-orange-100'}`}>
+                          <TrendingUp className={`h-5 w-5 ${vuln.severity === 'critical' ? 'text-red-600' : 'text-orange-600'}`} />
+                        </div>
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900 dark:text-white">{vuln.name}</h5>
+                          <p className="text-sm text-gray-500">{vuln.affected} affected assets</p>
+                        </div>
+                        <Badge className={vuln.severity === 'critical' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}>{vuln.severity}</Badge>
+                        <span className="text-green-600 font-medium">{vuln.trend}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Security Timeline */}
+              <Card className="col-span-6 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Security Timeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { time: '10:32 AM', event: 'Vulnerability scan completed', type: 'scan', status: 'success' },
+                      { time: '09:15 AM', event: 'Critical CVE detected on prod-api-01', type: 'alert', status: 'critical' },
+                      { time: '08:45 AM', event: 'Compliance report generated', type: 'report', status: 'info' },
+                      { time: 'Yesterday', event: 'Penetration test scheduled', type: 'schedule', status: 'pending' },
+                      { time: '2 days ago', event: 'SOC 2 audit completed', type: 'audit', status: 'success' },
+                      { time: '3 days ago', event: 'New asset discovered: db-backup-02', type: 'discovery', status: 'info' }
+                    ].map((event, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <div className="text-sm text-gray-500 w-24">{event.time}</div>
+                        <div className={`w-3 h-3 rounded-full ${event.status === 'critical' ? 'bg-red-500' : event.status === 'success' ? 'bg-green-500' : event.status === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'}`} />
+                        <p className="flex-1 text-gray-900 dark:text-white">{event.event}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Risk Heatmap */}
+              <Card className="col-span-6 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Risk Heatmap by Asset Type</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { type: 'Servers', risk: 78, vulns: 45 },
+                      { type: 'Databases', risk: 65, vulns: 23 },
+                      { type: 'Applications', risk: 82, vulns: 56 },
+                      { type: 'Cloud', risk: 45, vulns: 12 },
+                      { type: 'Containers', risk: 38, vulns: 8 },
+                      { type: 'Network', risk: 52, vulns: 15 }
+                    ].map((item, i) => (
+                      <div key={i} className={`p-4 rounded-lg ${item.risk > 70 ? 'bg-red-100 dark:bg-red-900/30' : item.risk > 50 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-green-100 dark:bg-green-900/30'}`}>
+                        <p className="font-medium text-gray-900 dark:text-white">{item.type}</p>
+                        <p className={`text-2xl font-bold ${item.risk > 70 ? 'text-red-600' : item.risk > 50 ? 'text-yellow-600' : 'text-green-600'}`}>{item.risk}%</p>
+                        <p className="text-sm text-gray-500">{item.vulns} vulnerabilities</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           {/* Vulnerabilities Tab */}
-          <TabsContent value="vulnerabilities" className="mt-6">
+          <TabsContent value="vulnerabilities" className="mt-6 space-y-6">
+            {/* Vulnerabilities Overview Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Vulnerability Management</h2>
+                  <p className="text-red-100">Track, prioritize, and remediate security vulnerabilities</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-red-600 hover:bg-red-50" onClick={() => setShowScanDialog(true)}>
+                    <Scan className="w-4 h-4 mr-2" />Scan Now
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.total}</div>
+                  <div className="text-sm text-red-100">Total</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.critical}</div>
+                  <div className="text-sm text-red-100">Critical</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.high}</div>
+                  <div className="text-sm text-red-100">High</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.medium}</div>
+                  <div className="text-sm text-red-100">Medium</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.open}</div>
+                  <div className="text-sm text-red-100">Open</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{vulnerabilityStats.resolved}</div>
+                  <div className="text-sm text-red-100">Resolved</div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -826,7 +1018,47 @@ export default function SecurityAuditClient() {
           </TabsContent>
 
           {/* Audits Tab */}
-          <TabsContent value="audits" className="mt-6">
+          <TabsContent value="audits" className="mt-6 space-y-6">
+            {/* Audits Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Security Audits</h2>
+                  <p className="text-purple-100">Schedule and manage comprehensive security assessments</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Calendar className="w-4 h-4 mr-2" />Schedule
+                  </Button>
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                    <Plus className="w-4 h-4 mr-2" />New Audit
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAudits.length}</div>
+                  <div className="text-sm text-purple-100">Total Audits</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAudits.filter(a => a.status === 'passed').length}</div>
+                  <div className="text-sm text-purple-100">Passed</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAudits.filter(a => a.status === 'in-progress').length}</div>
+                  <div className="text-sm text-purple-100">In Progress</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAudits.filter(a => a.status === 'scheduled').length}</div>
+                  <div className="text-sm text-purple-100">Scheduled</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">85%</div>
+                  <div className="text-sm text-purple-100">Avg Score</div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               {mockAudits.map(audit => (
                 <Card
@@ -877,7 +1109,51 @@ export default function SecurityAuditClient() {
           </TabsContent>
 
           {/* Assets Tab */}
-          <TabsContent value="assets" className="mt-6">
+          <TabsContent value="assets" className="mt-6 space-y-6">
+            {/* Assets Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Asset Inventory</h2>
+                  <p className="text-emerald-100">Manage and monitor your IT infrastructure assets</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Scan className="w-4 h-4 mr-2" />Discover
+                  </Button>
+                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+                    <Plus className="w-4 h-4 mr-2" />Add Asset
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAssets.length}</div>
+                  <div className="text-sm text-emerald-100">Total Assets</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAssets.filter(a => a.status === 'online').length}</div>
+                  <div className="text-sm text-emerald-100">Online</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAssets.filter(a => a.criticality === 'critical').length}</div>
+                  <div className="text-sm text-emerald-100">Critical</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAssets.reduce((sum, a) => sum + a.vulnerabilities, 0)}</div>
+                  <div className="text-sm text-emerald-100">Vulnerabilities</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockAssets.filter(a => a.riskScore > 60).length}</div>
+                  <div className="text-sm text-emerald-100">High Risk</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">98%</div>
+                  <div className="text-sm text-emerald-100">Coverage</div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -947,7 +1223,51 @@ export default function SecurityAuditClient() {
           </TabsContent>
 
           {/* Compliance Tab */}
-          <TabsContent value="compliance" className="mt-6">
+          <TabsContent value="compliance" className="mt-6 space-y-6">
+            {/* Compliance Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Compliance Management</h2>
+                  <p className="text-amber-100">Monitor regulatory compliance and control effectiveness</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Reports
+                  </Button>
+                  <Button className="bg-white text-amber-600 hover:bg-amber-50">
+                    <RefreshCw className="w-4 h-4 mr-2" />Assess
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">6</div>
+                  <div className="text-sm text-amber-100">Frameworks</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">475</div>
+                  <div className="text-sm text-amber-100">Controls</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">410</div>
+                  <div className="text-sm text-amber-100">Passed</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">86%</div>
+                  <div className="text-sm text-amber-100">Compliance</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-sm text-amber-100">Issues</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">Q1 2024</div>
+                  <div className="text-sm text-amber-100">Next Audit</div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6 mb-6">
               {complianceFrameworks.map(framework => (
                 <Card key={framework.id} className="border-gray-200 dark:border-gray-700">
@@ -1004,64 +1324,341 @@ export default function SecurityAuditClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Scanning Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Automatic Scanning</p>
-                      <p className="text-sm text-gray-500">Run scheduled vulnerability scans</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Deep Scan Mode</p>
-                      <p className="text-sm text-gray-500">Enable comprehensive vulnerability detection</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Safe Scan Mode</p>
-                      <p className="text-sm text-gray-500">Avoid potentially disruptive checks</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'scanning', icon: Scan, label: 'Scanning', desc: 'Scan configuration' },
+                        { id: 'compliance', icon: FileCheck, label: 'Compliance', desc: 'Framework settings' },
+                        { id: 'integrations', icon: Webhook, label: 'Integrations', desc: 'Third-party tools' },
+                        { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alert preferences' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-l-4 border-blue-600'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Notification Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Critical Alerts</p>
-                      <p className="text-sm text-gray-500">Immediate notification for critical findings</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Weekly Reports</p>
-                      <p className="text-sm text-gray-500">Receive weekly security summary</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Slack Integration</p>
-                      <p className="text-sm text-gray-500">Send alerts to Slack channel</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-blue-600" />
+                        General Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Organization Name</label>
+                          <Input defaultValue="Acme Corporation" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Security Contact</label>
+                          <Input defaultValue="security@acme.com" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Enable Security Dashboard</p>
+                          <p className="text-sm text-gray-500">Show security metrics on main dashboard</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Risk-Based Prioritization</p>
+                          <p className="text-sm text-gray-500">Sort vulnerabilities by risk score</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Auto-Assign Vulnerabilities</p>
+                          <p className="text-sm text-gray-500">Automatically assign based on asset owner</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Scanning Settings */}
+                {settingsTab === 'scanning' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Scan className="w-5 h-5 text-green-600" />
+                        Scanning Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Automatic Scanning</p>
+                          <p className="text-sm text-gray-500">Run scheduled vulnerability scans</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Deep Scan Mode</p>
+                          <p className="text-sm text-gray-500">Enable comprehensive vulnerability detection</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Safe Scan Mode</p>
+                          <p className="text-sm text-gray-500">Avoid potentially disruptive checks</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Credential Scanning</p>
+                          <p className="text-sm text-gray-500">Use credentials for authenticated scans</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Container Scanning</p>
+                          <p className="text-sm text-gray-500">Scan Docker containers and images</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Compliance Settings */}
+                {settingsTab === 'compliance' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileCheck className="w-5 h-5 text-purple-600" />
+                        Compliance Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">SOC 2 Type II</p>
+                          <p className="text-sm text-gray-500">Enable SOC 2 compliance monitoring</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">ISO 27001</p>
+                          <p className="text-sm text-gray-500">Enable ISO 27001 compliance monitoring</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">PCI-DSS</p>
+                          <p className="text-sm text-gray-500">Enable PCI-DSS compliance monitoring</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">HIPAA</p>
+                          <p className="text-sm text-gray-500">Enable HIPAA compliance monitoring</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">GDPR</p>
+                          <p className="text-sm text-gray-500">Enable GDPR compliance monitoring</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Integration Settings */}
+                {settingsTab === 'integrations' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="w-5 h-5 text-orange-600" />
+                        Integration Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Jira Integration</p>
+                          <p className="text-sm text-gray-500">Create tickets for vulnerabilities</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Slack Integration</p>
+                          <p className="text-sm text-gray-500">Send alerts to Slack channel</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">PagerDuty Integration</p>
+                          <p className="text-sm text-gray-500">Trigger incidents for critical findings</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">SIEM Integration</p>
+                          <p className="text-sm text-gray-500">Send events to your SIEM</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">CI/CD Integration</p>
+                          <p className="text-sm text-gray-500">Block deployments with critical vulns</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notification Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                        Notification Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Critical Alerts</p>
+                          <p className="text-sm text-gray-500">Immediate notification for critical findings</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">High Severity Alerts</p>
+                          <p className="text-sm text-gray-500">Notify for high severity vulnerabilities</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Scan Completion</p>
+                          <p className="text-sm text-gray-500">Notify when scans complete</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Weekly Reports</p>
+                          <p className="text-sm text-gray-500">Receive weekly security summary</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">SLA Breach Warnings</p>
+                          <p className="text-sm text-gray-500">Alert before remediation SLA expires</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-red-600" />
+                        Advanced Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">API Access</p>
+                          <p className="text-sm text-gray-500">Enable REST API access</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Exploit Simulation</p>
+                          <p className="text-sm text-gray-500">Run safe exploit simulations</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Agent-Based Scanning</p>
+                          <p className="text-sm text-gray-500">Deploy scanning agents to assets</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Custom CVE Mappings</p>
+                          <p className="text-sm text-gray-500">Define custom vulnerability mappings</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
+                            <p className="text-sm text-red-600">This will reset all configurations</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            Reset
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

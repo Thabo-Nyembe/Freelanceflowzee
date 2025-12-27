@@ -428,6 +428,7 @@ export default function ReleasesClient() {
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
   const [showReleaseDialog, setShowReleaseDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredReleases = useMemo(() => {
     return mockReleases.filter(release => {
@@ -584,10 +585,78 @@ export default function ReleasesClient() {
               <BarChart3 className="w-4 h-4 mr-2" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Releases Tab */}
-          <TabsContent value="releases" className="mt-6">
+          <TabsContent value="releases" className="mt-6 space-y-6">
+            {/* Releases Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Release Management</h2>
+                  <p className="text-indigo-100">Deploy, track, and manage your software releases</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-indigo-600 hover:bg-indigo-50">
+                    <Plus className="w-4 h-4 mr-2" />New Release
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.totalReleases}</div>
+                  <div className="text-sm text-indigo-100">Total</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.deployedReleases}</div>
+                  <div className="text-sm text-indigo-100">Deployed</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.scheduledReleases}</div>
+                  <div className="text-sm text-indigo-100">Scheduled</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+                  <div className="text-sm text-indigo-100">Success</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.avgDeployTime}m</div>
+                  <div className="text-sm text-indigo-100">Avg Deploy</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-sm text-indigo-100">Downloads</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-6 gap-4">
+              {[
+                { icon: Plus, label: 'New Release', desc: 'Create release', color: 'indigo' },
+                { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green' },
+                { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple' },
+                { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange' },
+                { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue' },
+                { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan' }
+              ].map(action => (
+                <Card key={action.label} className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 mx-auto w-fit group-hover:scale-110 transition-transform`}>
+                    <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                  </div>
+                  <p className="text-sm font-medium mt-2 text-gray-900 dark:text-white">{action.label}</p>
+                  <p className="text-xs text-gray-500">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Filters Sidebar */}
               <Card className="lg:col-span-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -787,7 +856,47 @@ export default function ReleasesClient() {
           </TabsContent>
 
           {/* Deployments Tab */}
-          <TabsContent value="deployments" className="mt-6">
+          <TabsContent value="deployments" className="mt-6 space-y-6">
+            {/* Deployments Overview Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Deployment History</h2>
+                  <p className="text-green-100">Track and monitor all deployment activities</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-green-600 hover:bg-green-50">
+                    <Rocket className="w-4 h-4 mr-2" />Deploy Now
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">156</div>
+                  <div className="text-sm text-green-100">Total Deploys</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">148</div>
+                  <div className="text-sm text-green-100">Successful</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">8</div>
+                  <div className="text-sm text-green-100">Failed</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">95%</div>
+                  <div className="text-sm text-green-100">Success Rate</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">3.8m</div>
+                  <div className="text-sm text-green-100">Avg Time</div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg">Deployment History</CardTitle>
@@ -833,7 +942,47 @@ export default function ReleasesClient() {
           </TabsContent>
 
           {/* Commits Tab */}
-          <TabsContent value="commits" className="mt-6">
+          <TabsContent value="commits" className="mt-6 space-y-6">
+            {/* Commits Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Commit Activity</h2>
+                  <p className="text-blue-100">Track code changes and contributions</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <GitBranch className="w-4 h-4 mr-2" />Branches
+                  </Button>
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                    <GitPullRequest className="w-4 h-4 mr-2" />Pull Requests
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalCommits)}</div>
+                  <div className="text-sm text-blue-100">Total Commits</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-sm text-blue-100">Contributors</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">8</div>
+                  <div className="text-sm text-blue-100">Branches</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-green-300">+45.6K</div>
+                  <div className="text-sm text-blue-100">Additions</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-red-300">-12.3K</div>
+                  <div className="text-sm text-blue-100">Deletions</div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg">Recent Commits</CardTitle>
@@ -864,7 +1013,38 @@ export default function ReleasesClient() {
           </TabsContent>
 
           {/* Rollbacks Tab */}
-          <TabsContent value="rollbacks" className="mt-6">
+          <TabsContent value="rollbacks" className="mt-6 space-y-6">
+            {/* Rollbacks Overview Banner */}
+            <div className="bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Rollback History</h2>
+                  <p className="text-yellow-100">Track and manage release rollbacks</p>
+                </div>
+                <Button className="bg-white text-yellow-600 hover:bg-yellow-50">
+                  <RotateCcw className="w-4 h-4 mr-2" />Initiate Rollback
+                </Button>
+              </div>
+              <div className="grid grid-cols-4 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockRollbacks.length}</div>
+                  <div className="text-sm text-yellow-100">Total</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockRollbacks.filter(r => r.status === 'completed').length}</div>
+                  <div className="text-sm text-yellow-100">Completed</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">1.2m</div>
+                  <div className="text-sm text-yellow-100">Avg Time</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">100%</div>
+                  <div className="text-sm text-yellow-100">Success</div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -924,7 +1104,47 @@ export default function ReleasesClient() {
           </TabsContent>
 
           {/* Assets Tab */}
-          <TabsContent value="assets" className="mt-6">
+          <TabsContent value="assets" className="mt-6 space-y-6">
+            {/* Assets Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Release Assets</h2>
+                  <p className="text-orange-100">Manage binaries, source code, and documentation</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Download All
+                  </Button>
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                    <Plus className="w-4 h-4 mr-2" />Upload Asset
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">24</div>
+                  <div className="text-sm text-orange-100">Total Assets</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">8</div>
+                  <div className="text-sm text-orange-100">Binaries</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">4</div>
+                  <div className="text-sm text-orange-100">Source</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">256MB</div>
+                  <div className="text-sm text-orange-100">Total Size</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-sm text-orange-100">Downloads</div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg">Release Assets</CardTitle>
@@ -966,7 +1186,51 @@ export default function ReleasesClient() {
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="analytics" className="mt-6 space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Release Analytics</h2>
+                  <p className="text-purple-100">Insights into your release performance and trends</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                    <RefreshCw className="w-4 h-4 mr-2" />Refresh
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+                  <div className="text-sm text-purple-100">Success Rate</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.avgDeployTime}m</div>
+                  <div className="text-sm text-purple-100">Avg Deploy</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.releaseFrequency}</div>
+                  <div className="text-sm text-purple-100">Per Week</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-sm text-purple-100">Downloads</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">2.1</div>
+                  <div className="text-sm text-purple-100">Rollbacks</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">99.9%</div>
+                  <div className="text-sm text-purple-100">Uptime</div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                 <CardHeader>
@@ -1041,6 +1305,328 @@ export default function ReleasesClient() {
                   ))}
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'deployment', icon: Rocket, label: 'Deployment', desc: 'Deploy config' },
+                        { id: 'environments', icon: Server, label: 'Environments', desc: 'Target envs' },
+                        { id: 'integrations', icon: GitBranch, label: 'Integrations', desc: 'Git & CI/CD' },
+                        { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alert prefs' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-l-4 border-indigo-600'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-indigo-600" />
+                        General Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Project Name</label>
+                          <Input defaultValue="My Application" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Repository URL</label>
+                          <Input defaultValue="https://github.com/org/repo" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Auto-generate Release Notes</p>
+                          <p className="text-sm text-gray-500">Generate changelog from commits</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Semantic Versioning</p>
+                          <p className="text-sm text-gray-500">Enforce semver for version numbers</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Draft Releases</p>
+                          <p className="text-sm text-gray-500">Create releases as drafts by default</p>
+                        </div>
+                        <input type="checkbox" className="w-4 h-4 rounded" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Deployment Settings */}
+                {settingsTab === 'deployment' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Rocket className="w-5 h-5 text-green-600" />
+                        Deployment Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Blue-Green Deployment</p>
+                          <p className="text-sm text-gray-500">Enable zero-downtime deployments</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Canary Releases</p>
+                          <p className="text-sm text-gray-500">Gradual rollout to percentage of users</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Auto-Rollback</p>
+                          <p className="text-sm text-gray-500">Automatically rollback on failure</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Require Approval</p>
+                          <p className="text-sm text-gray-500">Require approval for production deploys</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Health Checks</p>
+                          <p className="text-sm text-gray-500">Verify deployment health before completing</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Environments Settings */}
+                {settingsTab === 'environments' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Server className="w-5 h-5 text-purple-600" />
+                        Environment Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {['Production', 'Staging', 'Development', 'Canary'].map(env => (
+                        <div key={env} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${env === 'Production' ? 'bg-green-500' : env === 'Staging' ? 'bg-blue-500' : env === 'Canary' ? 'bg-orange-500' : 'bg-gray-500'}`} />
+                            <div>
+                              <p className="font-medium">{env}</p>
+                              <p className="text-sm text-gray-500">{env === 'Production' ? '12 servers' : env === 'Staging' ? '4 servers' : '2 servers'}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={env === 'Production' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                              {env === 'Production' ? 'Active' : 'Available'}
+                            </Badge>
+                            <Button size="sm" variant="outline">Configure</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <GitBranch className="w-5 h-5 text-orange-600" />
+                        Integration Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">GitHub Integration</p>
+                          <p className="text-sm text-gray-500">Sync releases with GitHub</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">CI/CD Pipeline</p>
+                          <p className="text-sm text-gray-500">Trigger deployments from CI</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Docker Registry</p>
+                          <p className="text-sm text-gray-500">Auto-push images on release</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">AWS/GCP/Azure</p>
+                          <p className="text-sm text-gray-500">Cloud provider integration</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Kubernetes</p>
+                          <p className="text-sm text-gray-500">Deploy to K8s clusters</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notification Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                        Notification Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Deploy Started</p>
+                          <p className="text-sm text-gray-500">Notify when deployment begins</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Deploy Completed</p>
+                          <p className="text-sm text-gray-500">Notify on successful deployment</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Deploy Failed</p>
+                          <p className="text-sm text-gray-500">Alert on deployment failures</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Rollback Events</p>
+                          <p className="text-sm text-gray-500">Notify on rollback triggers</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Slack Integration</p>
+                          <p className="text-sm text-gray-500">Send notifications to Slack</p>
+                        </div>
+                        <input type="checkbox" className="w-4 h-4 rounded" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-red-600" />
+                        Advanced Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">API Access</p>
+                          <p className="text-sm text-gray-500">Enable REST API for releases</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Webhooks</p>
+                          <p className="text-sm text-gray-500">Send release events to webhooks</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Audit Logging</p>
+                          <p className="text-sm text-gray-500">Log all release activities</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Retention Policy</p>
+                          <p className="text-sm text-gray-500">Auto-archive old releases</p>
+                        </div>
+                        <input type="checkbox" className="w-4 h-4 rounded" />
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
+                            <p className="text-sm text-red-600">This will reset all release configurations</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            Reset
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

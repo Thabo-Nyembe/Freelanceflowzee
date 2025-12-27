@@ -344,6 +344,7 @@ export default function HelpDocsClient() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['cat1'])
   const [articleFilter, setArticleFilter] = useState<string>('all')
   const [ticketFilter, setTicketFilter] = useState<string>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const toggleCategoryExpand = (categoryId: string) => {
     setExpandedCategories(prev =>
@@ -667,7 +668,65 @@ export default function HelpDocsClient() {
           </TabsContent>
 
           {/* Categories Tab */}
-          <TabsContent value="categories" className="space-y-4">
+          <TabsContent value="categories" className="space-y-6">
+            {/* Categories Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Knowledge Base Categories</h2>
+                  <p className="text-blue-100">Organize and manage your help center content structure</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Plus className="w-4 h-4 mr-2" />Add Category
+                  </Button>
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                    <Settings className="w-4 h-4 mr-2" />Manage Structure
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockCategories.length}</div>
+                  <div className="text-sm text-blue-100">Categories</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockCategories.reduce((acc, c) => acc + c.sections.length, 0)}</div>
+                  <div className="text-sm text-blue-100">Sections</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockCategories.reduce((acc, c) => acc + c.articleCount, 0)}</div>
+                  <div className="text-sm text-blue-100">Total Articles</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">98%</div>
+                  <div className="text-sm text-blue-100">Content Coverage</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'New Category', desc: 'Create category', color: 'blue' },
+                { icon: Layers, label: 'Reorder', desc: 'Change order', color: 'purple' },
+                { icon: Archive, label: 'Archive', desc: 'Manage archived', color: 'orange' },
+                { icon: Download, label: 'Export', desc: 'Export structure', color: 'green' }
+              ].map(action => (
+                <Card key={action.label} className="p-4 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{action.label}</p>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-4 gap-6">
               <div className="col-span-1">
                 <Card className="p-4">
@@ -752,8 +811,67 @@ export default function HelpDocsClient() {
           </TabsContent>
 
           {/* Articles Tab */}
-          <TabsContent value="articles" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
+          <TabsContent value="articles" className="space-y-6">
+            {/* Articles Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Article Management</h2>
+                  <p className="text-emerald-100">Create, edit, and publish knowledge base articles</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Upload className="w-4 h-4 mr-2" />Import
+                  </Button>
+                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+                    <Plus className="w-4 h-4 mr-2" />New Article
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockArticles.length}</div>
+                  <div className="text-sm text-emerald-100">Total</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockArticles.filter(a => a.status === 'published').length}</div>
+                  <div className="text-sm text-emerald-100">Published</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockArticles.filter(a => a.status === 'draft').length}</div>
+                  <div className="text-sm text-emerald-100">Drafts</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockArticles.filter(a => a.status === 'review').length}</div>
+                  <div className="text-sm text-emerald-100">In Review</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockArticles.reduce((sum, a) => sum + a.views, 0))}</div>
+                  <div className="text-sm text-emerald-100">Total Views</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-6 gap-4">
+              {[
+                { icon: Plus, label: 'New Article', color: 'emerald' },
+                { icon: Edit, label: 'Edit Draft', color: 'blue' },
+                { icon: Eye, label: 'Preview', color: 'purple' },
+                { icon: Languages, label: 'Translate', color: 'orange' },
+                { icon: History, label: 'Versions', color: 'gray' },
+                { icon: Archive, label: 'Archive', color: 'red' }
+              ].map(action => (
+                <Card key={action.label} className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center">
+                  <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 mx-auto w-fit group-hover:scale-110 transition-transform`}>
+                    <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                  </div>
+                  <p className="text-sm font-medium mt-2 text-gray-900 dark:text-white">{action.label}</p>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">All Articles ({filteredArticles.length})</h2>
               <div className="flex items-center gap-2">
                 <Select value={articleFilter} onValueChange={setArticleFilter}>
@@ -825,8 +943,75 @@ export default function HelpDocsClient() {
           </TabsContent>
 
           {/* Tickets Tab */}
-          <TabsContent value="tickets" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
+          <TabsContent value="tickets" className="space-y-6">
+            {/* Tickets Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Ticket Management</h2>
+                  <p className="text-orange-100">Track, respond, and resolve customer support requests</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <BarChart3 className="w-4 h-4 mr-2" />Reports
+                  </Button>
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                    <Plus className="w-4 h-4 mr-2" />New Ticket
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockTickets.length}</div>
+                  <div className="text-sm text-orange-100">Total</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'new').length}</div>
+                  <div className="text-sm text-orange-100">New</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'open').length}</div>
+                  <div className="text-sm text-orange-100">Open</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'pending').length}</div>
+                  <div className="text-sm text-orange-100">Pending</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'solved').length}</div>
+                  <div className="text-sm text-orange-100">Solved</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">2.5h</div>
+                  <div className="text-sm text-orange-100">Avg Response</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { icon: Plus, label: 'New Ticket', desc: 'Create ticket', color: 'orange' },
+                { icon: Users, label: 'Assign', desc: 'Bulk assign', color: 'blue' },
+                { icon: Tag, label: 'Tag', desc: 'Manage tags', color: 'purple' },
+                { icon: Send, label: 'Respond', desc: 'Quick reply', color: 'green' },
+                { icon: Archive, label: 'Close', desc: 'Close tickets', color: 'gray' }
+              ].map(action => (
+                <Card key={action.label} className="p-4 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{action.label}</p>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Support Tickets</h2>
               <div className="flex items-center gap-2">
                 <Select value={ticketFilter} onValueChange={setTicketFilter}>
@@ -900,8 +1085,71 @@ export default function HelpDocsClient() {
           </TabsContent>
 
           {/* Community Tab */}
-          <TabsContent value="community" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
+          <TabsContent value="community" className="space-y-6">
+            {/* Community Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Community Forum</h2>
+                  <p className="text-purple-100">Connect with users, share knowledge, and find solutions</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Users className="w-4 h-4 mr-2" />Members
+                  </Button>
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                    <Plus className="w-4 h-4 mr-2" />New Post
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockCommunityPosts.length}</div>
+                  <div className="text-sm text-purple-100">Posts</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockCommunityPosts.filter(p => p.isSolved).length}</div>
+                  <div className="text-sm text-purple-100">Solved</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockCommunityPosts.reduce((sum, p) => sum + p.replies, 0)}</div>
+                  <div className="text-sm text-purple-100">Replies</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">3.4K</div>
+                  <div className="text-sm text-purple-100">Active Users</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">92%</div>
+                  <div className="text-sm text-purple-100">Satisfaction</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { icon: Plus, label: 'New Post', desc: 'Start discussion', color: 'purple' },
+                { icon: MessageCircle, label: 'Reply', desc: 'Respond to posts', color: 'blue' },
+                { icon: Star, label: 'Featured', desc: 'Feature posts', color: 'amber' },
+                { icon: CheckCircle, label: 'Mark Solved', desc: 'Close threads', color: 'green' },
+                { icon: AlertCircle, label: 'Moderate', desc: 'Review content', color: 'red' }
+              ].map(action => (
+                <Card key={action.label} className="p-4 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{action.label}</p>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Community Discussions</h2>
               <Button><Plus className="w-4 h-4 mr-2" />New Post</Button>
             </div>
@@ -964,6 +1212,75 @@ export default function HelpDocsClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Help Center Analytics</h2>
+                  <p className="text-cyan-100">Track performance, engagement, and customer satisfaction</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-cyan-600 hover:bg-cyan-50">
+                    <RefreshCw className="w-4 h-4 mr-2" />Refresh
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalViews)}</div>
+                  <div className="text-sm text-cyan-100">Total Views</div>
+                  <div className="text-xs text-green-300 mt-1">↑ {mockStats.viewsTrend}%</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockStats.avgSatisfaction}%</div>
+                  <div className="text-sm text-cyan-100">Satisfaction</div>
+                  <div className="text-xs text-green-300 mt-1">↑ {mockStats.satisfactionTrend}%</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.searchQueries)}</div>
+                  <div className="text-sm text-cyan-100">Searches</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{formatNumber(mockStats.ticketsDeflected)}</div>
+                  <div className="text-sm text-cyan-100">Deflected</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">4.2min</div>
+                  <div className="text-sm text-cyan-100">Avg Read Time</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">87%</div>
+                  <div className="text-sm text-cyan-100">Self-Service</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { icon: BarChart3, label: 'View Reports', desc: 'Detailed analytics', color: 'cyan' },
+                { icon: TrendingUp, label: 'Trends', desc: 'Performance trends', color: 'green' },
+                { icon: Search, label: 'Search Analytics', desc: 'Query insights', color: 'blue' },
+                { icon: Users, label: 'User Behavior', desc: 'Journey analytics', color: 'purple' },
+                { icon: Download, label: 'Export Data', desc: 'Download reports', color: 'gray' }
+              ].map(action => (
+                <Card key={action.label} className="p-4 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{action.label}</p>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
               <Card className="p-6">
                 <div className="text-3xl font-bold text-blue-600">{formatNumber(mockStats.totalViews)}</div>
@@ -1022,7 +1339,70 @@ export default function HelpDocsClient() {
 
           {/* Videos Tab */}
           <TabsContent value="videos" className="space-y-6">
-            <div className="flex items-center justify-between mb-4">
+            {/* Videos Overview Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Video Learning Center</h2>
+                  <p className="text-red-100">Create and manage video tutorials for your help center</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Play className="w-4 h-4 mr-2" />Live Stream
+                  </Button>
+                  <Button className="bg-white text-red-600 hover:bg-red-50">
+                    <Upload className="w-4 h-4 mr-2" />Upload Video
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">35</div>
+                  <div className="text-sm text-red-100">Videos</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">57.6K</div>
+                  <div className="text-sm text-red-100">Total Views</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">12.5h</div>
+                  <div className="text-sm text-red-100">Total Duration</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">4.8</div>
+                  <div className="text-sm text-red-100">Avg Rating</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">85%</div>
+                  <div className="text-sm text-red-100">Completion</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { icon: Upload, label: 'Upload', desc: 'Add new video', color: 'red' },
+                { icon: Edit, label: 'Edit', desc: 'Modify videos', color: 'blue' },
+                { icon: Layers, label: 'Playlist', desc: 'Create playlist', color: 'purple' },
+                { icon: Languages, label: 'Subtitles', desc: 'Add captions', color: 'green' },
+                { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan' }
+              ].map(action => (
+                <Card key={action.label} className="p-4 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{action.label}</p>
+                      <p className="text-xs text-gray-500">{action.desc}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Video Tutorials</h2>
               <Button><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
             </div>
@@ -1053,49 +1433,414 @@ export default function HelpDocsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Help Center Settings</CardTitle>
-                <CardDescription>Configure your help center preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Enable AI Assistant</h4>
-                    <p className="text-sm text-gray-500">Allow users to chat with AI for instant help</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Article Feedback</h4>
-                    <p className="text-sm text-gray-500">Show "Was this helpful?" on articles</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Community Features</h4>
-                    <p className="text-sm text-gray-500">Enable community discussions and Q&A</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Multi-language Support</h4>
-                    <p className="text-sm text-gray-500">Enable article translations</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Require Login</h4>
-                    <p className="text-sm text-gray-500">Users must sign in to view articles</p>
-                  </div>
-                  <Switch />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                    <CardDescription>Configure your help center</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'content', icon: FileText, label: 'Content', desc: 'Article settings' },
+                        { id: 'ai', icon: Bot, label: 'AI & Chatbot', desc: 'AI assistant' },
+                        { id: 'languages', icon: Languages, label: 'Languages', desc: 'Translations' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert preferences' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-l-4 border-blue-600'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-blue-600" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure basic help center settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Help Center Name</Label>
+                          <Input defaultValue="Knowledge Base" placeholder="Your help center name" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Support Email</Label>
+                          <Input defaultValue="support@company.com" placeholder="support@example.com" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Help Center Description</Label>
+                        <Input defaultValue="Find answers to your questions and get support" placeholder="Describe your help center" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Enable Help Center</h4>
+                          <p className="text-sm text-gray-500">Make help center accessible to users</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Require Login</h4>
+                          <p className="text-sm text-gray-500">Users must sign in to view articles</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Show Article Views</h4>
+                          <p className="text-sm text-gray-500">Display view counts on articles</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Enable Search Suggestions</h4>
+                          <p className="text-sm text-gray-500">Show popular searches as users type</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Content Settings */}
+                {settingsTab === 'content' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-emerald-600" />
+                        Content Settings
+                      </CardTitle>
+                      <CardDescription>Configure article and content preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Article Feedback</h4>
+                          <p className="text-sm text-gray-500">Show "Was this helpful?" on articles</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Allow Comments</h4>
+                          <p className="text-sm text-gray-500">Enable comments on articles</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Show Related Articles</h4>
+                          <p className="text-sm text-gray-500">Display related content suggestions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Enable Version History</h4>
+                          <p className="text-sm text-gray-500">Track article revisions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Community Features</h4>
+                          <p className="text-sm text-gray-500">Enable community discussions and Q&A</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Archive Old Articles</h4>
+                          <p className="text-sm text-gray-500">Archive articles after 12 months without updates</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* AI & Chatbot Settings */}
+                {settingsTab === 'ai' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bot className="w-5 h-5 text-purple-600" />
+                        AI & Chatbot Settings
+                      </CardTitle>
+                      <CardDescription>Configure AI assistant and chatbot features</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Enable AI Assistant</h4>
+                          <p className="text-sm text-gray-500">Allow users to chat with AI for instant help</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">AI-Powered Search</h4>
+                          <p className="text-sm text-gray-500">Use AI to improve search results</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Suggest Articles</h4>
+                          <p className="text-sm text-gray-500">AI suggests relevant articles during chat</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Smart Ticket Routing</h4>
+                          <p className="text-sm text-gray-500">AI assigns tickets to appropriate agents</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Sentiment Analysis</h4>
+                          <p className="text-sm text-gray-500">Analyze customer sentiment in tickets</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Generate FAQs</h4>
+                          <p className="text-sm text-gray-500">AI creates FAQs from common queries</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Language Settings */}
+                {settingsTab === 'languages' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Languages className="w-5 h-5 text-orange-600" />
+                        Language Settings
+                      </CardTitle>
+                      <CardDescription>Configure multi-language support and translations</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Multi-language Support</h4>
+                          <p className="text-sm text-gray-500">Enable article translations</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Default Language</Label>
+                          <Select defaultValue="en">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Spanish</SelectItem>
+                              <SelectItem value="fr">French</SelectItem>
+                              <SelectItem value="de">German</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Fallback Language</Label>
+                          <Select defaultValue="en">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Spanish</SelectItem>
+                              <SelectItem value="fr">French</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <Label>Enabled Languages</Label>
+                        <div className="grid grid-cols-3 gap-3">
+                          {['English', 'Spanish', 'French', 'German', 'Japanese', 'Chinese'].map(lang => (
+                            <div key={lang} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <Switch defaultChecked={lang === 'English' || lang === 'Spanish'} />
+                              <span className="text-sm text-gray-900 dark:text-white">{lang}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Translate</h4>
+                          <p className="text-sm text-gray-500">Automatically translate new articles</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notification Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-amber-600" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Configure alert and notification preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">New Ticket Alerts</h4>
+                          <p className="text-sm text-gray-500">Get notified when new tickets arrive</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Article Comments</h4>
+                          <p className="text-sm text-gray-500">Notify when articles receive comments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Community Mentions</h4>
+                          <p className="text-sm text-gray-500">Alert when mentioned in discussions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Negative Feedback</h4>
+                          <p className="text-sm text-gray-500">Notify on negative article feedback</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Weekly Reports</h4>
+                          <p className="text-sm text-gray-500">Receive weekly analytics summary</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Slack Integration</h4>
+                          <p className="text-sm text-gray-500">Send notifications to Slack</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-red-600" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>Configure power user settings and integrations</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">API Access</h4>
+                          <p className="text-sm text-gray-500">Enable REST API access</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Custom Domain</h4>
+                          <p className="text-sm text-gray-500">Use custom domain for help center</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">SSO Integration</h4>
+                          <p className="text-sm text-gray-500">Enable single sign-on</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Custom CSS</h4>
+                          <p className="text-sm text-gray-500">Add custom styling</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Webhooks</h4>
+                          <p className="text-sm text-gray-500">Send events to external services</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Analytics Export</h4>
+                          <p className="text-sm text-gray-500">Export analytics to third-party tools</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-red-700 dark:text-red-400">Reset Help Center</h4>
+                            <p className="text-sm text-red-600 dark:text-red-500">This will reset all settings to defaults</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            Reset
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
