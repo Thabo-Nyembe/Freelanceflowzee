@@ -55,7 +55,22 @@ import {
   Gauge,
   LineChart,
   Layers,
+  Download,
+  HelpCircle,
+  Globe,
+  Briefcase,
+  Headphones,
+  FileCheck,
+  MailCheck,
+  UserCheck,
+  Trophy,
+  Gift,
+  Handshake,
+  GraduationCap,
+  BookOpen,
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type HealthStatus = 'healthy' | 'good' | 'concerning' | 'at_risk' | 'critical' | 'churned'
@@ -406,6 +421,7 @@ export default function CustomerSuccessClient() {
   const [selectedHealth, setSelectedHealth] = useState<HealthStatus | 'all'>('all')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [activeTab, setActiveTab] = useState('portfolio')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered customers
   const filteredCustomers = useMemo(() => {
@@ -587,9 +603,58 @@ export default function CustomerSuccessClient() {
               <Users className="h-4 w-4" />
               CSM Team
             </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="portfolio" className="space-y-6">
+            {/* Portfolio Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Building2 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Customer Portfolio</h2>
+                    <p className="text-emerald-100">{customers.length} customers • {formatCurrency(stats.totalARR)} ARR</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.avgHealth.toFixed(0)}</p>
+                    <p className="text-emerald-100 text-sm">Avg Health</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Customer
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'Add Customer', desc: 'New account', color: 'text-emerald-500' },
+                { icon: Phone, label: 'Schedule Call', desc: 'Book meeting', color: 'text-blue-500' },
+                { icon: Mail, label: 'Send Campaign', desc: 'Email blast', color: 'text-purple-500' },
+                { icon: Target, label: 'Set Goals', desc: 'Define targets', color: 'text-amber-500' },
+                { icon: Trophy, label: 'Recognize', desc: 'Customer wins', color: 'text-pink-500' },
+                { icon: Gift, label: 'Send Gift', desc: 'Appreciation', color: 'text-red-500' },
+                { icon: FileText, label: 'Report', desc: 'Generate report', color: 'text-cyan-500' },
+                { icon: Handshake, label: 'Introduce', desc: 'Make intro', color: 'text-green-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             {/* Filters */}
             <Card>
               <CardContent className="p-4">
@@ -723,6 +788,31 @@ export default function CustomerSuccessClient() {
           </TabsContent>
 
           <TabsContent value="health" className="space-y-6">
+            {/* Health Overview Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Gauge className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Customer Health</h2>
+                    <p className="text-green-100">Monitor health scores and engagement</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{customers.filter(c => c.healthStatus === 'healthy').length}</p>
+                    <p className="text-green-100 text-sm">Healthy</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card>
@@ -841,6 +931,31 @@ export default function CustomerSuccessClient() {
           </TabsContent>
 
           <TabsContent value="renewals" className="space-y-6">
+            {/* Renewals Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <RefreshCcw className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Renewal Management</h2>
+                    <p className="text-blue-100">{stats.renewalsNext90} renewals in 90 days • {formatCurrency(stats.atRiskARR)} at risk</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{customers.filter(c => c.renewalRisk === 'low').length}</p>
+                    <p className="text-blue-100 text-sm">On Track</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {[30, 60, 90, 180].map(days => {
                 const renewals = customers.filter(c => c.daysToRenewal <= days)
@@ -900,8 +1015,53 @@ export default function CustomerSuccessClient() {
           </TabsContent>
 
           <TabsContent value="playbooks" className="space-y-6">
+            {/* Playbooks Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Layers className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Success Playbooks</h2>
+                    <p className="text-orange-100">{playbooks.length} playbooks • {playbooks.reduce((sum, p) => sum + p.activeAccounts, 0)} active enrollments</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{(playbooks.reduce((sum, p) => sum + p.successRate, 0) / playbooks.length).toFixed(0)}%</p>
+                    <p className="text-orange-100 text-sm">Avg Success Rate</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500' },
+                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500' },
+                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500' },
+                { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500' },
+                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500' },
+                { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500' },
+                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500' },
+                { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Success Playbooks</h2>
+              <h2 className="text-xl font-semibold">All Playbooks</h2>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Playbook
@@ -950,6 +1110,31 @@ export default function CustomerSuccessClient() {
           </TabsContent>
 
           <TabsContent value="team" className="space-y-6">
+            {/* Team Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">CSM Team</h2>
+                    <p className="text-pink-100">{csms.length} CSMs • {formatCurrency(csms.reduce((sum, c) => sum + c.arr, 0))} total ARR</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{csms.reduce((sum, c) => sum + c.accounts, 0)}</p>
+                    <p className="text-pink-100 text-sm">Total Accounts</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add CSM
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {csms.map(csm => (
                 <Card key={csm.id}>
@@ -1000,6 +1185,346 @@ export default function CustomerSuccessClient() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Customer Success Settings</h2>
+                    <p className="text-emerald-100">Configure health scoring, alerts, and team settings</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'health', icon: Gauge, label: 'Health Scoring', desc: 'Score rules' },
+                      { id: 'alerts', icon: Bell, label: 'Alerts', desc: 'Alert triggers' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations', desc: 'Connect apps' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Email settings' },
+                      { id: 'advanced', icon: Shield, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </Card>
+              </div>
+
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Customer Success Configuration</CardTitle>
+                        <CardDescription>Basic CS platform settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default CSM Assignment</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Round Robin</option>
+                              <option>Territory Based</option>
+                              <option>Manual</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Renewal Window</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>90 days</option>
+                              <option>60 days</option>
+                              <option>120 days</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-assign New Customers</p>
+                            <p className="text-sm text-gray-500">Automatically assign CSM to new accounts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Track Customer Lifecycle</p>
+                            <p className="text-sm text-gray-500">Monitor onboarding to renewal</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Touchpoint Settings</CardTitle>
+                        <CardDescription>Configure customer interaction tracking</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Log All Communications</p>
+                            <p className="text-sm text-gray-500">Auto-log emails and calls</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Sentiment Analysis</p>
+                            <p className="text-sm text-gray-500">AI-powered sentiment detection</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Health Scoring Settings */}
+                {settingsTab === 'health' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Health Score Model</CardTitle>
+                        <CardDescription>Configure health score calculation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { metric: 'Product Usage', weight: 30 },
+                            { metric: 'NPS Score', weight: 20 },
+                            { metric: 'Support Tickets', weight: 15 },
+                            { metric: 'Engagement', weight: 20 },
+                            { metric: 'Contract Value', weight: 15 },
+                          ].map((item) => (
+                            <div key={item.metric} className="flex items-center justify-between p-4 border rounded-lg">
+                              <span className="font-medium">{item.metric}</span>
+                              <Input value={`${item.weight}%`} className="w-20 text-right" />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Health Thresholds</CardTitle>
+                        <CardDescription>Define health status boundaries</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { status: 'Healthy', min: 80, color: 'green' },
+                          { status: 'Good', min: 60, color: 'blue' },
+                          { status: 'Concerning', min: 40, color: 'yellow' },
+                          { status: 'At Risk', min: 20, color: 'orange' },
+                          { status: 'Critical', min: 0, color: 'red' },
+                        ].map((item) => (
+                          <div key={item.status} className="flex items-center justify-between p-4 border rounded-lg">
+                            <span className={`font-medium text-${item.color}-600`}>{item.status}</span>
+                            <span className="text-sm text-gray-500">{item.min}+ score</span>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Alerts Settings */}
+                {settingsTab === 'alerts' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Alert Triggers</CardTitle>
+                        <CardDescription>Configure automatic alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Health Score Drop</p>
+                            <p className="text-sm text-gray-500">Alert when score drops 10+ points</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Renewal Approaching</p>
+                            <p className="text-sm text-gray-500">Alert 90 days before renewal</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Champion Left</p>
+                            <p className="text-sm text-gray-500">Alert when key contact leaves</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Usage Decline</p>
+                            <p className="text-sm text-gray-500">Alert on 20%+ usage drop</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Integrations</CardTitle>
+                        <CardDescription>Manage data sources</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Salesforce', status: 'Connected', icon: DollarSign },
+                          { name: 'HubSpot', status: 'Not Connected', icon: Users },
+                          { name: 'Zendesk', status: 'Connected', icon: Headphones },
+                          { name: 'Slack', status: 'Connected', icon: MessageSquare },
+                        ].map((integration) => (
+                          <div key={integration.name} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <integration.icon className="h-5 w-5 text-gray-500" />
+                              <span className="font-medium">{integration.name}</span>
+                            </div>
+                            <Badge className={integration.status === 'Connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {integration.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure notification preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Daily Digest</p>
+                            <p className="text-sm text-gray-500">Summary of daily activities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Risk Alerts</p>
+                            <p className="text-sm text-gray-500">Immediate risk notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Reports</p>
+                            <p className="text-sm text-gray-500">Weekly performance summary</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Programmatic access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable API</p>
+                            <p className="text-sm text-gray-500">Allow external integrations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">API Key</label>
+                          <div className="flex gap-2">
+                            <Input value="cs_••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Reset All Settings</p>
+                            <p className="text-sm text-gray-500">Restore default settings</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Delete All Data</p>
+                            <p className="text-sm text-gray-500">Permanently delete CS data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Export All Data</p>
+                            <p className="text-sm text-gray-500">Download complete backup</p>
+                          </div>
+                          <Button variant="outline">Export</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

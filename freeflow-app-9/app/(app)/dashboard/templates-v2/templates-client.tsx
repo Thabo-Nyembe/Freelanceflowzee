@@ -73,8 +73,28 @@ import {
   ImagePlus,
   LayoutGrid,
   List,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Bell,
+  HardDrive,
+  Shield,
+  Layers as LayersIcon,
+  RefreshCcw,
+  Cloud,
+  Target,
+  MousePointer,
+  Activity,
+  Database,
+  Link,
+  Box,
+  Boxes,
+  LayoutTemplate,
+  FileCode,
+  Brush,
+  Megaphone,
+  PenLine
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type TemplateCategory = 'social_media' | 'presentation' | 'document' | 'video' | 'print' | 'email' | 'marketing' | 'infographic'
@@ -388,6 +408,7 @@ export default function TemplatesClient() {
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | 'all'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats: TemplateStats = useMemo(() => ({
@@ -559,6 +580,51 @@ export default function TemplatesClient() {
 
           {/* Gallery Tab */}
           <TabsContent value="gallery" className="space-y-6">
+            {/* Gallery Overview Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <LayoutTemplate className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Template Gallery</h2>
+                    <p className="text-violet-100">{stats.totalTemplates} templates • {stats.totalUsage.toLocaleString()} total uses</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.avgRating.toFixed(1)}</p>
+                    <p className="text-violet-100 text-sm">Avg Rating</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-violet-500' },
+                { icon: Wand2, label: 'AI Generate', desc: 'Auto-create', color: 'text-purple-500' },
+                { icon: Instagram, label: 'Social Media', desc: 'Post templates', color: 'text-pink-500' },
+                { icon: Presentation, label: 'Presentations', desc: 'Slide decks', color: 'text-blue-500' },
+                { icon: FileText, label: 'Documents', desc: 'Reports & docs', color: 'text-green-500' },
+                { icon: Video, label: 'Video', desc: 'Video templates', color: 'text-red-500' },
+                { icon: Printer, label: 'Print', desc: 'Print-ready', color: 'text-orange-500' },
+                { icon: Mail, label: 'Email', desc: 'Newsletters', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             {/* Filters */}
             <div className="flex items-center gap-4">
               <div className="relative flex-1 max-w-md">
@@ -694,6 +760,51 @@ export default function TemplatesClient() {
 
           {/* My Templates Tab */}
           <TabsContent value="my-templates" className="space-y-6">
+            {/* My Templates Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Layout className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">My Templates</h2>
+                    <p className="text-blue-100">{favoriteTemplates.length} favorites • {mockTemplates.length} created</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.totalDownloads.toLocaleString()}</p>
+                    <p className="text-blue-100 text-sm">Total Downloads</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-blue-500' },
+                { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500' },
+                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500' },
+                { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500' },
+                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500' },
+                { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500' },
+                { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500' },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">My Templates</h3>
               <Button className="gap-2">
@@ -747,8 +858,53 @@ export default function TemplatesClient() {
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
+            {/* Collections Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Folder className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Template Collections</h2>
+                    <p className="text-orange-100">{mockCollections.length} collections • {mockCollections.reduce((sum, c) => sum + c.templateCount, 0)} templates</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{mockCollections.filter(c => c.isPublic).length}</p>
+                    <p className="text-orange-100 text-sm">Public</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <FolderPlus className="h-4 w-4 mr-2" />
+                    New
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: FolderPlus, label: 'Create', desc: 'New collection', color: 'text-orange-500' },
+                { icon: Folder, label: 'Browse', desc: 'View all', color: 'text-amber-500' },
+                { icon: Share2, label: 'Share', desc: 'Public access', color: 'text-blue-500' },
+                { icon: Users, label: 'Collaborate', desc: 'Team access', color: 'text-green-500' },
+                { icon: Tag, label: 'Tags', desc: 'Organize', color: 'text-purple-500' },
+                { icon: Download, label: 'Export', desc: 'Download all', color: 'text-cyan-500' },
+                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-pink-500' },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-red-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Collections</h3>
+              <h3 className="text-lg font-semibold">All Collections</h3>
               <Button className="gap-2">
                 <FolderPlus className="w-4 h-4" />
                 New Collection
@@ -789,8 +945,53 @@ export default function TemplatesClient() {
 
           {/* Brand Kit Tab */}
           <TabsContent value="brand-kit" className="space-y-6">
+            {/* Brand Kit Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Palette className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Brand Kit</h2>
+                    <p className="text-pink-100">{mockBrandAssets.length} brand assets • Logos, colors, fonts</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{mockBrandAssets.filter(a => a.type === 'color').length}</p>
+                    <p className="text-pink-100 text-sm">Brand Colors</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Asset
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: ImagePlus, label: 'Upload Logo', desc: 'Add logo', color: 'text-pink-500' },
+                { icon: Palette, label: 'Add Color', desc: 'Brand color', color: 'text-purple-500' },
+                { icon: Type, label: 'Add Font', desc: 'Brand font', color: 'text-blue-500' },
+                { icon: Brush, label: 'Style Guide', desc: 'Create guide', color: 'text-green-500' },
+                { icon: Download, label: 'Export Kit', desc: 'Download all', color: 'text-amber-500' },
+                { icon: Share2, label: 'Share Kit', desc: 'Team access', color: 'text-cyan-500' },
+                { icon: RefreshCcw, label: 'Sync', desc: 'Cloud sync', color: 'text-orange-500' },
+                { icon: Settings, label: 'Configure', desc: 'Kit settings', color: 'text-gray-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Brand Kit</h3>
+              <h3 className="text-lg font-semibold">Brand Assets</h3>
               <Button className="gap-2">
                 <Plus className="w-4 h-4" />
                 Add Asset
@@ -896,6 +1097,51 @@ export default function TemplatesClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <BarChart3 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Template Analytics</h2>
+                    <p className="text-cyan-100">Track usage, downloads, and performance</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.totalUsage.toLocaleString()}</p>
+                    <p className="text-cyan-100 text-sm">Total Uses</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-cyan-500' },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
+                { icon: Eye, label: 'Views', desc: 'View stats', color: 'text-blue-500' },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-purple-500' },
+                { icon: Star, label: 'Ratings', desc: 'User ratings', color: 'text-yellow-500' },
+                { icon: Users, label: 'Users', desc: 'User activity', color: 'text-pink-500' },
+                { icon: Calendar, label: 'Timeline', desc: 'Date range', color: 'text-orange-500' },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Usage Overview */}
               <Card>
@@ -1006,142 +1252,448 @@ export default function TemplatesClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* General Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    General Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Default Access Level</p>
-                      <p className="text-xs text-gray-500">For new templates</p>
-                    </div>
-                    <select className="px-3 py-1 border rounded text-sm">
-                      <option>Private</option>
-                      <option>Team</option>
-                      <option>Public</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-save Drafts</p>
-                      <p className="text-xs text-gray-500">Save changes automatically</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Show Usage Stats</p>
-                      <p className="text-xs text-gray-500">Display template analytics</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Export Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Download className="w-5 h-5" />
-                    Export Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Default Export Format</label>
-                    <select className="w-full px-3 py-2 border rounded-lg text-sm">
-                      <option>PNG (High Quality)</option>
-                      <option>JPG (Compressed)</option>
-                      <option>PDF (Print Ready)</option>
-                      <option>SVG (Vector)</option>
-                    </select>
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Default Quality</label>
-                    <select className="w-full px-3 py-2 border rounded-lg text-sm">
-                      <option>Standard (72 DPI)</option>
-                      <option>High (150 DPI)</option>
-                      <option>Print (300 DPI)</option>
-                    </select>
+                    <h2 className="text-2xl font-bold">Template Settings</h2>
+                    <p className="text-violet-100">Configure templates, exports, and team settings</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-              {/* Sharing Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Share2 className="w-5 h-5" />
-                    Sharing Preferences
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Allow Comments</p>
-                      <p className="text-xs text-gray-500">On shared templates</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Allow Duplication</p>
-                      <p className="text-xs text-gray-500">Let others copy your templates</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Watermark Free Templates</p>
-                      <p className="text-xs text-gray-500">Requires Pro subscription</p>
-                    </div>
-                    <Badge variant="outline" className="gap-1">
-                      <Crown className="w-3 h-3" />
-                      Pro
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'editor', icon: PenLine, label: 'Editor', desc: 'Design tools' },
+                      { id: 'export', icon: Download, label: 'Export', desc: 'Output settings' },
+                      { id: 'sharing', icon: Share2, label: 'Sharing', desc: 'Access control' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert settings' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </Card>
+              </div>
 
-              {/* Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Template Used</p>
-                      <p className="text-xs text-gray-500">When someone uses your template</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Template Configuration</CardTitle>
+                        <CardDescription>Basic template settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Access Level</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Private</option>
+                              <option>Team</option>
+                              <option>Public</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Category</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Social Media</option>
+                              <option>Presentation</option>
+                              <option>Document</option>
+                              <option>Print</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-save Drafts</p>
+                            <p className="text-sm text-gray-500">Save changes automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Usage Stats</p>
+                            <p className="text-sm text-gray-500">Display template analytics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Templates Library</p>
+                            <p className="text-sm text-gray-500">Access to template gallery</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Brand Kit Integration</CardTitle>
+                        <CardDescription>Use brand assets in templates</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-apply Brand Colors</p>
+                            <p className="text-sm text-gray-500">Use brand colors by default</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-apply Brand Fonts</p>
+                            <p className="text-sm text-gray-500">Use brand fonts by default</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">New Review</p>
-                      <p className="text-xs text-gray-500">When someone reviews your template</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                )}
+
+                {/* Editor Settings */}
+                {settingsTab === 'editor' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Design Editor</CardTitle>
+                        <CardDescription>Configure the template editor</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Snap to Grid</p>
+                            <p className="text-sm text-gray-500">Align elements to grid</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Rulers</p>
+                            <p className="text-sm text-gray-500">Display rulers in editor</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Smart Guides</p>
+                            <p className="text-sm text-gray-500">Show alignment guides</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Undo History</p>
+                            <p className="text-sm text-gray-500">Number of undo steps</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>50 steps</option>
+                            <option>100 steps</option>
+                            <option>200 steps</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Canvas Settings</CardTitle>
+                        <CardDescription>Default canvas preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Zoom</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Fit to Screen</option>
+                              <option>50%</option>
+                              <option>100%</option>
+                              <option>150%</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Grid Size</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>8px</option>
+                              <option>16px</option>
+                              <option>32px</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Weekly Summary</p>
-                      <p className="text-xs text-gray-500">Weekly usage report</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
+                )}
+
+                {/* Export Settings */}
+                {settingsTab === 'export' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Export Preferences</CardTitle>
+                        <CardDescription>Default export settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Format</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>PNG (High Quality)</option>
+                              <option>JPG (Compressed)</option>
+                              <option>PDF (Print Ready)</option>
+                              <option>SVG (Vector)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Quality</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Standard (72 DPI)</option>
+                              <option>High (150 DPI)</option>
+                              <option>Print (300 DPI)</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Bleed Marks</p>
+                            <p className="text-sm text-gray-500">For print-ready exports</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Compress on Export</p>
+                            <p className="text-sm text-gray-500">Reduce file size</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Metadata</p>
+                            <p className="text-sm text-gray-500">Embed template info</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {/* Sharing Settings */}
+                {settingsTab === 'sharing' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sharing Preferences</CardTitle>
+                        <CardDescription>Control how templates are shared</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Comments</p>
+                            <p className="text-sm text-gray-500">On shared templates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Duplication</p>
+                            <p className="text-sm text-gray-500">Let others copy templates</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Watermark Free</p>
+                            <p className="text-sm text-gray-500">Remove watermarks from exports</p>
+                          </div>
+                          <Badge variant="outline" className="gap-1">
+                            <Crown className="w-3 h-3" />
+                            Pro
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Link Expiration</p>
+                            <p className="text-sm text-gray-500">Auto-expire shared links</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>Never</option>
+                            <option>7 days</option>
+                            <option>30 days</option>
+                            <option>90 days</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Team Access</CardTitle>
+                        <CardDescription>Team sharing settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Team Can Edit</p>
+                            <p className="text-sm text-gray-500">Allow team editing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Team Can Export</p>
+                            <p className="text-sm text-gray-500">Allow team downloads</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Template Notifications</CardTitle>
+                        <CardDescription>Get notified about template activity</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Template Used</p>
+                            <p className="text-sm text-gray-500">When someone uses your template</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">New Review</p>
+                            <p className="text-sm text-gray-500">When someone reviews</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Summary</p>
+                            <p className="text-sm text-gray-500">Weekly usage report</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Download Alerts</p>
+                            <p className="text-sm text-gray-500">When templates downloaded</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Programmatic template access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable API</p>
+                            <p className="text-sm text-gray-500">Allow API access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">API Key</label>
+                          <div className="flex gap-2">
+                            <Input value="tmpl_••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <CardDescription>External integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Template Created Webhook</p>
+                            <p className="text-sm text-gray-500">Trigger on new templates</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Webhook URL</label>
+                          <Input placeholder="https://your-server.com/webhook" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Delete All Templates</p>
+                            <p className="text-sm text-gray-500">Permanently remove all templates</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Reset Settings</p>
+                            <p className="text-sm text-gray-500">Reset to default settings</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -196,6 +196,7 @@ export default function AnalyticsClient() {
   const [compareMode, setCompareMode] = useState(false)
   const [isLive, setIsLive] = useState(true)
   const [cohortType, setCohortType] = useState<'retention' | 'revenue' | 'engagement'>('retention')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter metrics
   const filteredMetrics = useMemo(() => {
@@ -373,6 +374,51 @@ export default function AnalyticsClient() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <BarChart3 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Analytics Overview</h2>
+                    <p className="text-indigo-100">Real-time insights across all metrics</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">$285K</p>
+                    <p className="text-indigo-100 text-sm">Total Revenue</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'New Metric', desc: 'Create custom', color: 'text-indigo-500' },
+                { icon: Target, label: 'New Funnel', desc: 'Track conversions', color: 'text-purple-500' },
+                { icon: FileText, label: 'New Report', desc: 'Schedule reports', color: 'text-pink-500' },
+                { icon: Layout, label: 'Dashboard', desc: 'Create view', color: 'text-blue-500' },
+                { icon: Bell, label: 'Alert', desc: 'Set threshold', color: 'text-amber-500' },
+                { icon: Share2, label: 'Share', desc: 'Export data', color: 'text-green-500' },
+                { icon: Activity, label: 'Live View', desc: 'Real-time', color: 'text-red-500' },
+                { icon: Zap, label: 'Automate', desc: 'Set triggers', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
@@ -511,6 +557,25 @@ export default function AnalyticsClient() {
 
           {/* Metrics Tab */}
           <TabsContent value="metrics" className="space-y-6">
+            {/* Metrics Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Activity className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Key Metrics</h2>
+                    <p className="text-blue-100">{filteredMetrics.length} active metrics tracked</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Metric
+                </Button>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -574,9 +639,28 @@ export default function AnalyticsClient() {
 
           {/* Funnels Tab */}
           <TabsContent value="funnels" className="space-y-6">
+            {/* Funnels Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Target className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Funnel Analysis</h2>
+                    <p className="text-purple-100">Track user journeys and conversions</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowCreateFunnel(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Funnel
+                </Button>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Funnel Analysis</h2>
+                <h2 className="text-lg font-semibold">Active Funnels</h2>
                 <p className="text-gray-500">Track user conversion through your product</p>
               </div>
               <Button onClick={() => setShowCreateFunnel(true)}>
@@ -649,9 +733,31 @@ export default function AnalyticsClient() {
 
           {/* Cohorts Tab */}
           <TabsContent value="cohorts" className="space-y-6">
+            {/* Cohorts Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Cohort Analysis</h2>
+                    <p className="text-amber-100">Analyze user behavior over time</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-white/20 text-white border-white/30">{cohortType}</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Cohort Analysis</h2>
+                <h2 className="text-lg font-semibold">Retention Cohorts</h2>
                 <p className="text-gray-500">Track retention by user cohorts</p>
               </div>
               <div className="flex items-center gap-2">
@@ -885,9 +991,28 @@ export default function AnalyticsClient() {
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="space-y-6">
+            {/* Reports Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <FileText className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Reports</h2>
+                    <p className="text-emerald-100">Scheduled and automated reports</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowCreateReport(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Report
+                </Button>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Reports</h2>
+                <h2 className="text-lg font-semibold">Scheduled Reports</h2>
                 <p className="text-gray-500">Scheduled and on-demand reports</p>
               </div>
               <Button onClick={() => setShowCreateReport(true)}>
@@ -943,9 +1068,54 @@ export default function AnalyticsClient() {
 
           {/* Dashboards Tab */}
           <TabsContent value="dashboards" className="space-y-6">
+            {/* Dashboards Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Layout className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Custom Dashboards</h2>
+                    <p className="text-violet-100">Build personalized analytics views</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowCreateDashboard(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Dashboard
+                </Button>
+              </div>
+            </div>
+
+            {/* Dashboard Quick Templates */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Start Templates</CardTitle>
+                <CardDescription>Start with a pre-built dashboard template</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-4">
+                  {[
+                    { name: 'Executive Overview', desc: 'High-level KPIs', icon: BarChart3, color: 'bg-blue-100 text-blue-600' },
+                    { name: 'Marketing', desc: 'Campaign metrics', icon: TrendingUp, color: 'bg-green-100 text-green-600' },
+                    { name: 'Sales Pipeline', desc: 'Revenue tracking', icon: DollarSign, color: 'bg-amber-100 text-amber-600' },
+                    { name: 'User Engagement', desc: 'Behavior analytics', icon: Users, color: 'bg-purple-100 text-purple-600' },
+                  ].map((template, i) => (
+                    <div key={i} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all">
+                      <div className={`p-2 rounded-lg ${template.color} w-fit mb-3`}>
+                        <template.icon className="h-5 w-5" />
+                      </div>
+                      <h4 className="font-medium">{template.name}</h4>
+                      <p className="text-sm text-gray-500">{template.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Custom Dashboards</h2>
+                <h2 className="text-lg font-semibold">Your Dashboards</h2>
                 <p className="text-gray-500">Create and manage personalized dashboards</p>
               </div>
               <Button onClick={() => setShowCreateDashboard(true)}>
@@ -1001,174 +1171,575 @@ export default function AnalyticsClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Analytics Settings</h2>
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Analytics Settings</h2>
+                    <p className="text-indigo-100">Configure tracking, privacy, and integration preferences</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Data Collection</CardTitle>
-                  <CardDescription>Configure how analytics data is collected</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Enable Analytics</Label>
-                      <p className="text-sm text-gray-500">Collect user behavior data</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Session Recording</Label>
-                      <p className="text-sm text-gray-500">Record user sessions for playback</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Heatmaps</Label>
-                      <p className="text-sm text-gray-500">Track click and scroll patterns</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Error Tracking</Label>
-                      <p className="text-sm text-gray-500">Capture JavaScript errors</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Privacy & Compliance</CardTitle>
-                  <CardDescription>Manage data privacy settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>IP Anonymization</Label>
-                      <p className="text-sm text-gray-500">Mask user IP addresses</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Cookie Consent</Label>
-                      <p className="text-sm text-gray-500">Require consent before tracking</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Data Retention</Label>
-                      <p className="text-sm text-gray-500">How long to keep data</p>
-                    </div>
-                    <Select defaultValue="12">
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3 months</SelectItem>
-                        <SelectItem value="6">6 months</SelectItem>
-                        <SelectItem value="12">12 months</SelectItem>
-                        <SelectItem value="24">24 months</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Integrations</CardTitle>
-                  <CardDescription>Connect with third-party services</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { name: 'Google Analytics', connected: true },
-                    { name: 'Mixpanel', connected: true },
-                    { name: 'Segment', connected: false },
-                    { name: 'Amplitude', connected: false }
-                  ].map((integration, idx) => (
-                    <div key={idx} className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                          <Database className="h-4 w-4" />
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'tracking', icon: Activity, label: 'Tracking', desc: 'Data collection' },
+                      { id: 'privacy', icon: Eye, label: 'Privacy', desc: 'Compliance settings' },
+                      { id: 'integrations', icon: Database, label: 'Integrations', desc: 'Third-party services' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert settings' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
                         </div>
-                        <span className="font-medium">{integration.name}</span>
-                      </div>
-                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
-                        {integration.connected ? 'Disconnect' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                      </button>
+                    ))}
+                  </nav>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Alerts & Notifications</CardTitle>
-                  <CardDescription>Configure when to receive alerts</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Email Alerts</Label>
-                      <p className="text-sm text-gray-500">Receive alerts via email</p>
-                    </div>
-                    <Switch defaultChecked />
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Configuration</CardTitle>
+                        <CardDescription>Basic analytics settings and preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Analytics Name</Label>
+                            <Input defaultValue="Main Analytics" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">EST</SelectItem>
+                                <SelectItem value="pst">PST</SelectItem>
+                                <SelectItem value="sast">SAST (South Africa)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Enable Analytics</Label>
+                            <p className="text-sm text-gray-500">Collect user behavior data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Real-time Dashboard</Label>
+                            <p className="text-sm text-gray-500">Show live data updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Display Preferences</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Default View</Label>
+                            <p className="text-sm text-gray-500">Default dashboard view on load</p>
+                          </div>
+                          <Select defaultValue="overview">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="overview">Overview</SelectItem>
+                              <SelectItem value="metrics">Metrics</SelectItem>
+                              <SelectItem value="funnels">Funnels</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Chart Type</Label>
+                            <p className="text-sm text-gray-500">Preferred chart visualization</p>
+                          </div>
+                          <Select defaultValue="line">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="line">Line Chart</SelectItem>
+                              <SelectItem value="bar">Bar Chart</SelectItem>
+                              <SelectItem value="area">Area Chart</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Slack Notifications</Label>
-                      <p className="text-sm text-gray-500">Send alerts to Slack</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Anomaly Detection</Label>
-                      <p className="text-sm text-gray-500">AI-powered anomaly alerts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Tracking Code</CardTitle>
-                <CardDescription>Add this code to your website to enable tracking</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                  <pre>{`<script>
+                {/* Tracking Settings */}
+                {settingsTab === 'tracking' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Collection</CardTitle>
+                        <CardDescription>Configure how analytics data is collected</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Session Recording</Label>
+                            <p className="text-sm text-gray-500">Record user sessions for playback</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Heatmaps</Label>
+                            <p className="text-sm text-gray-500">Track click and scroll patterns</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Error Tracking</Label>
+                            <p className="text-sm text-gray-500">Capture JavaScript errors</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Form Analytics</Label>
+                            <p className="text-sm text-gray-500">Track form submissions and abandonment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Tracking Code</CardTitle>
+                        <CardDescription>Add this code to your website to enable tracking</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                          <pre>{`<script>
   (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   'https://analytics.kazi.app/track.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','kaziLayer','KAZI-XXXXXXXX');
 </script>`}</pre>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <Button variant="outline" size="sm">
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy Code
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Email to Developer
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2">
+                          <Button variant="outline" size="sm">
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy Code
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Mail className="h-4 w-4 mr-2" />
+                            Email to Developer
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Privacy Settings */}
+                {settingsTab === 'privacy' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Privacy & Compliance</CardTitle>
+                        <CardDescription>Manage data privacy and regulatory compliance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>IP Anonymization</Label>
+                            <p className="text-sm text-gray-500">Mask user IP addresses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Cookie Consent</Label>
+                            <p className="text-sm text-gray-500">Require consent before tracking</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>GDPR Mode</Label>
+                            <p className="text-sm text-gray-500">Enable GDPR compliance features</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Do Not Track</Label>
+                            <p className="text-sm text-gray-500">Respect DNT browser settings</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Retention</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Retention Period</Label>
+                            <p className="text-sm text-gray-500">How long to keep analytics data</p>
+                          </div>
+                          <Select defaultValue="12">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3 months</SelectItem>
+                              <SelectItem value="6">6 months</SelectItem>
+                              <SelectItem value="12">12 months</SelectItem>
+                              <SelectItem value="24">24 months</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Auto-delete Old Data</Label>
+                            <p className="text-sm text-gray-500">Automatically purge expired data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Manage third-party analytics integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Google Analytics', connected: true, icon: BarChart3 },
+                          { name: 'Mixpanel', connected: true, icon: PieChart },
+                          { name: 'Segment', connected: false, icon: Layers },
+                          { name: 'Amplitude', connected: false, icon: LineChart },
+                          { name: 'Hotjar', connected: true, icon: MousePointer },
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <integration.icon className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-xs text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                              {integration.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input value="ak_••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Enable API Access</Label>
+                            <p className="text-sm text-gray-500">Allow programmatic data access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Alert Channels</CardTitle>
+                        <CardDescription>Configure where to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Email Alerts</Label>
+                            <p className="text-sm text-gray-500">Receive alerts via email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Slack Notifications</Label>
+                            <p className="text-sm text-gray-500">Send alerts to Slack</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>SMS Alerts</Label>
+                            <p className="text-sm text-gray-500">Critical alerts via SMS</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>In-app Notifications</Label>
+                            <p className="text-sm text-gray-500">Show alerts in dashboard</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>AI Alerts</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Anomaly Detection</Label>
+                            <p className="text-sm text-gray-500">AI-powered anomaly alerts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Trend Predictions</Label>
+                            <p className="text-sm text-gray-500">Alert on predicted trend changes</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Performance</CardTitle>
+                        <CardDescription>Optimize analytics performance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Sampling Rate</Label>
+                            <p className="text-sm text-gray-500">Percentage of traffic to track</p>
+                          </div>
+                          <Select defaultValue="100">
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100%</SelectItem>
+                              <SelectItem value="75">75%</SelectItem>
+                              <SelectItem value="50">50%</SelectItem>
+                              <SelectItem value="25">25%</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Batch Uploads</Label>
+                            <p className="text-sm text-gray-500">Queue events before sending</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Debug Mode</Label>
+                            <p className="text-sm text-gray-500">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Export</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Export All Data</Label>
+                            <p className="text-sm text-gray-500">Download complete analytics data</p>
+                          </div>
+                          <Button variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Scheduled Exports</Label>
+                            <p className="text-sm text-gray-500">Automatic data exports</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Custom Events</CardTitle>
+                        <CardDescription>Configure custom event tracking</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Custom Event Tracking</Label>
+                            <p className="text-sm text-gray-500">Enable custom event collection</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Event Validation</Label>
+                            <p className="text-sm text-gray-500">Validate events before storage</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Auto-capture Events</Label>
+                            <p className="text-sm text-gray-500">Automatically track common events</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Event Schema</Label>
+                            <p className="text-sm text-gray-500">Define event structure</p>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>User Identification</CardTitle>
+                        <CardDescription>Configure user tracking settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Cross-device Tracking</Label>
+                            <p className="text-sm text-gray-500">Track users across devices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <Label>Session Stitching</Label>
+                            <p className="text-sm text-gray-500">Combine anonymous and identified sessions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Identity Resolution</Label>
+                            <p className="text-sm text-gray-500">Advanced user matching</p>
+                          </div>
+                          <Badge className="bg-purple-100 text-purple-700">Premium</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Reset All Data</Label>
+                            <p className="text-sm text-gray-500">Permanently delete all analytics</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset Data</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Delete Tracking Code</Label>
+                            <p className="text-sm text-gray-500">Remove tracking from all sites</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Revoke All API Keys</Label>
+                            <p className="text-sm text-gray-500">Invalidate all existing keys</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Revoke</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

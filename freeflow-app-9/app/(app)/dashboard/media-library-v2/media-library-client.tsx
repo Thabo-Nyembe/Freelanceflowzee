@@ -78,8 +78,26 @@ import {
   Heart,
   Bookmark,
   ExternalLink,
-  Info
+  Info,
+  Bell,
+  RefreshCw,
+  Archive,
+  Move,
+  SortAsc,
+  FolderTree,
+  ImagePlus,
+  VideoIcon,
+  MusicIcon,
+  FileUp,
+  FolderSync,
+  Boxes,
+  Database,
+  Activity,
+  PieChart,
+  LineChart,
+  AreaChart
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 
 // Types
 type FileType = 'image' | 'video' | 'audio' | 'document' | 'archive' | 'other'
@@ -466,6 +484,7 @@ export default function MediaLibraryClient({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null)
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const stats = useMemo(() => {
     const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
@@ -588,6 +607,51 @@ export default function MediaLibraryClient({
 
           {/* Assets Tab */}
           <TabsContent value="assets" className="space-y-6">
+            {/* Assets Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Media Library</h2>
+                    <p className="text-pink-100">{stats.totalAssets} assets • {stats.storageUsed.toFixed(1)}% storage used</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                    <p className="text-pink-100 text-sm">Total Views</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <CloudUpload className="h-4 w-4 mr-2" />
+                    Upload
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: CloudUpload, label: 'Upload', desc: 'Add new files', color: 'text-pink-500' },
+                { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500' },
+                { icon: LayoutGrid, label: 'Collection', desc: 'Create group', color: 'text-purple-500' },
+                { icon: Wand2, label: 'AI Enhance', desc: 'Auto-optimize', color: 'text-amber-500' },
+                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500' },
+                { icon: Download, label: 'Bulk Export', desc: 'Download all', color: 'text-cyan-500' },
+                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500' },
+                { icon: Sparkles, label: 'AI Search', desc: 'Smart find', color: 'text-indigo-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 flex-1">
                 <div className="relative flex-1 max-w-md">
@@ -712,12 +776,63 @@ export default function MediaLibraryClient({
 
           {/* Folders Tab */}
           <TabsContent value="folders" className="space-y-6">
+            {/* Folders Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Folder className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Folder Organization</h2>
+                    <p className="text-blue-100">{initialFolders.length} folders • {initialFolders.reduce((sum, f) => sum + f.assetCount, 0)} total assets</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{formatSize(initialFolders.reduce((sum, f) => sum + f.totalSize, 0))}</p>
+                    <p className="text-blue-100 text-sm">Total Size</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <FolderPlus className="h-4 w-4 mr-2" />
+                    New Folder
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Folder Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500' },
+                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500' },
+                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500' },
+                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500' },
+                { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500' },
+                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500' },
+                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500' },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Folders</h2>
-              <Button>
-                <FolderPlus className="w-4 h-4 mr-2" />
-                New Folder
-              </Button>
+              <h2 className="text-xl font-semibold">All Folders</h2>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <SortAsc className="w-4 h-4 mr-2" />
+                  Sort
+                </Button>
+                <Button>
+                  <FolderPlus className="w-4 h-4 mr-2" />
+                  New Folder
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -745,8 +860,53 @@ export default function MediaLibraryClient({
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
+            {/* Collections Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Boxes className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Asset Collections</h2>
+                    <p className="text-purple-100">{mockCollections.length} collections • {mockCollections.reduce((sum, c) => sum + c.assetCount, 0)} total assets</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{mockCollections.filter(c => c.isPublic).length}</p>
+                    <p className="text-purple-100 text-sm">Public Collections</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Collections Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500' },
+                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500' },
+                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500' },
+                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500' },
+                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500' },
+                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500' },
+                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500' },
+                { icon: Download, label: 'Export', desc: 'Download all', color: 'text-indigo-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Collections</h2>
+              <h2 className="text-xl font-semibold">All Collections</h2>
               <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Collection
@@ -784,6 +944,51 @@ export default function MediaLibraryClient({
 
           {/* Uploads Tab */}
           <TabsContent value="uploads" className="space-y-6">
+            {/* Uploads Overview Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <CloudUpload className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Upload Center</h2>
+                    <p className="text-green-100">Upload images, videos, audio, documents, and archives</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">5GB</p>
+                    <p className="text-green-100 text-sm">Max File Size</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Upload Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: ImagePlus, label: 'Images', desc: 'Upload photos', color: 'text-blue-500' },
+                { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500' },
+                { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500' },
+                { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500' },
+                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500' },
+                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500' },
+                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500' },
+                { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <Card className="border-0 shadow-sm">
               <CardContent className="p-8">
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer">
@@ -825,6 +1030,51 @@ export default function MediaLibraryClient({
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <BarChart3 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Media Analytics</h2>
+                    <p className="text-orange-100">Track views, downloads, and storage usage</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                    <p className="text-orange-100 text-sm">Total Views</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500' },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
+                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500' },
+                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500' },
+                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500' },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500' },
+                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500' },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 border-0 shadow-sm">
                 <CardHeader>
@@ -917,151 +1167,462 @@ export default function MediaLibraryClient({
                 </CardContent>
               </Card>
             </div>
+
+            {/* Additional Analytics */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Upload Trends</CardTitle>
+                  <CardDescription>Weekly upload activity</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+                      <div key={day} className="flex items-center gap-4">
+                        <span className="w-10 text-sm text-gray-500">{day}</span>
+                        <Progress value={[45, 72, 58, 89, 34, 12, 8][i]} className="h-2 flex-1" />
+                        <span className="w-12 text-sm text-right">{[45, 72, 58, 89, 34, 12, 8][i]} files</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Popular Tags</CardTitle>
+                  <CardDescription>Most used asset tags</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { tag: 'product', count: 234 },
+                      { tag: 'marketing', count: 189 },
+                      { tag: 'team', count: 156 },
+                      { tag: 'brand', count: 145 },
+                      { tag: 'social', count: 123 },
+                      { tag: 'video', count: 98 },
+                      { tag: 'banner', count: 87 },
+                      { tag: 'hero', count: 76 },
+                    ].map((item) => (
+                      <Badge key={item.tag} variant="secondary" className="px-3 py-1">
+                        {item.tag} <span className="ml-1 text-gray-400">({item.count})</span>
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Storage Settings</CardTitle>
-                  <CardDescription>Manage your storage quota and cleanup policies</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                    <div>
-                      <p className="font-medium">Current Plan</p>
-                      <p className="text-sm text-gray-500">100GB Storage, 1GB/month bandwidth</p>
-                    </div>
-                    <Button variant="outline" size="sm">Upgrade</Button>
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-delete trash</p>
-                      <p className="text-sm text-gray-500">Remove deleted files after 30 days</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Media Library Settings</h2>
+                    <p className="text-pink-100">Configure storage, AI, CDN, and access settings</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Version history</p>
-                      <p className="text-sm text-gray-500">Keep file versions for 90 days</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>AI Features</CardTitle>
-                  <CardDescription>Configure AI-powered asset management</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                        <Wand2 className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Auto-tagging</p>
-                        <p className="text-sm text-gray-500">AI-generated tags for new uploads</p>
-                      </div>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                        <Palette className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Color extraction</p>
-                        <p className="text-sm text-gray-500">Extract dominant colors from images</p>
-                      </div>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                        <Sparkles className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Smart search</p>
-                        <p className="text-sm text-gray-500">AI-powered content-based search</p>
-                      </div>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'storage', icon: HardDrive, label: 'Storage', desc: 'Quota & cleanup' },
+                      { id: 'ai', icon: Wand2, label: 'AI Features', desc: 'Smart tools' },
+                      { id: 'cdn', icon: Globe, label: 'CDN', desc: 'Delivery settings' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert settings' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </Card>
+              </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>CDN & Delivery</CardTitle>
-                  <CardDescription>Configure content delivery settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                    <p className="text-sm font-medium mb-1">CDN Endpoint</p>
-                    <div className="flex items-center gap-2">
-                      <code className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded flex-1">cdn.freeflow.com/media/</code>
-                      <Button size="icon" variant="ghost">
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Library Configuration</CardTitle>
+                        <CardDescription>Basic media library settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Library Name</label>
+                            <Input defaultValue="Main Media Library" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default View</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Grid View</option>
+                              <option>List View</option>
+                              <option>Gallery View</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Show File Extensions</p>
+                            <p className="text-sm text-gray-500">Display file extensions in names</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Drag & Drop</p>
+                            <p className="text-sm text-gray-500">Allow drag and drop uploads</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Default permissions for new assets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Default access level', value: 'Team' },
+                          { name: 'Allow public links', value: 'Enabled' },
+                          { name: 'Download permissions', value: 'Team members only' },
+                          { name: 'Watermark external shares', value: 'Disabled' }
+                        ].map((setting) => (
+                          <div key={setting.name} className="flex items-center justify-between p-3 rounded-lg border">
+                            <span className="font-medium">{setting.name}</span>
+                            <Button variant="outline" size="sm">{setting.value}</Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Image optimization</p>
-                      <p className="text-sm text-gray-500">Auto-convert and resize images</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">WebP conversion</p>
-                      <p className="text-sm text-gray-500">Serve images in WebP format</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                )}
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Access Control</CardTitle>
-                  <CardDescription>Default permissions for new assets</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { name: 'Default access level', value: 'Team' },
-                    { name: 'Allow public links', value: 'Enabled' },
-                    { name: 'Download permissions', value: 'Team members only' },
-                    { name: 'Watermark external shares', value: 'Disabled' }
-                  ].map((setting) => (
-                    <div key={setting.name} className="flex items-center justify-between p-3 rounded-lg border">
-                      <span className="font-medium">{setting.name}</span>
-                      <Button variant="outline" size="sm">{setting.value}</Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                {/* Storage Settings */}
+                {settingsTab === 'storage' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Storage Quota</CardTitle>
+                        <CardDescription>Manage your storage allocation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                          <div>
+                            <p className="font-medium">Current Plan</p>
+                            <p className="text-sm text-gray-500">100GB Storage, 1GB/month bandwidth</p>
+                          </div>
+                          <Button variant="outline" size="sm">Upgrade</Button>
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-sm mb-2">
+                            <span>Storage Used</span>
+                            <span>{stats.storageUsed.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={stats.storageUsed} className="h-2" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-delete trash</p>
+                            <p className="text-sm text-gray-500">Remove deleted files after 30 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Version history</p>
+                            <p className="text-sm text-gray-500">Keep file versions for 90 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Compress on Upload</p>
+                            <p className="text-sm text-gray-500">Auto-compress large files</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* AI Settings */}
+                {settingsTab === 'ai' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>AI-Powered Features</CardTitle>
+                        <CardDescription>Configure intelligent asset management</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Wand2 className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Auto-tagging</p>
+                              <p className="text-sm text-gray-500">AI-generated tags for new uploads</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <Palette className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Color extraction</p>
+                              <p className="text-sm text-gray-500">Extract dominant colors from images</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Sparkles className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Smart search</p>
+                              <p className="text-sm text-gray-500">AI-powered content-based search</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                              <Eye className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Face Detection</p>
+                              <p className="text-sm text-gray-500">Detect and tag faces in photos</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-pink-100 dark:bg-pink-900/30">
+                              <FileText className="w-5 h-5 text-pink-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">OCR Text Extraction</p>
+                              <p className="text-sm text-gray-500">Extract text from images and PDFs</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* CDN Settings */}
+                {settingsTab === 'cdn' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>CDN & Delivery</CardTitle>
+                        <CardDescription>Configure content delivery settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                          <p className="text-sm font-medium mb-2">CDN Endpoint</p>
+                          <div className="flex items-center gap-2">
+                            <code className="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded flex-1 font-mono">cdn.freeflow.com/media/</code>
+                            <Button size="sm" variant="outline">
+                              <Copy className="w-4 h-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Image optimization</p>
+                            <p className="text-sm text-gray-500">Auto-convert and resize images</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">WebP conversion</p>
+                            <p className="text-sm text-gray-500">Serve images in WebP format</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Lazy Loading</p>
+                            <p className="text-sm text-gray-500">Load images on scroll</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Cache Control</p>
+                            <p className="text-sm text-gray-500">Browser caching headers</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>1 hour</option>
+                            <option>1 day</option>
+                            <option>1 week</option>
+                            <option>1 month</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Upload Notifications</CardTitle>
+                        <CardDescription>Get notified about uploads and processing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Upload Complete</p>
+                            <p className="text-sm text-gray-500">Notify when uploads finish</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Processing Complete</p>
+                            <p className="text-sm text-gray-500">Notify when AI processing finishes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Storage Warnings</p>
+                            <p className="text-sm text-gray-500">Alert when storage is low</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Share Notifications</p>
+                            <p className="text-sm text-gray-500">Notify when assets are shared</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Configure programmatic access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable API</p>
+                            <p className="text-sm text-gray-500">Allow API access to media</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">API Key</label>
+                          <div className="flex gap-2">
+                            <Input value="mk_••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Upload Webhook</p>
+                            <p className="text-sm text-gray-500">Trigger on new uploads</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Webhook URL</label>
+                          <Input placeholder="https://your-server.com/webhook" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Clear All Metadata</p>
+                            <p className="text-sm text-gray-500">Remove AI-generated tags</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Delete All Assets</p>
+                            <p className="text-sm text-gray-500">Permanently remove all files</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

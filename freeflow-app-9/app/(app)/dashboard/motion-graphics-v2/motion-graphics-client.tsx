@@ -88,8 +88,21 @@ import {
   GitBranch,
   Star,
   Crown,
-  Clapperboard
+  Clapperboard,
+  Bell,
+  Globe,
+  HardDrive,
+  Activity,
+  FolderOpen,
+  FileText,
+  Cpu,
+  Video as VideoIcon,
+  Camera,
+  Box,
+  PenTool,
+  LayoutTemplate
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 
 // Types
 type AnimationStatus = 'draft' | 'rendering' | 'ready' | 'failed' | 'queued' | 'archived'
@@ -425,6 +438,7 @@ export default function MotionGraphicsClient({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const stats = useMemo(() => {
     const total = initialAnimations.length
@@ -535,6 +549,51 @@ export default function MotionGraphicsClient({
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
+            {/* Projects Overview Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Film className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Motion Graphics Projects</h2>
+                    <p className="text-cyan-100">{stats.total} projects • {stats.totalViews.toLocaleString()} total views</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.ready}</p>
+                    <p className="text-cyan-100 text-sm">Rendered</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Project
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'text-cyan-500' },
+                { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500' },
+                { icon: LayoutTemplate, label: 'Templates', desc: 'Start fast', color: 'text-blue-500' },
+                { icon: Layers, label: 'Compositions', desc: 'Layer groups', color: 'text-green-500' },
+                { icon: Sparkles, label: 'Effects', desc: 'Add effects', color: 'text-pink-500' },
+                { icon: Type, label: 'Typography', desc: 'Kinetic text', color: 'text-orange-500' },
+                { icon: Camera, label: 'Cameras', desc: '3D cameras', color: 'text-amber-500' },
+                { icon: Clapperboard, label: 'Render', desc: 'Export video', color: 'text-red-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 flex-1">
                 <div className="relative flex-1 max-w-md">
@@ -678,6 +737,31 @@ export default function MotionGraphicsClient({
 
           {/* Timeline Tab */}
           <TabsContent value="timeline" className="space-y-6">
+            {/* Timeline Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Layers className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Animation Timeline</h2>
+                    <p className="text-purple-100">{mockLayers.length} layers • {formatDuration(8.5)} duration</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">60</p>
+                    <p className="text-purple-100 text-sm">FPS</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Layer
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <Card className="lg:col-span-3 border-0 shadow-sm">
                 <CardContent className="p-4">
@@ -823,8 +907,53 @@ export default function MotionGraphicsClient({
 
           {/* Presets Tab */}
           <TabsContent value="presets" className="space-y-6">
+            {/* Presets Overview Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Wand2 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Effect Presets</h2>
+                    <p className="text-green-100">{mockPresets.length} presets • Ready to use</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">8</p>
+                    <p className="text-green-100 text-sm">Categories</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'Create Preset', desc: 'New effect', color: 'text-green-500' },
+                { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500' },
+                { icon: Move, label: 'Motion', desc: 'Animations', color: 'text-blue-500' },
+                { icon: Type, label: 'Text', desc: 'Typography', color: 'text-orange-500' },
+                { icon: Shapes, label: 'Shapes', desc: 'Shape presets', color: 'text-pink-500' },
+                { icon: Palette, label: 'Colors', desc: 'Color presets', color: 'text-red-500' },
+                { icon: Download, label: 'Import', desc: 'Import preset', color: 'text-cyan-500' },
+                { icon: Upload, label: 'Export', desc: 'Share preset', color: 'text-amber-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Effect Presets</h2>
+              <h2 className="text-xl font-semibold">All Presets</h2>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Preset
@@ -852,8 +981,53 @@ export default function MotionGraphicsClient({
 
           {/* Render Queue Tab */}
           <TabsContent value="render" className="space-y-6">
+            {/* Render Queue Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Clapperboard className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Render Queue</h2>
+                    <p className="text-orange-100">{mockRenderQueue.length} jobs • {mockRenderQueue.filter(j => j.status === 'rendering').length} rendering</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{mockRenderQueue.filter(j => j.status === 'completed').length}</p>
+                    <p className="text-orange-100 text-sm">Completed</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Play className="h-4 w-4 mr-2" />
+                    Start All
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Play, label: 'Start All', desc: 'Begin rendering', color: 'text-green-500' },
+                { icon: Pause, label: 'Pause All', desc: 'Pause queue', color: 'text-amber-500' },
+                { icon: Square, label: 'Stop All', desc: 'Cancel all', color: 'text-red-500' },
+                { icon: RefreshCw, label: 'Retry Failed', desc: 'Retry errors', color: 'text-blue-500' },
+                { icon: Plus, label: 'Add to Queue', desc: 'New render', color: 'text-purple-500' },
+                { icon: Download, label: 'Download All', desc: 'Get outputs', color: 'text-cyan-500' },
+                { icon: Trash2, label: 'Clear Queue', desc: 'Remove all', color: 'text-gray-500' },
+                { icon: Settings, label: 'Queue Settings', desc: 'Configure', color: 'text-indigo-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Render Queue</h2>
+              <h2 className="text-xl font-semibold">All Jobs</h2>
               <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
                 <Play className="w-4 h-4 mr-2" />
                 Start All
@@ -923,6 +1097,51 @@ export default function MotionGraphicsClient({
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <BarChart3 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Performance Analytics</h2>
+                    <p className="text-indigo-100">Track views, likes, and downloads</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                    <p className="text-indigo-100 text-sm">Total Views</p>
+                  </div>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500' },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
+                { icon: Eye, label: 'Views', desc: 'View stats', color: 'text-blue-500' },
+                { icon: Heart, label: 'Engagement', desc: 'Likes & shares', color: 'text-pink-500' },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500' },
+                { icon: Timer, label: 'Performance', desc: 'Render times', color: 'text-amber-500' },
+                { icon: Users, label: 'Audience', desc: 'User insights', color: 'text-purple-500' },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-orange-500' },
+              ].map((action, i) => (
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 border-0 shadow-sm">
                 <CardHeader>
@@ -1010,138 +1229,475 @@ export default function MotionGraphicsClient({
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Default Export Settings</CardTitle>
-                  <CardDescription>Configure default output settings for new projects</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Resolution</label>
-                      <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                        <option>720p (1280x720)</option>
-                        <option>1080p (1920x1080)</option>
-                        <option>2K (2560x1440)</option>
-                        <option>4K (3840x2160)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Frame Rate</label>
-                      <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                        <option>24 fps</option>
-                        <option>30 fps</option>
-                        <option>60 fps</option>
-                        <option>120 fps</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Format</label>
-                      <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                        <option>MP4 (H.264)</option>
-                        <option>MOV (ProRes)</option>
-                        <option>WebM</option>
-                        <option>GIF</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Quality</label>
-                      <select className="w-full mt-1 px-3 py-2 rounded-md border bg-background">
-                        <option>Best (Large File)</option>
-                        <option>High</option>
-                        <option>Medium</option>
-                        <option>Low (Small File)</option>
-                      </select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Render Settings</CardTitle>
-                  <CardDescription>Configure rendering behavior</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">GPU Acceleration</p>
-                      <p className="text-sm text-gray-500">Use GPU for faster rendering</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Background Rendering</p>
-                      <p className="text-sm text-gray-500">Continue working while rendering</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-save Projects</p>
-                      <p className="text-sm text-gray-500">Save every 5 minutes</p>
-                    </div>
-                    <div className="w-12 h-6 bg-green-500 rounded-full relative cursor-pointer">
-                      <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Keyboard Shortcuts</CardTitle>
-                  <CardDescription>Customize your workflow</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    { action: 'Play/Pause', shortcut: 'Space' },
-                    { action: 'Split Layer', shortcut: 'Cmd + Shift + D' },
-                    { action: 'Add Keyframe', shortcut: 'K' },
-                    { action: 'Render', shortcut: 'Cmd + M' },
-                    { action: 'Save Project', shortcut: 'Cmd + S' }
-                  ].map((item) => (
-                    <div key={item.action} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                      <span className="text-sm">{item.action}</span>
-                      <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">{item.shortcut}</kbd>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Storage & Cache</CardTitle>
-                  <CardDescription>Manage disk usage</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Cache Size</span>
-                      <span className="text-sm text-gray-500">12.4 GB / 50 GB</span>
-                    </div>
-                    <Progress value={25} className="h-2" />
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
                   </div>
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Project Files</span>
-                      <span className="text-sm text-gray-500">45.6 GB</span>
-                    </div>
-                    <Progress value={45} className="h-2" />
+                    <h2 className="text-2xl font-bold">Motion Graphics Settings</h2>
+                    <p className="text-cyan-100">Configure rendering, export, and workspace preferences</p>
                   </div>
-                  <Button variant="outline" className="w-full">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Clear Cache
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Config
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <nav className="p-2 space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'render', icon: Clapperboard, label: 'Rendering', desc: 'Output settings' },
+                      { id: 'performance', icon: Cpu, label: 'Performance', desc: 'GPU & memory' },
+                      { id: 'workspace', icon: Monitor, label: 'Workspace', desc: 'UI preferences' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert settings' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Advanced options' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs opacity-70">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </Card>
+              </div>
+
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Project Defaults</CardTitle>
+                        <CardDescription>Configure default settings for new projects</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Resolution</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>1080p (1920x1080)</option>
+                              <option>4K (3840x2160)</option>
+                              <option>720p (1280x720)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Frame Rate</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>30 fps</option>
+                              <option>60 fps</option>
+                              <option>24 fps</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-save Projects</p>
+                            <p className="text-sm text-gray-500">Save every 5 minutes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Create Backup on Save</p>
+                            <p className="text-sm text-gray-500">Keep previous versions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Startup Screen</p>
+                            <p className="text-sm text-gray-500">Show recent projects on start</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Keyboard Shortcuts</CardTitle>
+                        <CardDescription>Customize your workflow</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {[
+                          { action: 'Play/Pause', shortcut: 'Space' },
+                          { action: 'Split Layer', shortcut: 'Cmd + Shift + D' },
+                          { action: 'Add Keyframe', shortcut: 'K' },
+                          { action: 'Render', shortcut: 'Cmd + M' },
+                          { action: 'Save Project', shortcut: 'Cmd + S' }
+                        ].map((item) => (
+                          <div key={item.action} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                            <span className="text-sm">{item.action}</span>
+                            <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">{item.shortcut}</kbd>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Render Settings */}
+                {settingsTab === 'render' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Export Settings</CardTitle>
+                        <CardDescription>Configure default output settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Format</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>MP4 (H.264)</option>
+                              <option>MOV (ProRes)</option>
+                              <option>WebM</option>
+                              <option>GIF</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Quality Preset</label>
+                            <select className="w-full px-3 py-2 border rounded-lg">
+                              <option>Best (Large File)</option>
+                              <option>High</option>
+                              <option>Medium</option>
+                              <option>Low (Small File)</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Include Audio</p>
+                            <p className="text-sm text-gray-500">Export audio tracks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Optimize for Web</p>
+                            <p className="text-sm text-gray-500">Fast start for streaming</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Render Queue Settings</CardTitle>
+                        <CardDescription>Configure queue behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Background Rendering</p>
+                            <p className="text-sm text-gray-500">Continue working while rendering</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Max Parallel Renders</p>
+                            <p className="text-sm text-gray-500">Number of simultaneous renders</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>4</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Performance Settings */}
+                {settingsTab === 'performance' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>GPU Settings</CardTitle>
+                        <CardDescription>Configure hardware acceleration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">GPU Acceleration</p>
+                            <p className="text-sm text-gray-500">Use GPU for faster rendering</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Hardware Decode</p>
+                            <p className="text-sm text-gray-500">Use GPU for video decoding</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">GPU Memory Limit</p>
+                            <p className="text-sm text-gray-500">Max GPU memory usage</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>4 GB</option>
+                            <option>8 GB</option>
+                            <option>12 GB</option>
+                            <option>Auto</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Storage & Cache</CardTitle>
+                        <CardDescription>Manage disk usage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Cache Size</span>
+                            <span className="text-sm text-gray-500">12.4 GB / 50 GB</span>
+                          </div>
+                          <Progress value={25} className="h-2" />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Project Files</span>
+                            <span className="text-sm text-gray-500">45.6 GB</span>
+                          </div>
+                          <Progress value={45} className="h-2" />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Clear Cache
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Workspace Settings */}
+                {settingsTab === 'workspace' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Interface Preferences</CardTitle>
+                        <CardDescription>Customize the workspace</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Dark Mode</p>
+                            <p className="text-sm text-gray-500">Use dark theme</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Rulers</p>
+                            <p className="text-sm text-gray-500">Display rulers in preview</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Snap to Grid</p>
+                            <p className="text-sm text-gray-500">Align elements to grid</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">UI Scale</p>
+                            <p className="text-sm text-gray-500">Interface scaling</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>100%</option>
+                            <option>125%</option>
+                            <option>150%</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Timeline Preferences</CardTitle>
+                        <CardDescription>Configure timeline behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-scroll Timeline</p>
+                            <p className="text-sm text-gray-500">Follow playhead during playback</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Keyframe Labels</p>
+                            <p className="text-sm text-gray-500">Display keyframe values</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Render Notifications</CardTitle>
+                        <CardDescription>Get notified about render status</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Render Complete</p>
+                            <p className="text-sm text-gray-500">Notify when render finishes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Render Errors</p>
+                            <p className="text-sm text-gray-500">Alert on render failures</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Queue Updates</p>
+                            <p className="text-sm text-gray-500">Notify on queue changes</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>System Notifications</CardTitle>
+                        <CardDescription>General notification settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Desktop Notifications</p>
+                            <p className="text-sm text-gray-500">Show system notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Sound Alerts</p>
+                            <p className="text-sm text-gray-500">Play sounds for alerts</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Programmatic access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable API</p>
+                            <p className="text-sm text-gray-500">Allow remote control</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">API Key</label>
+                          <div className="flex gap-2">
+                            <Input value="mg_••••••••••••" readOnly className="font-mono" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Scripting</CardTitle>
+                        <CardDescription>ExtendScript and expressions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Scripting</p>
+                            <p className="text-sm text-gray-500">Allow external scripts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Expression Engine</p>
+                            <p className="text-sm text-gray-500">JavaScript expressions</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg">
+                            <option>JavaScript</option>
+                            <option>Legacy ExtendScript</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Reset All Settings</p>
+                            <p className="text-sm text-gray-500">Restore factory defaults</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Clear All Projects</p>
+                            <p className="text-sm text-gray-500">Delete all project data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
