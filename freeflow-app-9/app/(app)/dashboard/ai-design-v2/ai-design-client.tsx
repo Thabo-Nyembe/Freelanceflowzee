@@ -361,6 +361,7 @@ export default function AIDesignClient() {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatio>('1:1')
   const [selectedQuality, setSelectedQuality] = useState<QualityLevel>('high')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats: AIDesignStats = useMemo(() => ({
@@ -553,6 +554,144 @@ export default function AIDesignClient() {
           </Card>
         </div>
 
+        {/* AI Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-fuchsia-50 to-purple-50 dark:from-fuchsia-900/20 dark:to-purple-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-fuchsia-600" />
+                </div>
+                <div className="font-semibold">Most Popular Style</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Photorealistic leads with 45% of your generations</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-pink-600" />
+                </div>
+                <div className="font-semibold">Top Performing</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Anime style gets 2.3x more likes than average</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                  <Lightbulb className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="font-semibold">Pro Tip</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Add "cinematic lighting" for more dramatic results</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="font-semibold">This Week</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">You've created 23 images - 15% more than last week</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Usage Stats Banner */}
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Cpu className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">AI Generation Stats</h3>
+                  <p className="text-white/80">Your creative output this month</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{stats.completedGenerations}</div>
+                  <div className="text-sm text-white/80">Completed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{((stats.completedGenerations / stats.totalGenerations) * 100).toFixed(0)}%</div>
+                  <div className="text-sm text-white/80">Success Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{formatTime(stats.avgGenerationTime)}</div>
+                  <div className="text-sm text-white/80">Avg Time</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{stats.creditsUsed}</div>
+                  <div className="text-sm text-white/80">Credits Used</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Popular Templates Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="w-5 h-5 text-fuchsia-500" />
+                Trending Styles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {styleTemplates.filter(t => t.isPopular).slice(0, 4).map((template, idx) => (
+                  <div key={template.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{template.name}</div>
+                        <div className="text-xs text-gray-500">{template.usageCount.toLocaleString()} uses</div>
+                      </div>
+                    </div>
+                    <Badge className={getStyleColor(template.style)}>{template.style.replace('_', ' ')}</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Clock className="w-5 h-5 text-amber-500" />
+                Recent Creations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mockGenerations.slice(0, 4).map((gen) => (
+                  <div key={gen.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600" />
+                      <div>
+                        <div className="font-medium text-sm truncate max-w-[200px]">{gen.prompt.substring(0, 40)}...</div>
+                        <div className="text-xs text-gray-500">{gen.style.replace('_', ' ')}</div>
+                      </div>
+                    </div>
+                    <Badge className={getStatusColor(gen.status)}>{gen.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1">
@@ -584,6 +723,37 @@ export default function AIDesignClient() {
 
           {/* Generate Tab */}
           <TabsContent value="generate" className="space-y-6">
+            {/* Generate Overview Banner */}
+            <Card className="bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Sparkles className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">AI Image Generation</h3>
+                      <p className="text-fuchsia-100">Create stunning visuals with text prompts</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalCredits - stats.creditsUsed}</div>
+                      <div className="text-sm text-fuchsia-100">Credits Left</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalGenerations}</div>
+                      <div className="text-sm text-fuchsia-100">Generated</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatTime(stats.avgGenerationTime)}</div>
+                      <div className="text-sm text-fuchsia-100">Avg Time</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Prompt Input */}
               <div className="lg:col-span-2 space-y-4">
@@ -808,7 +978,61 @@ export default function AIDesignClient() {
           </TabsContent>
 
           {/* Gallery Tab */}
-          <TabsContent value="gallery" className="space-y-4">
+          <TabsContent value="gallery" className="space-y-6">
+            {/* Gallery Overview Banner */}
+            <Card className="bg-gradient-to-r from-pink-600 to-rose-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Image className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Your Gallery</h3>
+                      <p className="text-pink-100">Browse and manage all your AI-generated images</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockGenerations.length}</div>
+                      <div className="text-sm text-pink-100">Total Images</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.favoriteCount}</div>
+                      <div className="text-sm text-pink-100">Favorites</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalLikes}</div>
+                      <div className="text-sm text-pink-100">Total Likes</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalDownloads}</div>
+                      <div className="text-sm text-pink-100">Downloads</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gallery Stats */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { style: 'photorealistic', count: mockGenerations.filter(g => g.style === 'photorealistic').length, icon: Image, color: 'blue' },
+                { style: 'digital_art', count: mockGenerations.filter(g => g.style === 'digital_art').length, icon: Paintbrush, color: 'purple' },
+                { style: 'anime', count: mockGenerations.filter(g => g.style === 'anime').length, icon: Sparkles, color: 'pink' },
+                { style: '3d_render', count: mockGenerations.filter(g => g.style === '3d_render').length, icon: Layers, color: 'indigo' },
+                { style: 'oil_painting', count: mockGenerations.filter(g => g.style === 'oil_painting').length, icon: Palette, color: 'amber' }
+              ].map((stat, idx) => (
+                <Card key={idx} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                  <CardContent className="p-3 text-center">
+                    <stat.icon className={`w-6 h-6 mx-auto mb-1 text-${stat.color}-500`} />
+                    <div className="font-bold text-lg">{stat.count}</div>
+                    <div className="text-xs text-gray-500 capitalize">{stat.style.replace('_', ' ')}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -889,7 +1113,59 @@ export default function AIDesignClient() {
           </TabsContent>
 
           {/* Styles Tab */}
-          <TabsContent value="styles" className="space-y-4">
+          <TabsContent value="styles" className="space-y-6">
+            {/* Styles Overview Banner */}
+            <Card className="bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Palette className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Style Templates</h3>
+                      <p className="text-violet-100">Pre-configured styles for instant results</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{styleTemplates.length}</div>
+                      <div className="text-sm text-violet-100">Templates</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{styleTemplates.filter(t => t.isPopular).length}</div>
+                      <div className="text-sm text-violet-100">Popular</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{(styleTemplates.reduce((sum, t) => sum + t.usageCount, 0) / 1000).toFixed(1)}K</div>
+                      <div className="text-sm text-violet-100">Total Uses</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Style Categories */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { style: 'photorealistic', label: 'Photo', icon: Image, color: 'blue' },
+                { style: 'digital_art', label: 'Digital', icon: Paintbrush, color: 'purple' },
+                { style: 'anime', label: 'Anime', icon: Sparkles, color: 'pink' },
+                { style: '3d_render', label: '3D', icon: Layers, color: 'indigo' },
+                { style: 'oil_painting', label: 'Painting', icon: Palette, color: 'amber' }
+              ].map((cat, idx) => (
+                <Card key={idx} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm cursor-pointer hover:shadow-lg transition-all">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-12 h-12 rounded-xl bg-${cat.color}-100 dark:bg-${cat.color}-900/30 flex items-center justify-center mx-auto mb-2`}>
+                      <cat.icon className={`w-6 h-6 text-${cat.color}-500`} />
+                    </div>
+                    <div className="font-medium">{cat.label}</div>
+                    <div className="text-xs text-gray-500">{styleTemplates.filter(t => t.style === cat.style).length} styles</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {styleTemplates.map((template) => (
                 <Card key={template.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
@@ -944,7 +1220,38 @@ export default function AIDesignClient() {
           </TabsContent>
 
           {/* History Tab */}
-          <TabsContent value="history" className="space-y-4">
+          <TabsContent value="history" className="space-y-6">
+            {/* History Overview Banner */}
+            <Card className="bg-gradient-to-r from-amber-600 to-orange-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <History className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Prompt History</h3>
+                      <p className="text-amber-100">Review and reuse your previous prompts</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockPromptHistory.length}</div>
+                      <div className="text-sm text-amber-100">Prompts</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockPromptHistory.filter(p => p.isFavorite).length}</div>
+                      <div className="text-sm text-amber-100">Favorites</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockPromptHistory.reduce((sum, p) => sum + p.resultCount, 0)}</div>
+                      <div className="text-sm text-amber-100">Results</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -983,121 +1290,423 @@ export default function AIDesignClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-5 h-5 text-fuchsia-500" />
-                    Default Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Default Model</div>
-                      <div className="text-sm text-gray-500">Midjourney V6</div>
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <Card className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-violet-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-8 h-8 text-white" />
                     </div>
-                    <Button variant="outline" size="sm">Change</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Default Quality</div>
-                      <div className="text-sm text-gray-500">High (5 credits)</div>
+                      <h2 className="text-2xl font-bold">Midjourney-Level AI Design Studio</h2>
+                      <p className="text-fuchsia-100 mt-1">Configure generation, models, exports, and integrations</p>
                     </div>
-                    <Button variant="outline" size="sm">Change</Button>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Default Aspect Ratio</div>
-                      <div className="text-sm text-gray-500">1:1 (Square)</div>
+                  <div className="flex items-center gap-8">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalGenerations}</div>
+                      <div className="text-sm text-fuchsia-100">Generations</div>
                     </div>
-                    <Button variant="outline" size="sm">Change</Button>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalCredits - stats.creditsUsed}</div>
+                      <div className="text-sm text-fuchsia-100">Credits Left</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalDownloads}</div>
+                      <div className="text-sm text-fuchsia-100">Downloads</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.favoriteCount}</div>
+                      <div className="text-sm text-fuchsia-100">Favorites</div>
+                    </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'models', icon: Cpu, label: 'AI Models' },
+                      { id: 'styles', icon: Palette, label: 'Styles' },
+                      { id: 'exports', icon: Download, label: 'Exports' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-yellow-500" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Generation Complete</div>
-                      <div className="text-sm text-gray-500">Notify when image is ready</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Daily Summary</div>
-                      <div className="text-sm text-gray-500">Daily usage and stats</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Low Credits Warning</div>
-                      <div className="text-sm text-gray-500">Alert when credits are low</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <SlidersHorizontal className="w-5 h-5" />
+                        General Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Model</div>
+                          <div className="text-sm text-muted-foreground">Primary AI model for generations</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>Midjourney V6</option>
+                          <option>Midjourney V5</option>
+                          <option>DALL-E 3</option>
+                          <option>Stable Diffusion</option>
+                          <option>Flux Pro</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Quality</div>
+                          <div className="text-sm text-muted-foreground">Image quality level (affects credits)</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>Draft (1 credit)</option>
+                          <option>Standard (3 credits)</option>
+                          <option>High (5 credits)</option>
+                          <option>Ultra (10 credits)</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Aspect Ratio</div>
+                          <div className="text-sm text-muted-foreground">Preferred output dimensions</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>1:1 (Square)</option>
+                          <option>16:9 (Landscape)</option>
+                          <option>9:16 (Portrait)</option>
+                          <option>4:3</option>
+                          <option>3:2</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Auto-save Generations</div>
+                          <div className="text-sm text-muted-foreground">Automatically save to gallery</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Show Seed Number</div>
+                          <div className="text-sm text-muted-foreground">Display seed for reproducibility</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="w-5 h-5 text-emerald-500" />
-                    Export Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Default Format</div>
-                      <div className="text-sm text-gray-500">PNG (lossless)</div>
-                    </div>
-                    <Button variant="outline" size="sm">Change</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Include Metadata</div>
-                      <div className="text-sm text-gray-500">Embed prompt in image</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'models' && (
+                  <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Cpu className="w-5 h-5" />
+                        AI Models Configuration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                            <Sparkles className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Midjourney V6</div>
+                            <div className="text-sm text-muted-foreground">Latest version - best quality</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <Wand2 className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">DALL-E 3</div>
+                            <div className="text-sm text-muted-foreground">OpenAI's text-to-image model</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                            <Cpu className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Stable Diffusion XL</div>
+                            <div className="text-sm text-muted-foreground">Open-source model</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                            <Zap className="w-5 h-5 text-pink-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Flux Pro</div>
+                            <div className="text-sm text-muted-foreground">Fast, high-quality generations</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Enable</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-red-500" />
-                    Privacy
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Public by Default</div>
-                      <div className="text-sm text-gray-500">Share generations publicly</div>
+                {settingsTab === 'styles' && (
+                  <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Palette className="w-5 h-5" />
+                        Style Preferences
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Style</div>
+                          <div className="text-sm text-muted-foreground">Starting style for new prompts</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>Photorealistic</option>
+                          <option>Digital Art</option>
+                          <option>Anime</option>
+                          <option>Oil Painting</option>
+                          <option>3D Render</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Auto-apply Style Modifiers</div>
+                          <div className="text-sm text-muted-foreground">Add style keywords automatically</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Save Custom Styles</div>
+                          <div className="text-sm text-muted-foreground">Allow saving custom style presets</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Show Popular Styles</div>
+                          <div className="text-sm text-muted-foreground">Display trending styles in picker</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'exports' && (
+                  <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Download className="w-5 h-5" />
+                        Export Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Format</div>
+                          <div className="text-sm text-muted-foreground">Image file format for exports</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>PNG (Lossless)</option>
+                          <option>JPEG (Compressed)</option>
+                          <option>WebP (Modern)</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Include Metadata</div>
+                          <div className="text-sm text-muted-foreground">Embed prompt and settings in file</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Auto-upscale on Download</div>
+                          <div className="text-sm text-muted-foreground">Upscale to 4K before download</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Watermark Free Exports</div>
+                          <div className="text-sm text-muted-foreground">Remove watermarks (Pro feature)</div>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-700">Pro</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5" />
+                        Notification Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Generation Complete</div>
+                          <div className="text-sm text-muted-foreground">Notify when image is ready</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Daily Summary</div>
+                          <div className="text-sm text-muted-foreground">Daily usage and stats email</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Low Credits Warning</div>
+                          <div className="text-sm text-muted-foreground">Alert when credits are low</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">New Features</div>
+                          <div className="text-sm text-muted-foreground">Updates about new AI models</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Community Likes</div>
+                          <div className="text-sm text-muted-foreground">When others like your images</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5" />
+                        Advanced Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">API Access</div>
+                          <div className="text-sm text-muted-foreground">Enable API for integrations</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Public by Default</div>
+                          <div className="text-sm text-muted-foreground">Share generations publicly</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Show in Explore</div>
+                          <div className="text-sm text-muted-foreground">Feature in community gallery</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Debug Mode</div>
+                          <div className="text-sm text-muted-foreground">Show detailed generation logs</div>
+                        </div>
+                        <input type="checkbox" className="w-5 h-5" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Download className="w-6 h-6" />
+                          <span>Export All</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <RefreshCw className="w-6 h-6" />
+                          <span>Clear Cache</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <History className="w-6 h-6" />
+                          <span>View History</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <HelpCircle className="w-6 h-6" />
+                          <span>Get Help</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Sparkles, label: 'Generate', desc: 'Create', color: 'from-fuchsia-500 to-purple-600' },
+                { icon: Palette, label: 'Styles', desc: 'Browse', color: 'from-pink-500 to-rose-600' },
+                { icon: Cpu, label: 'Models', desc: 'Switch', color: 'from-blue-500 to-cyan-600' },
+                { icon: History, label: 'History', desc: 'View', color: 'from-amber-500 to-orange-600' },
+                { icon: Star, label: 'Favorites', desc: 'Saved', color: 'from-yellow-500 to-amber-600' },
+                { icon: Download, label: 'Export', desc: 'Download', color: 'from-green-500 to-emerald-600' },
+                { icon: Zap, label: 'Upscale', desc: 'Enhance', color: 'from-violet-500 to-purple-600' },
+                { icon: Share2, label: 'Share', desc: 'Publish', color: 'from-indigo-500 to-blue-600' }
+              ].map((action, idx) => (
+                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                      <action.icon className="w-5 h-5 text-white" />
                     </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Show in Explore</div>
-                      <div className="text-sm text-gray-500">Feature in community gallery</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="font-medium text-sm">{action.label}</div>
+                    <div className="text-xs text-muted-foreground">{action.desc}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
         </Tabs>

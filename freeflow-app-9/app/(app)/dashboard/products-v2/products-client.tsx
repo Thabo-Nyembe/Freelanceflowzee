@@ -303,6 +303,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [showCreateProduct, setShowCreateProduct] = useState(false)
   const [showCreateCoupon, setShowCreateCoupon] = useState(false)
   const [showCreatePrice, setShowCreatePrice] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { data: products } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
@@ -485,10 +486,45 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <BarChart3 className="w-4 h-4" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Catalog Tab */}
           <TabsContent value="catalog" className="mt-6">
+            {/* Catalog Overview Banner */}
+            <Card className="bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Package className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Product Catalog</h3>
+                      <p className="text-violet-100">Manage your complete product catalog</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredProducts.length}</div>
+                      <div className="text-sm text-violet-100">Products</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredProducts.filter(p => p.status === 'active').length}</div>
+                      <div className="text-sm text-violet-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(totalRevenue * 100)}</div>
+                      <div className="text-sm text-violet-100">Revenue</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="space-y-4">
               {/* Filters */}
               <div className="flex items-center justify-between gap-4">
@@ -639,6 +675,37 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
           {/* Pricing Tab */}
           <TabsContent value="pricing" className="mt-6">
+            {/* Pricing Overview Banner */}
+            <Card className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <DollarSign className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Pricing Management</h3>
+                      <p className="text-green-100">Configure prices, billing intervals, and trials</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockProducts.flatMap(p => p.prices).length}</div>
+                      <div className="text-sm text-green-100">Prices</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</div>
+                      <div className="text-sm text-green-100">Recurring</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(totalMRR * 100)}</div>
+                      <div className="text-sm text-green-100">MRR</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
@@ -748,6 +815,37 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
           {/* Coupons Tab */}
           <TabsContent value="coupons" className="mt-6">
+            {/* Coupons Overview Banner */}
+            <Card className="bg-gradient-to-r from-orange-600 to-red-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Tag className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Coupons & Discounts</h3>
+                      <p className="text-orange-100">Create promotional codes and track redemptions</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockCoupons.length}</div>
+                      <div className="text-sm text-orange-100">Coupons</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockCoupons.filter(c => c.valid).length}</div>
+                      <div className="text-sm text-orange-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockCoupons.reduce((sum, c) => sum + c.timesRedeemed, 0)}</div>
+                      <div className="text-sm text-orange-100">Redeemed</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Coupons & Discounts</h3>
@@ -806,6 +904,37 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
           {/* Tax Rates Tab */}
           <TabsContent value="taxes" className="mt-6">
+            {/* Tax Rates Overview Banner */}
+            <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Percent className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Tax Configuration</h3>
+                      <p className="text-blue-100">Manage tax rates and automatic calculation</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockTaxRates.length}</div>
+                      <div className="text-sm text-blue-100">Tax Rates</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockTaxRates.filter(t => t.active).length}</div>
+                      <div className="text-sm text-blue-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{new Set(mockTaxRates.map(t => t.country)).size}</div>
+                      <div className="text-sm text-blue-100">Countries</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
@@ -892,6 +1021,41 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="mt-6">
+            {/* Analytics Overview Banner */}
+            <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <BarChart3 className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Product Analytics</h3>
+                      <p className="text-indigo-100">Revenue, subscriptions, and performance insights</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(totalRevenue * 100)}</div>
+                      <div className="text-sm text-indigo-100">Revenue</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{totalSubscribers.toLocaleString()}</div>
+                      <div className="text-sm text-indigo-100">Subscribers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{avgConversion.toFixed(1)}%</div>
+                      <div className="text-sm text-indigo-100">Conversion</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{avgChurn.toFixed(1)}%</div>
+                      <div className="text-sm text-indigo-100">Churn</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card>
@@ -1018,6 +1182,464 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Banner */}
+            <Card className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">Stripe-Level Product Management</h2>
+                      <p className="text-violet-100 mt-1">Configure catalog, pricing, inventory, and integrations</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-8">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{activeProducts}</div>
+                      <div className="text-sm text-violet-100">Products</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockProducts.flatMap(p => p.prices).length}</div>
+                      <div className="text-sm text-violet-100">Prices</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{formatCurrency(totalMRR * 100)}</div>
+                      <div className="text-sm text-violet-100">MRR</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{totalSubscribers.toLocaleString()}</div>
+                      <div className="text-sm text-violet-100">Subscribers</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit border-0 shadow-sm">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'inventory', icon: Box, label: 'Inventory' },
+                      { id: 'shipping', icon: Truck, label: 'Shipping' },
+                      { id: 'integrations', icon: Link2, label: 'Integrations' },
+                      { id: 'notifications', icon: Activity, label: 'Notifications' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </CardContent>
+              </Card>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure default product settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Currency</div>
+                          <div className="text-sm text-muted-foreground">Primary currency for new products</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>USD - US Dollar</option>
+                          <option>EUR - Euro</option>
+                          <option>GBP - British Pound</option>
+                          <option>CAD - Canadian Dollar</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Tax Calculation</div>
+                          <div className="text-sm text-muted-foreground">Enable automatic tax calculation</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Statement Descriptor</div>
+                          <div className="text-sm text-muted-foreground">Appears on customer credit card statements</div>
+                        </div>
+                        <Input className="w-48" defaultValue="FREEFLOW KAZI" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Product Images</div>
+                          <div className="text-sm text-muted-foreground">Require images for all products</div>
+                        </div>
+                        <ToggleLeft className="w-6 h-6 text-gray-400 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Trial Period</div>
+                          <div className="text-sm text-muted-foreground">Default trial days for subscriptions</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>7 days</option>
+                          <option>14 days</option>
+                          <option>30 days</option>
+                          <option>No trial</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Proration Behavior</div>
+                          <div className="text-sm text-muted-foreground">How to handle subscription changes</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>Create prorations</option>
+                          <option>None</option>
+                          <option>Always invoice</option>
+                        </select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'inventory' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Box className="w-5 h-5" />
+                        Inventory Settings
+                      </CardTitle>
+                      <CardDescription>Manage stock levels and tracking</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Track Inventory</div>
+                          <div className="text-sm text-muted-foreground">Enable inventory tracking for physical products</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Low Stock Threshold</div>
+                          <div className="text-sm text-muted-foreground">Alert when stock falls below</div>
+                        </div>
+                        <Input className="w-24" type="number" defaultValue="10" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Out of Stock Behavior</div>
+                          <div className="text-sm text-muted-foreground">What happens when stock is zero</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>Allow backorders</option>
+                          <option>Mark as unavailable</option>
+                          <option>Hide product</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Reserve Stock</div>
+                          <div className="text-sm text-muted-foreground">Reserve inventory during checkout</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">SKU Auto-Generation</div>
+                          <div className="text-sm text-muted-foreground">Automatically generate SKUs for new products</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'shipping' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Truck className="w-5 h-5" />
+                        Shipping Settings
+                      </CardTitle>
+                      <CardDescription>Configure shipping options and rates</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Enable Shipping</div>
+                          <div className="text-sm text-muted-foreground">Allow physical product shipping</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Shipping Rate</div>
+                          <div className="text-sm text-muted-foreground">Standard shipping cost</div>
+                        </div>
+                        <Input className="w-32" defaultValue="$9.99" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Free Shipping Threshold</div>
+                          <div className="text-sm text-muted-foreground">Order minimum for free shipping</div>
+                        </div>
+                        <Input className="w-32" defaultValue="$99.00" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Shipping Zones</div>
+                          <div className="text-sm text-muted-foreground">Configure regional shipping rates</div>
+                        </div>
+                        <Button variant="outline" size="sm">Manage Zones</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Carrier Integration</div>
+                          <div className="text-sm text-muted-foreground">Connect shipping carriers for real-time rates</div>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Link2 className="w-5 h-5" />
+                        Integrations
+                      </CardTitle>
+                      <CardDescription>Connect with payment processors and platforms</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                            <CreditCard className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Stripe</div>
+                            <div className="text-sm text-muted-foreground">Payment processing</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <Globe className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Shopify</div>
+                            <div className="text-sm text-muted-foreground">E-commerce platform sync</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                            <Package className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Amazon</div>
+                            <div className="text-sm text-muted-foreground">Product listing sync</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">QuickBooks</div>
+                            <div className="text-sm text-muted-foreground">Accounting integration</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                            <Zap className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Zapier</div>
+                            <div className="text-sm text-muted-foreground">Workflow automation</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="w-5 h-5" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Configure alerts and notifications</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">New Order Alerts</div>
+                          <div className="text-sm text-muted-foreground">Get notified when orders are placed</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Low Stock Alerts</div>
+                          <div className="text-sm text-muted-foreground">Alert when inventory is low</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Subscription Events</div>
+                          <div className="text-sm text-muted-foreground">Notify on renewals, cancellations, trials</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Payment Failures</div>
+                          <div className="text-sm text-muted-foreground">Alert on failed payments</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Daily Revenue Summary</div>
+                          <div className="text-sm text-muted-foreground">Daily email with revenue stats</div>
+                        </div>
+                        <ToggleLeft className="w-6 h-6 text-gray-400 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Churn Alerts</div>
+                          <div className="text-sm text-muted-foreground">Notify when churn exceeds threshold</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>Power user settings and data management</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">API Access</div>
+                          <div className="text-sm text-muted-foreground">Enable Products API for integrations</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Webhook Events</div>
+                          <div className="text-sm text-muted-foreground">Send product events to external services</div>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Audit Logging</div>
+                          <div className="text-sm text-muted-foreground">Track all product changes</div>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500 cursor-pointer" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Test Mode</div>
+                          <div className="text-sm text-muted-foreground">Use test API keys for development</div>
+                        </div>
+                        <ToggleLeft className="w-6 h-6 text-gray-400 cursor-pointer" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Download className="w-6 h-6" />
+                          <span>Export Catalog</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Upload className="w-6 h-6" />
+                          <span>Import Products</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Archive className="w-6 h-6" />
+                          <span>Backup Data</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <RefreshCw className="w-6 h-6" />
+                          <span>Sync All</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Package, label: 'New Product', desc: 'Create', color: 'from-violet-500 to-purple-600' },
+                { icon: DollarSign, label: 'Add Price', desc: 'Pricing', color: 'from-green-500 to-emerald-600' },
+                { icon: Tag, label: 'Coupon', desc: 'Discount', color: 'from-orange-500 to-red-600' },
+                { icon: Percent, label: 'Tax Rate', desc: 'Configure', color: 'from-blue-500 to-cyan-600' },
+                { icon: Box, label: 'Inventory', desc: 'Stock', color: 'from-amber-500 to-yellow-600' },
+                { icon: BarChart3, label: 'Analytics', desc: 'Reports', color: 'from-pink-500 to-rose-600' },
+                { icon: Download, label: 'Export', desc: 'Download', color: 'from-teal-500 to-green-600' },
+                { icon: RefreshCw, label: 'Sync', desc: 'Update', color: 'from-indigo-500 to-blue-600' }
+              ].map((action, idx) => (
+                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                      <action.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="font-medium text-sm">{action.label}</div>
+                    <div className="text-xs text-muted-foreground">{action.desc}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
         </Tabs>
