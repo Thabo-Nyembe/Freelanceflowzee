@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Bug,
@@ -56,7 +57,18 @@ import {
   Timer,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  Shield,
+  Sliders,
+  Bell,
+  Globe,
+  Database,
+  Workflow,
+  Mail,
+  Webhook,
+  Terminal,
+  Archive,
+  History
 } from 'lucide-react'
 
 // Types
@@ -464,6 +476,7 @@ export default function BugsClient() {
   const [severityFilter, setSeverityFilter] = useState<BugSeverity | 'all'>('all')
   const [selectedBug, setSelectedBug] = useState<BugItem | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Computed values
   const filteredBugs = useMemo(() => {
@@ -668,6 +681,52 @@ export default function BugsClient() {
 
           {/* Bugs List Tab */}
           <TabsContent value="list" className="space-y-4">
+            {/* Bugs List Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Bug className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Bug List</h3>
+                  <Badge className="bg-white/20 text-white border-0">{filteredBugs.length} Items</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Track and manage bugs across your entire project. Filter by status, severity, or search to find specific issues.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Zap className="w-5 h-5 text-red-600" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: Plus, label: 'Report Bug', color: 'from-red-500 to-orange-500' },
+                    { icon: Search, label: 'Search Issues', color: 'from-blue-500 to-cyan-500' },
+                    { icon: Filter, label: 'Advanced Filter', color: 'from-green-500 to-emerald-500' },
+                    { icon: Archive, label: 'View Archive', color: 'from-gray-500 to-slate-500' },
+                    { icon: Download, label: 'Export CSV', color: 'from-violet-500 to-purple-500' },
+                    { icon: Upload, label: 'Import Bugs', color: 'from-pink-500 to-rose-500' },
+                    { icon: GitBranch, label: 'Link PRs', color: 'from-teal-500 to-green-500' },
+                    { icon: History, label: 'View History', color: 'from-amber-500 to-orange-500' },
+                  ].map((action, idx) => (
+                    <button key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                      <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center gap-2 mb-4 flex-wrap">
               <span className="text-sm font-medium text-muted-foreground">Status:</span>
               {(['all', 'open', 'in_progress', 'in_review', 'resolved', 'closed'] as const).map(s => (
@@ -770,6 +829,21 @@ export default function BugsClient() {
 
           {/* Board Tab */}
           <TabsContent value="board" className="space-y-4">
+            {/* Board Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <LayoutGrid className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Kanban Board</h3>
+                  <Badge className="bg-white/20 text-white border-0">4 Columns</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Visualize your bug workflow with drag-and-drop kanban. Move issues through stages from open to resolved.
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
               {boardColumns.map(column => (
                 <div key={column.id} className="space-y-4">
@@ -813,6 +887,21 @@ export default function BugsClient() {
 
           {/* Sprints Tab */}
           <TabsContent value="sprints" className="space-y-4">
+            {/* Sprints Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Target className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Sprint Planning</h3>
+                  <Badge className="bg-white/20 text-white border-0">Active Sprints</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Organize bugs into sprints for agile development. Track sprint progress and manage your backlog efficiently.
+                </p>
+              </div>
+            </div>
+
             <div className="grid gap-4">
               {['Sprint 12', 'Sprint 11', 'Backlog'].map(sprint => {
                 const sprintBugs = mockBugs.filter(b => b.sprint === sprint || (!b.sprint && sprint === 'Backlog'))
@@ -861,6 +950,39 @@ export default function BugsClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
+            {/* Analytics Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Bug Analytics</h3>
+                  <Badge className="bg-white/20 text-white border-0">Insights</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Analyze bug trends, resolution times, and team performance. Make data-driven decisions to improve quality.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockStats.avgResolutionTime}d</div>
+                    <div className="text-xs text-white/70">Avg Resolution</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockStats.resolvedThisWeek}</div>
+                    <div className="text-xs text-white/70">Fixed This Week</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{Math.round((mockStats.resolved / mockStats.total) * 100)}%</div>
+                    <div className="text-xs text-white/70">Resolution Rate</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockStats.critical}</div>
+                    <div className="text-xs text-white/70">Critical Issues</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                 <CardHeader>
@@ -992,6 +1114,39 @@ export default function BugsClient() {
 
           {/* Team Tab */}
           <TabsContent value="team" className="space-y-4">
+            {/* Team Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Bug Fix Team</h3>
+                  <Badge className="bg-white/20 text-white border-0">6 Members</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Track team workload, bug assignments, and resolution performance. Manage team capacity and distribution.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">6</div>
+                    <div className="text-xs text-white/70">Team Members</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">23</div>
+                    <div className="text-xs text-white/70">Active Bugs</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">70</div>
+                    <div className="text-xs text-white/70">Bugs Resolved</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">94%</div>
+                    <div className="text-xs text-white/70">SLA Compliance</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
                 { name: 'Sarah Chen', role: 'Senior Developer', avatar: 'SC', assigned: 8, resolved: 24, inProgress: 3 },
@@ -1032,88 +1187,419 @@ export default function BugsClient() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="w-5 h-5" />
-                    Labels
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {mockLabels.map(label => (
-                    <div key={label.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
-                        <span className="font-medium">{label.name}</span>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <Button variant="outline" className="w-full">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Label
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <GitBranch className="w-5 h-5" />
-                    Workflow
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {['open', 'in_progress', 'in_review', 'resolved', 'closed'].map((status, idx, arr) => (
-                    <div key={status} className="flex items-center gap-2">
-                      <Badge className={getStatusColor(status as BugStatus)} variant="outline" className="capitalize">
-                        {status.replace('_', ' ')}
-                      </Badge>
-                      {idx < arr.length - 1 && <ArrowRight className="w-4 h-4 text-muted-foreground" />}
-                    </div>
-                  ))}
-                  <Button variant="outline" className="w-full mt-4">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Configure Workflow
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Integrations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[
-                      { name: 'GitHub', icon: '🐙', status: 'Connected', description: 'Link PRs to bugs' },
-                      { name: 'Slack', icon: '💬', status: 'Connected', description: 'Bug notifications' },
-                      { name: 'Sentry', icon: '🔍', status: 'Not connected', description: 'Error tracking' }
-                    ].map(integration => (
-                      <div key={integration.name} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{integration.icon}</span>
-                            <span className="font-semibold">{integration.name}</span>
-                          </div>
-                          <Badge variant={integration.status === 'Connected' ? 'default' : 'secondary'}>
-                            {integration.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{integration.description}</p>
-                      </div>
-                    ))}
+          {/* Settings Tab - Comprehensive 6 Sub-tabs with Sidebar */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Settings className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Bug Tracker Settings</h3>
+                  <Badge className="bg-red-500/20 text-red-300 border-0">Jira Level</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Configure your bug tracking system, workflows, integrations, notifications, and team permissions.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockLabels.length}</div>
+                    <div className="text-xs text-white/70">Labels</div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">5</div>
+                    <div className="text-xs text-white/70">Workflow States</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">3</div>
+                    <div className="text-xs text-white/70">Integrations</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">6</div>
+                    <div className="text-xs text-white/70">Team Members</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, description: 'Basic settings' },
+                        { id: 'workflow', label: 'Workflow', icon: Workflow, description: 'Bug states & transitions' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alert preferences' },
+                        { id: 'integrations', label: 'Integrations', icon: Zap, description: 'Third-party apps' },
+                        { id: 'security', label: 'Security', icon: Shield, description: 'Access control' },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders, description: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-l-4 border-red-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-red-600' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-red-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure basic bug tracker preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-assign Bugs</p>
+                            <p className="text-sm text-gray-500">Automatically assign new bugs based on component</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Duplicate Detection</p>
+                            <p className="text-sm text-gray-500">Suggest potential duplicates when creating bugs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Time Tracking</p>
+                            <p className="text-sm text-gray-500">Enable time estimates and logging</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Description</p>
+                            <p className="text-sm text-gray-500">Make description field mandatory</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Tag className="w-5 h-5 text-blue-600" />
+                          Labels
+                        </CardTitle>
+                        <CardDescription>Manage bug labels and categories</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {mockLabels.map(label => (
+                          <div key={label.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
+                              <span className="font-medium">{label.name}</span>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Label
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Workflow Settings */}
+                {settingsTab === 'workflow' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Workflow className="w-5 h-5 text-orange-600" />
+                        Workflow Configuration
+                      </CardTitle>
+                      <CardDescription>Define bug states and transitions</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center flex-wrap gap-2 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        {['open', 'in_progress', 'in_review', 'resolved', 'closed'].map((status, idx, arr) => (
+                          <div key={status} className="flex items-center gap-2">
+                            <Badge className={`${getStatusColor(status as BugStatus)} capitalize`}>
+                              {status.replace('_', ' ')}
+                            </Badge>
+                            {idx < arr.length - 1 && <ArrowRight className="w-4 h-4 text-muted-foreground" />}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Allow Backward Transitions</p>
+                          <p className="text-sm text-gray-500">Enable moving bugs to previous states</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Require Comments on Transition</p>
+                          <p className="text-sm text-gray-500">Force comment when changing status</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-close Resolved Bugs</p>
+                          <p className="text-sm text-gray-500">Automatically close after 14 days</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Custom Status
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notifications */}
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-yellow-600" />
+                        Notification Preferences
+                      </CardTitle>
+                      <CardDescription>Configure how you receive bug updates</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                          <p className="text-sm text-gray-500">Receive bug updates via email</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Slack Notifications</p>
+                          <p className="text-sm text-gray-500">Get notified in Slack channels</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Critical Bug Alerts</p>
+                          <p className="text-sm text-gray-500">Immediate alerts for critical issues</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Daily Digest</p>
+                          <p className="text-sm text-gray-500">Summary of bug activity each day</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Mention Notifications</p>
+                          <p className="text-sm text-gray-500">Alert when mentioned in comments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Integrations */}
+                {settingsTab === 'integrations' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-purple-600" />
+                        Integrations
+                      </CardTitle>
+                      <CardDescription>Connect with third-party tools</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { name: 'GitHub', icon: '🐙', status: 'Connected', description: 'Link PRs to bugs automatically' },
+                          { name: 'Slack', icon: '💬', status: 'Connected', description: 'Bug notifications to channels' },
+                          { name: 'Sentry', icon: '🔍', status: 'Not connected', description: 'Auto-create bugs from errors' },
+                          { name: 'Jira', icon: '📋', status: 'Not connected', description: 'Sync with Jira issues' },
+                          { name: 'GitLab', icon: '🦊', status: 'Not connected', description: 'Link merge requests' },
+                          { name: 'PagerDuty', icon: '🔔', status: 'Not connected', description: 'On-call alerts for critical bugs' }
+                        ].map(integration => (
+                          <div key={integration.name} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl">{integration.icon}</span>
+                                <span className="font-semibold">{integration.name}</span>
+                              </div>
+                              <Badge variant={integration.status === 'Connected' ? 'default' : 'secondary'}>
+                                {integration.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">{integration.description}</p>
+                            <Button variant="outline" size="sm" className="w-full">
+                              {integration.status === 'Connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Security */}
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-green-600" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Configure access control and permissions</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                          <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
+                          <p className="text-sm text-gray-500">Restrict access by IP address</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                          <p className="text-sm text-gray-500">Track all user actions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Session Timeout</p>
+                          <p className="text-sm text-gray-500">Auto-logout after 30 minutes of inactivity</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Sensitive Bug Masking</p>
+                          <p className="text-sm text-gray-500">Hide security bugs from non-members</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-cyan-600" />
+                          Advanced Options
+                        </CardTitle>
+                        <CardDescription>Power user features and configurations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">API Access</p>
+                            <p className="text-sm text-gray-500">Enable REST API for bug management</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Webhooks</p>
+                            <p className="text-sm text-gray-500">Send events to external endpoints</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Custom Fields</p>
+                            <p className="text-sm text-gray-500">Add custom fields to bug forms</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                            <p className="text-sm text-gray-500">Access experimental features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800 bg-white/80 dark:bg-gray-800/80">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Archive All Closed Bugs</p>
+                            <p className="text-sm text-gray-500">Move all closed bugs to archive</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Archive</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Test Data</p>
+                            <p className="text-sm text-gray-500">Remove all test and demo bugs</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Project</p>
+                            <p className="text-sm text-gray-500">Delete all bugs and reset to default</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -67,8 +67,15 @@ import {
   Layers,
   Layout,
   Grid3X3,
-  List
+  List,
+  Sliders,
+  Webhook,
+  Mail,
+  History
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type LogStatus = 'success' | 'failed' | 'blocked' | 'warning' | 'info'
@@ -424,6 +431,7 @@ export default function AccessLogsClient() {
   const [showLogDialog, setShowLogDialog] = useState(false)
   const [isLiveTail, setIsLiveTail] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'compact'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredLogs = useMemo(() => {
     return mockLogs.filter(log => {
@@ -608,7 +616,68 @@ export default function AccessLogsClient() {
           </TabsList>
 
           {/* Logs Tab */}
-          <TabsContent value="logs" className="mt-6">
+          <TabsContent value="logs" className="mt-6 space-y-6">
+            {/* Logs Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Access Logs</h3>
+                    <p className="text-blue-100">Monitor and analyze system activity</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockStats.total.toLocaleString()}</p>
+                    <p className="text-sm text-blue-100">Total Requests</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockStats.successRate}%</p>
+                    <p className="text-sm text-blue-100">Success Rate</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockStats.blocked.toLocaleString()}</p>
+                    <p className="text-sm text-blue-100">Blocked</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockStats.avgDuration}ms</p>
+                    <p className="text-sm text-blue-100">Avg Duration</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Search, label: 'Search Logs', color: 'from-blue-500 to-cyan-600' },
+                { icon: Filter, label: 'Filter', color: 'from-purple-500 to-pink-600' },
+                { icon: Download, label: 'Export', color: 'from-green-500 to-emerald-600' },
+                { icon: RefreshCw, label: 'Refresh', color: 'from-orange-500 to-amber-600' },
+                { icon: Play, label: 'Live Tail', color: 'from-cyan-500 to-blue-600' },
+                { icon: Bell, label: 'Set Alert', color: 'from-pink-500 to-rose-600' },
+                { icon: Bookmark, label: 'Save View', color: 'from-indigo-500 to-purple-600' },
+                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               {/* Filters Sidebar */}
               <Card className="lg:col-span-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -813,7 +882,67 @@ export default function AccessLogsClient() {
           </TabsContent>
 
           {/* Patterns Tab */}
-          <TabsContent value="patterns" className="mt-6">
+          <TabsContent value="patterns" className="mt-6 space-y-6">
+            {/* Patterns Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Layers className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Log Patterns</h3>
+                    <p className="text-purple-100">Identify recurring patterns in logs</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockPatterns.length}</p>
+                    <p className="text-sm text-purple-100">Patterns Found</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockPatterns.filter(p => p.status === 'failed').length}</p>
+                    <p className="text-sm text-purple-100">Failed</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockPatterns.reduce((a, p) => a + p.occurrences, 0)}</p>
+                    <p className="text-sm text-purple-100">Occurrences</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockPatterns.filter(p => p.status === 'blocked').length}</p>
+                    <p className="text-sm text-purple-100">Blocked</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Search, label: 'Find Pattern', color: 'from-purple-500 to-violet-600' },
+                { icon: Bell, label: 'Set Alert', color: 'from-blue-500 to-indigo-600' },
+                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600' },
+                { icon: Download, label: 'Export', color: 'from-orange-500 to-amber-600' },
+                { icon: Archive, label: 'Archive', color: 'from-cyan-500 to-blue-600' },
+                { icon: Tag, label: 'Tag Pattern', color: 'from-pink-500 to-rose-600' },
+                { icon: Trash2, label: 'Dismiss', color: 'from-red-500 to-pink-600' },
+                { icon: Share2, label: 'Share', color: 'from-indigo-500 to-purple-600' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -854,7 +983,32 @@ export default function AccessLogsClient() {
           </TabsContent>
 
           {/* Alerts Tab */}
-          <TabsContent value="alerts" className="mt-6">
+          <TabsContent value="alerts" className="mt-6 space-y-6">
+            {/* Alerts Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Security Alerts</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Configure alert rules to get notified about suspicious activities, failed logins, and security events.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockAlerts.filter(a => a.enabled).length}</div>
+                      <div className="text-sm text-white/80">Active Alerts</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockAlerts.length}</div>
+                      <div className="text-sm text-white/80">Total Rules</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                 <CardHeader>
@@ -961,7 +1115,51 @@ export default function AccessLogsClient() {
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="analytics" className="mt-6 space-y-6">
+            {/* Analytics Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Access Analytics</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Gain insights from access patterns, geographic distribution, and security trends across your platform.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockStats.total.toLocaleString()}</div>
+                      <div className="text-sm text-white/80">Total Events</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{((mockStats.success / mockStats.total) * 100).toFixed(1)}%</div>
+                      <div className="text-sm text-white/80">Success Rate</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: PieChart, label: 'Status Report', color: 'text-indigo-500' },
+                { icon: MapPin, label: 'Geo Analysis', color: 'text-green-500' },
+                { icon: Clock, label: 'Time Trends', color: 'text-blue-500' },
+                { icon: Users, label: 'User Breakdown', color: 'text-purple-500' },
+                { icon: Activity, label: 'Traffic Flow', color: 'text-cyan-500' },
+                { icon: Shield, label: 'Risk Score', color: 'text-red-500' },
+                { icon: Download, label: 'Export Data', color: 'text-orange-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                 <CardHeader>
@@ -1048,64 +1246,360 @@ export default function AccessLogsClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-lg">Log Retention</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
-                    <div>
-                      <h4 className="font-medium">Retention Period</h4>
-                      <p className="text-sm text-gray-500">How long to keep logs</p>
-                    </div>
-                    <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-700">
-                      <option>30 days</option>
-                      <option>60 days</option>
-                      <option>90 days</option>
-                      <option>1 year</option>
-                    </select>
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Settings className="w-6 h-6" />
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
-                    <div>
-                      <h4 className="font-medium">Archive Logs</h4>
-                      <p className="text-sm text-gray-500">Move old logs to cold storage</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      <Archive className="w-4 h-4 mr-2" />
-                      Configure
-                    </Button>
+                  <div>
+                    <h3 className="text-xl font-bold">Log Settings</h3>
+                    <p className="text-gray-300">Configure logging and monitoring preferences</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">6</p>
+                    <p className="text-sm text-gray-300">Settings Areas</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">30 days</p>
+                    <p className="text-sm text-gray-300">Retention</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">3</p>
+                    <p className="text-sm text-gray-300">Integrations</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'active').length}</p>
+                    <p className="text-sm text-gray-300">Active Alerts</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="text-lg">Integrations</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { name: 'Slack', status: 'connected', icon: '💬' },
-                    { name: 'PagerDuty', status: 'connected', icon: '🚨' },
-                    { name: 'Email', status: 'connected', icon: '📧' },
-                    { name: 'Webhook', status: 'not connected', icon: '🔗' }
-                  ].map(integration => (
-                    <div key={integration.name} className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{integration.icon}</span>
-                        <div>
-                          <h4 className="font-medium">{integration.name}</h4>
-                          <p className="text-sm text-gray-500 capitalize">{integration.status}</p>
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 lg:col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm sticky top-6">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, description: 'Basic settings' },
+                        { id: 'retention', label: 'Retention', icon: Archive, description: 'Log retention' },
+                        { id: 'alerts', label: 'Alerts', icon: Bell, description: 'Alert rules' },
+                        { id: 'integrations', label: 'Integrations', icon: Zap, description: 'Third-party apps' },
+                        { id: 'security', label: 'Security', icon: Shield, description: 'Access control' },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders, description: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 lg:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Activity className="w-5 h-5 text-blue-600" />Logging Preferences</CardTitle>
+                        <CardDescription>Configure what to log</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Detailed Logging</p>
+                            <p className="text-sm text-gray-500">Log detailed request/response data</p>
+                          </div>
+                          <Switch defaultChecked />
                         </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        {integration.status === 'connected' ? 'Configure' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Log User Actions</p>
+                            <p className="text-sm text-gray-500">Track all user activities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Log API Calls</p>
+                            <p className="text-sm text-gray-500">Track API request/response</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Log Performance Metrics</p>
+                            <p className="text-sm text-gray-500">Include timing data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Retention Settings */}
+                {settingsTab === 'retention' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Archive className="w-5 h-5 text-blue-600" />Log Retention</CardTitle>
+                        <CardDescription>How long to keep logs</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Retention Period</p>
+                            <p className="text-sm text-gray-500">Time to keep logs before deletion</p>
+                          </div>
+                          <Input defaultValue="30 days" className="w-32" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Archive to Cold Storage</p>
+                            <p className="text-sm text-gray-500">Move old logs to cheaper storage</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-cleanup</p>
+                            <p className="text-sm text-gray-500">Automatically delete old logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Alert Settings */}
+                {settingsTab === 'alerts' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Bell className="w-5 h-5 text-blue-600" />Alert Configuration</CardTitle>
+                        <CardDescription>Configure alert thresholds</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">High Error Rate Alert</p>
+                            <p className="text-sm text-gray-500">Alert when error rate exceeds threshold</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Slow Response Alert</p>
+                            <p className="text-sm text-gray-500">Alert on slow response times</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Suspicious Activity Alert</p>
+                            <p className="text-sm text-gray-500">Alert on potential security threats</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Bot Traffic Alert</p>
+                            <p className="text-sm text-gray-500">Alert on unusual bot activity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Webhook className="w-5 h-5 text-blue-600" />Connected Apps</CardTitle>
+                        <CardDescription>Manage log integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg"><Zap className="w-4 h-4 text-purple-600" /></div>
+                            <div>
+                              <p className="font-medium">Slack</p>
+                              <p className="text-sm text-gray-500">Alert notifications</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg"><BellRing className="w-4 h-4 text-red-600" /></div>
+                            <div>
+                              <p className="font-medium">PagerDuty</p>
+                              <p className="text-sm text-gray-500">Incident management</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg"><Mail className="w-4 h-4 text-blue-600" /></div>
+                            <div>
+                              <p className="font-medium">Email</p>
+                              <p className="text-sm text-gray-500">Email notifications</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg"><Webhook className="w-4 h-4" /></div>
+                            <div>
+                              <p className="font-medium">Webhook</p>
+                              <p className="text-sm text-gray-500">Custom webhook endpoint</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-blue-600" />Security Settings</CardTitle>
+                        <CardDescription>Configure log security</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Log Encryption</p>
+                            <p className="text-sm text-gray-500">Encrypt logs at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">PII Masking</p>
+                            <p className="text-sm text-gray-500">Mask sensitive data in logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Anonymization</p>
+                            <p className="text-sm text-gray-500">Anonymize IP addresses</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Audit Log Access</p>
+                            <p className="text-sm text-gray-500">Log who accesses the logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Sliders className="w-5 h-5 text-blue-600" />Advanced Settings</CardTitle>
+                        <CardDescription>Power user features</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Log Sampling</p>
+                            <p className="text-sm text-gray-500">Sample logs to reduce volume</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-gray-500">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom Fields</p>
+                            <p className="text-sm text-gray-500">Add custom log fields</p>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Database className="w-5 h-5 text-blue-600" />Data Management</CardTitle>
+                        <CardDescription>Manage log data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Export Logs</p>
+                            <p className="text-sm text-gray-500">Download log data</p>
+                          </div>
+                          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Clear Cache</p>
+                            <p className="text-sm text-gray-500">Refresh cached log data</p>
+                          </div>
+                          <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Purge All Logs</p>
+                            <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all logs</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Purge</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

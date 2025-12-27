@@ -16,7 +16,9 @@ import {
   Verified, Crown, Gem, AlertCircle, Info, X, ChevronRight,
   ChevronDown, Filter, SortAsc, Grid, List, Play, Pause,
   Volume2, Headphones, Radio, Gift, Coffee, Rocket, Flame,
-  Compass, Map, Navigation, Anchor, Scissors, Wand2
+  Compass, Map, Navigation, Anchor, Scissors, Wand2, Sliders,
+  Webhook, Key, History, RefreshCw, UserCog, ShieldCheck, FileKey,
+  Trash2, HardDrive, AlertTriangle
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -563,6 +565,7 @@ export default function ProfileClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSkillCategory, setSelectedSkillCategory] = useState<string | 'all'>('all')
   const [showAnalytics, setShowAnalytics] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const skillCategories = useMemo(() => {
     const categories = [...new Set(mockSkills.map(s => s.category))]
@@ -769,6 +772,67 @@ export default function ProfileClient() {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
+              {/* Overview Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <User className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Profile Overview</h3>
+                      <p className="text-blue-100">Your professional presence at a glance</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(stats.profileViews)}</p>
+                      <p className="text-sm text-blue-100">Profile Views</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(stats.connections)}</p>
+                      <p className="text-sm text-blue-100">Connections</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{stats.skills}</p>
+                      <p className="text-sm text-blue-100">Skills</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockProfile.profileStrength}%</p>
+                      <p className="text-sm text-blue-100">Profile Strength</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600' },
+                  { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600' },
+                  { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600' },
+                  { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600' },
+                  { icon: FileText, label: 'Add Post', color: 'from-pink-500 to-rose-600' },
+                  { icon: Briefcase, label: 'Update Jobs', color: 'from-indigo-500 to-purple-600' },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-2 bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                   <CardHeader>
@@ -880,6 +944,67 @@ export default function ProfileClient() {
 
             {/* Experience Tab */}
             <TabsContent value="experience" className="space-y-6">
+              {/* Experience Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Briefcase className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Professional Experience</h3>
+                      <p className="text-purple-100">Your career journey and achievements</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockExperiences.length}</p>
+                      <p className="text-sm text-purple-100">Positions</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockCertifications.length}</p>
+                      <p className="text-sm text-purple-100">Certifications</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockEducation.length}</p>
+                      <p className="text-sm text-purple-100">Degrees</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockHonors.length}</p>
+                      <p className="text-sm text-purple-100">Awards</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600' },
+                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600' },
+                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600' },
+                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600' },
+                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600' },
+                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600' },
+                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -981,6 +1106,67 @@ export default function ProfileClient() {
 
             {/* Skills Tab */}
             <TabsContent value="skills" className="space-y-6">
+              {/* Skills Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Zap className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Skills & Endorsements</h3>
+                      <p className="text-green-100">Showcase your expertise and get endorsed</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{stats.skills}</p>
+                      <p className="text-sm text-green-100">Total Skills</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(stats.endorsements)}</p>
+                      <p className="text-sm text-green-100">Endorsements</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{stats.assessmentsPassed}</p>
+                      <p className="text-sm text-green-100">Assessments Passed</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockSkills.filter(s => s.isTopSkill).length}</p>
+                      <p className="text-sm text-green-100">Top Skills</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: Plus, label: 'Add Skill', color: 'from-green-500 to-emerald-600' },
+                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600' },
+                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600' },
+                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600' },
+                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600' },
+                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600' },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between flex-wrap gap-4">
@@ -1046,6 +1232,67 @@ export default function ProfileClient() {
 
             {/* Featured Tab */}
             <TabsContent value="featured" className="space-y-6">
+              {/* Featured Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Star className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Featured Content</h3>
+                      <p className="text-yellow-100">Highlight your best work and achievements</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockFeatured.length}</p>
+                      <p className="text-sm text-yellow-100">Featured Items</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockProfile.articlesCount}</p>
+                      <p className="text-sm text-yellow-100">Articles</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(mockProfile.newsletterSubscribers)}</p>
+                      <p className="text-sm text-yellow-100">Subscribers</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockProjects.length}</p>
+                      <p className="text-sm text-yellow-100">Projects</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600' },
+                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600' },
+                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600' },
+                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600' },
+                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600' },
+                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600' },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -1086,6 +1333,67 @@ export default function ProfileClient() {
 
             {/* Network Tab */}
             <TabsContent value="network" className="space-y-6">
+              {/* Network Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Network className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Your Network</h3>
+                      <p className="text-cyan-100">Connect with professionals worldwide</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(stats.connections)}</p>
+                      <p className="text-sm text-cyan-100">Connections</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(stats.followers)}</p>
+                      <p className="text-sm text-cyan-100">Followers</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockProfile.following}</p>
+                      <p className="text-sm text-cyan-100">Following</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockConnections.filter(c => c.status === 'pending').length}</p>
+                      <p className="text-sm text-cyan-100">Pending</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600' },
+                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600' },
+                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600' },
+                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600' },
+                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600' },
+                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600' },
+                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Network className="w-5 h-5 text-blue-600" />Connections</CardTitle>
@@ -1118,6 +1426,67 @@ export default function ProfileClient() {
 
             {/* Jobs Tab */}
             <TabsContent value="jobs" className="space-y-6">
+              {/* Jobs Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Briefcase className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Job Opportunities</h3>
+                      <p className="text-indigo-100">Find your next career opportunity</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockJobs.length}</p>
+                      <p className="text-sm text-indigo-100">Recommended</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockJobs.filter(j => j.isSaved).length}</p>
+                      <p className="text-sm text-indigo-100">Saved Jobs</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockJobs.filter(j => j.isEasyApply).length}</p>
+                      <p className="text-sm text-indigo-100">Easy Apply</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{Math.round(mockJobs.reduce((a, j) => a + j.matchScore, 0) / mockJobs.length)}%</p>
+                      <p className="text-sm text-indigo-100">Avg Match</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600' },
+                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600' },
+                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600' },
+                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600' },
+                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600' },
+                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600' },
+                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Recommended Jobs</CardTitle>
@@ -1159,6 +1528,67 @@ export default function ProfileClient() {
 
             {/* Activity Tab */}
             <TabsContent value="activity" className="space-y-6">
+              {/* Activity Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Activity className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Your Activity</h3>
+                      <p className="text-pink-100">Track your posts and engagement</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockPosts.length}</p>
+                      <p className="text-sm text-pink-100">Posts</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(mockPosts.reduce((a, p) => a + p.likes, 0))}</p>
+                      <p className="text-sm text-pink-100">Total Likes</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockPosts.reduce((a, p) => a + p.comments, 0)}</p>
+                      <p className="text-sm text-pink-100">Comments</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{formatNumber(stats.postImpressions)}</p>
+                      <p className="text-sm text-pink-100">Impressions</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {[
+                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600' },
+                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600' },
+                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600' },
+                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600' },
+                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600' },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600' },
+                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600' },
+                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                      <action.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Activity className="w-5 h-5 text-blue-600" />Recent Activity</CardTitle>
@@ -1198,46 +1628,495 @@ export default function ProfileClient() {
 
             {/* Settings Tab */}
             <TabsContent value="settings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Eye className="w-5 h-5" />Visibility</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div><p className="font-medium">Profile visibility</p><p className="text-sm text-gray-500">Visible to everyone</p></div>
-                      <Switch defaultChecked />
+              {/* Settings Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 p-6 text-white">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Settings className="w-6 h-6" />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div><p className="font-medium">Open to work</p><p className="text-sm text-gray-500">Let recruiters know</p></div>
-                      <Switch />
+                    <div>
+                      <h3 className="text-xl font-bold">Profile Settings</h3>
+                      <p className="text-gray-300">Customize your profile and preferences</p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div><p className="font-medium">Creator mode</p><p className="text-sm text-gray-500">Grow your audience</p></div>
-                      <Switch defaultChecked />
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">6</p>
+                      <p className="text-sm text-gray-300">Settings Areas</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">{mockProfile.profileStrength}%</p>
+                      <p className="text-sm text-gray-300">Completeness</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">Active</p>
+                      <p className="text-sm text-gray-300">Security Status</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                      <p className="text-2xl font-bold">3</p>
+                      <p className="text-sm text-gray-300">Integrations</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              </div>
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 border-0 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Bell className="w-5 h-5" />Notifications</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div><p className="font-medium">Connection requests</p><p className="text-sm text-gray-500">New requests</p></div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div><p className="font-medium">Profile views</p><p className="text-sm text-gray-500">Weekly summary</p></div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div><p className="font-medium">Job alerts</p><p className="text-sm text-gray-500">Matching jobs</p></div>
-                      <Switch />
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* Settings Grid with Sidebar Navigation */}
+              <div className="grid grid-cols-12 gap-6">
+                {/* Settings Sidebar */}
+                <div className="col-span-12 lg:col-span-3">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm sticky top-6">
+                    <CardContent className="p-4">
+                      <nav className="space-y-1">
+                        {[
+                          { id: 'general', label: 'General', icon: Settings, description: 'Basic profile settings' },
+                          { id: 'visibility', label: 'Visibility', icon: Eye, description: 'Profile visibility options' },
+                          { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alert preferences' },
+                          { id: 'privacy', label: 'Privacy', icon: Shield, description: 'Privacy controls' },
+                          { id: 'security', label: 'Security', icon: Lock, description: 'Account security' },
+                          { id: 'advanced', label: 'Advanced', icon: Sliders, description: 'Power features' },
+                        ].map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => setSettingsTab(item.id)}
+                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                              settingsTab === item.id
+                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                            <div>
+                              <p className="font-medium text-sm">{item.label}</p>
+                              <p className="text-xs text-gray-500">{item.description}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </nav>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Settings Content */}
+                <div className="col-span-12 lg:col-span-9 space-y-6">
+                  {/* General Settings */}
+                  {settingsTab === 'general' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><User className="w-5 h-5 text-blue-600" />Profile Information</CardTitle>
+                          <CardDescription>Manage your basic profile details</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label>First Name</Label>
+                              <Input defaultValue={mockProfile.firstName} className="mt-1" />
+                            </div>
+                            <div>
+                              <Label>Last Name</Label>
+                              <Input defaultValue={mockProfile.lastName} className="mt-1" />
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Headline</Label>
+                            <Input defaultValue={mockProfile.headline} className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Location</Label>
+                            <Input defaultValue={mockProfile.location} className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Industry</Label>
+                            <Input defaultValue={mockProfile.industry} className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Custom URL</Label>
+                            <Input defaultValue={mockProfile.customUrl} className="mt-1" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Mail className="w-5 h-5 text-blue-600" />Contact Information</CardTitle>
+                          <CardDescription>Manage your contact details</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label>Email Address</Label>
+                              <Input defaultValue={mockProfile.email} className="mt-1" />
+                            </div>
+                            <div>
+                              <Label>Phone Number</Label>
+                              <Input defaultValue={mockProfile.phone} className="mt-1" />
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Website</Label>
+                            <Input defaultValue={mockProfile.website} className="mt-1" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Visibility Settings */}
+                  {settingsTab === 'visibility' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Eye className="w-5 h-5 text-blue-600" />Profile Visibility</CardTitle>
+                          <CardDescription>Control who can see your profile</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Public Profile</p>
+                              <p className="text-sm text-gray-500">Make your profile visible to everyone</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Open to Work</p>
+                              <p className="text-sm text-gray-500">Let recruiters know you're looking</p>
+                            </div>
+                            <Switch defaultChecked={mockProfile.isOpenToWork} />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Hiring Badge</p>
+                              <p className="text-sm text-gray-500">Show that you're hiring</p>
+                            </div>
+                            <Switch defaultChecked={mockProfile.isHiring} />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Creator Mode</p>
+                              <p className="text-sm text-gray-500">Grow your audience with creator tools</p>
+                            </div>
+                            <Switch defaultChecked={mockProfile.isCreatorMode} />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5 text-blue-600" />Connection Visibility</CardTitle>
+                          <CardDescription>Control who can see your connections</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Show Connections</p>
+                              <p className="text-sm text-gray-500">Let others see your connections</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Show Followers Count</p>
+                              <p className="text-sm text-gray-500">Display your follower count</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Notification Settings */}
+                  {settingsTab === 'notifications' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Bell className="w-5 h-5 text-blue-600" />Email Notifications</CardTitle>
+                          <CardDescription>Manage your email preferences</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Connection Requests</p>
+                              <p className="text-sm text-gray-500">Email me when I receive connection requests</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Profile Views</p>
+                              <p className="text-sm text-gray-500">Weekly summary of profile views</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Job Alerts</p>
+                              <p className="text-sm text-gray-500">Jobs matching your preferences</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Messages</p>
+                              <p className="text-sm text-gray-500">Email me for new messages</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-600" />In-App Notifications</CardTitle>
+                          <CardDescription>Manage push notifications</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Post Reactions</p>
+                              <p className="text-sm text-gray-500">Notify when someone reacts to your posts</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Comments</p>
+                              <p className="text-sm text-gray-500">Notify when someone comments</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Mentions</p>
+                              <p className="text-sm text-gray-500">Notify when you're mentioned</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Privacy Settings */}
+                  {settingsTab === 'privacy' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-blue-600" />Privacy Controls</CardTitle>
+                          <CardDescription>Manage your privacy settings</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Profile Viewing Mode</p>
+                              <p className="text-sm text-gray-500">Browse profiles privately</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Activity Broadcasts</p>
+                              <p className="text-sm text-gray-500">Share activity updates with network</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Data Sharing</p>
+                              <p className="text-sm text-gray-500">Allow data for personalization</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Download className="w-5 h-5 text-blue-600" />Data Management</CardTitle>
+                          <CardDescription>Download or delete your data</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Download Your Data</p>
+                              <p className="text-sm text-gray-500">Get a copy of all your data</p>
+                            </div>
+                            <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Download</Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
+                              <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account</p>
+                            </div>
+                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Security Settings */}
+                  {settingsTab === 'security' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Lock className="w-5 h-5 text-blue-600" />Account Security</CardTitle>
+                          <CardDescription>Protect your account</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Two-Factor Authentication</p>
+                              <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Login Alerts</p>
+                              <p className="text-sm text-gray-500">Get notified of new logins</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Change Password</p>
+                              <p className="text-sm text-gray-500">Update your password regularly</p>
+                            </div>
+                            <Button variant="outline" size="sm"><Key className="w-4 h-4 mr-2" />Change</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><History className="w-5 h-5 text-blue-600" />Login History</CardTitle>
+                          <CardDescription>Recent account access</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {[
+                              { device: 'MacBook Pro', location: 'San Francisco, CA', time: '2 hours ago', current: true },
+                              { device: 'iPhone 15', location: 'San Francisco, CA', time: '1 day ago', current: false },
+                              { device: 'Chrome on Windows', location: 'New York, NY', time: '3 days ago', current: false },
+                            ].map((session, i) => (
+                              <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                    <Terminal className="w-4 h-4 text-blue-600" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-sm flex items-center gap-2">
+                                      {session.device}
+                                      {session.current && <Badge className="bg-green-100 text-green-700 text-xs">Current</Badge>}
+                                    </p>
+                                    <p className="text-xs text-gray-500">{session.location} • {session.time}</p>
+                                  </div>
+                                </div>
+                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600">Sign out</Button>}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Advanced Settings */}
+                  {settingsTab === 'advanced' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Sliders className="w-5 h-5 text-blue-600" />Advanced Settings</CardTitle>
+                          <CardDescription>Power user features</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Language</p>
+                              <p className="text-sm text-gray-500">Select your preferred language</p>
+                            </div>
+                            <Input defaultValue="English (US)" className="w-48" />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Timezone</p>
+                              <p className="text-sm text-gray-500">Set your timezone</p>
+                            </div>
+                            <Input defaultValue="America/Los_Angeles" className="w-48" />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Dark Mode</p>
+                              <p className="text-sm text-gray-500">Enable dark theme</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Webhook className="w-5 h-5 text-blue-600" />Integrations</CardTitle>
+                          <CardDescription>Connect with other apps</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg"><Twitter className="w-4 h-4" /></div>
+                              <div>
+                                <p className="font-medium">Twitter</p>
+                                <p className="text-sm text-gray-500">Connected as @johnsmith</p>
+                              </div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg"><Github className="w-4 h-4" /></div>
+                              <div>
+                                <p className="font-medium">GitHub</p>
+                                <p className="text-sm text-gray-500">Connected as johnsmith</p>
+                              </div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg"><Globe className="w-4 h-4" /></div>
+                              <div>
+                                <p className="font-medium">Google</p>
+                                <p className="text-sm text-gray-500">Not connected</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Connect</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><Database className="w-5 h-5 text-blue-600" />Data & Storage</CardTitle>
+                          <CardDescription>Manage data usage</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Cache</p>
+                              <p className="text-sm text-gray-500">Clear cached data</p>
+                            </div>
+                            <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <p className="font-medium">Storage Usage</p>
+                              <p className="text-sm text-gray-500">245 MB of 1 GB used</p>
+                            </div>
+                            <Progress value={24.5} className="w-32" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                </div>
               </div>
             </TabsContent>
           </Tabs>

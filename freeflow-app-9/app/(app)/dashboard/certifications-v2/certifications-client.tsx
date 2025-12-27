@@ -608,6 +608,7 @@ export default function CertificationsClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [skillCategory, setSkillCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -772,10 +773,45 @@ export default function CertificationsClient() {
             <TabsTrigger value="verification" className="data-[state=active]:bg-cyan-100 dark:data-[state=active]:bg-cyan-900/30">
               🔐 Verification
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-800">
+              ⚙️ Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Credentials Tab */}
-          <TabsContent value="credentials" className="space-y-4">
+          <TabsContent value="credentials" className="space-y-6">
+            {/* Credentials Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">🏆</span>
+                  <h3 className="text-xl font-bold">Digital Credentials</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Manage and showcase your verified digital credentials. Share your achievements with blockchain-verified authenticity.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalCredentials}</div>
+                    <div className="text-xs text-white/70">Total Credentials</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-green-200">{stats.activeCredentials}</div>
+                    <div className="text-xs text-white/70">Active</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.blockchainVerified}</div>
+                    <div className="text-xs text-white/70">Blockchain Verified</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockCredentials.reduce((sum, c) => sum + c.shareCount, 0)}</div>
+                    <div className="text-xs text-white/70">Total Shares</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-4 mb-4">
               <select
                 value={typeFilter}
@@ -912,7 +948,39 @@ export default function CertificationsClient() {
           </TabsContent>
 
           {/* Badges Tab */}
-          <TabsContent value="badges" className="space-y-4">
+          <TabsContent value="badges" className="space-y-6">
+            {/* Badges Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">🎖️</span>
+                  <h3 className="text-xl font-bold">Achievement Badges</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Earn badges by completing learning pathways, achievements, and skill assessments. Show off your accomplishments!
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalBadges}</div>
+                    <div className="text-xs text-white/70">Badges Earned</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalXP}</div>
+                    <div className="text-xs text-white/70">Total XP</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockBadges.filter(b => b.rarity === 'legendary' || b.rarity === 'epic').length}</div>
+                    <div className="text-xs text-white/70">Rare Badges</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockBadges.filter(b => b.isPinned).length}</div>
+                    <div className="text-xs text-white/70">Pinned</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockBadges.map(badge => (
                 <Dialog key={badge.id}>
@@ -1301,6 +1369,435 @@ export default function CertificationsClient() {
                   ))}
                 </div>
               </ScrollArea>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Comprehensive 6 Sub-tabs */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">⚙️</span>
+                  <h3 className="text-xl font-bold">Certification Settings</h3>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Configure your credential platform settings, verification preferences, notifications, privacy options, and account security.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalCredentials}</div>
+                    <div className="text-xs text-white/70">Credentials</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalBadges}</div>
+                    <div className="text-xs text-white/70">Badges</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalXP}</div>
+                    <div className="text-xs text-white/70">Total XP</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalEndorsements}</div>
+                    <div className="text-xs text-white/70">Endorsements</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: '⚙️', description: 'Account settings' },
+                      { id: 'privacy', label: 'Privacy', icon: '🔒', description: 'Visibility options' },
+                      { id: 'verification', label: 'Verification', icon: '✓', description: 'Verify settings' },
+                      { id: 'notifications', label: 'Notifications', icon: '🔔', description: 'Alert preferences' },
+                      { id: 'integrations', label: 'Integrations', icon: '🔗', description: 'Connected apps' },
+                      { id: 'advanced', label: 'Advanced', icon: '🚀', description: 'Power features' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                          settingsTab === item.id
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        <span className="text-xl">{item.icon}</span>
+                        <div>
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs text-gray-500">{item.description}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>👤</span> Profile Settings
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Display Name</label>
+                          <input type="text" defaultValue="John Doe" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Professional Title</label>
+                          <input type="text" defaultValue="Senior Developer" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                          <input type="email" defaultValue="john@example.com" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">LinkedIn URL</label>
+                          <input type="url" defaultValue="linkedin.com/in/johndoe" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
+                        <textarea rows={3} defaultValue="Experienced developer with expertise in cloud technologies..." className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>🌐</span> Public Profile
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Public Profile</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow others to view your credentials</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Featured Credentials</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show top credentials on your profile</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Skills Endorsements</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow others to endorse your skills</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Privacy Settings */}
+                {settingsTab === 'privacy' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>🔒</span> Privacy Controls
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Hide Email Address</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Don't display email on public profile</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Hide Verification History</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep verification records private</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Anonymous Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Hide your name on leaderboards</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Indexable Profile</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow search engines to index your profile</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>📊</span> Data Sharing
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Share with Employers</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow verified employers to view credentials</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Analytics Sharing</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Share anonymous usage data</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Verification Settings */}
+                {settingsTab === 'verification' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>✅</span> Verification Preferences
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Blockchain Verification</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Store credentials on blockchain</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Auto-Renew Credentials</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically renew expiring credentials</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Verification QR Code</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Generate QR codes for quick verification</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>🔔</span> Email Notifications
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Credential Expiry</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify before credentials expire</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">New Badges</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when you earn new badges</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Endorsements</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when skills are endorsed</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Verification Requests</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when credentials are verified</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>🔗</span> Connected Platforms
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'LinkedIn', status: 'connected', icon: '💼' },
+                          { name: 'Coursera', status: 'connected', icon: '📚' },
+                          { name: 'Credly', status: 'connected', icon: '🎖️' },
+                          { name: 'Udemy', status: 'disconnected', icon: '🎓' },
+                          { name: 'AWS Training', status: 'connected', icon: '☁️' },
+                          { name: 'Google Cloud', status: 'disconnected', icon: '🌐' },
+                        ].map((platform) => (
+                          <div key={platform.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{platform.icon}</span>
+                              <div>
+                                <p className="font-medium dark:text-white">{platform.name}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  {platform.status === 'connected' ? 'Connected' : 'Not connected'}
+                                </p>
+                              </div>
+                            </div>
+                            <button className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                              platform.status === 'connected'
+                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                            }`}>
+                              {platform.status === 'connected' ? 'Disconnect' : 'Connect'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>🚀</span> Advanced Options
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Developer Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Access API keys and webhooks</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium dark:text-white">Beta Features</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Early access to new features</p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 dark:bg-gray-600"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
+                        <span>📥</span> Data Export
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600">
+                          <span className="text-2xl">📄</span>
+                          <p className="font-medium mt-2 dark:text-white">Export as PDF</p>
+                          <p className="text-xs text-gray-500">All credentials</p>
+                        </button>
+                        <button className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600">
+                          <span className="text-2xl">📊</span>
+                          <p className="font-medium mt-2 dark:text-white">Export as JSON</p>
+                          <p className="text-xs text-gray-500">Machine readable</p>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <h3 className="text-lg font-semibold mb-4 text-red-700 dark:text-red-400 flex items-center gap-2">
+                        <span>⚠️</span> Danger Zone
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Data</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remove all credentials and data</p>
+                          </div>
+                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

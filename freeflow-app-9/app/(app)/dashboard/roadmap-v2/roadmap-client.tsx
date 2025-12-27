@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -59,7 +61,21 @@ import {
   Heart,
   Share2,
   Download,
-  Upload
+  Upload,
+  Shield,
+  Sliders,
+  Bell,
+  Webhook,
+  Key,
+  Database,
+  Trash2,
+  Lock,
+  Globe,
+  HardDrive,
+  Terminal,
+  History,
+  RefreshCw,
+  Mail
 } from 'lucide-react'
 
 // Types
@@ -508,6 +524,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   const [selectedQuarter, setSelectedQuarter] = useState<Quarter | 'all'>('all')
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
   const [isFeatureDialogOpen, setIsFeatureDialogOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const features = mockFeatures
   const releases = mockReleases
@@ -733,7 +750,67 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
           </TabsList>
 
           {/* Roadmap Tab */}
-          <TabsContent value="roadmap" className="mt-6">
+          <TabsContent value="roadmap" className="mt-6 space-y-6">
+            {/* Roadmap Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Map className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Product Roadmap</h2>
+                    <p className="text-white/80">Strategic feature planning and prioritization</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Features</p>
+                    <p className="text-2xl font-bold">{stats.totalFeatures}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">In Progress</p>
+                    <p className="text-2xl font-bold">{stats.inProgress}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Released</p>
+                    <p className="text-2xl font-bold">{stats.released}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg Progress</p>
+                    <p className="text-2xl font-bold">{stats.avgProgress.toFixed(0)}%</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Plus, label: 'New Feature', color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600' },
+                { icon: Package, label: 'New Release', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
+                { icon: Lightbulb, label: 'Submit Idea', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
+                { icon: Target, label: 'Set OKR', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
+                { icon: Share2, label: 'Share', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600' },
+                { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
+                { icon: GitBranch, label: 'Sync Jira', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`p-3 rounded-xl ${action.color}`}>
+                    <action.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -943,7 +1020,34 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
           </TabsContent>
 
           {/* Features Tab */}
-          <TabsContent value="features" className="mt-6">
+          <TabsContent value="features" className="mt-6 space-y-6">
+            {/* Features Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Layers className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Feature Prioritization</h2>
+                    <p className="text-white/80">RICE scoring and impact analysis</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mt-6">
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
+                    <RefreshCw className="w-4 h-4 inline mr-2" />
+                    Recalculate
+                  </button>
+                  <button className="px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-white/90 transition-colors">
+                    <Plus className="w-4 h-4 inline mr-2" />
+                    Add Feature
+                  </button>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card>
@@ -1032,7 +1136,42 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
           </TabsContent>
 
           {/* Releases Tab */}
-          <TabsContent value="releases" className="mt-6">
+          <TabsContent value="releases" className="mt-6 space-y-6">
+            {/* Releases Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Package className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Release Management</h2>
+                    <p className="text-white/80">Plan and track your product releases</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Releases</p>
+                    <p className="text-2xl font-bold">{releases.length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">In Development</p>
+                    <p className="text-2xl font-bold">{releases.filter(r => r.status === 'development').length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Released</p>
+                    <p className="text-2xl font-bold">{releases.filter(r => r.status === 'released').length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Upcoming</p>
+                    <p className="text-2xl font-bold">{stats.upcomingReleases}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {releases.map((release) => (
                 <Card key={release.id} className="hover:shadow-lg transition-shadow">
@@ -1136,7 +1275,24 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
           </TabsContent>
 
           {/* Ideas Tab */}
-          <TabsContent value="ideas" className="mt-6">
+          <TabsContent value="ideas" className="mt-6 space-y-6">
+            {/* Ideas Header */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-500/20 rounded-lg">
+                  <Lightbulb className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Idea Portal</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{stats.totalIdeas} ideas submitted • Accept feature requests from users</p>
+                </div>
+              </div>
+              <Button className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Submit Idea
+              </Button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {ideas.map((idea) => (
                 <Card key={idea.id} className="hover:shadow-lg transition-shadow">
@@ -1172,55 +1328,333 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Roadmap Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { title: 'Public Roadmap', description: 'Allow external access to roadmap', enabled: true },
-                    { title: 'Voting Enabled', description: 'Let users vote on features', enabled: true },
-                    { title: 'Idea Portal', description: 'Accept feature requests', enabled: true },
-                    { title: 'Auto-prioritization', description: 'Calculate RICE scores automatically', enabled: false }
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div>
-                        <p className="font-medium">{setting.title}</p>
-                        <p className="text-sm text-muted-foreground">{setting.description}</p>
-                      </div>
-                      <div className={`w-10 h-6 rounded-full transition-colors ${setting.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                        <div className={`w-4 h-4 rounded-full bg-white shadow mt-1 transition-transform ${setting.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sticky top-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: Sliders },
+                      { id: 'visibility', label: 'Visibility', icon: Globe },
+                      { id: 'notifications', label: 'Notifications', icon: Bell },
+                      { id: 'integrations', label: 'Integrations', icon: Webhook },
+                      { id: 'security', label: 'Security', icon: Shield },
+                      { id: 'advanced', label: 'Advanced', icon: Terminal },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Integrations</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    { name: 'Jira', description: 'Sync features with Jira issues', connected: true },
-                    { name: 'Slack', description: 'Post updates to Slack', connected: true },
-                    { name: 'Intercom', description: 'Link customer conversations', connected: false },
-                    { name: 'GitHub', description: 'Connect to repositories', connected: false }
-                  ].map((integration, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div>
-                        <p className="font-medium">{integration.name}</p>
-                        <p className="text-sm text-muted-foreground">{integration.description}</p>
-                      </div>
-                      <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
-                        {integration.connected ? 'Connected' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Roadmap Preferences</CardTitle>
+                        <CardDescription>Configure default roadmap behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="defaultView">Default View</Label>
+                            <select id="defaultView" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                              <option>Timeline</option>
+                              <option>Kanban</option>
+                              <option>List</option>
+                              <option>Swimlane</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label htmlFor="defaultQuarter">Default Quarter</Label>
+                            <select id="defaultQuarter" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                              <option>Current Quarter</option>
+                              <option>All Quarters</option>
+                              <option>Next Quarter</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-prioritization</p>
+                            <p className="text-sm text-gray-500">Calculate RICE scores automatically</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Archived Features</p>
+                            <p className="text-sm text-gray-500">Include archived items in views</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Scoring Configuration</CardTitle>
+                        <CardDescription>Customize RICE scoring weights</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="reachWeight">Reach Weight</Label>
+                            <Input id="reachWeight" type="number" className="mt-1" defaultValue="1.0" />
+                          </div>
+                          <div>
+                            <Label htmlFor="impactWeight">Impact Weight</Label>
+                            <Input id="impactWeight" type="number" className="mt-1" defaultValue="2.0" />
+                          </div>
+                          <div>
+                            <Label htmlFor="confidenceWeight">Confidence Weight</Label>
+                            <Input id="confidenceWeight" type="number" className="mt-1" defaultValue="1.0" />
+                          </div>
+                          <div>
+                            <Label htmlFor="effortWeight">Effort Weight</Label>
+                            <Input id="effortWeight" type="number" className="mt-1" defaultValue="1.5" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'visibility' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Public Roadmap</CardTitle>
+                        <CardDescription>Control external access to your roadmap</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Public Roadmap</p>
+                            <p className="text-sm text-gray-500">Allow anyone to view the roadmap</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Voting</p>
+                            <p className="text-sm text-gray-500">Let users vote on features</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Progress</p>
+                            <p className="text-sm text-gray-500">Display feature progress publicly</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label htmlFor="publicUrl">Public URL</Label>
+                          <div className="mt-1 flex gap-2">
+                            <Input id="publicUrl" type="text" className="flex-1" defaultValue="roadmap.yourcompany.com" readOnly />
+                            <Button variant="outline">Copy</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Idea Portal</CardTitle>
+                        <CardDescription>Accept feature requests from users</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Idea Portal</p>
+                            <p className="text-sm text-gray-500">Accept feature suggestions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Email</p>
+                            <p className="text-sm text-gray-500">Collect submitter email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure notification preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'New Feature Added', desc: 'When a new feature is created', enabled: true },
+                          { name: 'Status Changes', desc: 'When feature status updates', enabled: true },
+                          { name: 'New Votes', desc: 'When features receive votes', enabled: false },
+                          { name: 'New Ideas', desc: 'When users submit ideas', enabled: true },
+                          { name: 'Release Updates', desc: 'When releases are published', enabled: true },
+                        ].map((notification) => (
+                          <div key={notification.name} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notification.name}</p>
+                              <p className="text-sm text-gray-500">{notification.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notification.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Sync with your existing tools</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Jira', desc: 'Sync features with Jira issues', status: 'connected', icon: '📋' },
+                          { name: 'Slack', desc: 'Post updates to channels', status: 'connected', icon: '💬' },
+                          { name: 'GitHub', desc: 'Link to repositories', status: 'disconnected', icon: '🐙' },
+                          { name: 'Intercom', desc: 'Connect customer feedback', status: 'disconnected', icon: '💭' },
+                          { name: 'Segment', desc: 'Product analytics', status: 'disconnected', icon: '📊' },
+                        ].map((integration) => (
+                          <div key={integration.name} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {integration.status === 'connected' ? 'Manage' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage who can access the roadmap</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">SSO Required</p>
+                            <p className="text-sm text-gray-500">Require single sign-on</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Auth</p>
+                            <p className="text-sm text-gray-500">Require 2FA for team members</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Track all changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Export and manage roadmap data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Export Roadmap</p>
+                            <p className="text-sm text-gray-500">Download all features and releases</p>
+                          </div>
+                          <Button>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Import Features</p>
+                            <p className="text-sm text-gray-500">Bulk import from CSV</p>
+                          </div>
+                          <Button variant="outline">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900/50">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Archive All Completed</p>
+                            <p className="text-sm text-gray-500">Move all released features to archive</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            Archive
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Delete Roadmap</p>
+                            <p className="text-sm text-gray-500">Permanently delete all data</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

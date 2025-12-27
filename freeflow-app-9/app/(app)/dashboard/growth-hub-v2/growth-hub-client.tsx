@@ -10,6 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -58,7 +60,20 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Layers,
-  PieChart
+  PieChart,
+  Shield,
+  Sliders,
+  Bell,
+  Webhook,
+  Database,
+  Trash2,
+  Terminal,
+  Key,
+  History,
+  Lock,
+  Globe,
+  Mail,
+  Upload
 } from 'lucide-react'
 
 // ============================================================================
@@ -545,6 +560,7 @@ export default function GrowthHubClient() {
   const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null)
   const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -678,6 +694,50 @@ export default function GrowthHubClient() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Overview Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Growth Analytics Overview</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Monitor your conversion funnels, user cohorts, and growth experiments in one dashboard.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.avgConversion.toFixed(1)}%</div>
+                      <div className="text-sm text-white/80">Avg Conversion</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.activeExperiments}</div>
+                      <div className="text-sm text-white/80">Active Tests</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Filter, label: 'New Funnel', color: 'text-blue-500' },
+                { icon: Users, label: 'New Cohort', color: 'text-purple-500' },
+                { icon: FlaskConical, label: 'New Test', color: 'text-orange-500' },
+                { icon: BarChart3, label: 'Reports', color: 'text-green-500' },
+                { icon: Target, label: 'Goals', color: 'text-red-500' },
+                { icon: Activity, label: 'Real-time', color: 'text-cyan-500' },
+                { icon: Download, label: 'Export', color: 'text-indigo-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Top Funnels */}
               <Card>
@@ -800,6 +860,31 @@ export default function GrowthHubClient() {
 
           {/* Funnels Tab */}
           <TabsContent value="funnels" className="space-y-6">
+            {/* Funnels Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Conversion Funnels</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Analyze user journeys, identify drop-off points, and optimize conversion paths.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockFunnels.length}</div>
+                      <div className="text-sm text-white/80">Total Funnels</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.avgConversion.toFixed(1)}%</div>
+                      <div className="text-sm text-white/80">Avg Conversion</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Button variant="outline" size="sm" className="gap-2">
@@ -868,6 +953,31 @@ export default function GrowthHubClient() {
 
           {/* Cohorts Tab */}
           <TabsContent value="cohorts" className="space-y-6">
+            {/* Cohorts Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-fuchsia-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">User Cohorts</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Segment users by behavior, properties, or predictive signals for targeted analysis.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockCohorts.length}</div>
+                      <div className="text-sm text-white/80">Cohorts</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalCohortSize.toLocaleString()}</div>
+                      <div className="text-sm text-white/80">Total Users</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {['all', 'behavioral', 'property', 'computed', 'predictive'].map((type) => (
@@ -993,6 +1103,31 @@ export default function GrowthHubClient() {
 
           {/* Experiments Tab */}
           <TabsContent value="experiments" className="space-y-6">
+            {/* Experiments Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">A/B Experiments</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Run controlled experiments to validate hypotheses and optimize product experiences.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.activeExperiments}</div>
+                      <div className="text-sm text-white/80">Running</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalExperimentUsers.toLocaleString()}</div>
+                      <div className="text-sm text-white/80">Total Users</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {['all', 'draft', 'running', 'paused', 'completed'].map((status) => (
@@ -1120,6 +1255,340 @@ export default function GrowthHubClient() {
                 </CardContent>
               </Card>
             ))}
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'tracking', label: 'Tracking', icon: Activity },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Sliders className="w-5 h-5 text-emerald-500" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure basic growth analytics settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Default Date Range</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default time period for reports</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Last 90 days</option>
+                            <option>Last 12 months</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Statistical Significance</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Confidence level for experiments</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>90% confidence</option>
+                            <option>95% confidence</option>
+                            <option>99% confidence</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Auto-Refresh Dashboard</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically update metrics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'tracking' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-blue-500" />
+                        Tracking Settings
+                      </CardTitle>
+                      <CardDescription>Configure event tracking and data collection</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Auto-Track Page Views</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically track page visits</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Track Click Events</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Capture button and link clicks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Session Recording</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Record user sessions for analysis</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Heatmaps</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Generate click and scroll heatmaps</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-purple-500" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Configure alerts and notification preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Experiment Completion</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when experiments reach significance</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Conversion Alerts</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on significant conversion changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Weekly Reports</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send weekly analytics digest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Anomaly Detection</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on unusual patterns</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="w-5 h-5 text-green-500" />
+                        Integrations
+                      </CardTitle>
+                      <CardDescription>Connect external analytics and data sources</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        {[
+                          { name: 'Google Analytics', icon: BarChart3, status: 'Connected', color: 'green' },
+                          { name: 'Segment', icon: Database, status: 'Connected', color: 'green' },
+                          { name: 'Mixpanel', icon: PieChart, status: 'Not Connected', color: 'gray' },
+                          { name: 'Slack', icon: Bell, status: 'Connected', color: 'green' },
+                          { name: 'Webhooks', icon: Webhook, status: '3 Active', color: 'blue' },
+                          { name: 'Data Export', icon: Download, status: 'Configured', color: 'green' }
+                        ].map((integration, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <integration.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <Badge className={`bg-${integration.color}-100 text-${integration.color}-800 dark:bg-${integration.color}-900/30 dark:text-${integration.color}-400`}>
+                                  {integration.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Configure</Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-red-500" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Manage data privacy and access controls</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Data Anonymization</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Anonymize PII in analytics data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">IP Masking</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Mask last octet of IP addresses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Data Retention</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep raw data</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>30 days</option>
+                            <option>90 days</option>
+                            <option>1 year</option>
+                            <option>2 years</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">GDPR Compliance Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable GDPR-compliant tracking</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Terminal className="w-5 h-5 text-gray-500" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>System configuration and maintenance options</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Cache TTL</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Query cache duration</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>5 minutes</option>
+                            <option>15 minutes</option>
+                            <option>1 hour</option>
+                            <option>24 hours</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Export All Data</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Download complete analytics export</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">Danger Zone</h4>
+                        <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear All Data
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset to Defaults
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Puzzle,
   Download,
@@ -64,7 +65,13 @@ import {
   Webhook,
   Bot,
   Sparkles,
-  Crown
+  Crown,
+  Sliders,
+  Bell,
+  History,
+  Upload,
+  HardDrive,
+  Key
 } from 'lucide-react'
 
 // Types
@@ -461,6 +468,7 @@ export default function PluginsClient() {
   const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null)
   const [showInstallDialog, setShowInstallDialog] = useState(false)
   const [installing, setInstalling] = useState<string | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter plugins
   const filteredPlugins = useMemo(() => {
@@ -757,7 +765,51 @@ export default function PluginsClient() {
           </TabsList>
 
           {/* Discover Tab */}
-          <TabsContent value="discover" className="mt-6">
+          <TabsContent value="discover" className="mt-6 space-y-6">
+            {/* Discover Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Discover Plugins</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Browse our marketplace of powerful plugins to extend your platform's functionality.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockPlugins.length}</div>
+                      <div className="text-sm text-white/80">Total Plugins</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{categories.length}</div>
+                      <div className="text-sm text-white/80">Categories</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Search, label: 'Search', color: 'text-blue-500' },
+                { icon: Star, label: 'Top Rated', color: 'text-yellow-500' },
+                { icon: TrendingUp, label: 'Trending', color: 'text-green-500' },
+                { icon: Crown, label: 'Premium', color: 'text-purple-500' },
+                { icon: Sparkles, label: 'New', color: 'text-pink-500' },
+                { icon: Shield, label: 'Security', color: 'text-red-500' },
+                { icon: Code, label: 'Dev Tools', color: 'text-cyan-500' },
+                { icon: Bot, label: 'AI Plugins', color: 'text-orange-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Categories Sidebar */}
               <div className="col-span-3">
@@ -872,7 +924,32 @@ export default function PluginsClient() {
           </TabsContent>
 
           {/* Installed Tab */}
-          <TabsContent value="installed" className="mt-6">
+          <TabsContent value="installed" className="mt-6 space-y-6">
+            {/* Installed Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Installed Plugins</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Manage your installed plugins, check for updates, and configure plugin settings.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{installedPlugins.length}</div>
+                      <div className="text-sm text-white/80">Installed</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{installedPlugins.filter(p => p.status === 'active').length}</div>
+                      <div className="text-sm text-white/80">Active</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -895,7 +972,51 @@ export default function PluginsClient() {
           </TabsContent>
 
           {/* Updates Tab */}
-          <TabsContent value="updates" className="mt-6">
+          <TabsContent value="updates" className="mt-6 space-y-6">
+            {/* Updates Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Plugin Updates</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Keep your plugins up to date for the latest features, bug fixes, and security patches.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{needsUpdatePlugins.length}</div>
+                      <div className="text-sm text-white/80">Updates Available</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{installedPlugins.length}</div>
+                      <div className="text-sm text-white/80">Total Installed</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: RefreshCw, label: 'Update All', color: 'text-blue-500' },
+                { icon: History, label: 'View History', color: 'text-purple-500' },
+                { icon: Download, label: 'Backup First', color: 'text-green-500' },
+                { icon: Shield, label: 'Security Scan', color: 'text-red-500' },
+                { icon: Clock, label: 'Schedule', color: 'text-orange-500' },
+                { icon: Bell, label: 'Notifications', color: 'text-yellow-500' },
+                { icon: FileText, label: 'Changelogs', color: 'text-cyan-500' },
+                { icon: Settings, label: 'Settings', color: 'text-gray-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -942,7 +1063,28 @@ export default function PluginsClient() {
           </TabsContent>
 
           {/* Collections Tab */}
-          <TabsContent value="collections" className="mt-6">
+          <TabsContent value="collections" className="mt-6 space-y-6">
+            {/* Collections Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Plugin Collections</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Curated bundles of plugins designed to work together for specific use cases.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockCollections.length}</div>
+                      <div className="text-sm text-white/80">Collections</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-6">
               {mockCollections.map(collection => (
                 <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
@@ -970,7 +1112,51 @@ export default function PluginsClient() {
           </TabsContent>
 
           {/* Developer Tab */}
-          <TabsContent value="developer" className="mt-6">
+          <TabsContent value="developer" className="mt-6 space-y-6">
+            {/* Developer Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Developer Tools</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Build custom plugins, access API documentation, and debug your integrations with our developer toolkit.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">v2.0</div>
+                      <div className="text-sm text-white/80">API Version</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">50+</div>
+                      <div className="text-sm text-white/80">Endpoints</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Terminal, label: 'CLI Tools', color: 'text-green-500' },
+                { icon: Code, label: 'API Docs', color: 'text-blue-500' },
+                { icon: GitBranch, label: 'SDK', color: 'text-purple-500' },
+                { icon: Webhook, label: 'Webhooks', color: 'text-orange-500' },
+                { icon: Database, label: 'Database', color: 'text-cyan-500' },
+                { icon: Activity, label: 'Debug', color: 'text-red-500' },
+                { icon: FileText, label: 'Guides', color: 'text-yellow-500' },
+                { icon: MessageSquare, label: 'Support', color: 'text-pink-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <Card className="col-span-2 border-gray-200 dark:border-gray-700">
                 <CardHeader>
@@ -1030,64 +1216,346 @@ export default function PluginsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Auto-Update Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Enable Auto-Updates</p>
-                      <p className="text-sm text-gray-500">Automatically update plugins when new versions are available</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Update Notifications</p>
-                      <p className="text-sm text-gray-500">Receive email notifications about plugin updates</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Backup Before Update</p>
-                      <p className="text-sm text-gray-500">Create automatic backups before updating plugins</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'updates', label: 'Updates', icon: RefreshCw },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'developer', label: 'Developer', icon: Code },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Verify Plugin Integrity</p>
-                      <p className="text-sm text-gray-500">Check plugin files against known signatures</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Block Untrusted Sources</p>
-                      <p className="text-sm text-gray-500">Only allow plugins from verified developers</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Security Scanning</p>
-                      <p className="text-sm text-gray-500">Automatically scan plugins for vulnerabilities</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Sliders className="w-5 h-5 text-green-500" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure basic plugin management settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Plugin Directory</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Location where plugins are installed</p>
+                          </div>
+                          <Input defaultValue="/plugins" className="w-64" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Max Concurrent Installs</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Maximum simultaneous installations</p>
+                          </div>
+                          <Input type="number" defaultValue="3" className="w-20" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Show Beta Plugins</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display beta and experimental plugins</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Cache Plugin Data</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Cache plugin information for faster loading</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'updates' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <RefreshCw className="w-5 h-5 text-blue-500" />
+                        Update Settings
+                      </CardTitle>
+                      <CardDescription>Configure automatic updates and backups</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Enable Auto-Updates</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically update when new versions available</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Update Schedule</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">When to check for updates</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>Daily at 3:00 AM</option>
+                            <option>Weekly on Sunday</option>
+                            <option>Manual Only</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Backup Before Update</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Create automatic backups before updating</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Rollback on Failure</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically restore if update fails</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-purple-500" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Configure alerts and notification preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Update Notifications</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when updates are available</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Security Alerts</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify about security vulnerabilities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">New Plugin Suggestions</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Recommend plugins based on usage</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Weekly Digest</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly summary of plugin activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-red-500" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Manage plugin security and verification</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Verify Plugin Integrity</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Check plugin files against known signatures</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Block Untrusted Sources</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Only allow plugins from verified developers</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Security Scanning</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically scan for vulnerabilities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Sandbox Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Run plugins in isolated environment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'developer' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Code className="w-5 h-5 text-cyan-500" />
+                        Developer Settings
+                      </CardTitle>
+                      <CardDescription>Configure developer tools and API access</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Developer Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable development features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Debug Logging</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log plugin debug information</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">API Documentation</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">View plugin API documentation</p>
+                          </div>
+                          <Button variant="outline" size="sm">View Docs</Button>
+                        </div>
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="font-medium">Plugin API Key</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">API key for plugin development</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input value="plg_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
+                          <Button variant="outline" size="sm">Regenerate</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Terminal className="w-5 h-5 text-gray-500" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>System configuration and maintenance options</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Plugin Memory Limit</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Maximum memory per plugin</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>128 MB</option>
+                            <option>256 MB</option>
+                            <option>512 MB</option>
+                            <option>1 GB</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Clear Plugin Cache</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remove cached plugin data</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Trash2 className="w-4 h-4" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Export Plugin List</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Download list of installed plugins</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">Danger Zone</h4>
+                        <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove All Plugins
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset to Defaults
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

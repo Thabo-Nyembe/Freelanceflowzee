@@ -11,6 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Package,
   Truck,
@@ -53,7 +55,25 @@ import {
   Plane,
   Ship,
   Train,
-  Home
+  Home,
+  Shield,
+  Sliders,
+  Bell,
+  Webhook,
+  Key,
+  Database,
+  Lock,
+  HardDrive,
+  Terminal,
+  History,
+  Trash2,
+  Copy,
+  Upload,
+  Workflow,
+  Archive,
+  Layers,
+  Target,
+  AlertTriangle
 } from 'lucide-react'
 
 // ============================================================================
@@ -652,6 +672,7 @@ export default function ShippingClient() {
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null)
   const [statusFilter, setStatusFilter] = useState<ShipmentStatus | 'all'>('all')
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered data
   const filteredShipments = useMemo(() => {
@@ -756,10 +777,70 @@ export default function ShippingClient() {
               <BarChart3 className="w-4 h-4" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Shipments Tab */}
           <TabsContent value="shipments" className="space-y-4">
+            {/* Shipments Overview Banner */}
+            <Card className="border-0 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Package className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Shipment Management</h3>
+                      <p className="text-white/80">Track and manage all your outgoing shipments</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockAnalytics.totalShipments.toLocaleString()}</p>
+                      <p className="text-sm text-white/80">Total Shipments</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockAnalytics.inTransit}</p>
+                      <p className="text-sm text-white/80">In Transit</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockAnalytics.onTimeRate}%</p>
+                      <p className="text-sm text-white/80">On-Time Rate</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Shipments Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Shipment', color: 'bg-blue-500' },
+                { icon: Upload, label: 'Bulk Import', color: 'bg-green-500' },
+                { icon: Printer, label: 'Print Labels', color: 'bg-purple-500' },
+                { icon: MapPin, label: 'Track All', color: 'bg-orange-500' },
+                { icon: Archive, label: 'Batch Update', color: 'bg-pink-500' },
+                { icon: Download, label: 'Export', color: 'bg-indigo-500' },
+                { icon: RefreshCw, label: 'Sync Status', color: 'bg-teal-500' },
+                { icon: AlertCircle, label: 'Exceptions', color: 'bg-red-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
@@ -868,6 +949,62 @@ export default function ShippingClient() {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-4">
+            {/* Orders Overview Banner */}
+            <Card className="border-0 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <FileText className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Order Fulfillment</h3>
+                      <p className="text-white/80">Process and ship pending orders efficiently</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{pendingOrders.length}</p>
+                      <p className="text-sm text-white/80">Pending</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockOrders.length}</p>
+                      <p className="text-sm text-white/80">Total Orders</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">2</p>
+                      <p className="text-sm text-white/80">Priority</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Orders Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Printer, label: 'Batch Labels', color: 'bg-blue-500' },
+                { icon: Package, label: 'Pack All', color: 'bg-green-500' },
+                { icon: Truck, label: 'Ship Selected', color: 'bg-purple-500' },
+                { icon: Clock, label: 'Priority First', color: 'bg-orange-500' },
+                { icon: Search, label: 'Find Order', color: 'bg-pink-500' },
+                { icon: Filter, label: 'Filter', color: 'bg-indigo-500' },
+                { icon: Download, label: 'Export', color: 'bg-teal-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Awaiting Shipment ({pendingOrders.length})
@@ -951,6 +1088,62 @@ export default function ShippingClient() {
 
           {/* Tracking Tab */}
           <TabsContent value="tracking" className="space-y-4">
+            {/* Tracking Overview Banner */}
+            <Card className="border-0 bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <MapPin className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Package Tracking</h3>
+                      <p className="text-white/80">Real-time visibility into all shipment locations</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockShipments.filter(s => s.status === 'in_transit').length}</p>
+                      <p className="text-sm text-white/80">In Transit</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockShipments.filter(s => s.status === 'out_for_delivery').length}</p>
+                      <p className="text-sm text-white/80">Out for Delivery</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockShipments.filter(s => s.events.length > 0).length}</p>
+                      <p className="text-sm text-white/80">With Updates</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tracking Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Search, label: 'Track Number', color: 'bg-blue-500' },
+                { icon: Globe, label: 'Map View', color: 'bg-green-500' },
+                { icon: Bell, label: 'Alerts', color: 'bg-purple-500' },
+                { icon: Clock, label: 'Timeline', color: 'bg-orange-500' },
+                { icon: Mail, label: 'Notify Customer', color: 'bg-pink-500' },
+                { icon: RefreshCw, label: 'Refresh All', color: 'bg-indigo-500' },
+                { icon: Download, label: 'Export', color: 'bg-teal-500' },
+                { icon: AlertCircle, label: 'Exceptions', color: 'bg-red-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Track Package</CardTitle>
@@ -1007,6 +1200,62 @@ export default function ShippingClient() {
 
           {/* Labels Tab */}
           <TabsContent value="labels" className="space-y-4">
+            {/* Labels Overview Banner */}
+            <Card className="border-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Printer className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Label Management</h3>
+                      <p className="text-white/80">Create, print, and manage shipping labels</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockLabels.length}</p>
+                      <p className="text-sm text-white/80">Total Labels</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockLabels.filter(l => l.status === 'printed').length}</p>
+                      <p className="text-sm text-white/80">Printed</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">${mockLabels.reduce((sum, l) => sum + l.cost, 0).toFixed(2)}</p>
+                      <p className="text-sm text-white/80">Total Cost</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Labels Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Create Label', color: 'bg-blue-500' },
+                { icon: Printer, label: 'Batch Print', color: 'bg-green-500' },
+                { icon: Download, label: 'Download All', color: 'bg-purple-500' },
+                { icon: XCircle, label: 'Void Label', color: 'bg-red-500' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-orange-500' },
+                { icon: Search, label: 'Find', color: 'bg-pink-500' },
+                { icon: History, label: 'History', color: 'bg-indigo-500' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Shipping Labels</h3>
               <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
@@ -1062,6 +1311,62 @@ export default function ShippingClient() {
 
           {/* Carriers Tab */}
           <TabsContent value="carriers" className="space-y-4">
+            {/* Carriers Overview Banner */}
+            <Card className="border-0 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Truck className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Carrier Integrations</h3>
+                      <p className="text-white/80">Manage your shipping carrier accounts and rates</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockCarriers.length}</p>
+                      <p className="text-sm text-white/80">Carriers</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockCarriers.filter(c => c.isActive).length}</p>
+                      <p className="text-sm text-white/80">Active</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockCarriers.reduce((sum, c) => sum + c.services.length, 0)}</p>
+                      <p className="text-sm text-white/80">Services</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Carriers Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Add Carrier', color: 'bg-blue-500' },
+                { icon: RefreshCw, label: 'Sync Rates', color: 'bg-green-500' },
+                { icon: DollarSign, label: 'Compare Rates', color: 'bg-purple-500' },
+                { icon: Settings, label: 'Configure', color: 'bg-orange-500' },
+                { icon: Key, label: 'API Keys', color: 'bg-pink-500' },
+                { icon: Shield, label: 'Insurance', color: 'bg-indigo-500' },
+                { icon: Globe, label: 'International', color: 'bg-teal-500' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Carrier Accounts</h3>
               <Button variant="outline">
@@ -1116,6 +1421,62 @@ export default function ShippingClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
+            {/* Analytics Overview Banner */}
+            <Card className="border-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <BarChart3 className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Shipping Analytics</h3>
+                      <p className="text-white/80">Insights into your shipping performance</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockAnalytics.onTimeRate}%</p>
+                      <p className="text-sm text-white/80">On-Time Rate</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.avgShippingCost)}</p>
+                      <p className="text-sm text-white/80">Avg Cost</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockAnalytics.avgDeliveryDays}d</p>
+                      <p className="text-sm text-white/80">Avg Delivery</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500' },
+                { icon: DollarSign, label: 'Cost Analysis', color: 'bg-purple-500' },
+                { icon: Truck, label: 'Carrier Stats', color: 'bg-orange-500' },
+                { icon: Globe, label: 'Destinations', color: 'bg-pink-500' },
+                { icon: Timer, label: 'Delivery Time', color: 'bg-indigo-500' },
+                { icon: Download, label: 'Export Data', color: 'bg-teal-500' },
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Shipping Volume */}
               <Card className="col-span-full">
@@ -1233,6 +1594,543 @@ export default function ShippingClient() {
                   ))}
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <Card className="border-0 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Shipping Settings</h3>
+                      <p className="text-white/80">Configure your shipping preferences and integrations</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'carriers', label: 'Carriers', icon: Truck },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-blue-500" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure basic shipping preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Weight Unit</Label>
+                            <Input defaultValue="lb" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Dimension Unit</Label>
+                            <Input defaultValue="in" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Carrier</Label>
+                            <Input defaultValue="FedEx" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Service</Label>
+                            <Input defaultValue="Ground" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Automatic Rate Shopping</p>
+                            <p className="text-sm text-gray-500">Automatically select cheapest carrier</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Signature Required by Default</p>
+                            <p className="text-sm text-gray-500">Require signature for all shipments</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Insurance by Default</p>
+                            <p className="text-sm text-gray-500">Add insurance to all shipments</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Home className="w-5 h-5 text-green-500" />
+                          Default Origin Address
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Company Name</Label>
+                            <Input defaultValue="FreeFlow Inc" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Contact Name</Label>
+                            <Input defaultValue="Shipping Department" className="mt-1" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Street Address</Label>
+                          <Input defaultValue="123 Shipping Lane" className="mt-1" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <Label>City</Label>
+                            <Input defaultValue="Los Angeles" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>State</Label>
+                            <Input defaultValue="CA" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>ZIP Code</Label>
+                            <Input defaultValue="90001" className="mt-1" />
+                          </div>
+                        </div>
+                        <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                          Save Origin Address
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Carriers Settings */}
+                {settingsTab === 'carriers' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Truck className="w-5 h-5 text-blue-500" />
+                          Carrier Accounts
+                        </CardTitle>
+                        <CardDescription>Manage your carrier integrations and API keys</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockCarriers.map((carrier) => (
+                          <div key={carrier.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+                                {carrier.name[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{carrier.name}</p>
+                                <p className="text-sm text-gray-500">Account: {carrier.accountNumber || 'Not configured'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={carrier.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                                {carrier.isActive ? 'Active' : 'Inactive'}
+                              </Badge>
+                              <Button variant="outline" size="sm">Configure</Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add New Carrier
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="w-5 h-5 text-green-500" />
+                          Rate Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Retail Rates</p>
+                            <p className="text-sm text-gray-500">Display retail pricing alongside discounted rates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Include Delivery Estimates</p>
+                            <p className="text-sm text-gray-500">Show estimated delivery dates with rates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Cache Rates</p>
+                            <p className="text-sm text-gray-500">Cache rates for faster quote retrieval</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-blue-500" />
+                          Shipment Notifications
+                        </CardTitle>
+                        <CardDescription>Configure shipping status notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Label Created', desc: 'Notify when shipping label is generated' },
+                          { label: 'Package Shipped', desc: 'Notify when package is picked up' },
+                          { label: 'In Transit Updates', desc: 'Notify on transit milestones' },
+                          { label: 'Out for Delivery', desc: 'Notify when package is out for delivery' },
+                          { label: 'Delivered', desc: 'Notify when package is delivered' },
+                          { label: 'Exceptions', desc: 'Notify on delivery issues or delays' }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={idx < 5} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-green-500" />
+                          Customer Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Send Tracking Emails</p>
+                            <p className="text-sm text-gray-500">Automatically email tracking info to customers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">SMS Notifications</p>
+                            <p className="text-sm text-gray-500">Send SMS updates for delivery status</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Custom Email Template</Label>
+                          <Input defaultValue="Use default template" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-blue-500" />
+                          E-commerce Integrations
+                        </CardTitle>
+                        <CardDescription>Connect your online stores</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Shopify', status: 'connected', orders: 156 },
+                          { name: 'WooCommerce', status: 'connected', orders: 89 },
+                          { name: 'Amazon', status: 'disconnected', orders: 0 },
+                          { name: 'eBay', status: 'disconnected', orders: 0 }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                {integration.name[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.orders} orders synced</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                                {integration.status}
+                              </Badge>
+                              <Button variant="outline" size="sm">
+                                {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-green-500" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input type="password" value="sk_live_****************************" readOnly className="font-mono" />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Webhook URL</Label>
+                          <Input defaultValue="https://api.yoursite.com/webhooks/shipping" className="mt-1 font-mono" />
+                        </div>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-blue-500" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Protect your shipping operations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500">Require 2FA for shipping operations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">IP Whitelisting</p>
+                            <p className="text-sm text-gray-500">Restrict API access to specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all shipping activities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-green-500" />
+                          Access Control
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Approval for High-Value Shipments</p>
+                            <p className="text-sm text-gray-500">Shipments over $500 require manager approval</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Restrict International Shipping</p>
+                            <p className="text-sm text-gray-500">Only admins can create international shipments</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Label Void Confirmation</p>
+                            <p className="text-sm text-gray-500">Require confirmation before voiding labels</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-blue-500" />
+                          Advanced Configuration
+                        </CardTitle>
+                        <CardDescription>Advanced shipping settings for power users</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                            <p className="text-sm text-gray-500">Enable verbose logging for troubleshooting</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Sandbox Mode</p>
+                            <p className="text-sm text-gray-500">Use test credentials for all carriers</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Batch Processing</p>
+                            <p className="text-sm text-gray-500">Process shipments in batches for performance</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>API Timeout (seconds)</Label>
+                          <Input type="number" defaultValue="30" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Max Concurrent Requests</Label>
+                          <Input type="number" defaultValue="10" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-green-500" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-Archive Old Shipments</p>
+                            <p className="text-sm text-gray-500">Archive shipments older than 90 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Data Retention Period (days)</Label>
+                          <Input type="number" defaultValue="365" className="mt-1" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
+                            <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
+                            <p className="text-sm text-red-600/70">Permanently delete all shipping data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

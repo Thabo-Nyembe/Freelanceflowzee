@@ -35,12 +35,25 @@ import {
   Gauge,
   Timer,
   Target,
-  AlertCircle
+  AlertCircle,
+  Shield,
+  Sliders,
+  Webhook,
+  Key,
+  Lock,
+  Upload,
+  History,
+  Trash2,
+  Copy,
+  Mail,
+  PieChart,
+  Workflow,
+  FileText
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -467,6 +480,66 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Overview Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Activity className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Performance Overview</h2>
+                    <p className="text-white/80">Real-time observability and APM insights</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Services</p>
+                    <p className="text-2xl font-bold">{stats.healthyServices}/{stats.totalServices}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg Latency</p>
+                    <p className="text-2xl font-bold">{stats.avgLatency}ms</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Error Rate</p>
+                    <p className="text-2xl font-bold">{stats.errorRate}%</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Active Alerts</p>
+                    <p className="text-2xl font-bold">{stats.firingAlerts}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Plus, label: 'New Dashboard', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
+                { icon: Bell, label: 'Create Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600' },
+                { icon: Download, label: 'Export Data', color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
+                { icon: Target, label: 'New SLO', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
+                { icon: Webhook, label: 'Integrations', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
+                { icon: Workflow, label: 'Trace Search', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
+                { icon: FileText, label: 'View Logs', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
+                { icon: PieChart, label: 'Analytics', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`p-3 rounded-xl ${action.color}`}>
+                    <action.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Service Health Map */}
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -563,6 +636,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Infrastructure Tab */}
           <TabsContent value="infrastructure" className="space-y-6">
+            {/* Infrastructure Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-teal-500 to-green-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Server className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Infrastructure Monitoring</h2>
+                    <p className="text-white/80">Real-time host metrics and container health</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Active Hosts</p>
+                    <p className="text-2xl font-bold">{stats.activeHosts}/{stats.totalHosts}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg CPU</p>
+                    <p className="text-2xl font-bold">54%</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg Memory</p>
+                    <p className="text-2xl font-bold">66%</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Containers</p>
+                    <p className="text-2xl font-bold">33</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Host Infrastructure</h3>
@@ -630,6 +738,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Logs Tab */}
           <TabsContent value="logs" className="space-y-6">
+            {/* Logs Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Terminal className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Log Explorer</h2>
+                    <p className="text-white/80">Search, filter, and analyze your logs in real-time</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Logs</p>
+                    <p className="text-2xl font-bold">{stats.totalLogs}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Errors</p>
+                    <p className="text-2xl font-bold">{stats.errorLogs}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Log Rate</p>
+                    <p className="text-2xl font-bold">2.4K/min</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Storage</p>
+                    <p className="text-2xl font-bold">82%</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
@@ -669,6 +812,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* SLOs Tab */}
           <TabsContent value="slos" className="space-y-6">
+            {/* SLOs Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Target className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Service Level Objectives</h2>
+                    <p className="text-white/80">Track reliability targets and error budgets</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">SLOs Met</p>
+                    <p className="text-2xl font-bold">{stats.slosMet}/{stats.totalSLOs}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">At Risk</p>
+                    <p className="text-2xl font-bold">1</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg Budget</p>
+                    <p className="text-2xl font-bold">48%</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Breached</p>
+                    <p className="text-2xl font-bold">0</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {mockSLOs.map((slo) => (
                 <div key={slo.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
@@ -702,6 +880,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Services Tab */}
           <TabsContent value="services" className="space-y-6">
+            {/* Services Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Server className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Service Health</h2>
+                    <p className="text-white/80">Monitor all your microservices in one place</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Services</p>
+                    <p className="text-2xl font-bold">{stats.totalServices}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Healthy</p>
+                    <p className="text-2xl font-bold">{stats.healthyServices}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Degraded</p>
+                    <p className="text-2xl font-bold">1</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Critical</p>
+                    <p className="text-2xl font-bold">1</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Health Dashboard</h3>
@@ -760,6 +973,29 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Metrics Tab */}
           <TabsContent value="metrics" className="space-y-6">
+            {/* Metrics Header */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-violet-500/20 rounded-lg">
+                  <Gauge className="w-6 h-6 text-violet-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Metric Explorer</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Browse and analyze all system metrics</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Metric
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -825,6 +1061,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Traces Tab */}
           <TabsContent value="traces" className="space-y-6">
+            {/* Traces Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Layers className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Distributed Tracing</h2>
+                    <p className="text-white/80">End-to-end visibility across all services</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Traces</p>
+                    <p className="text-2xl font-bold">{stats.totalTraces}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Errors</p>
+                    <p className="text-2xl font-bold">{stats.errorTraces}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg Duration</p>
+                    <p className="text-2xl font-bold">337ms</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">P99 Latency</p>
+                    <p className="text-2xl font-bold">892ms</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
@@ -877,6 +1148,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6">
+            {/* Alerts Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Bell className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Alert Management</h2>
+                    <p className="text-white/80">Configure and manage your alerting rules</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Firing</p>
+                    <p className="text-2xl font-bold">{stats.firingAlerts}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Acknowledged</p>
+                    <p className="text-2xl font-bold">{stats.acknowledgedAlerts}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Resolved (24h)</p>
+                    <p className="text-2xl font-bold">2</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Rules</p>
+                    <p className="text-2xl font-bold">24</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
@@ -942,6 +1248,41 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Dashboards Tab */}
           <TabsContent value="dashboards" className="space-y-6">
+            {/* Dashboards Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <BarChart3 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Custom Dashboards</h2>
+                    <p className="text-white/80">Build and share observability dashboards</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Dashboards</p>
+                    <p className="text-2xl font-bold">{stats.totalDashboards}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Favorites</p>
+                    <p className="text-2xl font-bold">{stats.favoriteDashboards}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Shared</p>
+                    <p className="text-2xl font-bold">4</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Views</p>
+                    <p className="text-2xl font-bold">3.5K</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Custom Dashboards</h3>
@@ -1018,26 +1359,40 @@ export default function PerformanceAnalyticsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-white dark:bg-gray-800">
-              <CardContent className="p-0">
-                <div className="flex border-b border-gray-200 dark:border-gray-700">
-                  {['general', 'integrations', 'alerting', 'retention', 'access'].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setSettingsTab(tab)}
-                      className={`px-6 py-4 text-sm font-medium capitalize ${
-                        settingsTab === tab
-                          ? 'border-b-2 border-blue-600 text-blue-600'
-                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sticky top-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: Sliders },
+                      { id: 'integrations', label: 'Integrations', icon: Webhook },
+                      { id: 'alerting', label: 'Alerting', icon: Bell },
+                      { id: 'retention', label: 'Retention', icon: Database },
+                      { id: 'security', label: 'Security', icon: Shield },
+                      { id: 'advanced', label: 'Advanced', icon: Terminal },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
                 </div>
+              </div>
 
-                <div className="p-6">
-                  {settingsTab === 'general' && (
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
                     <div className="space-y-6">
                       <div>
                         <h4 className="font-semibold text-gray-900 dark:text-white mb-4">General Settings</h4>
@@ -1220,10 +1575,14 @@ export default function PerformanceAnalyticsClient() {
                     </div>
                   )}
 
-                  {settingsTab === 'access' && (
-                    <div className="space-y-6">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Access Control</h4>
-                      <div className="space-y-4">
+                  {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage API keys and authentication</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">API Keys</p>
@@ -1252,12 +1611,97 @@ export default function PerformanceAnalyticsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>IP Restrictions</CardTitle>
+                        <CardDescription>Control access by IP address</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
+                            <p className="text-sm text-gray-500">Only allow specific IP ranges</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">VPN Required</p>
+                            <p className="text-sm text-gray-500">Require VPN for dashboard access</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Export</CardTitle>
+                        <CardDescription>Export metrics and logs</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Export All Metrics</p>
+                            <p className="text-sm text-gray-500">Download complete metric history</p>
+                          </div>
+                          <Button>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Export Logs</p>
+                            <p className="text-sm text-gray-500">Download log archives</p>
+                          </div>
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900/50">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Clear All Data</p>
+                            <p className="text-sm text-gray-500">Delete all metrics and logs</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset Configuration</p>
+                            <p className="text-sm text-gray-500">Reset all settings to defaults</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

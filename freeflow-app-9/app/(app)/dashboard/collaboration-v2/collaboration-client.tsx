@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -552,7 +552,69 @@ export default function CollaborationClient() {
           </TabsList>
 
           {/* Boards Tab */}
-          <TabsContent value="boards" className="mt-6">
+          <TabsContent value="boards" className="mt-6 space-y-6">
+            {/* Boards Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Layout className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Collaborative Boards</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Create and collaborate on whiteboards, flowcharts, wireframes, and more. Real-time editing with your team across all board types.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalBoards}</div>
+                    <div className="text-xs text-white/70">Total Boards</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.activeBoards}</div>
+                    <div className="text-xs text-white/70">Active</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockBoards.filter(b => b.isStarred).length}</div>
+                    <div className="text-xs text-white/70">Starred</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockMembers.filter(m => m.presence === 'online').length}</div>
+                    <div className="text-xs text-white/70">Online Now</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-blue-600" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Plus className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">New Board</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <LayoutTemplate className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">From Template</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                    <UserPlus className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Invite Members</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                    <Star className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Starred Boards</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center gap-2 mb-4">
               <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('grid')}><Grid className="h-4 w-4" /></Button>
               <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}><List className="h-4 w-4" /></Button>
@@ -588,7 +650,39 @@ export default function CollaborationClient() {
           </TabsContent>
 
           {/* Chat Tab */}
-          <TabsContent value="chat" className="mt-6">
+          <TabsContent value="chat" className="mt-6 space-y-6">
+            {/* Chat Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <MessageSquare className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Team Chat</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Real-time messaging with your team. Share files, react with emojis, and stay connected across all your channels.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockChannels.length}</div>
+                    <div className="text-xs text-white/70">Channels</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-red-200">{stats.unreadMessages}</div>
+                    <div className="text-xs text-white/70">Unread</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockMessages.length}</div>
+                    <div className="text-xs text-white/70">Messages Today</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.onlineNow}</div>
+                    <div className="text-xs text-white/70">Online Now</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-12 gap-6 h-[600px]">
               {/* Channels Sidebar */}
               <Card className="col-span-3 border-gray-200 dark:border-gray-700">
@@ -690,10 +784,69 @@ export default function CollaborationClient() {
           </TabsContent>
 
           {/* Meetings Tab */}
-          <TabsContent value="meetings" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button onClick={() => setShowNewMeeting(true)}><Plus className="h-4 w-4 mr-2" />Schedule Meeting</Button>
+          <TabsContent value="meetings" className="mt-6 space-y-6">
+            {/* Meetings Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Video className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Video Meetings</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Host and join video meetings with your team. Record sessions, share screens, and collaborate in real-time with HD video and audio.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockMeetings.length}</div>
+                    <div className="text-xs text-white/70">Total Meetings</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-green-200">{mockMeetings.filter(m => m.status === 'live').length}</div>
+                    <div className="text-xs text-white/70">Live Now</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.scheduledMeetings}</div>
+                    <div className="text-xs text-white/70">Scheduled</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockMeetings.filter(m => m.hasRecording).length}</div>
+                    <div className="text-xs text-white/70">Recordings</div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Meeting Quick Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-cyan-600" />
+                  Meeting Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => setShowNewMeeting(true)}>
+                    <Video className="h-5 w-5 text-cyan-600" />
+                    <span className="text-sm">Start Meeting</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Schedule</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Play className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Recordings</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                    <Settings className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Settings</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-2 gap-6">
               {mockMeetings.map(meeting => (
                 <Card key={meeting.id} className="border-gray-200 dark:border-gray-700">
@@ -738,7 +891,69 @@ export default function CollaborationClient() {
           </TabsContent>
 
           {/* Files Tab */}
-          <TabsContent value="files" className="mt-6">
+          <TabsContent value="files" className="mt-6 space-y-6">
+            {/* Files Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <FileText className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Shared Files</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Access and manage all your shared files in one place. Upload, download, and collaborate on documents, presentations, and media files.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.sharedFiles}</div>
+                    <div className="text-xs text-white/70">Total Files</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockFiles.filter(f => f.isStarred).length}</div>
+                    <div className="text-xs text-white/70">Starred</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{formatSize(mockFiles.reduce((sum, f) => sum + f.size, 0))}</div>
+                    <div className="text-xs text-white/70">Total Size</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockFiles.reduce((sum, f) => sum + f.downloadCount, 0)}</div>
+                    <div className="text-xs text-white/70">Downloads</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* File Quick Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-rose-600" />
+                  File Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all hover:scale-105">
+                    <Upload className="h-5 w-5 text-rose-600" />
+                    <span className="text-sm">Upload File</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                    <FolderOpen className="h-5 w-5 text-pink-600" />
+                    <span className="text-sm">New Folder</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20 transition-all hover:scale-105">
+                    <Star className="h-5 w-5 text-fuchsia-600" />
+                    <span className="text-sm">Starred Files</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Download className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Recent</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -774,7 +989,69 @@ export default function CollaborationClient() {
           </TabsContent>
 
           {/* Teams Tab */}
-          <TabsContent value="teams" className="mt-6">
+          <TabsContent value="teams" className="mt-6 space-y-6">
+            {/* Teams Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Your Teams</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Manage your teams and collaborate with members across departments. Create channels, share files, and coordinate projects effectively.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTeams.length}</div>
+                    <div className="text-xs text-white/70">Teams</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTeams.reduce((sum, t) => sum + t.memberCount, 0)}</div>
+                    <div className="text-xs text-white/70">Members</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTeams.reduce((sum, t) => sum + t.boardCount, 0)}</div>
+                    <div className="text-xs text-white/70">Boards</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTeams.reduce((sum, t) => sum + t.channelCount, 0)}</div>
+                    <div className="text-xs text-white/70">Channels</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Team Quick Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-indigo-600" />
+                  Team Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all hover:scale-105">
+                    <Plus className="h-5 w-5 text-indigo-600" />
+                    <span className="text-sm">Create Team</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <UserPlus className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Invite Members</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                    <Hash className="h-5 w-5 text-pink-600" />
+                    <span className="text-sm">New Channel</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Settings className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">Team Settings</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-3 gap-6">
               {mockTeams.map(team => (
                 <Card key={team.id} className="border-gray-200 dark:border-gray-700">
@@ -802,10 +1079,69 @@ export default function CollaborationClient() {
           </TabsContent>
 
           {/* Channels Tab */}
-          <TabsContent value="channels" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button onClick={() => setShowNewChannel(true)}><Plus className="h-4 w-4 mr-2" />Create Channel</Button>
+          <TabsContent value="channels" className="mt-6 space-y-6">
+            {/* Channels Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Hash className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Channels</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Organize conversations by topic, project, or team. Create public or private channels to keep discussions focused and productive.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockChannels.length}</div>
+                    <div className="text-xs text-white/70">Total Channels</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockChannels.filter(c => c.type === 'public').length}</div>
+                    <div className="text-xs text-white/70">Public</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockChannels.filter(c => c.type === 'private').length}</div>
+                    <div className="text-xs text-white/70">Private</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockChannels.filter(c => c.isPinned).length}</div>
+                    <div className="text-xs text-white/70">Pinned</div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Channel Quick Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-600" />
+                  Channel Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={() => setShowNewChannel(true)}>
+                    <Plus className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Create Channel</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105">
+                    <Lock className="h-5 w-5 text-orange-600" />
+                    <span className="text-sm">Private Channel</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                    <Pin className="h-5 w-5 text-red-600" />
+                    <span className="text-sm">Pinned Channels</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Search className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Browse All</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -833,7 +1169,69 @@ export default function CollaborationClient() {
           </TabsContent>
 
           {/* Activity Tab */}
-          <TabsContent value="activity" className="mt-6">
+          <TabsContent value="activity" className="mt-6 space-y-6">
+            {/* Activity Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <History className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Activity Feed</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Track all activity across your workspace. See who's editing boards, posting messages, uploading files, and scheduling meetings in real-time.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockActivities.length}</div>
+                    <div className="text-xs text-white/70">Activities Today</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockActivities.filter(a => a.type === 'board').length}</div>
+                    <div className="text-xs text-white/70">Board Updates</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockActivities.filter(a => a.type === 'file').length}</div>
+                    <div className="text-xs text-white/70">File Actions</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.onlineNow}</div>
+                    <div className="text-xs text-white/70">Active Users</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Quick Actions */}
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-violet-600" />
+                  Activity Filters
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all hover:scale-105">
+                    <Layout className="h-5 w-5 text-violet-600" />
+                    <span className="text-sm">Board Activity</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <MessageSquare className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Messages</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all hover:scale-105">
+                    <FileText className="h-5 w-5 text-indigo-600" />
+                    <span className="text-sm">File Uploads</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">Team Updates</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
               <CardContent>
@@ -862,23 +1260,90 @@ export default function CollaborationClient() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="general"><Settings2 className="h-4 w-4 mr-2" />General</TabsTrigger>
-                <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-2" />Notifications</TabsTrigger>
-                <TabsTrigger value="integrations"><Link2 className="h-4 w-4 mr-2" />Integrations</TabsTrigger>
-                <TabsTrigger value="automations"><Zap className="h-4 w-4 mr-2" />Automations</TabsTrigger>
-                <TabsTrigger value="privacy"><Lock className="h-4 w-4 mr-2" />Privacy</TabsTrigger>
-                <TabsTrigger value="appearance"><Palette className="h-4 w-4 mr-2" />Appearance</TabsTrigger>
-              </TabsList>
+          {/* Settings Tab - Comprehensive 6 Sub-tabs with Sidebar */}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Settings className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Collaboration Settings</h3>
+                  <Badge className="bg-blue-500/20 text-blue-300 border-0">Teams Level</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Configure your workspace preferences, meeting defaults, notifications, integrations, automations, and appearance options.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockIntegrations.filter(i => i.status === 'connected').length}</div>
+                    <div className="text-xs text-white/70">Connected Apps</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockAutomations.filter(a => a.isActive).length}</div>
+                    <div className="text-xs text-white/70">Active Automations</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTemplates.length}</div>
+                    <div className="text-xs text-white/70">Templates</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTeams.length}</div>
+                    <div className="text-xs text-white/70">Teams</div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {/* General Settings */}
-              <TabsContent value="general">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Workspace Settings</CardTitle></CardHeader>
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings2, description: 'Workspace settings' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alerts & sounds' },
+                        { id: 'integrations', label: 'Integrations', icon: Link2, description: 'Connected apps' },
+                        { id: 'automations', label: 'Automations', icon: Zap, description: 'Workflows' },
+                        { id: 'privacy', label: 'Privacy', icon: Lock, description: 'Security & data' },
+                        { id: 'appearance', label: 'Appearance', icon: Palette, description: 'Theme & display' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings2 className="h-5 w-5 text-blue-600" />
+                          Workspace Settings
+                        </CardTitle>
+                        <CardDescription>Configure your workspace preferences and organization details</CardDescription>
+                      </CardHeader>
                     <CardContent className="space-y-4">
                       <div><Label>Workspace Name</Label><Input defaultValue="My Workspace" className="mt-1" /></div>
                       <div><Label>Workspace URL</Label><Input defaultValue="my-workspace" className="mt-1" /></div>
@@ -899,8 +1364,41 @@ export default function CollaborationClient() {
                       <div className="flex items-center justify-between"><div><p className="font-medium">Enable Transcription</p><p className="text-sm text-gray-500">Auto-transcribe meetings</p></div><Switch defaultChecked /></div>
                     </CardContent>
                   </Card>
-                  <Card className="border-gray-200 dark:border-gray-700 col-span-2">
-                    <CardHeader><CardTitle>Templates</CardTitle>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="h-5 w-5 text-purple-600" />
+                          Workspace Branding
+                        </CardTitle>
+                        <CardDescription>Customize your workspace appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border-2 border-dashed rounded-lg text-center">
+                          <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-500">Upload workspace logo</p>
+                          <p className="text-xs text-gray-400">PNG, JPG up to 2MB</p>
+                        </div>
+                        <div><Label>Workspace Color</Label>
+                          <div className="flex gap-2 mt-2">
+                            {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
+                              <button key={color} className="w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition-transform" style={{ backgroundColor: color }} />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom Domain</p>
+                            <p className="text-sm text-gray-500">Use your own domain</p>
+                          </div>
+                          <Badge variant="outline">Enterprise</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700 col-span-2">
+                      <CardHeader><CardTitle className="flex items-center gap-2">
+                        <LayoutTemplate className="h-5 w-5 text-indigo-600" />
+                        Templates
+                      </CardTitle>
                       <Button size="sm" onClick={() => setShowTemplateDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
                     </CardHeader>
                     <CardContent>
@@ -930,13 +1428,20 @@ export default function CollaborationClient() {
                     </CardContent>
                   </Card>
                 </div>
-              </TabsContent>
+                  </>
+                )}
 
-              {/* Notifications Settings */}
-              <TabsContent value="notifications">
-                <div className="grid grid-cols-2 gap-6">
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Desktop Notifications</CardTitle></CardHeader>
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="grid grid-cols-2 gap-6">
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-amber-600" />
+                          Desktop Notifications
+                        </CardTitle>
+                        <CardDescription>Configure desktop alerts</CardDescription>
+                      </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between"><div><p className="font-medium">All Notifications</p><p className="text-sm text-gray-500">Enable desktop notifications</p></div><Switch defaultChecked /></div>
                       <div className="flex items-center justify-between"><div><p className="font-medium">Direct Messages</p><p className="text-sm text-gray-500">Notify for DMs</p></div><Switch defaultChecked /></div>
@@ -974,10 +1479,10 @@ export default function CollaborationClient() {
                     </CardContent>
                   </Card>
                 </div>
-              </TabsContent>
+                )}
 
-              {/* Integrations Settings */}
-              <TabsContent value="integrations">
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1013,10 +1518,10 @@ export default function CollaborationClient() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
+                )}
 
-              {/* Automations Settings */}
-              <TabsContent value="automations">
+                {/* Automations Settings */}
+                {settingsTab === 'automations' && (
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1051,10 +1556,10 @@ export default function CollaborationClient() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
+                )}
 
-              {/* Privacy Settings */}
-              <TabsContent value="privacy">
+                {/* Privacy Settings */}
+                {settingsTab === 'privacy' && (
                 <div className="grid grid-cols-2 gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Presence & Status</CardTitle></CardHeader>
@@ -1089,10 +1594,10 @@ export default function CollaborationClient() {
                     </CardContent>
                   </Card>
                 </div>
-              </TabsContent>
+                )}
 
-              {/* Appearance Settings */}
-              <TabsContent value="appearance">
+                {/* Appearance Settings */}
+                {settingsTab === 'appearance' && (
                 <div className="grid grid-cols-2 gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Theme</CardTitle></CardHeader>
@@ -1136,8 +1641,9 @@ export default function CollaborationClient() {
                     </CardContent>
                   </Card>
                 </div>
-              </TabsContent>
-            </Tabs>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

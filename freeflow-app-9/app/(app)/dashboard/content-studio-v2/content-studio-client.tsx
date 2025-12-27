@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,9 @@ import {
   ArrowUpRight, BarChart3, Link2, RefreshCw, History, Lock, Unlock,
   FileCode, Database, Type, Hash, ToggleLeft, ImageIcon, Film, Music,
   Paperclip, MapPin, User, Mail, Phone, ChevronRight, ExternalLink,
-  Archive, Send, PenTool, Palette, AlignLeft, Box, Boxes, GitBranch
+  Archive, Send, PenTool, Palette, AlignLeft, Box, Boxes, GitBranch,
+  Shield, Sliders, Edit, Terminal, TrendingUp, Activity, Target,
+  Workflow, FileSearch, FolderOpen, Tags, BookOpen, Play
 } from 'lucide-react'
 
 // ============================================================================
@@ -557,6 +559,7 @@ export default function ContentStudioClient() {
   const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [statusFilter, setStatusFilter] = useState<EntryStatus | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Dashboard stats
   const stats = useMemo(() => ({
@@ -566,8 +569,10 @@ export default function ContentStudioClient() {
     scheduled: mockEntries.filter(e => e.status === 'scheduled').length,
     contentTypes: mockContentTypes.length,
     assets: mockAssets.length,
+    totalAssets: mockAssets.length,
     locales: mockLocales.filter(l => l.status === 'active').length,
-    avgLocalization: Math.round(mockLocales.reduce((sum, l) => sum + l.completion_percentage, 0) / mockLocales.length)
+    avgLocalization: Math.round(mockLocales.reduce((sum, l) => sum + l.completion_percentage, 0) / mockLocales.length),
+    apiCalls: '45.2K'
   }), [])
 
   // Filtered data
@@ -655,6 +660,70 @@ export default function ContentStudioClient() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6 mt-6">
+            {/* Dashboard Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Content Dashboard</h3>
+                  <Badge className="bg-white/20 text-white border-0">Overview</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Monitor your content performance, track publishing activity, and manage your headless CMS from one central hub.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalEntries}</div>
+                    <div className="text-xs text-white/70">Total Entries</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.published}</div>
+                    <div className="text-xs text-white/70">Published</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.drafts}</div>
+                    <div className="text-xs text-white/70">Drafts</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.scheduled}</div>
+                    <div className="text-xs text-white/70">Scheduled</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <Card className="border-0 shadow-sm dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-purple-600" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: Plus, label: 'New Entry', color: 'from-purple-500 to-pink-500' },
+                    { icon: Upload, label: 'Upload Media', color: 'from-blue-500 to-cyan-500' },
+                    { icon: Boxes, label: 'New Content Type', color: 'from-green-500 to-emerald-500' },
+                    { icon: Globe, label: 'Add Locale', color: 'from-orange-500 to-amber-500' },
+                    { icon: FileSearch, label: 'Search Content', color: 'from-violet-500 to-purple-500' },
+                    { icon: History, label: 'View History', color: 'from-pink-500 to-rose-500' },
+                    { icon: Send, label: 'Publish All', color: 'from-teal-500 to-green-500' },
+                    { icon: RefreshCw, label: 'Sync Changes', color: 'from-indigo-500 to-blue-500' },
+                  ].map((action, idx) => (
+                    <button key={idx} className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Content */}
               <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-gray-800">
@@ -762,6 +831,52 @@ export default function ContentStudioClient() {
 
           {/* Content Tab */}
           <TabsContent value="content" className="space-y-6 mt-6">
+            {/* Content Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <FileText className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Content Entries</h3>
+                  <Badge className="bg-white/20 text-white border-0">{filteredEntries.length} Items</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Browse, search, and manage all your content entries. Filter by status, content type, or tags to find what you need.
+                </p>
+              </div>
+            </div>
+
+            {/* Content Quick Actions */}
+            <Card className="border-0 shadow-sm dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-indigo-600" />
+                  Content Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: Plus, label: 'New Entry', color: 'from-indigo-500 to-violet-500' },
+                    { icon: Edit2, label: 'Edit Selected', color: 'from-blue-500 to-cyan-500' },
+                    { icon: Copy, label: 'Duplicate', color: 'from-green-500 to-emerald-500' },
+                    { icon: Archive, label: 'Archive', color: 'from-orange-500 to-amber-500' },
+                    { icon: Send, label: 'Publish', color: 'from-violet-500 to-purple-500' },
+                    { icon: Languages, label: 'Translate', color: 'from-pink-500 to-rose-500' },
+                    { icon: Tags, label: 'Manage Tags', color: 'from-teal-500 to-green-500' },
+                    { icon: Download, label: 'Export', color: 'from-gray-500 to-slate-500' },
+                  ].map((action, idx) => (
+                    <button key={idx} className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -842,6 +957,52 @@ export default function ContentStudioClient() {
 
           {/* Content Types Tab */}
           <TabsContent value="types" className="space-y-6 mt-6">
+            {/* Content Types Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Boxes className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Content Models</h3>
+                  <Badge className="bg-white/20 text-white border-0">{mockContentTypes.length} Types</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Define and manage your content structure. Create custom content types with flexible fields to model any type of content.
+                </p>
+              </div>
+            </div>
+
+            {/* Content Types Quick Actions */}
+            <Card className="border-0 shadow-sm dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-emerald-600" />
+                  Model Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: Plus, label: 'New Type', color: 'from-emerald-500 to-teal-500' },
+                    { icon: Copy, label: 'Clone Type', color: 'from-blue-500 to-cyan-500' },
+                    { icon: GitBranch, label: 'Add Field', color: 'from-green-500 to-emerald-500' },
+                    { icon: Link2, label: 'Add Reference', color: 'from-orange-500 to-amber-500' },
+                    { icon: Eye, label: 'Preview', color: 'from-violet-500 to-purple-500' },
+                    { icon: Download, label: 'Export Schema', color: 'from-pink-500 to-rose-500' },
+                    { icon: Upload, label: 'Import Schema', color: 'from-teal-500 to-green-500' },
+                    { icon: BookOpen, label: 'Documentation', color: 'from-gray-500 to-slate-500' },
+                  ].map((action, idx) => (
+                    <button key={idx} className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Content Models</h2>
               <Button>
@@ -890,6 +1051,52 @@ export default function ContentStudioClient() {
 
           {/* Media Tab */}
           <TabsContent value="media" className="space-y-6 mt-6">
+            {/* Media Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <ImageIcon className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Media Library</h3>
+                  <Badge className="bg-white/20 text-white border-0">{mockAssets.length} Assets</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Upload, organize, and manage all your media assets. Support for images, videos, audio, and documents.
+                </p>
+              </div>
+            </div>
+
+            {/* Media Quick Actions */}
+            <Card className="border-0 shadow-sm dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-pink-600" />
+                  Media Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: Upload, label: 'Upload Files', color: 'from-pink-500 to-rose-500' },
+                    { icon: FolderOpen, label: 'New Folder', color: 'from-blue-500 to-cyan-500' },
+                    { icon: Edit2, label: 'Edit Metadata', color: 'from-green-500 to-emerald-500' },
+                    { icon: Tags, label: 'Manage Tags', color: 'from-orange-500 to-amber-500' },
+                    { icon: Download, label: 'Download', color: 'from-violet-500 to-purple-500' },
+                    { icon: Copy, label: 'Copy URL', color: 'from-teal-500 to-green-500' },
+                    { icon: Trash2, label: 'Delete', color: 'from-red-500 to-pink-500' },
+                    { icon: RefreshCw, label: 'Reprocess', color: 'from-gray-500 to-slate-500' },
+                  ].map((action, idx) => (
+                    <button key={idx} className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -944,6 +1151,70 @@ export default function ContentStudioClient() {
 
           {/* Localization Tab */}
           <TabsContent value="localization" className="space-y-6 mt-6">
+            {/* Localization Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Globe className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Localization</h3>
+                  <Badge className="bg-white/20 text-white border-0">{mockLocales.length} Locales</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Manage translations and localized content. Track completion progress and ensure global readiness.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockLocales.filter(l => l.status === 'active').length}</div>
+                    <div className="text-xs text-white/70">Active Locales</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.avgLocalization}%</div>
+                    <div className="text-xs text-white/70">Avg Completion</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">LTR/RTL</div>
+                    <div className="text-xs text-white/70">Directions</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">5</div>
+                    <div className="text-xs text-white/70">Fallbacks</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Localization Quick Actions */}
+            <Card className="border-0 shadow-sm dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-blue-600" />
+                  Localization Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: Plus, label: 'Add Locale', color: 'from-blue-500 to-cyan-500' },
+                    { icon: Languages, label: 'Auto Translate', color: 'from-green-500 to-emerald-500' },
+                    { icon: Target, label: 'Set Fallback', color: 'from-orange-500 to-amber-500' },
+                    { icon: Activity, label: 'Track Progress', color: 'from-violet-500 to-purple-500' },
+                    { icon: Download, label: 'Export XLIFF', color: 'from-pink-500 to-rose-500' },
+                    { icon: Upload, label: 'Import XLIFF', color: 'from-teal-500 to-green-500' },
+                    { icon: CheckCircle, label: 'Validate', color: 'from-emerald-500 to-green-500' },
+                    { icon: RefreshCw, label: 'Sync All', color: 'from-gray-500 to-slate-500' },
+                  ].map((action, idx) => (
+                    <button key={idx} className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Locales</h2>
               <Button>
@@ -1011,95 +1282,417 @@ export default function ContentStudioClient() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Comprehensive 6 Sub-tabs with Sidebar */}
           <TabsContent value="settings" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* General Settings */}
-              <Card className="border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-purple-600" />
-                    General Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto-save Drafts</p>
-                      <p className="text-sm text-gray-500">Automatically save drafts every 30 seconds</p>
-                    </div>
-                    <Switch defaultChecked />
+            {/* Settings Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Settings className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Content Studio Settings</h3>
+                  <Badge className="bg-purple-500/20 text-purple-300 border-0">Contentful Level</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Configure your content management system settings, API access, localization, webhooks, and security options.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.contentTypes}</div>
+                    <div className="text-xs text-white/70">Content Types</div>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Version History</p>
-                      <p className="text-sm text-gray-500">Keep history of all content changes</p>
-                    </div>
-                    <Switch defaultChecked />
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalAssets}</div>
+                    <div className="text-xs text-white/70">Media Assets</div>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Require Review</p>
-                      <p className="text-sm text-gray-500">Require approval before publishing</p>
-                    </div>
-                    <Switch />
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.locales}</div>
+                    <div className="text-xs text-white/70">Locales</div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.apiCalls}</div>
+                    <div className="text-xs text-white/70">API Calls/Day</div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {/* API Access */}
-              <Card className="border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="w-5 h-5 text-purple-600" />
-                    API Access
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <p className="text-sm text-gray-500 mb-1">Space ID</p>
-                    <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
-                      space_Qx7K9mN3pL2wE5
-                    </code>
-                  </div>
-                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <p className="text-sm text-gray-500 mb-1">Content Delivery API</p>
-                    <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
-                      https://cdn.contentful.com
-                    </code>
-                  </div>
-                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <p className="text-sm text-gray-500 mb-1">Content Management API</p>
-                    <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
-                      https://api.contentful.com
-                    </code>
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Regenerate API Keys
-                  </Button>
-                </CardContent>
-              </Card>
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm dark:bg-gray-800">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, description: 'Basic settings' },
+                        { id: 'api', label: 'API Access', icon: Database, description: 'Keys & endpoints' },
+                        { id: 'webhooks', label: 'Webhooks', icon: Zap, description: 'Event triggers' },
+                        { id: 'localization', label: 'Localization', icon: Globe, description: 'Languages' },
+                        { id: 'security', label: 'Security', icon: Shield, description: 'Access control' },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders, description: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-l-4 border-purple-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-purple-600' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Webhooks */}
-              <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-purple-600" />
-                    Webhooks
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    <Zap className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No webhooks configured</p>
-                    <Button variant="outline" className="mt-4">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Webhook
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-sm dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-purple-600" />
+                          Content Settings
+                        </CardTitle>
+                        <CardDescription>Configure content management preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-save Drafts</p>
+                            <p className="text-sm text-gray-500">Automatically save drafts every 30 seconds</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Version History</p>
+                            <p className="text-sm text-gray-500">Keep history of all content changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Review</p>
+                            <p className="text-sm text-gray-500">Require approval before publishing</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Rich Text Editor</p>
+                            <p className="text-sm text-gray-500">Enable advanced text formatting</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Edit className="w-5 h-5 text-blue-600" />
+                          Editorial Workflow
+                        </CardTitle>
+                        <CardDescription>Configure content review process</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Multi-stage Review</p>
+                            <p className="text-sm text-gray-500">Enable draft → review → publish workflow</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Scheduled Publishing</p>
+                            <p className="text-sm text-gray-500">Allow scheduling content for future publish</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* API Access */}
+                {settingsTab === 'api' && (
+                  <>
+                    <Card className="border-0 shadow-sm dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-purple-600" />
+                          API Credentials
+                        </CardTitle>
+                        <CardDescription>Manage your API keys and endpoints</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">Space ID</p>
+                          <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                            space_Qx7K9mN3pL2wE5
+                          </code>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">Content Delivery API Key</p>
+                          <div className="flex items-center gap-2">
+                            <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
+                              •••••••••••••••••••••
+                            </code>
+                            <Button variant="ghost" size="sm"><Copy className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">Content Management API Key</p>
+                          <div className="flex items-center gap-2">
+                            <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
+                              •••••••••••••••••••••
+                            </code>
+                            <Button variant="ghost" size="sm"><Copy className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Regenerate Keys
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            API Docs
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-green-600" />
+                          API Endpoints
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">Content Delivery API</p>
+                          <code className="text-sm font-mono">https://cdn.contentful.com</code>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">Content Management API</p>
+                          <code className="text-sm font-mono">https://api.contentful.com</code>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">Preview API</p>
+                          <code className="text-sm font-mono">https://preview.contentful.com</code>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <p className="text-sm text-gray-500 mb-1">GraphQL API</p>
+                          <code className="text-sm font-mono">https://graphql.contentful.com</code>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Webhooks */}
+                {settingsTab === 'webhooks' && (
+                  <Card className="border-0 shadow-sm dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-purple-600" />
+                        Webhooks
+                      </CardTitle>
+                      <CardDescription>Configure event triggers for external integrations</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-8 text-gray-500">
+                        <Zap className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p className="mb-2">No webhooks configured</p>
+                        <p className="text-sm mb-4">Webhooks notify external systems when content changes</p>
+                        <Button variant="outline">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Localization */}
+                {settingsTab === 'localization' && (
+                  <Card className="border-0 shadow-sm dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-blue-600" />
+                        Localization Settings
+                      </CardTitle>
+                      <CardDescription>Configure supported languages and locales</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">🇺🇸</span>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">English (US)</p>
+                            <p className="text-sm text-gray-500">Default locale</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-700">Default</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">🇪🇸</span>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Spanish</p>
+                            <p className="text-sm text-gray-500">Enabled</p>
+                          </div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">🇫🇷</span>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">French</p>
+                            <p className="text-sm text-gray-500">Enabled</p>
+                          </div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">🇩🇪</span>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">German</p>
+                            <p className="text-sm text-gray-500">Disabled</p>
+                          </div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Locale
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Security */}
+                {settingsTab === 'security' && (
+                  <Card className="border-0 shadow-sm dark:bg-gray-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-green-600" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Configure access control and permissions</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                          <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
+                          <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                          <p className="text-sm text-gray-500">Track all user actions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Content Encryption</p>
+                          <p className="text-sm text-gray-500">Encrypt sensitive fields</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-sm dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-amber-600" />
+                          Advanced Options
+                        </CardTitle>
+                        <CardDescription>Power user features and configurations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Custom Extensions</p>
+                            <p className="text-sm text-gray-500">Enable custom field extensions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">GraphQL Playground</p>
+                            <p className="text-sm text-gray-500">Enable GraphQL explorer</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                            <p className="text-sm text-gray-500">Access experimental features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Content</p>
+                            <p className="text-sm text-gray-500">Remove all entries and content types</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Space</p>
+                            <p className="text-sm text-gray-500">Reset entire space to defaults</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

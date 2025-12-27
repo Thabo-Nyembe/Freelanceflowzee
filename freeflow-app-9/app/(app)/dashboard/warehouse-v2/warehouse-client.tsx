@@ -46,9 +46,24 @@ import {
   RefreshCw,
   FileText,
   Tag,
-  Hash
+  Hash,
+  Shield,
+  Sliders,
+  Bell,
+  Webhook,
+  Key,
+  Database,
+  Trash2,
+  History,
+  Lock,
+  Globe,
+  Printer,
+  Mail,
+  Upload,
+  HardDrive,
+  Terminal
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -57,6 +72,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 // Types
 type InventoryStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'reserved' | 'damaged' | 'quarantine'
@@ -373,6 +390,7 @@ export default function WarehouseClient() {
   const [inventoryFilter, setInventoryFilter] = useState<InventoryStatus | 'all'>('all')
   const [zoneFilter, setZoneFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -662,10 +680,58 @@ export default function WarehouseClient() {
               <Scan className="w-4 h-4" />
               Cycle Counts
             </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
+            {/* Inventory Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Inventory Management</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Track stock levels, manage bin locations, and optimize your warehouse inventory in real-time.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalItems}</div>
+                      <div className="text-sm text-white/80">Total SKUs</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">${(stats.totalValue / 1000).toFixed(0)}K</div>
+                      <div className="text-sm text-white/80">Total Value</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Plus, label: 'Add Item', color: 'text-green-500' },
+                { icon: Search, label: 'Find SKU', color: 'text-blue-500' },
+                { icon: Move, label: 'Transfer', color: 'text-purple-500' },
+                { icon: ClipboardList, label: 'Cycle Count', color: 'text-orange-500' },
+                { icon: AlertTriangle, label: 'Low Stock', color: 'text-yellow-500' },
+                { icon: RefreshCw, label: 'Replenish', color: 'text-cyan-500' },
+                { icon: Download, label: 'Export', color: 'text-indigo-500' },
+                { icon: Upload, label: 'Import', color: 'text-gray-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -795,6 +861,31 @@ export default function WarehouseClient() {
 
           {/* Inbound Tab */}
           <TabsContent value="inbound" className="space-y-6">
+            {/* Inbound Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Inbound Shipments</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Manage incoming shipments, receiving processes, and putaway operations for seamless inventory flow.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.pendingInbound}</div>
+                      <div className="text-sm text-white/80">Pending</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockInboundShipments.filter(s => s.status === 'receiving').length}</div>
+                      <div className="text-sm text-white/80">Receiving</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-4">
               {mockInboundShipments.map((shipment) => {
                 const statusBadge = getShipmentStatusBadge(shipment.status)
@@ -881,6 +972,31 @@ export default function WarehouseClient() {
 
           {/* Outbound Tab */}
           <TabsContent value="outbound" className="space-y-6">
+            {/* Outbound Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Outbound Orders</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Manage order fulfillment, picking, packing, and shipping operations with real-time tracking.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.pendingOutbound}</div>
+                      <div className="text-sm text-white/80">Pending</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockOutboundOrders.filter(o => o.priority === 'urgent').length}</div>
+                      <div className="text-sm text-white/80">Urgent</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-4">
               {mockOutboundOrders.map((order) => {
                 const statusBadge = getOrderStatusBadge(order.status)
@@ -973,6 +1089,31 @@ export default function WarehouseClient() {
 
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-6">
+            {/* Tasks Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Warehouse Tasks</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Assign, track, and complete warehouse tasks including picks, putaways, replenishments, and cycle counts.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.activeTasks}</div>
+                      <div className="text-sm text-white/80">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.pendingTasks}</div>
+                      <div className="text-sm text-white/80">Pending</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -1076,6 +1217,31 @@ export default function WarehouseClient() {
 
           {/* Zones Tab */}
           <TabsContent value="zones" className="space-y-6">
+            {/* Zones Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Zones & Bin Locations</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Configure warehouse zones, manage bin locations, and optimize storage layout for maximum efficiency.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockZones.length}</div>
+                      <div className="text-sm text-white/80">Zones</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.avgZoneUtilization}%</div>
+                      <div className="text-sm text-white/80">Avg Utilization</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockZones.map((zone) => {
                 const ZoneIcon = getZoneTypeIcon(zone.type)
@@ -1156,6 +1322,31 @@ export default function WarehouseClient() {
 
           {/* Cycle Counts Tab */}
           <TabsContent value="counts" className="space-y-6">
+            {/* Cycle Counts Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Cycle Counts</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Schedule and perform cycle counts to maintain inventory accuracy and identify discrepancies.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockCycleCounts.filter(c => c.status === 'in_progress').length}</div>
+                      <div className="text-sm text-white/80">In Progress</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockCycleCounts.filter(c => c.status === 'scheduled').length}</div>
+                      <div className="text-sm text-white/80">Scheduled</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-4">
               {mockCycleCounts.map((count) => {
                 const progress = (count.counted_bins / count.total_bins) * 100
@@ -1243,6 +1434,427 @@ export default function WarehouseClient() {
                   </Card>
                 )
               })}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'inventory', label: 'Inventory', icon: Package },
+                        { id: 'operations', label: 'Operations', icon: ClipboardList },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Sliders className="w-5 h-5 text-cyan-500" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure basic warehouse management settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Warehouse Name</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display name for this warehouse</p>
+                          </div>
+                          <Input defaultValue="Main Distribution Center" className="w-64" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Time Zone</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Operating time zone for scheduling</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>America/New_York (EST)</option>
+                            <option>America/Los_Angeles (PST)</option>
+                            <option>Europe/London (GMT)</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Auto-Refresh Dashboard</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically update stats and tasks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Unit System</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Measurement units for weights and dimensions</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>Metric (kg, cm)</option>
+                            <option>Imperial (lb, in)</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Default Barcode Format</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Standard barcode format for scanning</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>Code 128</option>
+                            <option>Code 39</option>
+                            <option>QR Code</option>
+                            <option>EAN-13</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'inventory' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="w-5 h-5 text-blue-500" />
+                        Inventory Settings
+                      </CardTitle>
+                      <CardDescription>Configure inventory management rules and thresholds</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Low Stock Alert Threshold</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Percentage below reorder point to trigger alerts</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="20" className="w-20" />
+                            <span className="text-gray-500">%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Auto-Reorder</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create POs when stock is low</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">FIFO Enforcement</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enforce first-in-first-out picking</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Lot Tracking</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Track items by lot/batch number</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Serial Number Tracking</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Track individual item serial numbers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Expiry Date Alerts</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Days before expiry to alert</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="30" className="w-20" />
+                            <span className="text-gray-500">days</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'operations' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ClipboardList className="w-5 h-5 text-purple-500" />
+                        Operations Settings
+                      </CardTitle>
+                      <CardDescription>Configure task management and workflow settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Auto Task Assignment</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically assign tasks to available workers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Wave Planning</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable wave-based order processing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Pick Path Optimization</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Optimize pick routes for efficiency</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Cycle Count Frequency</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How often to schedule cycle counts</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>Daily</option>
+                            <option>Weekly</option>
+                            <option>Monthly</option>
+                            <option>Quarterly</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Task Priority Rules</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default priority escalation rules</p>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="w-5 h-5 text-green-500" />
+                        Integrations
+                      </CardTitle>
+                      <CardDescription>Connect external systems and configure API access</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        {[
+                          { name: 'ERP System', icon: Database, status: 'Connected', color: 'green' },
+                          { name: 'Shipping Carriers', icon: Truck, status: 'Connected', color: 'green' },
+                          { name: 'Barcode Scanners', icon: Scan, status: 'Active', color: 'green' },
+                          { name: 'Label Printers', icon: Printer, status: '2 Connected', color: 'green' },
+                          { name: 'Email Notifications', icon: Mail, status: 'Configured', color: 'green' },
+                          { name: 'Webhook Events', icon: Webhook, status: '5 Active', color: 'blue' }
+                        ].map((integration, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <integration.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <Badge className={`bg-${integration.color}-100 text-${integration.color}-800 dark:bg-${integration.color}-900/30 dark:text-${integration.color}-400`}>
+                                  {integration.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Configure</Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">REST API for external integrations</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input value="wms_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
+                          <Button variant="outline" size="sm">Regenerate</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-red-500" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Manage access controls and security policies</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Session Timeout</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Auto-logout after inactivity</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="30" className="w-20" />
+                            <span className="text-gray-500">minutes</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">IP Whitelist</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Restrict access to specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Failed Login Lockout</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Attempts before account lockout</p>
+                          </div>
+                          <Input type="number" defaultValue="5" className="w-20" />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Terminal className="w-5 h-5 text-gray-500" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>System configuration and maintenance options</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable verbose logging for troubleshooting</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Data Retention</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep historical data</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>1 Year</option>
+                            <option>2 Years</option>
+                            <option>5 Years</option>
+                            <option>Forever</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Database Maintenance</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Last optimized: 2 days ago</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Optimize Now
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Export Configuration</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Backup all warehouse settings</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Import Configuration</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Restore settings from backup</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Upload className="w-4 h-4" />
+                            Import
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">Danger Zone</h4>
+                        <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Purge Old Data
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset to Defaults
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

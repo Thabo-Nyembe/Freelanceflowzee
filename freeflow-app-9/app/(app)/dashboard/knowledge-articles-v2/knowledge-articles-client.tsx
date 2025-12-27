@@ -59,8 +59,26 @@ import {
   Calendar,
   Timer,
   Award,
-  Lightbulb
+  Lightbulb,
+  Shield,
+  Sliders,
+  Bell,
+  Key,
+  Webhook,
+  Database,
+  RefreshCw,
+  Download,
+  Trash2 as TrashIcon,
+  Terminal,
+  FileCode,
+  Folder,
+  GitBranch,
+  Workflow,
+  Mail,
+  Palette
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 // Types
 type ArticleStatus = 'published' | 'draft' | 'review' | 'archived' | 'scheduled'
@@ -483,6 +501,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const [statusFilter, setStatusFilter] = useState<ArticleStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<ArticleType | 'all'>('all')
   const [expandedSpaces, setExpandedSpaces] = useState<Set<string>>(new Set(['s1', 's4']))
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Computed values
   const filteredArticles = useMemo(() => {
@@ -640,6 +659,67 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
           {/* Articles Tab */}
           <TabsContent value="articles" className="space-y-6">
+            {/* Articles Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Knowledge Articles</h3>
+                    <p className="text-blue-100">Create, organize, and share documentation</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{stats.totalArticles}</p>
+                    <p className="text-sm text-blue-100">Total Articles</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{stats.publishedArticles}</p>
+                    <p className="text-sm text-blue-100">Published</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{(stats.totalViews / 1000).toFixed(1)}K</p>
+                    <p className="text-sm text-blue-100">Total Views</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{stats.totalContributors}</p>
+                    <p className="text-sm text-blue-100">Contributors</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600' },
+                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600' },
+                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600' },
+                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600' },
+                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600' },
+                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600' },
+                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600' },
+                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Sidebar - Space Navigation */}
               <div className="space-y-4">
@@ -842,7 +922,68 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
           </TabsContent>
 
           {/* Spaces Tab */}
-          <TabsContent value="spaces" className="space-y-4">
+          <TabsContent value="spaces" className="space-y-6">
+            {/* Spaces Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <FolderTree className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Content Spaces</h3>
+                    <p className="text-purple-100">Organize articles into logical spaces</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{spaces.length}</p>
+                    <p className="text-sm text-purple-100">Total Spaces</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{spaces.filter(s => s.isPublic).length}</p>
+                    <p className="text-sm text-purple-100">Public</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{spaces.reduce((a, s) => a + s.articlesCount, 0)}</p>
+                    <p className="text-sm text-purple-100">Total Articles</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{spaces.reduce((a, s) => a + s.membersCount, 0)}</p>
+                    <p className="text-sm text-purple-100">Members</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600' },
+                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600' },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600' },
+                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600' },
+                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600' },
+                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600' },
+                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600' },
+                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">All Spaces ({spaces.length})</h3>
               <Button className="gap-2">
@@ -893,7 +1034,68 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
           </TabsContent>
 
           {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-4">
+          <TabsContent value="templates" className="space-y-6">
+            {/* Templates Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <LayoutTemplate className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Article Templates</h3>
+                    <p className="text-green-100">Pre-built templates for faster content creation</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{templates.length}</p>
+                    <p className="text-sm text-green-100">Templates</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{templates.filter(t => t.isGlobal).length}</p>
+                    <p className="text-sm text-green-100">Global</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{templates.reduce((a, t) => a + t.usageCount, 0)}</p>
+                    <p className="text-sm text-green-100">Total Uses</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{[...new Set(templates.map(t => t.category))].length}</p>
+                    <p className="text-sm text-green-100">Categories</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600' },
+                { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600' },
+                { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600' },
+                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600' },
+                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600' },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600' },
+                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600' },
+                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Article Templates ({templates.length})</h3>
               <Button className="gap-2">
@@ -1108,74 +1310,390 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Knowledge Base Settings</CardTitle>
-                <CardDescription>Configure your knowledge base preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">General</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Public Access</p>
-                          <p className="text-xs text-muted-foreground">Allow public access to published articles</p>
-                        </div>
-                        <Checkbox />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Comments</p>
-                          <p className="text-xs text-muted-foreground">Enable comments on articles</p>
-                        </div>
-                        <Checkbox defaultChecked />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Ratings</p>
-                          <p className="text-xs text-muted-foreground">Allow users to rate articles</p>
-                        </div>
-                        <Checkbox defaultChecked />
-                      </div>
-                    </div>
+            {/* Settings Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Settings className="w-6 h-6" />
                   </div>
-
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Notifications</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">New Comments</p>
-                          <p className="text-xs text-muted-foreground">Get notified of new comments</p>
-                        </div>
-                        <Checkbox defaultChecked />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Article Updates</p>
-                          <p className="text-xs text-muted-foreground">Notify when starred articles are updated</p>
-                        </div>
-                        <Checkbox defaultChecked />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Weekly Digest</p>
-                          <p className="text-xs text-muted-foreground">Receive weekly content summary</p>
-                        </div>
-                        <Checkbox />
-                      </div>
-                    </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Knowledge Base Settings</h3>
+                    <p className="text-gray-300">Configure your knowledge base preferences</p>
                   </div>
                 </div>
-
-                <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline">Cancel</Button>
-                  <Button>Save Settings</Button>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">6</p>
+                    <p className="text-sm text-gray-300">Settings Areas</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">{spaces.length}</p>
+                    <p className="text-sm text-gray-300">Spaces</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">Active</p>
+                    <p className="text-sm text-gray-300">Status</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <p className="text-2xl font-bold">2</p>
+                    <p className="text-sm text-gray-300">Integrations</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 lg:col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm sticky top-6">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, description: 'Basic settings' },
+                        { id: 'content', label: 'Content', icon: FileText, description: 'Article preferences' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alert preferences' },
+                        { id: 'permissions', label: 'Permissions', icon: Shield, description: 'Access control' },
+                        { id: 'integrations', label: 'Integrations', icon: Zap, description: 'Third-party apps' },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders, description: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 lg:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><BookOpen className="w-5 h-5 text-blue-600" />Knowledge Base Info</CardTitle>
+                        <CardDescription>Basic knowledge base configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Knowledge Base Name</Label>
+                            <Input defaultValue="Company Knowledge Base" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Subdomain</Label>
+                            <Input defaultValue="docs.company.com" className="mt-1" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Description</Label>
+                          <Textarea defaultValue="Internal and external documentation" className="mt-1" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Language</Label>
+                            <Input defaultValue="English (US)" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Timezone</Label>
+                            <Input defaultValue="America/Los_Angeles" className="mt-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5 text-blue-600" />Public Access</CardTitle>
+                        <CardDescription>Control public visibility</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Public Knowledge Base</p>
+                            <p className="text-sm text-gray-500">Allow anyone to view published articles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Search Engine Indexing</p>
+                            <p className="text-sm text-gray-500">Allow search engines to index public content</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Content Settings */}
+                {settingsTab === 'content' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-blue-600" />Article Settings</CardTitle>
+                        <CardDescription>Configure article behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Comments</p>
+                            <p className="text-sm text-gray-500">Allow users to comment on articles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Ratings</p>
+                            <p className="text-sm text-gray-500">Allow users to rate articles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Version History</p>
+                            <p className="text-sm text-gray-500">Track changes to articles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Read Time Estimation</p>
+                            <p className="text-sm text-gray-500">Show estimated reading time</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Workflow className="w-5 h-5 text-blue-600" />Publishing Workflow</CardTitle>
+                        <CardDescription>Configure article publishing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Require Review</p>
+                            <p className="text-sm text-gray-500">Articles must be reviewed before publishing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Scheduled Publishing</p>
+                            <p className="text-sm text-gray-500">Allow articles to be scheduled for publishing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notification Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Mail className="w-5 h-5 text-blue-600" />Email Notifications</CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">New Comments</p>
+                            <p className="text-sm text-gray-500">Email when articles receive comments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Article Updates</p>
+                            <p className="text-sm text-gray-500">Email when starred articles are updated</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Review Requests</p>
+                            <p className="text-sm text-gray-500">Email when articles need review</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Digest</p>
+                            <p className="text-sm text-gray-500">Receive weekly content summary</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Permissions Settings */}
+                {settingsTab === 'permissions' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-blue-600" />Access Control</CardTitle>
+                        <CardDescription>Manage permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Default Space Permission</p>
+                            <p className="text-sm text-gray-500">Default access level for new spaces</p>
+                          </div>
+                          <Input defaultValue="View Only" className="w-40" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Inherit Permissions</p>
+                            <p className="text-sm text-gray-500">Articles inherit space permissions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Guest Access</p>
+                            <p className="text-sm text-gray-500">Allow guest users to view public content</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Webhook className="w-5 h-5 text-blue-600" />Connected Apps</CardTitle>
+                        <CardDescription>Manage integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg"><Zap className="w-4 h-4 text-blue-600" /></div>
+                            <div>
+                              <p className="font-medium">Slack</p>
+                              <p className="text-sm text-gray-500">Notifications to Slack channels</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg"><Search className="w-4 h-4" /></div>
+                            <div>
+                              <p className="font-medium">Algolia</p>
+                              <p className="text-sm text-gray-500">Enhanced search capabilities</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg"><BarChart3 className="w-4 h-4" /></div>
+                            <div>
+                              <p className="font-medium">Google Analytics</p>
+                              <p className="text-sm text-gray-500">Track content performance</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Sliders className="w-5 h-5 text-blue-600" />Advanced Settings</CardTitle>
+                        <CardDescription>Power user features</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500">Enable API access to knowledge base</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom CSS</p>
+                            <p className="text-sm text-gray-500">Add custom styling to public pages</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-gray-500">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Database className="w-5 h-5 text-blue-600" />Data Management</CardTitle>
+                        <CardDescription>Manage your data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Export All Data</p>
+                            <p className="text-sm text-gray-500">Download all articles and settings</p>
+                          </div>
+                          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Clear Cache</p>
+                            <p className="text-sm text-gray-500">Refresh cached content</p>
+                          </div>
+                          <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Knowledge Base</p>
+                            <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all content</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -74,7 +76,11 @@ import {
   Cpu,
   HardDrive,
   Wifi,
-  WifiOff
+  WifiOff,
+  Sliders,
+  Webhook,
+  Upload,
+  Mail
 } from 'lucide-react'
 
 // ============================================================================
@@ -603,6 +609,7 @@ export default function AuditLogsClient() {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
   const [isLiveMode, setIsLiveMode] = useState(true)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
@@ -732,7 +739,67 @@ export default function AuditLogsClient() {
           </TabsList>
 
           {/* Events Tab */}
-          <TabsContent value="events" className="mt-6">
+          <TabsContent value="events" className="mt-6 space-y-6">
+            {/* Events Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Activity className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Event Stream</h2>
+                    <p className="text-white/80">Real-time security monitoring and audit trail</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Events</p>
+                    <p className="text-2xl font-bold">{stats.total.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Critical</p>
+                    <p className="text-2xl font-bold">{stats.critical}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Anomalies</p>
+                    <p className="text-2xl font-bold">{stats.anomalies}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Blocked</p>
+                    <p className="text-2xl font-bold">{stats.blocked}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Search, label: 'Search Logs', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' },
+                { icon: Bell, label: 'New Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600' },
+                { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
+                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
+                { icon: ShieldCheck, label: 'Compliance', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
+                { icon: Archive, label: 'Archive', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
+                { icon: Webhook, label: 'Integrations', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`p-3 rounded-xl ${action.color}`}>
+                    <action.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
@@ -837,7 +904,24 @@ export default function AuditLogsClient() {
           </TabsContent>
 
           {/* Search Tab */}
-          <TabsContent value="search" className="mt-6">
+          <TabsContent value="search" className="mt-6 space-y-6">
+            {/* Search Header */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-100 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <Search className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Log Query</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Use structured queries to search audit logs</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                Saved Queries
+              </Button>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Advanced Search</CardTitle>
@@ -879,7 +963,42 @@ export default function AuditLogsClient() {
           </TabsContent>
 
           {/* Alerts Tab */}
-          <TabsContent value="alerts" className="mt-6">
+          <TabsContent value="alerts" className="mt-6 space-y-6">
+            {/* Alerts Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Bell className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Alert Management</h2>
+                    <p className="text-white/80">Configure and manage security alerts</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Active</p>
+                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'active').length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Acknowledged</p>
+                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'acknowledged').length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Resolved</p>
+                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'resolved').length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Rules</p>
+                    <p className="text-2xl font-bold">{mockAlertRules.length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card>
@@ -1001,7 +1120,30 @@ export default function AuditLogsClient() {
           </TabsContent>
 
           {/* Compliance Tab */}
-          <TabsContent value="compliance" className="mt-6">
+          <TabsContent value="compliance" className="mt-6 space-y-6">
+            {/* Compliance Header */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <ShieldCheck className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Compliance Dashboard</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">SOC2, GDPR, HIPAA, PCI-DSS, ISO27001 compliance status</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export All
+                </Button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockComplianceReports.map(report => (
                 <Card key={report.id}>
@@ -1048,7 +1190,34 @@ export default function AuditLogsClient() {
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="analytics" className="mt-6 space-y-6">
+            {/* Analytics Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <BarChart3 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Security Analytics</h2>
+                    <p className="text-white/80">Insights and trends from your audit logs</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mt-6">
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Last 7 Days
+                  </button>
+                  <button className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors">
+                    <Download className="w-4 h-4 inline mr-2" />
+                    Export Report
+                  </button>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -1159,121 +1328,379 @@ export default function AuditLogsClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Retention Policy</CardTitle>
-                  <CardDescription>Configure log retention periods</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sticky top-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Settings</h3>
+                  <nav className="space-y-1">
                     {[
-                      { type: 'Security Logs', retention: '7 years', required: true },
-                      { type: 'Authentication Logs', retention: '1 year', required: true },
-                      { type: 'System Logs', retention: '90 days', required: false },
-                      { type: 'Debug Logs', retention: '7 days', required: false }
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                      { id: 'general', label: 'General', icon: Sliders },
+                      { id: 'retention', label: 'Retention', icon: Database },
+                      { id: 'notifications', label: 'Notifications', icon: Bell },
+                      { id: 'integrations', label: 'Integrations', icon: Webhook },
+                      { id: 'security', label: 'Security', icon: Shield },
+                      { id: 'advanced', label: 'Advanced', icon: Terminal },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Log Sources</CardTitle>
+                        <CardDescription>Connected log sources and event rates</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Application Server', status: 'connected', events: '12.4K/hr' },
+                            { name: 'Database', status: 'connected', events: '8.2K/hr' },
+                            { name: 'Load Balancer', status: 'connected', events: '45.6K/hr' },
+                            { name: 'Firewall', status: 'connected', events: '23.1K/hr' },
+                            { name: 'CDN', status: 'connected', events: '67.2K/hr' },
+                          ].map((source, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-green-500" />
+                                <span className="font-medium">{source.name}</span>
+                              </div>
+                              <span className="text-sm text-gray-500">{source.events}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Anomaly Detection</CardTitle>
+                        <CardDescription>ML-powered anomaly detection settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Anomaly Detection</p>
+                            <p className="text-sm text-gray-500">Uses ML to detect unusual patterns</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
                         <div>
-                          <p className="font-medium">{item.type}</p>
-                          {item.required && <span className="text-xs text-gray-500">Compliance required</span>}
+                          <Label htmlFor="sensitivity">Sensitivity Level</Label>
+                          <select id="sensitivity" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                          </select>
                         </div>
-                        <Badge variant="outline">{item.retention}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Log Sources</CardTitle>
-                  <CardDescription>Connected log sources</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Application Server', status: 'connected', events: '12.4K/hr' },
-                      { name: 'Database', status: 'connected', events: '8.2K/hr' },
-                      { name: 'Load Balancer', status: 'connected', events: '45.6K/hr' },
-                      { name: 'Firewall', status: 'connected', events: '23.1K/hr' }
-                    ].map((source, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-green-500" />
-                          <span className="font-medium">{source.name}</span>
+                        <div>
+                          <Label htmlFor="learningPeriod">Learning Period</Label>
+                          <select id="learningPeriod" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                            <option>7 days</option>
+                            <option>14 days</option>
+                            <option>30 days</option>
+                          </select>
                         </div>
-                        <span className="text-sm text-gray-500">{source.events}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Anomaly Detection</CardTitle>
-                  <CardDescription>ML-powered anomaly settings</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Enable Anomaly Detection</p>
-                        <p className="text-sm text-gray-500">Uses ML to detect unusual patterns</p>
-                      </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Sensitivity Level</p>
-                        <p className="text-sm text-gray-500">Higher = more alerts</p>
-                      </div>
-                      <Badge>Medium</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Learning Period</p>
-                        <p className="text-sm text-gray-500">Baseline learning window</p>
-                      </div>
-                      <Badge variant="outline">14 days</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'retention' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Retention Policy</CardTitle>
+                        <CardDescription>Configure how long logs are retained</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {[
+                            { type: 'Security Logs', retention: '7 years', required: true },
+                            { type: 'Authentication Logs', retention: '1 year', required: true },
+                            { type: 'Audit Logs', retention: '2 years', required: true },
+                            { type: 'System Logs', retention: '90 days', required: false },
+                            { type: 'Debug Logs', retention: '7 days', required: false }
+                          ].map((item, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">{item.type}</p>
+                                {item.required && <span className="text-xs text-gray-500">Compliance required</span>}
+                              </div>
+                              <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                                <option>{item.retention}</option>
+                                <option>30 days</option>
+                                <option>90 days</option>
+                                <option>1 year</option>
+                                <option>7 years</option>
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Export Settings</CardTitle>
-                  <CardDescription>Configure log export options</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Export Format</p>
-                        <p className="text-sm text-gray-500">Default export format</p>
-                      </div>
-                      <Badge variant="outline">JSON</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">S3 Archive</p>
-                        <p className="text-sm text-gray-500">Auto-archive to S3</p>
-                      </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">SIEM Integration</p>
-                        <p className="text-sm text-gray-500">Forward to SIEM</p>
-                      </div>
-                      <Button variant="outline" size="sm">Configure</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Storage Settings</CardTitle>
+                        <CardDescription>Configure log storage options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Compression</p>
+                            <p className="text-sm text-gray-500">Compress archived logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Encryption at Rest</p>
+                            <p className="text-sm text-gray-500">Encrypt stored logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Alert Notifications</CardTitle>
+                        <CardDescription>Configure notification preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Critical Events', desc: 'Immediate alerts for critical events', enabled: true },
+                          { name: 'Failed Logins', desc: 'Alert on failed login attempts', enabled: true },
+                          { name: 'Anomaly Detection', desc: 'Alert when anomalies are detected', enabled: true },
+                          { name: 'Data Exports', desc: 'Notify on bulk data exports', enabled: false },
+                          { name: 'Daily Summary', desc: 'Daily audit log summary', enabled: true },
+                        ].map((notification) => (
+                          <div key={notification.name} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notification.name}</p>
+                              <p className="text-sm text-gray-500">{notification.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notification.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Channels</CardTitle>
+                        <CardDescription>Where to send notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="emailNotify">Email Addresses</Label>
+                          <Input id="emailNotify" type="text" className="mt-1" defaultValue="security@company.com" />
+                        </div>
+                        <div>
+                          <Label htmlFor="slackWebhook">Slack Webhook</Label>
+                          <Input id="slackWebhook" type="url" className="mt-1" placeholder="https://hooks.slack.com/..." />
+                        </div>
+                        <div>
+                          <Label htmlFor="pagerduty">PagerDuty Key</Label>
+                          <Input id="pagerduty" type="text" className="mt-1" placeholder="Integration key" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>SIEM Integration</CardTitle>
+                        <CardDescription>Connect to your SIEM platform</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Splunk', desc: 'Forward logs to Splunk', status: 'connected', icon: '📊' },
+                          { name: 'Datadog', desc: 'Send to Datadog', status: 'disconnected', icon: '🐕' },
+                          { name: 'Elastic', desc: 'Elasticsearch integration', status: 'disconnected', icon: '🔍' },
+                          { name: 'Sumo Logic', desc: 'Cloud SIEM', status: 'disconnected', icon: '☁️' },
+                        ].map((integration) => (
+                          <div key={integration.name} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {integration.status === 'connected' ? 'Manage' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Cloud Storage</CardTitle>
+                        <CardDescription>Archive logs to cloud storage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">AWS S3</p>
+                            <p className="text-sm text-gray-500">Auto-archive to S3</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label htmlFor="s3Bucket">S3 Bucket</Label>
+                          <Input id="s3Bucket" type="text" className="mt-1" defaultValue="audit-logs-archive" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage who can access audit logs</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">SSO Required</p>
+                            <p className="text-sm text-gray-500">Require SSO for access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
+                            <p className="text-sm text-gray-500">Restrict access by IP</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Log Access</p>
+                            <p className="text-sm text-gray-500">Log who views audit logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Protection</CardTitle>
+                        <CardDescription>Configure data security settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">PII Masking</p>
+                            <p className="text-sm text-gray-500">Mask sensitive data in logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Encryption in Transit</p>
+                            <p className="text-sm text-gray-500">TLS for all transfers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Export Settings</CardTitle>
+                        <CardDescription>Configure log export options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Export All Logs</p>
+                            <p className="text-sm text-gray-500">Download complete audit trail</p>
+                          </div>
+                          <Button>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                        <div>
+                          <Label htmlFor="exportFormat">Default Format</Label>
+                          <select id="exportFormat" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                            <option>JSON</option>
+                            <option>CSV</option>
+                            <option>Parquet</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900/50">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Clear Debug Logs</p>
+                            <p className="text-sm text-gray-500">Remove all debug-level logs</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset Configuration</p>
+                            <p className="text-sm text-gray-500">Reset all settings to default</p>
+                          </div>
+                          <Button variant="destructive">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

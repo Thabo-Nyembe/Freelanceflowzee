@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Shield,
   FileText,
@@ -63,7 +65,14 @@ import {
   History,
   Bookmark,
   Star,
-  MoreHorizontal
+  MoreHorizontal,
+  Sliders,
+  Webhook,
+  Mail,
+  Copy,
+  Upload,
+  Workflow,
+  Archive
 } from 'lucide-react'
 
 // Splunk-level types
@@ -453,6 +462,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const [selectedSearch, setSelectedSearch] = useState<SavedSearch | null>(null)
   const [showCreateAlert, setShowCreateAlert] = useState(false)
   const [showCreateSearch, setShowCreateSearch] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { auditEvents, loading } = useAuditEvents({ action: selectedAction })
   const { complianceChecks } = useComplianceChecks()
@@ -739,10 +749,70 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
               <CheckCircle className="w-4 h-4 mr-2" />
               Compliance
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-slate-700 text-slate-300">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Events Tab */}
-          <TabsContent value="events" className="mt-6">
+          <TabsContent value="events" className="mt-6 space-y-6">
+            {/* Events Banner */}
+            <Card className="border-0 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Database className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Security Event Stream</h3>
+                      <p className="text-white/80">Real-time security information and event management</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{totalEvents.toLocaleString()}</p>
+                      <p className="text-sm text-white/80">Total Events</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{criticalCount + highCount}</p>
+                      <p className="text-sm text-white/80">High Priority</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{uniqueActors}</p>
+                      <p className="text-sm text-white/80">Unique Actors</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Events Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Search, label: 'Search Events', color: 'bg-green-500' },
+                { icon: Filter, label: 'Filter', color: 'bg-blue-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-purple-500' },
+                { icon: Download, label: 'Export', color: 'bg-orange-500' },
+                { icon: Bell, label: 'Alerts', color: 'bg-pink-500' },
+                { icon: Bookmark, label: 'Save Search', color: 'bg-indigo-500' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-teal-500' },
+                { icon: Terminal, label: 'Query', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Event List */}
               <div className="lg:col-span-3 space-y-4">
@@ -890,7 +960,63 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           </TabsContent>
 
           {/* Alerts Tab */}
-          <TabsContent value="alerts" className="mt-6">
+          <TabsContent value="alerts" className="mt-6 space-y-6">
+            {/* Alerts Banner */}
+            <Card className="border-0 bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Bell className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Alert Management</h3>
+                      <p className="text-white/80">Configure and monitor security alerts</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'active').length}</p>
+                      <p className="text-sm text-white/80">Active</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockAlerts.filter(a => a.priority === 'critical' || a.priority === 'high').length}</p>
+                      <p className="text-sm text-white/80">Critical/High</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockAlerts.length}</p>
+                      <p className="text-sm text-white/80">Total Rules</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Alerts Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Create Alert', color: 'bg-green-500' },
+                { icon: Bell, label: 'Active Alerts', color: 'bg-red-500' },
+                { icon: CheckCircle, label: 'Acknowledge', color: 'bg-blue-500' },
+                { icon: XCircle, label: 'Suppress', color: 'bg-orange-500' },
+                { icon: History, label: 'History', color: 'bg-purple-500' },
+                { icon: Mail, label: 'Notifications', color: 'bg-pink-500' },
+                { icon: Webhook, label: 'Webhooks', color: 'bg-indigo-500' },
+                { icon: Settings, label: 'Configure', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
@@ -1002,7 +1128,63 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           </TabsContent>
 
           {/* Saved Searches Tab */}
-          <TabsContent value="searches" className="mt-6">
+          <TabsContent value="searches" className="mt-6 space-y-6">
+            {/* Saved Searches Banner */}
+            <Card className="border-0 bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Bookmark className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Saved Searches</h3>
+                      <p className="text-white/80">Quick access to your frequently used queries</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockSavedSearches.length}</p>
+                      <p className="text-sm text-white/80">Total Searches</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockSavedSearches.filter(s => s.isScheduled).length}</p>
+                      <p className="text-sm text-white/80">Scheduled</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockSavedSearches.filter(s => s.starred).length}</p>
+                      <p className="text-sm text-white/80">Starred</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Saved Searches Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Save Search', color: 'bg-green-500' },
+                { icon: Star, label: 'Starred', color: 'bg-yellow-500' },
+                { icon: Clock, label: 'Scheduled', color: 'bg-blue-500' },
+                { icon: Share, label: 'Shared', color: 'bg-purple-500' },
+                { icon: Play, label: 'Run Search', color: 'bg-orange-500' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500' },
+                { icon: Download, label: 'Export', color: 'bg-indigo-500' },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-white">Saved Searches</h3>
@@ -1068,7 +1250,63 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="mt-6">
+          <TabsContent value="reports" className="mt-6 space-y-6">
+            {/* Reports Banner */}
+            <Card className="border-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <FileText className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Scheduled Reports</h3>
+                      <p className="text-white/80">Automated reporting and distribution</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockReports.length}</p>
+                      <p className="text-sm text-white/80">Total Reports</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockReports.filter(r => r.status === 'active').length}</p>
+                      <p className="text-sm text-white/80">Active</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockReports.reduce((sum, r) => sum + r.recipients.length, 0)}</p>
+                      <p className="text-sm text-white/80">Recipients</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Reports Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Create Report', color: 'bg-green-500' },
+                { icon: Play, label: 'Run Now', color: 'bg-blue-500' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-500' },
+                { icon: Download, label: 'Download', color: 'bg-orange-500' },
+                { icon: Mail, label: 'Email Report', color: 'bg-pink-500' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-indigo-500' },
+                { icon: Archive, label: 'Archive', color: 'bg-teal-500' },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-white">Scheduled Reports</h3>
@@ -1136,7 +1374,63 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           </TabsContent>
 
           {/* Compliance Tab */}
-          <TabsContent value="compliance" className="mt-6">
+          <TabsContent value="compliance" className="mt-6 space-y-6">
+            {/* Compliance Banner */}
+            <Card className="border-0 bg-gradient-to-r from-teal-500 via-emerald-500 to-green-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <CheckCircle className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Compliance Dashboard</h3>
+                      <p className="text-white/80">Monitor regulatory compliance and security posture</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{avgComplianceScore.toFixed(0)}%</p>
+                      <p className="text-sm text-white/80">Overall Score</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{displayChecks.filter(c => c.status === 'passing').length}</p>
+                      <p className="text-sm text-white/80">Passing</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{displayChecks.filter(c => c.status === 'failing').length}</p>
+                      <p className="text-sm text-white/80">Failing</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Compliance Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: RefreshCw, label: 'Run Checks', color: 'bg-green-500' },
+                { icon: Shield, label: 'Frameworks', color: 'bg-blue-500' },
+                { icon: AlertTriangle, label: 'Issues', color: 'bg-red-500' },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-500' },
+                { icon: Target, label: 'Remediation', color: 'bg-orange-500' },
+                { icon: History, label: 'History', color: 'bg-pink-500' },
+                { icon: Download, label: 'Export', color: 'bg-indigo-500' },
+                { icon: Settings, label: 'Configure', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <h3 className="text-lg font-semibold text-white">Compliance Checks</h3>
@@ -1235,6 +1529,469 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <Card className="border-0 bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">SIEM Settings</h3>
+                      <p className="text-white/80">Configure your security monitoring preferences</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'alerts', label: 'Alerts', icon: Bell },
+                        { id: 'notifications', label: 'Notifications', icon: Mail },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'text-slate-400 hover:bg-slate-700'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-green-400" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">Configure basic SIEM preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-slate-300">Default Time Range</Label>
+                            <Input defaultValue="24h" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                          </div>
+                          <div>
+                            <Label className="text-slate-300">Events Per Page</Label>
+                            <Input type="number" defaultValue="50" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Real-Time Streaming</p>
+                            <p className="text-sm text-slate-500">Enable live event streaming</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Auto-Refresh</p>
+                            <p className="text-sm text-slate-500">Automatically refresh event data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Dark Mode</p>
+                            <p className="text-sm text-slate-500">Use dark theme for the console</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Database className="w-5 h-5 text-blue-400" />
+                          Data Retention
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label className="text-slate-300">Event Retention Period (days)</Label>
+                          <Input type="number" defaultValue="90" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                        </div>
+                        <div>
+                          <Label className="text-slate-300">Archive Location</Label>
+                          <Input defaultValue="s3://audit-logs/archive" className="mt-1 bg-slate-900 border-slate-600 text-white font-mono" />
+                        </div>
+                        <Button className="bg-green-600 hover:bg-green-700">Save Retention Settings</Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Alerts Settings */}
+                {settingsTab === 'alerts' && (
+                  <>
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-yellow-400" />
+                          Alert Configuration
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">Configure alert thresholds and behaviors</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Enable Critical Alerts</p>
+                            <p className="text-sm text-slate-500">Receive alerts for critical severity events</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Enable High Severity Alerts</p>
+                            <p className="text-sm text-slate-500">Receive alerts for high severity events</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Alert Deduplication</p>
+                            <p className="text-sm text-slate-500">Combine similar alerts into single notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label className="text-slate-300">Alert Cooldown Period (minutes)</Label>
+                          <Input type="number" defaultValue="15" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-orange-400" />
+                          Alert Actions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Email', enabled: true },
+                          { name: 'Slack', enabled: true },
+                          { name: 'PagerDuty', enabled: false },
+                          { name: 'Webhook', enabled: true }
+                        ].map((action, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center">
+                                <span className="text-sm font-bold text-white">{action.name[0]}</span>
+                              </div>
+                              <span className="text-white">{action.name}</span>
+                            </div>
+                            <Switch defaultChecked={action.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-pink-400" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Daily Digest</p>
+                            <p className="text-sm text-slate-500">Receive daily summary of security events</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Weekly Report</p>
+                            <p className="text-sm text-slate-500">Receive weekly security report</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Instant Alerts</p>
+                            <p className="text-sm text-slate-500">Receive immediate notifications for critical events</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label className="text-slate-300">Notification Recipients</Label>
+                          <Input defaultValue="security@company.com, soc@company.com" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-400" />
+                          SIEM Integrations
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">Connect external security tools</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Slack', status: 'connected' },
+                          { name: 'PagerDuty', status: 'connected' },
+                          { name: 'Jira', status: 'disconnected' },
+                          { name: 'ServiceNow', status: 'disconnected' }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                {integration.name[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium text-white">{integration.name}</p>
+                                <p className="text-sm text-slate-500">
+                                  {integration.status === 'connected' ? 'Connected' : 'Not connected'}
+                                </p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
+                              {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Key className="w-5 h-5 text-green-400" />
+                          API Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label className="text-slate-300">API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input type="password" value="sk_siem_****************************" readOnly className="bg-slate-900 border-slate-600 text-white font-mono" />
+                            <Button variant="outline" className="border-slate-600 text-slate-300">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-slate-300">Webhook Endpoint</Label>
+                          <Input defaultValue="https://api.yoursiem.com/webhooks/events" className="mt-1 bg-slate-900 border-slate-600 text-white font-mono" />
+                        </div>
+                        <Button variant="outline" className="border-slate-600 text-slate-300">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-400" />
+                          Access Security
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">Configure security and access controls</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Two-Factor Authentication</p>
+                            <p className="text-sm text-slate-500">Require 2FA for SIEM access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">IP Whitelisting</p>
+                            <p className="text-sm text-slate-500">Restrict access to specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Session Timeout</p>
+                            <p className="text-sm text-slate-500">Auto-logout after inactivity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-yellow-400" />
+                          Data Security
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Encrypt Data at Rest</p>
+                            <p className="text-sm text-slate-500">Enable AES-256 encryption for stored data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Encrypt Data in Transit</p>
+                            <p className="text-sm text-slate-500">Require TLS for all connections</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Audit All Access</p>
+                            <p className="text-sm text-slate-500">Log all SIEM console access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-cyan-400" />
+                          Advanced Configuration
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">Advanced settings for power users</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Debug Mode</p>
+                            <p className="text-sm text-slate-500">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Experimental Features</p>
+                            <p className="text-sm text-slate-500">Enable beta features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label className="text-slate-300">Query Timeout (seconds)</Label>
+                          <Input type="number" defaultValue="30" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                        </div>
+                        <div>
+                          <Label className="text-slate-300">Max Concurrent Queries</Label>
+                          <Input type="number" defaultValue="5" className="mt-1 bg-slate-900 border-slate-600 text-white" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-400" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-white">Auto-Archive Old Events</p>
+                            <p className="text-sm text-slate-500">Automatically archive events older than retention period</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="border-slate-600 text-slate-300">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-900/20">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-slate-800/50 border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-400 flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-300">Reset All Settings</p>
+                            <p className="text-sm text-red-400/70">Restore all settings to defaults</p>
+                          </div>
+                          <Button variant="outline" className="border-red-600 text-red-400">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-300">Delete All Data</p>
+                            <p className="text-sm text-red-400/70">Permanently delete all audit data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-600 text-red-400">Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>

@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -61,7 +63,17 @@ import {
   Target,
   Sparkles,
   Award,
-  Loader2
+  Loader2,
+  Shield,
+  Bell,
+  Webhook,
+  Key,
+  Database,
+  Lock,
+  HardDrive,
+  Terminal,
+  History,
+  RefreshCw
 } from 'lucide-react'
 
 // Types
@@ -411,6 +423,7 @@ export default function SurveysClient() {
   const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [sharingSurvey, setSharingSurvey] = useState<Survey | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Computed values
   const filteredSurveys = useMemo(() => {
@@ -599,6 +612,66 @@ export default function SurveysClient() {
 
           {/* Surveys Tab */}
           <TabsContent value="surveys" className="space-y-4">
+            {/* Surveys Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <ClipboardList className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Survey Management</h2>
+                    <p className="text-white/80">Create, distribute, and analyze surveys</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Active Surveys</p>
+                    <p className="text-2xl font-bold">{mockStats.activeSurveys}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Total Responses</p>
+                    <p className="text-2xl font-bold">{mockStats.totalResponses.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">Avg Completion</p>
+                    <p className="text-2xl font-bold">{mockStats.avgCompletionRate}%</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <p className="text-white/70 text-sm">NPS Score</p>
+                    <p className="text-2xl font-bold">{mockStats.avgNPS}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: Plus, label: 'New Survey', color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' },
+                { icon: Layout, label: 'Templates', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
+                { icon: Share2, label: 'Distribute', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600' },
+                { icon: Download, label: 'Export', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
+                { icon: Users, label: 'Responses', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
+                { icon: GitBranch, label: 'Logic Flow', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
+                { icon: Zap, label: 'Automations', color: 'bg-red-100 dark:bg-red-900/30 text-red-600' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`p-3 rounded-xl ${action.color}`}>
+                    <action.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-2 mb-4">
               <Button
                 variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -721,6 +794,33 @@ export default function SurveysClient() {
 
           {/* Responses Tab */}
           <TabsContent value="responses" className="space-y-4">
+            {/* Responses Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-8 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Users className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Response Management</h2>
+                    <p className="text-white/80">View and analyze all survey responses</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mt-6">
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
+                    <RefreshCw className="w-4 h-4 inline mr-2" />
+                    Refresh
+                  </button>
+                  <button className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-white/90 transition-colors">
+                    <Download className="w-4 h-4 inline mr-2" />
+                    Export All
+                  </button>
+                </div>
+              </div>
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardContent className="p-0">
                 <ScrollArea className="h-[600px]">
@@ -781,6 +881,23 @@ export default function SurveysClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-4">
+            {/* Templates Header */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-500/20 rounded-lg">
+                  <Layout className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Survey Templates</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Start with professionally designed templates</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Template
+              </Button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {mockTemplates.map(template => (
                 <Card key={template.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer group">
@@ -1019,134 +1136,468 @@ export default function SurveysClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="w-5 h-5" />
-                    Branding
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">Custom Logo</p>
-                      <p className="text-xs text-muted-foreground">Add your brand logo</p>
-                    </div>
-                    <Button variant="outline" size="sm">Upload</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">Brand Colors</p>
-                      <p className="text-xs text-muted-foreground">Customize theme colors</p>
-                    </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">Custom Domain</p>
-                      <p className="text-xs text-muted-foreground">surveys.yourdomain.com</p>
-                    </div>
-                    <Button variant="outline" size="sm">Setup</Button>
-                  </div>
-                </CardContent>
-              </Card>
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sticky top-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', label: 'General', icon: Sliders },
+                      { id: 'branding', label: 'Branding', icon: Globe },
+                      { id: 'notifications', label: 'Notifications', icon: Bell },
+                      { id: 'integrations', label: 'Integrations', icon: Webhook },
+                      { id: 'security', label: 'Security', icon: Shield },
+                      { id: 'advanced', label: 'Advanced', icon: Terminal },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Integrations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <span className="text-lg">📊</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Google Sheets</p>
-                        <p className="text-xs text-muted-foreground">Sync responses</p>
-                      </div>
-                    </div>
-                    <Badge className="bg-green-100 text-green-700">Connected</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                        <span className="text-lg">💬</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Slack</p>
-                        <p className="text-xs text-muted-foreground">Get notifications</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Connect</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                        <span className="text-lg">📧</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Mailchimp</p>
-                        <p className="text-xs text-muted-foreground">Sync contacts</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Connect</Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Default Survey Settings</CardTitle>
+                        <CardDescription>Configure default options for new surveys</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="defaultFont">Default Font</Label>
+                            <select id="defaultFont" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                              <option>Inter</option>
+                              <option>Plus Jakarta Sans</option>
+                              <option>Outfit</option>
+                              <option>Roboto</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label htmlFor="defaultLanguage">Default Language</Label>
+                            <select id="defaultLanguage" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                              <option>English</option>
+                              <option>Spanish</option>
+                              <option>French</option>
+                              <option>German</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Progress Bar</p>
+                            <p className="text-sm text-gray-500">Display completion progress to respondents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Question Numbers</p>
+                            <p className="text-sm text-gray-500">Display question numbers in surveys</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Multiple Responses</p>
+                            <p className="text-sm text-gray-500">Let users submit multiple times</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5" />
-                    Plan & Usage
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl">
-                      <h3 className="font-semibold text-lg mb-1">Professional</h3>
-                      <p className="text-xs text-muted-foreground mb-4">Current Plan</p>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span>Responses</span>
-                          <span>{mockStats.totalResponses.toLocaleString()} / 10,000</span>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Thank You Page</CardTitle>
+                        <CardDescription>Customize the completion experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="thankYouMessage">Thank You Message</Label>
+                          <Input id="thankYouMessage" type="text" className="mt-1" defaultValue="Thank you for your feedback!" />
                         </div>
-                        <Progress value={(mockStats.totalResponses / 10000) * 100} className="h-2" />
-                        <div className="flex items-center justify-between text-sm">
-                          <span>Surveys</span>
-                          <span>{mockStats.totalSurveys} / unlimited</span>
+                        <div>
+                          <Label htmlFor="redirectUrl">Redirect URL (optional)</Label>
+                          <Input id="redirectUrl" type="url" className="mt-1" placeholder="https://yoursite.com/thank-you" />
                         </div>
-                      </div>
-                    </div>
-                    <div className="md:col-span-2 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <p className="text-xs text-muted-foreground">Features</p>
-                          <p className="font-semibold">Logic Jumps, Custom Branding</p>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Social Share Buttons</p>
+                            <p className="text-sm text-gray-500">Allow respondents to share the survey</p>
+                          </div>
+                          <Switch defaultChecked />
                         </div>
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <p className="text-xs text-muted-foreground">Next Billing</p>
-                          <p className="font-semibold">$29/mo on Feb 1</p>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'branding' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Brand Identity</CardTitle>
+                        <CardDescription>Customize your survey appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Logo</p>
+                            <p className="text-sm text-gray-500">Upload your brand logo</p>
+                          </div>
+                          <Button variant="outline">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload
+                          </Button>
                         </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1">
-                          View Invoices
-                        </Button>
-                        <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600">
-                          Upgrade Plan
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="primaryColor">Primary Color</Label>
+                            <div className="mt-1 flex items-center gap-2">
+                              <input type="color" id="primaryColor" className="w-10 h-10 rounded border cursor-pointer" defaultValue="#10b981" />
+                              <Input type="text" className="flex-1" defaultValue="#10b981" />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="bgColor">Background Color</Label>
+                            <div className="mt-1 flex items-center gap-2">
+                              <input type="color" id="bgColor" className="w-10 h-10 rounded border cursor-pointer" defaultValue="#ffffff" />
+                              <Input type="text" className="flex-1" defaultValue="#ffffff" />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Custom Domain</CardTitle>
+                        <CardDescription>Use your own domain for surveys</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="customDomain">Custom Domain</Label>
+                          <Input id="customDomain" type="text" className="mt-1" placeholder="surveys.yourdomain.com" />
+                        </div>
+                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                            To use a custom domain, add a CNAME record pointing to surveys.app
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Remove Branding</p>
+                            <p className="text-sm text-gray-500">Hide "Powered by" watermark</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure when you receive emails</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'New Response', desc: 'Get notified for each new response', enabled: true },
+                          { name: 'Survey Completed', desc: 'When a survey reaches target responses', enabled: true },
+                          { name: 'Daily Summary', desc: 'Daily digest of all responses', enabled: true },
+                          { name: 'Weekly Reports', desc: 'Weekly analytics summary', enabled: true },
+                          { name: 'Low NPS Alert', desc: 'Alert when NPS drops below threshold', enabled: false },
+                          { name: 'Survey Expiring', desc: 'Reminder before survey closes', enabled: true },
+                        ].map((notification) => (
+                          <div key={notification.name} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notification.name}</p>
+                              <p className="text-sm text-gray-500">{notification.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notification.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Recipients</CardTitle>
+                        <CardDescription>Who should receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="notifyEmails">Email Addresses</Label>
+                          <Input id="notifyEmails" type="text" className="mt-1" defaultValue="team@company.com" />
+                          <p className="text-xs text-gray-500 mt-1">Separate multiple emails with commas</p>
+                        </div>
+                        <div>
+                          <Label htmlFor="slackChannel">Slack Channel</Label>
+                          <Input id="slackChannel" type="text" className="mt-1" placeholder="#survey-responses" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Apps</CardTitle>
+                        <CardDescription>Sync responses with your tools</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Google Sheets', desc: 'Sync responses automatically', status: 'connected', icon: '📊' },
+                          { name: 'Slack', desc: 'Real-time notifications', status: 'connected', icon: '💬' },
+                          { name: 'Mailchimp', desc: 'Sync contacts to lists', status: 'disconnected', icon: '📧' },
+                          { name: 'HubSpot', desc: 'CRM integration', status: 'disconnected', icon: '🔶' },
+                          { name: 'Zapier', desc: 'Connect to 5000+ apps', status: 'connected', icon: '⚡' },
+                          { name: 'Segment', desc: 'Analytics sync', status: 'disconnected', icon: '📈' },
+                        ].map((integration) => (
+                          <div key={integration.name} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {integration.status === 'connected' ? 'Manage' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Developer integration options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="apiKey">API Key</Label>
+                          <div className="mt-1 flex gap-2">
+                            <Input id="apiKey" type="password" className="flex-1" defaultValue="STRIPE_KEY_PLACEHOLDER" readOnly />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="webhookUrl">Webhook URL</Label>
+                          <Input id="webhookUrl" type="url" className="mt-1" placeholder="https://api.yoursite.com/webhooks/survey" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage survey access settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Login</p>
+                            <p className="text-sm text-gray-500">Respondents must sign in</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Password Protected</p>
+                            <p className="text-sm text-gray-500">Require password to access surveys</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">CAPTCHA</p>
+                            <p className="text-sm text-gray-500">Prevent spam responses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">IP Blocking</p>
+                            <p className="text-sm text-gray-500">Block suspicious IP addresses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Privacy</CardTitle>
+                        <CardDescription>Configure privacy settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Anonymous Responses</p>
+                            <p className="text-sm text-gray-500">Don't collect identifying information</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">GDPR Compliance</p>
+                            <p className="text-sm text-gray-500">Show consent notice</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Data Encryption</p>
+                            <p className="text-sm text-gray-500">Encrypt response data at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Export and manage survey data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Export All Data</p>
+                            <p className="text-sm text-gray-500">Download all surveys and responses</p>
+                          </div>
+                          <Button>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Import Surveys</p>
+                            <p className="text-sm text-gray-500">Upload surveys from other platforms</p>
+                          </div>
+                          <Button variant="outline">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Data Retention</p>
+                            <p className="text-sm text-gray-500">How long to keep response data</p>
+                          </div>
+                          <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                            <option>Forever (default)</option>
+                            <option>1 year</option>
+                            <option>2 years</option>
+                            <option>5 years</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Plan & Billing</CardTitle>
+                        <CardDescription>Manage your subscription</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl">
+                            <h3 className="font-semibold text-lg mb-1">Professional</h3>
+                            <p className="text-xs text-muted-foreground mb-4">Current Plan</p>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span>Responses</span>
+                                <span>{mockStats.totalResponses.toLocaleString()} / 10,000</span>
+                              </div>
+                              <Progress value={(mockStats.totalResponses / 10000) * 100} className="h-2" />
+                            </div>
+                          </div>
+                          <div className="md:col-span-2 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <p className="text-xs text-muted-foreground">Next Billing</p>
+                                <p className="font-semibold">$29/mo on Feb 1</p>
+                              </div>
+                              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <p className="text-xs text-muted-foreground">Features</p>
+                                <p className="font-semibold">Logic, Branding, API</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-3">
+                              <Button variant="outline" className="flex-1">View Invoices</Button>
+                              <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600">Upgrade</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900/50">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Delete All Responses</p>
+                            <p className="text-sm text-gray-500">Remove all collected data</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Close Account</p>
+                            <p className="text-sm text-gray-500">Permanently delete your account</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Account
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

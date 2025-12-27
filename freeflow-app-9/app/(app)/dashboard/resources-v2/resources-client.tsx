@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -17,7 +19,9 @@ import {
   CheckCircle2, XCircle, PauseCircle, Mail, Phone, MapPin,
   Building, DollarSign, RefreshCw, ArrowUpRight, ArrowDownRight,
   Zap, Timer, Activity, Eye, BookOpen, Layers, Hash, GitBranch,
-  Coffee, Plane, FileText, MessageSquare, Bell, Sparkles
+  Coffee, Plane, FileText, MessageSquare, Bell, Sparkles,
+  Shield, Sliders, Webhook, Key, Database, Trash2, Lock, Globe,
+  Download, Upload, Terminal, HardDrive, History
 } from 'lucide-react'
 
 // ============================================================================
@@ -553,6 +557,7 @@ export default function ResourcesClient() {
   const [statusFilter, setStatusFilter] = useState<ResourceStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<ResourceType | 'all'>('all')
   const [departmentFilter, setDepartmentFilter] = useState<string>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -750,6 +755,50 @@ export default function ResourcesClient() {
 
           {/* Resources Tab */}
           <TabsContent value="resources" className="space-y-6">
+            {/* Resources Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Resource Directory</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      View and manage your team members, contractors, and their skills, capacity, and project assignments.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.total}</div>
+                      <div className="text-sm text-white/80">Total Resources</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.available}</div>
+                      <div className="text-sm text-white/80">Available</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[
+                { icon: UserPlus, label: 'Add Resource', color: 'text-green-500' },
+                { icon: Search, label: 'Find Skills', color: 'text-blue-500' },
+                { icon: Calendar, label: 'Schedule', color: 'text-purple-500' },
+                { icon: BarChart3, label: 'Workload', color: 'text-orange-500' },
+                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500' },
+                { icon: Star, label: 'Skills Matrix', color: 'text-yellow-500' },
+                { icon: Download, label: 'Export', color: 'text-indigo-500' },
+                { icon: RefreshCw, label: 'Sync', color: 'text-gray-500' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className={viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}>
               {filteredResources.map((resource) => {
                 const StatusIcon = getStatusIcon(resource.status)
@@ -882,6 +931,31 @@ export default function ResourcesClient() {
 
           {/* Schedule Tab */}
           <TabsContent value="schedule" className="space-y-6">
+            {/* Schedule Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Capacity Planning</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Plan and forecast team capacity across weeks, identify availability gaps, and optimize resource allocation.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalCapacity}h</div>
+                      <div className="text-sm text-white/80">Total Capacity</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{Math.round(stats.avgUtilization)}%</div>
+                      <div className="text-sm text-white/80">Avg Utilization</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -933,6 +1007,31 @@ export default function ResourcesClient() {
 
           {/* Skills Tab */}
           <TabsContent value="skills" className="space-y-6">
+            {/* Skills Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Skills Matrix</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Map team competencies, identify skill gaps, and plan training to build a well-rounded workforce.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalSkills}</div>
+                      <div className="text-sm text-white/80">Total Skills</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{allSkills.length}</div>
+                      <div className="text-sm text-white/80">Categories</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Skills Matrix */}
               <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
@@ -1009,6 +1108,31 @@ export default function ResourcesClient() {
 
           {/* Workload Tab */}
           <TabsContent value="workload" className="space-y-6">
+            {/* Workload Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Team Workload</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      Monitor team utilization, identify overallocated members, and balance workloads across your organization.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockTeams.length}</div>
+                      <div className="text-sm text-white/80">Teams</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.overallocated}</div>
+                      <div className="text-sm text-white/80">Overallocated</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {mockTeams.map((team) => (
                 <Card key={team.id} className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
@@ -1076,6 +1200,31 @@ export default function ResourcesClient() {
 
           {/* Bookings Tab */}
           <TabsContent value="bookings" className="space-y-6">
+            {/* Bookings Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 p-6 text-white">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Project Bookings</h2>
+                    <p className="text-white/90 max-w-2xl">
+                      View all active resource bookings across projects, manage assignments, and track billable hours.
+                    </p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{mockResources.flatMap(r => r.bookings).length}</div>
+                      <div className="text-sm text-white/80">Active Bookings</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{Math.round(stats.avgBillable)}%</div>
+                      <div className="text-sm text-white/80">Billable</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1132,61 +1281,394 @@ export default function ResourcesClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>Notification Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Overallocation alerts', enabled: true },
-                    { label: 'Booking confirmations', enabled: true },
-                    { label: 'Leave request notifications', enabled: true },
-                    { label: 'Capacity threshold warnings', enabled: false },
-                    { label: 'Weekly utilization reports', enabled: true },
-                    { label: 'Skill expiry reminders', enabled: false },
-                  ].map((setting, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <div className="flex items-center gap-3">
-                        <Bell className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-700 dark:text-slate-300">{setting.label}</span>
-                      </div>
-                      <div className={`w-10 h-6 rounded-full transition-colors ${
-                        setting.enabled ? 'bg-sky-500' : 'bg-slate-300 dark:bg-slate-600'
-                      } relative cursor-pointer`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                          setting.enabled ? 'right-1' : 'left-1'
-                        }`} />
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'capacity', label: 'Capacity', icon: BarChart3 },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>Capacity Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Default weekly capacity', value: '40 hours', icon: Clock },
-                    { label: 'Overallocation threshold', value: '100%', icon: AlertTriangle },
-                    { label: 'Warning threshold', value: '90%', icon: Activity },
-                    { label: 'Billable target', value: '75%', icon: DollarSign },
-                  ].map((setting, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-                          <setting.icon className="w-4 h-4 text-sky-600" />
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Sliders className="w-5 h-5 text-sky-500" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure basic resource management settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Organization Name</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display name for your organization</p>
+                          </div>
+                          <Input defaultValue="Acme Corporation" className="w-64" />
                         </div>
-                        <span className="text-sm text-slate-700 dark:text-slate-300">{setting.label}</span>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Default Currency</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Currency for rates and billing</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>USD - US Dollar</option>
+                            <option>EUR - Euro</option>
+                            <option>GBP - British Pound</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Time Zone</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default time zone for scheduling</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>America/New_York (EST)</option>
+                            <option>America/Los_Angeles (PST)</option>
+                            <option>Europe/London (GMT)</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Fiscal Year Start</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">When your fiscal year begins</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>January</option>
+                            <option>April</option>
+                            <option>July</option>
+                            <option>October</option>
+                          </select>
+                        </div>
                       </div>
-                      <span className="font-medium text-slate-900 dark:text-white">{setting.value}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'capacity' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-blue-500" />
+                        Capacity Settings
+                      </CardTitle>
+                      <CardDescription>Configure capacity thresholds and utilization targets</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Default Weekly Capacity</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Standard hours per week</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="40" className="w-20" />
+                            <span className="text-gray-500">hours</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Overallocation Threshold</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">When to flag as overallocated</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="100" className="w-20" />
+                            <span className="text-gray-500">%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Warning Threshold</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">When to show warning</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="90" className="w-20" />
+                            <span className="text-gray-500">%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Billable Target</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Target billable percentage</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="75" className="w-20" />
+                            <span className="text-gray-500">%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Include Weekends</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Count weekends in capacity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-purple-500" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Configure alerts and notification preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Overallocation Alerts</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when resources are overallocated</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Booking Confirmations</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send confirmations for new bookings</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Leave Request Notifications</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify managers of leave requests</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Weekly Utilization Reports</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send weekly summary reports</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Skill Expiry Reminders</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remind about expiring certifications</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="w-5 h-5 text-green-500" />
+                        Integrations
+                      </CardTitle>
+                      <CardDescription>Connect external systems and configure API access</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        {[
+                          { name: 'HR System', icon: Users, status: 'Connected', color: 'green' },
+                          { name: 'Project Management', icon: Briefcase, status: 'Connected', color: 'green' },
+                          { name: 'Time Tracking', icon: Clock, status: 'Not Connected', color: 'gray' },
+                          { name: 'Calendar Sync', icon: Calendar, status: 'Connected', color: 'green' },
+                          { name: 'Slack', icon: MessageSquare, status: 'Connected', color: 'green' },
+                          { name: 'Email Notifications', icon: Mail, status: 'Configured', color: 'green' }
+                        ].map((integration, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <integration.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <Badge className={`bg-${integration.color}-100 text-${integration.color}-800 dark:bg-${integration.color}-900/30 dark:text-${integration.color}-400`}>
+                                  {integration.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Configure</Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">REST API for integrations</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input value="res_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
+                          <Button variant="outline" size="sm">Regenerate</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-red-500" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Manage access controls and security policies</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Session Timeout</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Auto-logout after inactivity</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="30" className="w-20" />
+                            <span className="text-gray-500">minutes</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Data Encryption</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Encrypt sensitive data at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Terminal className="w-5 h-5 text-gray-500" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>System configuration and maintenance options</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Data Retention</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep historical data</p>
+                          </div>
+                          <select className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 w-64">
+                            <option>1 Year</option>
+                            <option>2 Years</option>
+                            <option>5 Years</option>
+                            <option>Forever</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Export All Data</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Download complete data export</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div>
+                            <p className="font-medium">Import Data</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Import resources from file</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Upload className="w-4 h-4" />
+                            Import
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">Danger Zone</h4>
+                        <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear All Data
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset to Defaults
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

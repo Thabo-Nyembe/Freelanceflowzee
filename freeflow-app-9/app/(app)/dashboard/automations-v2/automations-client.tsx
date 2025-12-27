@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { useAutomations, type AutomationWorkflow, type WorkflowType, type WorkflowStatus } from '@/lib/hooks/use-automations'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -292,6 +292,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [selectedWorkflow, setSelectedWorkflow] = useState<AutomationWorkflow | null>(null)
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { workflows, loading, error } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
   const displayWorkflows = workflows.length > 0 ? workflows : initialWorkflows
@@ -550,6 +551,85 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Dashboard Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Automation Dashboard</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Monitor your automation performance with real-time metrics, track executions, and optimize your workflows for maximum efficiency.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.total}</div>
+                    <div className="text-xs text-white/70">Total Scenarios</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.active}</div>
+                    <div className="text-xs text-white/70">Active</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.successRate.toFixed(0)}%</div>
+                    <div className="text-xs text-white/70">Success Rate</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{formatBytes(stats.totalDataTransferred)}</div>
+                    <div className="text-xs text-white/70">Data Processed</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-emerald-600" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>Common automation tasks and operations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all hover:scale-105">
+                    <Plus className="h-5 w-5 text-emerald-600" />
+                    <span className="text-sm">New Scenario</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Play className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">Run All Active</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Package className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Browse Templates</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105">
+                    <Webhook className="h-5 w-5 text-orange-600" />
+                    <span className="text-sm">Manage Webhooks</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                    <Bot className="h-5 w-5 text-pink-600" />
+                    <span className="text-sm">AI Automation</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105">
+                    <Network className="h-5 w-5 text-cyan-600" />
+                    <span className="text-sm">Connections</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                    <Download className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Export Data</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                    <History className="h-5 w-5 text-red-600" />
+                    <span className="text-sm">Execution History</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Scenarios */}
               <Card>
@@ -672,7 +752,65 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
           </TabsContent>
 
           {/* Scenarios Tab */}
-          <TabsContent value="scenarios" className="space-y-4">
+          <TabsContent value="scenarios" className="space-y-6">
+            {/* Scenarios Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Workflow className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Automation Scenarios</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Build and manage powerful automation workflows. Connect apps, set triggers, and automate complex business processes with visual flow builders.
+                </p>
+                <div className="flex items-center gap-4">
+                  <Button className="bg-white text-blue-600 hover:bg-white/90" onClick={() => setShowNewWorkflow(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Scenario
+                  </Button>
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                    <Package className="h-4 w-4 mr-2" />
+                    Browse Templates
+                  </Button>
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Import Scenario
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions for Scenarios */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-blue-600" />
+                  Scenario Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                    <PlayCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Run All Active</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                    <PauseCircle className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Pause All</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Copy className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Clone Scenario</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Share2 className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">Share Scenario</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {loading && (
               <div className="text-center py-8">
                 <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-emerald-600 border-r-transparent"></div>
@@ -744,7 +882,69 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
           </TabsContent>
 
           {/* Executions Tab */}
-          <TabsContent value="executions">
+          <TabsContent value="executions" className="space-y-6">
+            {/* Executions Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Activity className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Execution History</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Monitor all workflow executions in real-time. Track success rates, debug failures, and analyze performance metrics across your automations.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.totalExecutions}</div>
+                    <div className="text-xs text-white/70">Total Executions</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-green-200">{stats.successfulExecutions}</div>
+                    <div className="text-xs text-white/70">Successful</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-red-200">{stats.failedExecutions}</div>
+                    <div className="text-xs text-white/70">Failed</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{stats.running}</div>
+                    <div className="text-xs text-white/70">Running Now</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Execution Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-orange-600" />
+                  Execution Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                    <StopCircle className="h-5 w-5 text-red-600" />
+                    <span className="text-sm">Stop All Running</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                    <RotateCcw className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Retry Failed</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Download className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">Export Logs</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Filter className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Advanced Filters</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Execution History</CardTitle>
@@ -804,9 +1004,71 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Package className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Scenario Templates</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Browse our library of pre-built automation templates. Start with community-proven workflows and customize them for your unique needs.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTemplates.length}</div>
+                    <div className="text-xs text-white/70">Templates</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTemplates.filter(t => t.isPremium).length}</div>
+                    <div className="text-xs text-white/70">Premium</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">6</div>
+                    <div className="text-xs text-white/70">Categories</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockTemplates.reduce((sum, t) => sum + t.uses, 0).toLocaleString()}</div>
+                    <div className="text-xs text-white/70">Total Uses</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Template Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-purple-600" />
+                  Template Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                    <Sparkles className="h-5 w-5 text-pink-600" />
+                    <span className="text-sm">AI Templates</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Star className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">Top Rated</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">Most Popular</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                    <Plus className="h-5 w-5 text-green-600" />
+                    <span className="text-sm">Submit Template</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Scenario Templates</h2>
+                <h2 className="text-2xl font-bold">Browse Templates</h2>
                 <p className="text-gray-500">Start with pre-built automations from the community</p>
               </div>
               <select className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -862,7 +1124,69 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
           </TabsContent>
 
           {/* Connections Tab */}
-          <TabsContent value="connections">
+          <TabsContent value="connections" className="space-y-6">
+            {/* Connections Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-500 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Network className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">App Connections</h3>
+                </div>
+                <p className="text-white/80 mb-4 max-w-2xl">
+                  Manage your connected apps and API integrations. Connect to over 400+ apps and services to power your automations.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockConnections.length}</div>
+                    <div className="text-xs text-white/70">Connected</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-green-200">{mockConnections.filter(c => c.status === 'connected').length}</div>
+                    <div className="text-xs text-white/70">Active</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-amber-200">{mockConnections.filter(c => c.status === 'expired').length}</div>
+                    <div className="text-xs text-white/70">Expired</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockWebhooks.length}</div>
+                    <div className="text-xs text-white/70">Webhooks</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Connection Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-cyan-600" />
+                  Connection Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105">
+                    <Plus className="h-5 w-5 text-cyan-600" />
+                    <span className="text-sm">New Connection</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                    <Webhook className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm">New Webhook</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                    <RefreshCw className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm">Refresh Expired</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                    <Key className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm">API Keys</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -930,121 +1254,617 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Enable Notifications</p>
-                      <p className="text-sm text-gray-500">Get notified about execution failures</p>
-                    </div>
-                    <Switch defaultChecked />
+          {/* Settings Tab - Comprehensive 6 Sub-tabs */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-xl p-6 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Settings className="h-6 w-6" />
+                  <h3 className="text-xl font-bold">Automation Settings</h3>
+                  <Badge className="bg-emerald-500/20 text-emerald-300 border-0">Pro Plan</Badge>
+                </div>
+                <p className="text-white/70 mb-4 max-w-2xl">
+                  Configure your automation platform settings, execution preferences, webhooks, integrations, notifications, and advanced options.
+                </p>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">5,240</div>
+                    <div className="text-xs text-white/70">Operations Used</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-retry Failed Executions</p>
-                      <p className="text-sm text-gray-500">Automatically retry up to 3 times</p>
-                    </div>
-                    <Switch defaultChecked />
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">2.1 GB</div>
+                    <div className="text-xs text-white/70">Data Transfer</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Execution Logging</p>
-                      <p className="text-sm text-gray-500">Store detailed execution logs</p>
-                    </div>
-                    <Switch defaultChecked />
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">8</div>
+                    <div className="text-xs text-white/70">Active Scenarios</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Email Digest</p>
-                      <p className="text-sm text-gray-500">Daily summary of all executions</p>
-                    </div>
-                    <Switch />
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold">{mockConnections.length}</div>
+                    <div className="text-xs text-white/70">Connections</div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Plan & Usage</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold">Pro Plan</span>
-                      <Badge className="bg-white/20 text-white border-0">Active</Badge>
-                    </div>
-                    <p className="text-sm text-white/80">10,000 operations/month • 5 GB data</p>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Operations Used</span>
-                      <span>5,240 / 10,000</span>
-                    </div>
-                    <Progress value={52.4} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Data Transfer</span>
-                      <span>2.1 GB / 5 GB</span>
-                    </div>
-                    <Progress value={42} className="h-2" />
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <Rocket className="h-4 w-4 mr-2" />
-                    Upgrade Plan
-                  </Button>
-                </CardContent>
-              </Card>
+            {/* Settings Grid with Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings, description: 'Basic settings' },
+                        { id: 'execution', label: 'Execution', icon: Play, description: 'Runtime options' },
+                        { id: 'webhooks', label: 'Webhooks', icon: Webhook, description: 'HTTP endpoints' },
+                        { id: 'integrations', label: 'Integrations', icon: Network, description: 'Connected apps' },
+                        { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alerts & digests' },
+                        { id: 'advanced', label: 'Advanced', icon: Cpu, description: 'Power features' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-l-4 border-emerald-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-emerald-600' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>API Access</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">API Key</span>
-                      <Button variant="ghost" size="sm">
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <code className="text-sm text-gray-600 dark:text-gray-400">••••••••••••••••••••••••</code>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
-                      <Key className="h-4 w-4 mr-2" />
-                      Regenerate Key
-                    </Button>
-                    <Button variant="outline" className="flex-1">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      API Docs
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="h-5 w-5 text-emerald-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure basic automation preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Timezone</label>
+                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                              <option>UTC</option>
+                              <option>America/New_York</option>
+                              <option>America/Los_Angeles</option>
+                              <option>Europe/London</option>
+                              <option>Asia/Tokyo</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Date Format</label>
+                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                              <option>MM/DD/YYYY</option>
+                              <option>DD/MM/YYYY</option>
+                              <option>YYYY-MM-DD</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Dark Mode</p>
+                              <p className="text-sm text-gray-500">Use dark theme for the interface</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Compact View</p>
+                              <p className="text-sm text-gray-500">Show more items with less spacing</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Auto-save Drafts</p>
+                              <p className="text-sm text-gray-500">Automatically save scenario changes</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Danger Zone</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-red-600">Delete All Data</p>
-                        <p className="text-sm text-gray-500">Remove all scenarios and executions</p>
-                      </div>
-                      <Button variant="destructive" size="sm">Delete</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Rocket className="h-5 w-5 text-purple-600" />
+                          Plan & Usage
+                        </CardTitle>
+                        <CardDescription>Your current subscription and usage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold">Pro Plan</span>
+                            <Badge className="bg-white/20 text-white border-0">Active</Badge>
+                          </div>
+                          <p className="text-sm text-white/80">10,000 operations/month • 5 GB data • 15 active scenarios</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Operations</span>
+                              <span className="font-medium">5,240 / 10,000</span>
+                            </div>
+                            <Progress value={52.4} className="h-2" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Data Transfer</span>
+                              <span className="font-medium">2.1 GB / 5 GB</span>
+                            </div>
+                            <Progress value={42} className="h-2" />
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Rocket className="h-4 w-4 mr-2" />
+                          Upgrade Plan
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Execution Settings */}
+                {settingsTab === 'execution' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Play className="h-5 w-5 text-blue-600" />
+                          Execution Settings
+                        </CardTitle>
+                        <CardDescription>Configure how your automations run</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Auto-retry Failed Executions</p>
+                              <p className="text-sm text-gray-500">Automatically retry up to 3 times on failure</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Parallel Execution</p>
+                              <p className="text-sm text-gray-500">Run independent branches simultaneously</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Sequential Processing</p>
+                              <p className="text-sm text-gray-500">Process items one at a time instead of batches</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">Detailed Logging</p>
+                              <p className="text-sm text-gray-500">Store detailed execution logs for debugging</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Default Timeout</label>
+                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                              <option>30 seconds</option>
+                              <option>1 minute</option>
+                              <option>5 minutes</option>
+                              <option>10 minutes</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Retry Delay</label>
+                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                              <option>1 second</option>
+                              <option>5 seconds</option>
+                              <option>10 seconds</option>
+                              <option>30 seconds</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Gauge className="h-5 w-5 text-amber-600" />
+                          Rate Limits
+                        </CardTitle>
+                        <CardDescription>Control execution frequency</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Max Concurrent Executions</label>
+                            <Input type="number" defaultValue="10" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Max Executions per Hour</label>
+                            <Input type="number" defaultValue="100" />
+                          </div>
+                        </div>
+                        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-sm font-medium">Setting limits too low may cause delays in execution</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Webhooks Settings */}
+                {settingsTab === 'webhooks' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5 text-orange-600" />
+                          Webhook Endpoints
+                        </CardTitle>
+                        <CardDescription>Manage your webhook URLs and triggers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockWebhooks.map(webhook => (
+                          <div key={webhook.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge variant={webhook.isActive ? 'default' : 'secondary'}>{webhook.method}</Badge>
+                                <span className="font-medium">{webhook.name}</span>
+                              </div>
+                              <Switch checked={webhook.isActive} />
+                            </div>
+                            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded p-2 font-mono text-xs">
+                              <code className="flex-1 truncate">{webhook.url}</code>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                              <span>Linked to: {webhook.scenarioName}</span>
+                              <span>{webhook.totalTriggers} triggers • Last: {webhook.lastTriggered?.toLocaleDateString() || 'Never'}</span>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create New Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5 text-green-600" />
+                          Webhook Security
+                        </CardTitle>
+                        <CardDescription>Secure your webhook endpoints</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Signature Verification</p>
+                            <p className="text-sm text-gray-500">Validate webhook payloads with HMAC signatures</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Whitelist</p>
+                            <p className="text-sm text-gray-500">Only accept webhooks from specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Webhook Secret</label>
+                          <div className="flex gap-2">
+                            <Input type="password" defaultValue="whsec_••••••••••••••••" className="flex-1" />
+                            <Button variant="outline">
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Network className="h-5 w-5 text-cyan-600" />
+                          Connected Apps
+                        </CardTitle>
+                        <CardDescription>Manage your app connections</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockConnections.map(connection => (
+                          <div key={connection.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                                  {connection.app.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{connection.name}</p>
+                                <p className="text-xs text-gray-500">Last used {connection.lastUsed.toLocaleDateString()} • {connection.usageCount} uses</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add New Connection
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5 text-purple-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys and access tokens</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Primary API Key</span>
+                            <Button variant="ghost" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-600 dark:text-gray-400">mk_live_••••••••••••••••••••••••</code>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            <Key className="h-4 w-4 mr-2" />
+                            Regenerate Key
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            API Documentation
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-red-600" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Configure email alerts and digests</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Execution Failures</p>
+                            <p className="text-sm text-gray-500">Get notified when a scenario fails</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Connection Expired</p>
+                            <p className="text-sm text-gray-500">Alert when app connections need refresh</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Usage Alerts</p>
+                            <p className="text-sm text-gray-500">Notify at 80% and 100% of quota</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Daily Digest</p>
+                            <p className="text-sm text-gray-500">Daily summary of all executions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Report</p>
+                            <p className="text-sm text-gray-500">Weekly automation performance report</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquare className="h-5 w-5 text-blue-600" />
+                          Slack Notifications
+                        </CardTitle>
+                        <CardDescription>Send alerts to Slack channels</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable Slack Notifications</p>
+                            <p className="text-sm text-gray-500">Send alerts to connected Slack workspace</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Default Channel</label>
+                          <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <option>#automations</option>
+                            <option>#alerts</option>
+                            <option>#general</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Thread Replies</p>
+                            <p className="text-sm text-gray-500">Group related notifications in threads</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cpu className="h-5 w-5 text-indigo-600" />
+                          Advanced Options
+                        </CardTitle>
+                        <CardDescription>Power user features and configurations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Debug Mode</p>
+                            <p className="text-sm text-gray-500">Enable verbose logging for troubleshooting</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Beta Features</p>
+                            <p className="text-sm text-gray-500">Access experimental features early</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Custom Functions</p>
+                            <p className="text-sm text-gray-500">Enable JavaScript code execution in scenarios</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Data Encryption</p>
+                            <p className="text-sm text-gray-500">Encrypt sensitive data at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Download className="h-5 w-5 text-green-600" />
+                          Data Export
+                        </CardTitle>
+                        <CardDescription>Export your automation data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <FileText className="h-5 w-5 text-blue-600" />
+                            <span>Export Scenarios</span>
+                            <span className="text-xs text-gray-500">JSON format</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Activity className="h-5 w-5 text-green-600" />
+                            <span>Export Logs</span>
+                            <span className="text-xs text-gray-500">CSV format</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-600">Delete All Scenarios</p>
+                              <p className="text-sm text-gray-500">Remove all scenarios and their data</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Delete</Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-600">Clear Execution History</p>
+                              <p className="text-sm text-gray-500">Remove all past execution logs</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Clear</Button>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-red-600">Delete Account</p>
+                              <p className="text-sm text-gray-500">Permanently remove your account</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Delete</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
