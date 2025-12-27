@@ -394,6 +394,7 @@ export default function FeaturesClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'kanban'>('grid')
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
   const [activeTab, setActiveTab] = useState('features')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered and sorted features
   const filteredFeatures = useMemo(() => {
@@ -568,6 +569,10 @@ export default function FeaturesClient() {
                 <Target className="h-4 w-4" />
                 Experiments
               </TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-2">
@@ -596,6 +601,59 @@ export default function FeaturesClient() {
           </div>
 
           <TabsContent value="features" className="space-y-6">
+            {/* Features Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Flag className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Feature Flags Dashboard</h2>
+                    <p className="text-indigo-100">Manage, prioritize, and ship features with confidence</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.totalFeatures}</p>
+                    <p className="text-sm text-indigo-200">Features</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.inProgress}</p>
+                    <p className="text-sm text-indigo-200">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.released}</p>
+                    <p className="text-sm text-indigo-200">Released</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { label: 'New Feature', icon: Plus, color: 'from-indigo-500 to-purple-500' },
+                { label: 'Toggle Flag', icon: ToggleRight, color: 'from-green-500 to-emerald-500' },
+                { label: 'Start Rollout', icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
+                { label: 'A/B Test', icon: Target, color: 'from-orange-500 to-red-500' },
+                { label: 'Add Segment', icon: Users, color: 'from-purple-500 to-pink-500' },
+                { label: 'View Metrics', icon: BarChart3, color: 'from-teal-500 to-cyan-500' },
+                { label: 'Compare', icon: GitBranch, color: 'from-pink-500 to-rose-500' },
+                { label: 'Export', icon: ExternalLink, color: 'from-gray-500 to-gray-600' }
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             {/* Filters */}
             <Card>
               <CardContent className="p-4">
@@ -846,6 +904,31 @@ export default function FeaturesClient() {
           </TabsContent>
 
           <TabsContent value="roadmap" className="space-y-6">
+            {/* Roadmap Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <GitBranch className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Product Roadmap</h2>
+                    <p className="text-blue-100">Plan and visualize your feature pipeline across quarters</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{features.filter(f => f.targetRelease).length}</p>
+                    <p className="text-sm text-blue-200">Planned</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">4</p>
+                    <p className="text-sm text-blue-200">Quarters</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Feature Roadmap</CardTitle>
@@ -889,6 +972,31 @@ export default function FeaturesClient() {
           </TabsContent>
 
           <TabsContent value="segments" className="space-y-6">
+            {/* Segments Overview Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">User Segments</h2>
+                    <p className="text-green-100">Target features to specific user groups with precision</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{segments.length}</p>
+                    <p className="text-sm text-green-200">Segments</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{segments.reduce((sum, s) => sum + s.userCount, 0).toLocaleString()}</p>
+                    <p className="text-sm text-green-200">Total Users</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Segments</h2>
               <Button>
@@ -927,6 +1035,31 @@ export default function FeaturesClient() {
           </TabsContent>
 
           <TabsContent value="experiments" className="space-y-6">
+            {/* Experiments Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Target className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">A/B Experiments</h2>
+                    <p className="text-orange-100">Run data-driven experiments to optimize features</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{features.filter(f => f.abTest).length}</p>
+                    <p className="text-sm text-orange-200">Active Tests</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{features.filter(f => f.abTest?.status === 'running').length}</p>
+                    <p className="text-sm text-orange-200">Running</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">A/B Experiments</h2>
               <Button>
@@ -983,6 +1116,440 @@ export default function FeaturesClient() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Feature Management Settings</h2>
+                    <p className="text-gray-300">Configure feature flags, rollouts, and experiments</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">All Systems Operational</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Sync Settings
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Sidebar Layout */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'flags', icon: Flag, label: 'Feature Flags', desc: 'Flag config' },
+                        { id: 'rollouts', icon: TrendingUp, label: 'Rollouts', desc: 'Deploy rules' },
+                        { id: 'segments', icon: Users, label: 'Segments', desc: 'User targeting' },
+                        { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alert prefs' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div className="text-left">
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-indigo-600" />
+                        General Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project Name</label>
+                        <Input defaultValue="FreeFlow Features" className="max-w-md" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Environment</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>Production</option>
+                          <option>Staging</option>
+                          <option>Development</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Enable Feature Flags</p>
+                          <p className="text-sm text-gray-500">Allow feature flag evaluations</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Real-time Updates</p>
+                          <p className="text-sm text-gray-500">Push flag changes instantly</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                          <p className="text-sm text-gray-500">Enable verbose logging</p>
+                        </div>
+                        <ToggleLeft className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">RICE Scoring</p>
+                          <p className="text-sm text-gray-500">Automatic prioritization scoring</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Feature Flags Settings */}
+                {settingsTab === 'flags' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Flag className="w-5 h-5 text-purple-600" />
+                        Feature Flags Configuration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Default Flag State</p>
+                          <p className="text-sm text-gray-500">New flags start as disabled</p>
+                        </div>
+                        <Badge>Off</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Require Approval</p>
+                          <p className="text-sm text-gray-500">Production changes need approval</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-cleanup Stale Flags</p>
+                          <p className="text-sm text-gray-500">Remove flags not accessed in 90 days</p>
+                        </div>
+                        <ToggleLeft className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Flag Dependencies</p>
+                          <p className="text-sm text-gray-500">Track flag relationships</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stale Flag Threshold</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>30 days</option>
+                          <option>60 days</option>
+                          <option>90 days</option>
+                          <option>180 days</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Version Control</p>
+                          <p className="text-sm text-gray-500">Track all flag configuration changes</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Rollouts Settings */}
+                {settingsTab === 'rollouts' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-green-600" />
+                        Rollout Configuration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Rollout Strategy</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>Percentage-based</option>
+                          <option>User segment</option>
+                          <option>Gradual rollout</option>
+                          <option>Ring-based</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Canary Deployments</p>
+                          <p className="text-sm text-gray-500">Start with small percentage</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Automatic Rollbacks</p>
+                          <p className="text-sm text-gray-500">Rollback on error threshold breach</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Error Rate Threshold</label>
+                        <Input type="number" defaultValue="5" className="max-w-md" />
+                        <p className="text-sm text-gray-500 mt-1">Rollback if error rate exceeds this percentage</p>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Sticky Bucketing</p>
+                          <p className="text-sm text-gray-500">Keep users in same variant</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Schedule Rollouts</p>
+                          <p className="text-sm text-gray-500">Plan rollouts for specific times</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Segments Settings */}
+                {settingsTab === 'segments' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-600" />
+                        User Segments Configuration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Dynamic Segments</p>
+                          <p className="text-sm text-gray-500">Auto-update segment membership</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Segment Analytics</p>
+                          <p className="text-sm text-gray-500">Track segment performance</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Import Segments</p>
+                          <p className="text-sm text-gray-500">Sync from external sources</p>
+                        </div>
+                        <ToggleLeft className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Segment Operator</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>AND (all rules must match)</option>
+                          <option>OR (any rule must match)</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">User Attributes</p>
+                          <p className="text-sm text-gray-500">Custom targeting attributes</p>
+                        </div>
+                        <Badge>12 configured</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Segment Versioning</p>
+                          <p className="text-sm text-gray-500">Track segment rule changes</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-orange-600" />
+                        Notification Preferences
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Flag Changes</p>
+                          <p className="text-sm text-gray-500">When flags are toggled or modified</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Rollout Progress</p>
+                          <p className="text-sm text-gray-500">Rollout milestone notifications</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Error Alerts</p>
+                          <p className="text-sm text-gray-500">High error rate notifications</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Experiment Results</p>
+                          <p className="text-sm text-gray-500">A/B test completion alerts</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Stale Flag Warnings</p>
+                          <p className="text-sm text-gray-500">Alert when flags become stale</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Weekly Digest</p>
+                          <p className="text-sm text-gray-500">Weekly feature summary email</p>
+                        </div>
+                        <ToggleLeft className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notification Channels</label>
+                        <div className="flex gap-2">
+                          <Badge className="bg-blue-100 text-blue-700">Email</Badge>
+                          <Badge className="bg-purple-100 text-purple-700">Slack</Badge>
+                          <Badge variant="outline">Webhook</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-yellow-600" />
+                        Advanced Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">SDK Caching</p>
+                          <p className="text-sm text-gray-500">Cache flag evaluations locally</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cache TTL</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>5 minutes</option>
+                          <option>15 minutes</option>
+                          <option>30 minutes</option>
+                          <option>1 hour</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">API Rate Limiting</p>
+                          <p className="text-sm text-gray-500">Limit SDK requests per minute</p>
+                        </div>
+                        <Badge>1000/min</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                          <p className="text-sm text-gray-500">Log all flag evaluations</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Offline Mode</p>
+                          <p className="text-sm text-gray-500">Enable offline flag evaluation</p>
+                        </div>
+                        <ToggleLeft className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Custom Events</p>
+                          <p className="text-sm text-gray-500">Track custom analytics events</p>
+                        </div>
+                        <ToggleRight className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Reset All Flags</p>
+                              <p className="text-sm text-red-600">Reset all flags to default state</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Reset
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
+                              <p className="text-sm text-red-600">Permanently delete this project</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
