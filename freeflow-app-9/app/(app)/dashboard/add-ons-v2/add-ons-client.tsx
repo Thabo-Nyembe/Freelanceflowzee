@@ -444,6 +444,7 @@ export default function AddOnsClient() {
   const [showAddOnDialog, setShowAddOnDialog] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState<AddOnCategory | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<AddOnStatus | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats: AddOnStats = useMemo(() => ({
@@ -627,6 +628,65 @@ export default function AddOnsClient() {
           </Card>
         </div>
 
+        {/* Add-ons Overview Banner */}
+        <Card className="bg-gradient-to-r from-orange-600 via-pink-600 to-rose-600 text-white border-0">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Puzzle className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Chrome Extension-Level Marketplace</h2>
+                  <p className="text-orange-100 mt-1">Discover, install, and manage {stats.totalAddOns} powerful add-ons for your platform</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{stats.installedAddOns}</div>
+                  <div className="text-sm text-orange-100">Installed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{stats.availableAddOns}</div>
+                  <div className="text-sm text-orange-100">Available</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{stats.featuredCount}</div>
+                  <div className="text-sm text-orange-100">Featured</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{formatNumber(stats.totalDownloads)}</div>
+                  <div className="text-sm text-orange-100">Downloads</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          {[
+            { icon: Store, label: 'Browse All', desc: 'Explore marketplace', color: 'from-orange-500 to-pink-600' },
+            { icon: Download, label: 'Install New', desc: 'Get add-ons', color: 'from-blue-500 to-indigo-600' },
+            { icon: Package, label: 'Manage', desc: 'Your add-ons', color: 'from-green-500 to-emerald-600' },
+            { icon: Crown, label: 'Featured', desc: 'Top picks', color: 'from-amber-500 to-orange-600' },
+            { icon: RefreshCw, label: 'Updates', desc: 'Check updates', color: 'from-purple-500 to-violet-600' },
+            { icon: Shield, label: 'Security', desc: 'Scan add-ons', color: 'from-red-500 to-rose-600' },
+            { icon: Code, label: 'Develop', desc: 'Create add-ons', color: 'from-cyan-500 to-blue-600' },
+            { icon: Settings, label: 'Settings', desc: 'Configure', color: 'from-gray-500 to-slate-600' }
+          ].map((action, idx) => (
+            <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0">
+              <CardContent className="p-4 text-center">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                  <action.icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="font-medium text-sm">{action.label}</div>
+                <div className="text-xs text-muted-foreground">{action.desc}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
         {/* Search and Filters */}
         <div className="flex items-center gap-4 flex-wrap">
           <div className="relative flex-1 max-w-md">
@@ -693,6 +753,37 @@ export default function AddOnsClient() {
 
           {/* Discover Tab */}
           <TabsContent value="discover" className="space-y-6">
+            {/* Discover Banner */}
+            <Card className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Store className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Discover Amazing Add-ons</h3>
+                      <p className="text-blue-100 text-sm">Browse {filteredAddOns.length} add-ons across {10} categories</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredAddOns.filter(a => a.pricingType === 'free').length}</div>
+                      <div className="text-xs text-blue-100">Free Add-ons</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredAddOns.filter(a => a.isFeatured).length}</div>
+                      <div className="text-xs text-blue-100">Featured</div>
+                    </div>
+                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2">
+                      <Search className="w-4 h-4" />
+                      Advanced Search
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Sidebar Filters */}
               <div className="space-y-4">
@@ -817,10 +908,148 @@ export default function AddOnsClient() {
                 </div>
               </div>
             </div>
+
+            {/* Marketplace Insights */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    Trending This Week
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'AI Assistant Pro', category: 'ai', downloads: 12500, trend: '+45%' },
+                      { name: 'Slack Integration', category: 'integration', downloads: 8900, trend: '+32%' },
+                      { name: 'Security Shield', category: 'security', downloads: 7600, trend: '+28%' },
+                      { name: 'Analytics Dashboard', category: 'analytics', downloads: 6200, trend: '+22%' },
+                      { name: 'Email Composer', category: 'communication', downloads: 5100, trend: '+18%' }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-bold text-gray-400">#{idx + 1}</span>
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{item.category}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">{formatNumber(item.downloads)}</p>
+                          <p className="text-xs text-green-500">{item.trend}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500" />
+                    Top Rated Add-ons
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Cloud Backup Plus', category: 'storage', rating: 4.9, reviews: 2340 },
+                      { name: 'Design System Kit', category: 'design', rating: 4.8, reviews: 1890 },
+                      { name: 'API Gateway', category: 'developer', rating: 4.8, reviews: 1560 },
+                      { name: 'Marketing Automation', category: 'marketing', rating: 4.7, reviews: 1230 },
+                      { name: 'Workflow Builder', category: 'productivity', rating: 4.7, reviews: 980 }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1 text-yellow-500">
+                            <Star className="w-4 h-4 fill-yellow-500" />
+                            <span className="font-bold">{item.rating}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{item.category}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">{formatNumber(item.reviews)} reviews</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  Recent Marketplace Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { action: 'New Release', addon: 'AI Image Generator v2.0', time: '2 hours ago', icon: Zap },
+                    { action: 'Major Update', addon: 'Security Scanner Pro', time: '5 hours ago', icon: Shield },
+                    { action: 'Featured', addon: 'Team Collaboration Suite', time: '8 hours ago', icon: Crown },
+                    { action: 'Price Drop', addon: 'Premium Analytics', time: '1 day ago', icon: TrendingDown },
+                    { action: 'New Release', addon: 'Email Marketing Hub', time: '2 days ago', icon: Mail }
+                  ].map((activity, idx) => (
+                    <div key={idx} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <activity.icon className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{activity.action}</Badge>
+                          <span className="font-medium">{activity.addon}</span>
+                        </div>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{activity.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Installed Tab */}
           <TabsContent value="installed" className="space-y-4">
+            {/* Installed Banner */}
+            <Card className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Package className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Installed Add-ons</h3>
+                      <p className="text-green-100 text-sm">Manage your {installedAddOns.length} installed add-ons</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{installedAddOns.filter(a => a.status === 'installed').length}</div>
+                      <div className="text-xs text-green-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{installedAddOns.filter(a => a.status === 'disabled').length}</div>
+                      <div className="text-xs text-green-100">Disabled</div>
+                    </div>
+                    <Button className="bg-white text-green-600 hover:bg-green-50 gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      Check Updates
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid gap-4">
               {installedAddOns.map((addOn) => {
                 const CategoryIcon = getCategoryIcon(addOn.category)
@@ -862,10 +1091,68 @@ export default function AddOnsClient() {
                 )
               })}
             </div>
+
+            {/* Storage Usage */}
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-5 h-5 text-purple-500" />
+                  Storage Usage
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Total Storage Used</span>
+                    <span className="font-bold">245 MB / 1 GB</span>
+                  </div>
+                  <Progress value={24.5} className="h-2" />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                    {installedAddOns.slice(0, 4).map((addOn, idx) => (
+                      <div key={idx} className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <p className="text-sm font-medium truncate">{addOn.name}</p>
+                        <p className="text-xs text-muted-foreground">{addOn.size}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Featured Tab */}
           <TabsContent value="featured" className="space-y-4">
+            {/* Featured Banner */}
+            <Card className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Crown className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Featured Add-ons</h3>
+                      <p className="text-amber-100 text-sm">Hand-picked premium add-ons by our team</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{featuredAddOns.length}</div>
+                      <div className="text-xs text-amber-100">Featured</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{featuredAddOns.filter(a => a.isVerified).length}</div>
+                      <div className="text-xs text-amber-100">Verified</div>
+                    </div>
+                    <Button className="bg-white text-amber-600 hover:bg-amber-50 gap-2">
+                      <Star className="w-4 h-4" />
+                      Submit Add-on
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {featuredAddOns.map((addOn) => {
                 const CategoryIcon = getCategoryIcon(addOn.category)
@@ -907,6 +1194,37 @@ export default function AddOnsClient() {
 
           {/* Categories Tab */}
           <TabsContent value="categories" className="space-y-4">
+            {/* Categories Banner */}
+            <Card className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Layers className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Browse by Category</h3>
+                      <p className="text-cyan-100 text-sm">Explore {10} categories with {stats.totalAddOns} total add-ons</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockAddOns.filter(a => a.category === 'ai').length}</div>
+                      <div className="text-xs text-cyan-100">AI & ML</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockAddOns.filter(a => a.category === 'integration').length}</div>
+                      <div className="text-xs text-cyan-100">Integrations</div>
+                    </div>
+                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2">
+                      <Plus className="w-4 h-4" />
+                      Request Category
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {(['ai', 'integration', 'security', 'analytics', 'communication', 'design', 'developer', 'storage', 'marketing', 'productivity'] as AddOnCategory[]).map((cat) => {
                 const Icon = getCategoryIcon(cat)
@@ -935,6 +1253,37 @@ export default function AddOnsClient() {
 
           {/* Updates Tab */}
           <TabsContent value="updates" className="space-y-4">
+            {/* Updates Banner */}
+            <Card className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <RefreshCw className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Add-on Updates</h3>
+                      <p className="text-purple-100 text-sm">Keep your add-ons up to date for best performance</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockAddOns.filter(a => a.status === 'update_available').length}</div>
+                      <div className="text-xs text-purple-100">Updates Available</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{installedAddOns.length}</div>
+                      <div className="text-xs text-purple-100">Up to Date</div>
+                    </div>
+                    <Button className="bg-white text-purple-600 hover:bg-purple-50 gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      Update All
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -970,110 +1319,383 @@ export default function AddOnsClient() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Update History */}
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  Update History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { addon: 'AI Assistant Pro', from: '2.4.0', to: '2.5.0', date: 'Dec 26, 2024', status: 'success' },
+                    { addon: 'Security Scanner', from: '1.8.2', to: '1.9.0', date: 'Dec 25, 2024', status: 'success' },
+                    { addon: 'Slack Integration', from: '3.1.0', to: '3.2.0', date: 'Dec 24, 2024', status: 'success' },
+                    { addon: 'Analytics Dashboard', from: '4.0.0', to: '4.1.0', date: 'Dec 23, 2024', status: 'success' },
+                    { addon: 'Email Composer', from: '2.2.0', to: '2.3.0', date: 'Dec 22, 2024', status: 'success' }
+                  ].map((update, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{update.addon}</p>
+                          <p className="text-xs text-muted-foreground">v{update.from} → v{update.to}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className="bg-green-100 text-green-700">Updated</Badge>
+                        <p className="text-xs text-muted-foreground mt-1">{update.date}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <RefreshCw className="w-5 h-5 text-orange-500" />
-                    Auto-Updates
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Automatic Updates</div>
-                      <div className="text-sm text-gray-500">Update add-ons automatically</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Update Notifications</div>
-                      <div className="text-sm text-gray-500">Get notified about new updates</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'updates', icon: RefreshCw, label: 'Updates' },
+                      { id: 'security', icon: Shield, label: 'Security' },
+                      { id: 'developer', icon: Code, label: 'Developer' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-red-500" />
-                    Security
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Verified Only</div>
-                      <div className="text-sm text-gray-500">Only show verified add-ons</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Permission Warnings</div>
-                      <div className="text-sm text-gray-500">Warn about elevated permissions</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>General Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Marketplace Region</label>
+                          <select className="w-full p-2 border rounded-lg dark:bg-gray-700">
+                            <option>United States</option>
+                            <option>Europe</option>
+                            <option>Asia Pacific</option>
+                            <option>Global</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Default Currency</label>
+                          <select className="w-full p-2 border rounded-lg dark:bg-gray-700">
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                            <option>GBP (£)</option>
+                            <option>JPY (¥)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Installed Add-ons First</div>
+                            <div className="text-sm text-muted-foreground">Prioritize installed add-ons in search results</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Enable Marketplace Recommendations</div>
+                            <div className="text-sm text-muted-foreground">Get personalized add-on suggestions</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-Install Compatible Add-ons</div>
+                            <div className="text-sm text-muted-foreground">Automatically install recommended add-ons</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-yellow-500" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">New Add-ons</div>
-                      <div className="text-sm text-gray-500">Notify about new releases</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Recommendations</div>
-                      <div className="text-sm text-gray-500">Personalized suggestions</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'updates' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Update Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Automatic Updates</div>
+                            <div className="text-sm text-muted-foreground">Update add-ons automatically when available</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Update Notifications</div>
+                            <div className="text-sm text-muted-foreground">Get notified about available updates</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Beta Updates</div>
+                            <div className="text-sm text-muted-foreground">Receive beta versions for testing</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Update Schedule</div>
+                            <div className="text-sm text-muted-foreground">When to check for updates</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Daily</option>
+                            <option>Weekly</option>
+                            <option>Monthly</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                          <RefreshCw className="w-5 h-5" />
+                          <span className="font-medium">Last checked: 2 hours ago</span>
+                        </div>
+                        <Button className="mt-3" variant="outline">Check for Updates Now</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Code className="w-5 h-5 text-emerald-500" />
-                    Developer Mode
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Developer Mode</div>
-                      <div className="text-sm text-gray-500">Enable developer features</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Load Unpacked</div>
-                      <div className="text-sm text-gray-500">Load local add-ons</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'security' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Security Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Verified Add-ons Only</div>
+                            <div className="text-sm text-muted-foreground">Only show and install verified add-ons</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Permission Warnings</div>
+                            <div className="text-sm text-muted-foreground">Warn about elevated permission requests</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Sandbox Mode</div>
+                            <div className="text-sm text-muted-foreground">Run add-ons in isolated environment</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Security Scan on Install</div>
+                            <div className="text-sm text-muted-foreground">Automatically scan add-ons before installation</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                      </div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                          <Shield className="w-5 h-5" />
+                          <span className="font-medium">All installed add-ons are verified and secure</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'developer' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Developer Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Developer Mode</div>
+                            <div className="text-sm text-muted-foreground">Enable developer features and debugging</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Load Unpacked Extensions</div>
+                            <div className="text-sm text-muted-foreground">Allow loading local add-ons for testing</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Debug Console</div>
+                            <div className="text-sm text-muted-foreground">Show developer console for add-ons</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">API Access</div>
+                            <div className="text-sm text-muted-foreground">Enable API endpoints for development</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                      </div>
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <div className="font-medium text-purple-700 dark:text-purple-400 mb-2">Developer Resources</div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" size="sm">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Documentation
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Code className="w-4 h-4 mr-2" />
+                            API Reference
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Notification Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">New Add-ons</div>
+                            <div className="text-sm text-muted-foreground">Notify about new add-on releases</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Recommendations</div>
+                            <div className="text-sm text-muted-foreground">Personalized add-on suggestions</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Update Available</div>
+                            <div className="text-sm text-muted-foreground">Notify when updates are available</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Security Alerts</div>
+                            <div className="text-sm text-muted-foreground">Critical security notifications</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Weekly Digest</div>
+                            <div className="text-sm text-muted-foreground">Weekly summary of marketplace activity</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Advanced Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Lazy Loading</div>
+                            <div className="text-sm text-muted-foreground">Load add-ons on demand to improve performance</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Cache Add-on Data</div>
+                            <div className="text-sm text-muted-foreground">Cache marketplace data for faster loading</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Parallel Downloads</div>
+                            <div className="text-sm text-muted-foreground">Download multiple add-ons simultaneously</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Backup Settings</div>
+                            <div className="text-sm text-muted-foreground">Auto-backup add-on configurations</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button variant="outline">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Import Settings
+                        </Button>
+                        <Button variant="outline">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export Settings
+                        </Button>
+                        <Button variant="destructive">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Reset All
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

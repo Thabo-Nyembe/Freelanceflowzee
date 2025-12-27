@@ -193,6 +193,7 @@ export default function CrmClient() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [statusFilter, setStatusFilter] = useState<ContactStatus | 'all'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Settings
   const [settings, setSettings] = useState({
@@ -379,6 +380,54 @@ export default function CrmClient() {
           ))}
         </div>
 
+        {/* CRM Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div className="font-semibold">Top Performer</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Sarah Johnson closed 3 deals worth $405K this month</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                </div>
+                <div className="font-semibold">Deals Won</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Enterprise Inc deal closed for $250K - your biggest win!</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="font-semibold">Needs Attention</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">3 deals have been stale for 7+ days - follow up soon</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="font-semibold">Upcoming</div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">5 follow-ups scheduled for this week across 4 contacts</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Main Tabs */}
         <Tabs defaultValue="pipeline" className="space-y-6">
           <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
@@ -418,6 +467,41 @@ export default function CrmClient() {
 
           {/* Pipeline Tab */}
           <TabsContent value="pipeline" className="space-y-6">
+            {/* Pipeline Overview Banner */}
+            <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Kanban className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Sales Pipeline</h3>
+                      <p className="text-indigo-100">Drag and drop to move deals between stages</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.activeDeals}</div>
+                      <div className="text-sm text-indigo-100">Active Deals</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(stats.pipelineValue)}</div>
+                      <div className="text-sm text-indigo-100">Total Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.winRate.toFixed(0)}%</div>
+                      <div className="text-sm text-indigo-100">Win Rate</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(stats.avgDealSize)}</div>
+                      <div className="text-sm text-indigo-100">Avg Deal</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="overflow-x-auto pb-4">
               <div className="flex gap-4 min-w-max">
                 {PIPELINE_STAGES.filter(s => s.id !== 'closed_lost').map((stage) => {
@@ -488,6 +572,41 @@ export default function CrmClient() {
 
           {/* Contacts Tab */}
           <TabsContent value="contacts" className="space-y-6">
+            {/* Contacts Overview Banner */}
+            <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Users className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Contact Management</h3>
+                      <p className="text-blue-100">Track and manage all your customer relationships</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalContacts}</div>
+                      <div className="text-sm text-blue-100">Total</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalLeads}</div>
+                      <div className="text-sm text-blue-100">Leads</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.totalCustomers}</div>
+                      <div className="text-sm text-blue-100">Customers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.vipContacts}</div>
+                      <div className="text-sm text-blue-100">VIP</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}>
@@ -581,6 +700,37 @@ export default function CrmClient() {
 
           {/* Companies Tab */}
           <TabsContent value="companies" className="space-y-6">
+            {/* Companies Overview Banner */}
+            <Card className="bg-gradient-to-r from-emerald-600 to-green-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Building2 className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Company Accounts</h3>
+                      <p className="text-green-100">Manage B2B relationships and accounts</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{companies.length}</div>
+                      <div className="text-sm text-green-100">Companies</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{companies.filter(c => c.status === 'active').length}</div>
+                      <div className="text-sm text-green-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(companies.reduce((sum, c) => sum + c.dealValue, 0))}</div>
+                      <div className="text-sm text-green-100">Total Value</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {companies.map(company => (
                 <Card key={company.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -637,6 +787,41 @@ export default function CrmClient() {
 
           {/* Deals Tab */}
           <TabsContent value="deals" className="space-y-6">
+            {/* Deals Overview Banner */}
+            <Card className="bg-gradient-to-r from-amber-600 to-orange-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Briefcase className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Deal Management</h3>
+                      <p className="text-amber-100">Track opportunities through your sales cycle</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{deals.length}</div>
+                      <div className="text-sm text-amber-100">Total Deals</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(deals.reduce((sum, d) => sum + d.value, 0))}</div>
+                      <div className="text-sm text-amber-100">Total Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatCurrency(stats.wonValue)}</div>
+                      <div className="text-sm text-amber-100">Won Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{stats.winRate.toFixed(0)}%</div>
+                      <div className="text-sm text-amber-100">Win Rate</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="space-y-4">
               {deals.map(deal => (
                 <Card key={deal.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedDeal(deal)}>
@@ -680,6 +865,41 @@ export default function CrmClient() {
 
           {/* Activities Tab */}
           <TabsContent value="activities" className="space-y-6">
+            {/* Activities Overview Banner */}
+            <Card className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Activity className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Activity Timeline</h3>
+                      <p className="text-purple-100">Track all customer interactions and tasks</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{activities.length}</div>
+                      <div className="text-sm text-purple-100">Total</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{activities.filter(a => !a.completed).length}</div>
+                      <div className="text-sm text-purple-100">Pending</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{activities.filter(a => a.completed).length}</div>
+                      <div className="text-sm text-purple-100">Completed</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{activities.filter(a => a.type === 'email').length}</div>
+                      <div className="text-sm text-purple-100">Emails</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card className="border-0 shadow-sm">
@@ -805,6 +1025,37 @@ export default function CrmClient() {
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="space-y-6">
+            {/* Reports Overview Banner */}
+            <Card className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <BarChart3 className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Reports & Analytics</h3>
+                      <p className="text-teal-100">Gain insights into your sales performance</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{reports.length}</div>
+                      <div className="text-sm text-teal-100">Reports</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{reports.filter(r => r.status === 'active').length}</div>
+                      <div className="text-sm text-teal-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{reports.reduce((sum, r) => sum + r.recipients, 0)}</div>
+                      <div className="text-sm text-teal-100">Recipients</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Reports & Analytics</h3>
               <Button>
@@ -854,6 +1105,41 @@ export default function CrmClient() {
 
           {/* Automation Tab */}
           <TabsContent value="automation" className="space-y-6">
+            {/* Automation Overview Banner */}
+            <Card className="bg-gradient-to-r from-rose-600 to-red-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Workflow className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Workflows & Automation</h3>
+                      <p className="text-rose-100">Automate repetitive tasks and workflows</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{automations.length}</div>
+                      <div className="text-sm text-rose-100">Automations</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{automations.filter(a => a.status === 'active').length}</div>
+                      <div className="text-sm text-rose-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{automations.reduce((sum, a) => sum + a.executions, 0)}</div>
+                      <div className="text-sm text-rose-100">Executions</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{(automations.reduce((sum, a) => sum + a.successRate, 0) / automations.length).toFixed(0)}%</div>
+                      <div className="text-sm text-rose-100">Success</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflows & Automation</h3>
               <Button>
@@ -916,133 +1202,460 @@ export default function CrmClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Cog className="w-5 h-5" />
-                    General Settings
-                  </CardTitle>
-                  <CardDescription>Configure CRM preferences</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Email Sync</Label>
-                      <p className="text-xs text-gray-500">Automatically sync email conversations</p>
+            {/* Settings Banner */}
+            <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-8 h-8 text-white" />
                     </div>
-                    <Switch checked={settings.emailSync} onCheckedChange={(checked) => setSettings({ ...settings, emailSync: checked })} />
+                    <div>
+                      <h2 className="text-2xl font-bold">Salesforce-Level CRM Platform</h2>
+                      <p className="text-indigo-100 mt-1">Configure contacts, pipelines, automation, and integrations</p>
+                    </div>
                   </div>
+                  <div className="flex items-center gap-8">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.totalContacts}</div>
+                      <div className="text-sm text-indigo-100">Contacts</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.activeDeals}</div>
+                      <div className="text-sm text-indigo-100">Active Deals</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{formatCurrency(stats.pipelineValue)}</div>
+                      <div className="text-sm text-indigo-100">Pipeline</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{stats.winRate.toFixed(0)}%</div>
+                      <div className="text-sm text-indigo-100">Win Rate</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Calendar Sync</Label>
-                      <p className="text-xs text-gray-500">Sync meetings and events</p>
-                    </div>
-                    <Switch checked={settings.calendarSync} onCheckedChange={(checked) => setSettings({ ...settings, calendarSync: checked })} />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Auto Lead Assignment</Label>
-                      <p className="text-xs text-gray-500">Automatically assign new leads</p>
-                    </div>
-                    <Switch checked={settings.autoAssign} onCheckedChange={(checked) => setSettings({ ...settings, autoAssign: checked })} />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Lead Scoring</Label>
-                      <p className="text-xs text-gray-500">Enable AI-powered lead scoring</p>
-                    </div>
-                    <Switch checked={settings.leadScoring} onCheckedChange={(checked) => setSettings({ ...settings, leadScoring: checked })} />
-                  </div>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit border-0 shadow-sm">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'pipeline', icon: Kanban, label: 'Pipeline' },
+                      { id: 'automation', icon: Workflow, label: 'Automation' },
+                      { id: 'integrations', icon: Link2, label: 'Integrations' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                  <CardDescription>Manage notification preferences</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Activity Reminders</Label>
-                      <p className="text-xs text-gray-500">Get reminders for scheduled activities</p>
-                    </div>
-                    <Switch checked={settings.activityReminders} onCheckedChange={(checked) => setSettings({ ...settings, activityReminders: checked })} />
-                  </div>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Cog className="w-5 h-5" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure CRM preferences and defaults</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Email Sync</div>
+                          <div className="text-sm text-muted-foreground">Automatically sync email conversations</div>
+                        </div>
+                        <Switch checked={settings.emailSync} onCheckedChange={(checked) => setSettings({ ...settings, emailSync: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Calendar Sync</div>
+                          <div className="text-sm text-muted-foreground">Sync meetings and events</div>
+                        </div>
+                        <Switch checked={settings.calendarSync} onCheckedChange={(checked) => setSettings({ ...settings, calendarSync: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Auto Lead Assignment</div>
+                          <div className="text-sm text-muted-foreground">Automatically assign new leads to team members</div>
+                        </div>
+                        <Switch checked={settings.autoAssign} onCheckedChange={(checked) => setSettings({ ...settings, autoAssign: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Lead Scoring</div>
+                          <div className="text-sm text-muted-foreground">Enable AI-powered lead scoring</div>
+                        </div>
+                        <Switch checked={settings.leadScoring} onCheckedChange={(checked) => setSettings({ ...settings, leadScoring: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Contact View</div>
+                          <div className="text-sm text-muted-foreground">Choose default view for contacts</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>List View</option>
+                          <option>Grid View</option>
+                          <option>Kanban View</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Activity Logging</div>
+                          <div className="text-sm text-muted-foreground">Auto-log emails and calls</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Deal Rotation Alerts</Label>
-                      <p className="text-xs text-gray-500">Notify when deals need attention</p>
-                    </div>
-                    <Switch checked={settings.dealRotation} onCheckedChange={(checked) => setSettings({ ...settings, dealRotation: checked })} />
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'pipeline' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Kanban className="w-5 h-5" />
+                        Pipeline Settings
+                      </CardTitle>
+                      <CardDescription>Configure deal stages and pipeline behavior</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Default Pipeline</div>
+                          <div className="text-sm text-muted-foreground">Select default pipeline for new deals</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>Sales Pipeline</option>
+                          <option>Enterprise Pipeline</option>
+                          <option>Partner Pipeline</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Auto-move Stale Deals</div>
+                          <div className="text-sm text-muted-foreground">Move inactive deals after 30 days</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Probability Auto-update</div>
+                          <div className="text-sm text-muted-foreground">Update probability based on stage</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Required Fields</div>
+                          <div className="text-sm text-muted-foreground">Enforce required fields per stage</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Close Date Alerts</div>
+                          <div className="text-sm text-muted-foreground">Alert before expected close date</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                          <option>3 days before</option>
+                          <option>7 days before</option>
+                          <option>14 days before</option>
+                        </select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    Data Enrichment
-                  </CardTitle>
-                  <CardDescription>Enhance contact data automatically</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Duplicate Detection</Label>
-                      <p className="text-xs text-gray-500">Automatically detect duplicate records</p>
-                    </div>
-                    <Switch checked={settings.duplicateDetection} onCheckedChange={(checked) => setSettings({ ...settings, duplicateDetection: checked })} />
-                  </div>
+                {settingsTab === 'automation' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Workflow className="w-5 h-5" />
+                        Automation Settings
+                      </CardTitle>
+                      <CardDescription>Configure workflows and automation rules</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Lead Nurturing</div>
+                          <div className="text-sm text-muted-foreground">Enable automated lead nurture sequences</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Follow-up Reminders</div>
+                          <div className="text-sm text-muted-foreground">Auto-create follow-up tasks</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Deal Stage Triggers</div>
+                          <div className="text-sm text-muted-foreground">Run automations on stage change</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Win/Loss Analysis</div>
+                          <div className="text-sm text-muted-foreground">Auto-send surveys on deal close</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Territory Assignment</div>
+                          <div className="text-sm text-muted-foreground">Auto-assign by geography</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Duplicate Detection</div>
+                          <div className="text-sm text-muted-foreground">Auto-detect and merge duplicates</div>
+                        </div>
+                        <Switch checked={settings.duplicateDetection} onCheckedChange={(checked) => setSettings({ ...settings, duplicateDetection: checked })} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="font-medium">Data Enrichment</Label>
-                      <p className="text-xs text-gray-500">Auto-fill missing contact information</p>
-                    </div>
-                    <Switch checked={settings.dataEnrichment} onCheckedChange={(checked) => setSettings({ ...settings, dataEnrichment: checked })} />
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'integrations' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Link2 className="w-5 h-5" />
+                        Integrations
+                      </CardTitle>
+                      <CardDescription>Connect with external services</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <Mail className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Gmail / Google Workspace</div>
+                            <div className="text-sm text-muted-foreground">Sync emails and calendar</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Connected</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <Linkedin className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">LinkedIn Sales Navigator</div>
+                            <div className="text-sm text-muted-foreground">Prospect enrichment</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Connected</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                            <MessageSquare className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Slack</div>
+                            <div className="text-sm text-muted-foreground">Deal notifications</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Stripe</div>
+                            <div className="text-sm text-muted-foreground">Payment tracking</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                            <Zap className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Zapier</div>
+                            <div className="text-sm text-muted-foreground">Connect 5000+ apps</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="w-5 h-5" />
-                    Data Management
-                  </CardTitle>
-                  <CardDescription>Import, export, and manage data</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-                      <Download className="w-6 h-6" />
-                      <span>Export Contacts</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-                      <Plus className="w-6 h-6" />
-                      <span>Import Contacts</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-                      <Archive className="w-6 h-6" />
-                      <span>Backup Data</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-                      <RefreshCw className="w-6 h-6" />
-                      <span>Sync Now</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                {settingsTab === 'notifications' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Manage alert and notification preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Activity Reminders</div>
+                          <div className="text-sm text-muted-foreground">Get reminders for scheduled activities</div>
+                        </div>
+                        <Switch checked={settings.activityReminders} onCheckedChange={(checked) => setSettings({ ...settings, activityReminders: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Deal Stage Changes</div>
+                          <div className="text-sm text-muted-foreground">Notify when deals move stages</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">New Lead Alerts</div>
+                          <div className="text-sm text-muted-foreground">Instant notification for new leads</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Deal Rotation Alerts</div>
+                          <div className="text-sm text-muted-foreground">Notify when deals need attention</div>
+                        </div>
+                        <Switch checked={settings.dealRotation} onCheckedChange={(checked) => setSettings({ ...settings, dealRotation: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Email Opens/Clicks</div>
+                          <div className="text-sm text-muted-foreground">Track engagement notifications</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Weekly Digest</div>
+                          <div className="text-sm text-muted-foreground">Summary of pipeline activity</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>Power user settings and data management</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Data Enrichment</div>
+                          <div className="text-sm text-muted-foreground">Auto-fill missing contact information</div>
+                        </div>
+                        <Switch checked={settings.dataEnrichment} onCheckedChange={(checked) => setSettings({ ...settings, dataEnrichment: checked })} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">API Access</div>
+                          <div className="text-sm text-muted-foreground">Enable REST API for integrations</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Audit Logging</div>
+                          <div className="text-sm text-muted-foreground">Track all user actions</div>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium">Field-level Security</div>
+                          <div className="text-sm text-muted-foreground">Restrict field access by role</div>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Download className="w-6 h-6" />
+                          <span>Export All Data</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Plus className="w-6 h-6" />
+                          <span>Import Data</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <Archive className="w-6 h-6" />
+                          <span>Backup CRM</span>
+                        </Button>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                          <RefreshCw className="w-6 h-6" />
+                          <span>Sync All Data</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: UserPlus, label: 'Add Contact', desc: 'Create new', color: 'from-indigo-500 to-purple-600' },
+                { icon: Briefcase, label: 'New Deal', desc: 'Start deal', color: 'from-green-500 to-emerald-600' },
+                { icon: Building2, label: 'Add Company', desc: 'Create account', color: 'from-blue-500 to-cyan-600' },
+                { icon: Mail, label: 'Send Email', desc: 'Compose', color: 'from-orange-500 to-red-600' },
+                { icon: Calendar, label: 'Schedule', desc: 'Book meeting', color: 'from-purple-500 to-pink-600' },
+                { icon: Workflow, label: 'Automation', desc: 'Create rule', color: 'from-teal-500 to-green-600' },
+                { icon: BarChart3, label: 'Reports', desc: 'View stats', color: 'from-yellow-500 to-orange-600' },
+                { icon: Download, label: 'Export', desc: 'Download', color: 'from-cyan-500 to-blue-600' }
+              ].map((action, idx) => (
+                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                      <action.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="font-medium text-sm">{action.label}</div>
+                    <div className="text-xs text-muted-foreground">{action.desc}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
         </Tabs>

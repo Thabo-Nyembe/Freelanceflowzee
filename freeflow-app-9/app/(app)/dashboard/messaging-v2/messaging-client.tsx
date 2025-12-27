@@ -342,7 +342,7 @@ const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉'
 // ============================================================================
 
 export default function MessagingClient() {
-  const [activeView, setActiveView] = useState<'channels' | 'dms' | 'threads' | 'search'>('channels')
+  const [activeView, setActiveView] = useState<'channels' | 'dms' | 'threads' | 'search' | 'settings' | 'analytics'>('channels')
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
   const [selectedDM, setSelectedDM] = useState<DirectMessage | null>(null)
   const [messages, setMessages] = useState<Message[]>(mockMessages)
@@ -361,6 +361,8 @@ export default function MessagingClient() {
   const [editContent, setEditContent] = useState('')
   const [typingUsers] = useState<User[]>([mockUsers[1]])
   const [showNewChannel, setShowNewChannel] = useState(false)
+  const [activeTab, setActiveTab] = useState('messages')
+  const [settingsTab, setSettingsTab] = useState('general')
   const messageEndRef = useRef<HTMLDivElement>(null)
 
   const currentChannelMessages = useMemo(() => {
@@ -552,6 +554,24 @@ export default function MessagingClient() {
             <Search className="w-4 h-4" />
             Search
           </button>
+          <button
+            onClick={() => setActiveView('analytics')}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+              activeView === 'analytics' ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4" />
+            Analytics
+          </button>
+          <button
+            onClick={() => setActiveView('settings')}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+              activeView === 'settings' ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            Settings
+          </button>
         </div>
 
         {/* Channels List */}
@@ -660,8 +680,608 @@ export default function MessagingClient() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
+        {/* Settings View */}
+        {activeView === 'settings' && (
+          <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-6">
+            <div className="max-w-5xl mx-auto space-y-6">
+              {/* Settings Header */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <Settings className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Messaging Settings</h1>
+                  <p className="text-muted-foreground">Configure your messaging experience</p>
+                </div>
+              </div>
+
+              {/* Settings Banner */}
+              <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 text-white border-0">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <MessageSquare className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">Slack-Level Messaging Platform</h3>
+                        <p className="text-indigo-100 text-sm">Real-time messaging, channels, and collaboration</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{channels.length}</div>
+                        <div className="text-xs text-indigo-100">Channels</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{directMessages.length}</div>
+                        <div className="text-xs text-indigo-100">DMs</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{messages.length}</div>
+                        <div className="text-xs text-indigo-100">Messages</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-12 gap-6">
+                {/* Settings Sidebar */}
+                <Card className="col-span-3 h-fit">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'privacy', icon: Lock, label: 'Privacy' },
+                        { id: 'appearance', icon: Eye, label: 'Appearance' },
+                        { id: 'audio', icon: Headphones, label: 'Audio & Video' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Settings Content */}
+                <div className="col-span-9 space-y-6">
+                  {settingsTab === 'general' && (
+                    <Card>
+                      <CardHeader><CardTitle>General Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Language</div>
+                            <div className="text-sm text-muted-foreground">Select your preferred language</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>English (US)</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Timezone</div>
+                            <div className="text-sm text-muted-foreground">Set your local timezone</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>UTC-5 (Eastern Time)</option>
+                            <option>UTC-8 (Pacific Time)</option>
+                            <option>UTC+0 (GMT)</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Online Status</div>
+                            <div className="text-sm text-muted-foreground">Let others see when you're online</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-mark as Read</div>
+                            <div className="text-sm text-muted-foreground">Mark messages as read when viewing</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'notifications' && (
+                    <Card>
+                      <CardHeader><CardTitle>Notification Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Desktop Notifications</div>
+                            <div className="text-sm text-muted-foreground">Show desktop notifications for new messages</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Sound Notifications</div>
+                            <div className="text-sm text-muted-foreground">Play sound for new messages</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Email Notifications</div>
+                            <div className="text-sm text-muted-foreground">Receive email for missed messages</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Do Not Disturb Schedule</div>
+                            <div className="text-sm text-muted-foreground">Set hours to pause notifications</div>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Thread Notifications</div>
+                            <div className="text-sm text-muted-foreground">Notify for thread replies</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'privacy' && (
+                    <Card>
+                      <CardHeader><CardTitle>Privacy Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Read Receipts</div>
+                            <div className="text-sm text-muted-foreground">Show when you've read messages</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Typing Indicators</div>
+                            <div className="text-sm text-muted-foreground">Show when you're typing</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Activity Status</div>
+                            <div className="text-sm text-muted-foreground">Share your activity with others</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Profile Visibility</div>
+                            <div className="text-sm text-muted-foreground">Who can see your profile</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Everyone</option>
+                            <option>Team Members</option>
+                            <option>Contacts Only</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'appearance' && (
+                    <Card>
+                      <CardHeader><CardTitle>Appearance Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Theme</div>
+                            <div className="text-sm text-muted-foreground">Choose your color theme</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>System</option>
+                            <option>Light</option>
+                            <option>Dark</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Message Density</div>
+                            <div className="text-sm text-muted-foreground">How compact messages appear</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Comfortable</option>
+                            <option>Compact</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Sidebar Width</div>
+                            <div className="text-sm text-muted-foreground">Adjust sidebar size</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Default</option>
+                            <option>Wide</option>
+                            <option>Narrow</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Avatars</div>
+                            <div className="text-sm text-muted-foreground">Display user avatars in messages</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'audio' && (
+                    <Card>
+                      <CardHeader><CardTitle>Audio & Video Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Microphone</div>
+                            <div className="text-sm text-muted-foreground">Select input device</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Default Microphone</option>
+                            <option>Built-in Microphone</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Speakers</div>
+                            <div className="text-sm text-muted-foreground">Select output device</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Default Speakers</option>
+                            <option>Built-in Speakers</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Camera</div>
+                            <div className="text-sm text-muted-foreground">Select video device</div>
+                          </div>
+                          <select className="p-2 border rounded-lg dark:bg-gray-700">
+                            <option>Default Camera</option>
+                            <option>Built-in Camera</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Noise Suppression</div>
+                            <div className="text-sm text-muted-foreground">Reduce background noise</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {settingsTab === 'advanced' && (
+                    <Card>
+                      <CardHeader><CardTitle>Advanced Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Developer Mode</div>
+                            <div className="text-sm text-muted-foreground">Enable developer features</div>
+                          </div>
+                          <input type="checkbox" className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Message Preview</div>
+                            <div className="text-sm text-muted-foreground">Show link previews</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-download Media</div>
+                            <div className="text-sm text-muted-foreground">Automatically download images and files</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">Keyboard Shortcuts</div>
+                            <div className="text-sm text-muted-foreground">Enable keyboard navigation</div>
+                          </div>
+                          <input type="checkbox" defaultChecked className="toggle" />
+                        </div>
+                        <div className="flex gap-3 mt-4">
+                          <Button variant="outline">Export Data</Button>
+                          <Button variant="destructive">Clear Cache</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Analytics View */}
+        {activeView === 'analytics' && (
+          <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-6">
+            <div className="max-w-6xl mx-auto space-y-6">
+              {/* Analytics Header */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Messaging Analytics</h1>
+                  <p className="text-muted-foreground">Track engagement and activity</p>
+                </div>
+              </div>
+
+              {/* Analytics Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">{messages.length}</div>
+                      <div className="text-xs text-muted-foreground">Total Messages</div>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">156</div>
+                      <div className="text-xs text-muted-foreground">Active Users</div>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                      <Hash className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">{channels.length}</div>
+                      <div className="text-xs text-muted-foreground">Active Channels</div>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">2.4h</div>
+                      <div className="text-xs text-muted-foreground">Avg Response Time</div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Analytics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                      Weekly Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day, idx) => (
+                        <div key={day} className="flex items-center gap-3">
+                          <span className="text-sm w-24">{day}</span>
+                          <Progress value={[85, 92, 78, 88, 95][idx]} className="flex-1" />
+                          <span className="text-sm font-medium w-12">{[425, 512, 389, 456, 589][idx]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Hash className="w-5 h-5 text-purple-500" />
+                      Top Channels
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {channels.slice(0, 5).map((channel, idx) => (
+                        <div key={channel.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-400">#{idx + 1}</span>
+                            <Hash className="w-4 h-4 text-gray-500" />
+                            <span>{channel.name}</span>
+                          </div>
+                          <Badge variant="secondary">{channel.memberCount} members</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="w-5 h-5 text-yellow-500" />
+                      Message Types
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { type: 'Text Messages', count: 2450, percent: 68 },
+                        { type: 'Files Shared', count: 456, percent: 13 },
+                        { type: 'Reactions', count: 389, percent: 11 },
+                        { type: 'Thread Replies', count: 289, percent: 8 }
+                      ].map(item => (
+                        <div key={item.type} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>{item.type}</span>
+                            <span className="font-medium">{item.count}</span>
+                          </div>
+                          <Progress value={item.percent} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-blue-500" />
+                      Most Active Members
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { name: 'Sarah Johnson', messages: 245, avatar: 'S' },
+                        { name: 'Mike Chen', messages: 198, avatar: 'M' },
+                        { name: 'Alex Rivera', messages: 156, avatar: 'A' },
+                        { name: 'Emily Davis', messages: 134, avatar: 'E' },
+                        { name: 'Chris Wilson', messages: 112, avatar: 'C' }
+                      ].map((member, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                              {member.avatar}
+                            </div>
+                            <span>{member.name}</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">{member.messages} msgs</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Response Trends & Activity */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-blue-500" />
+                      Response Time Trends
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { period: 'This Week', time: '2.4h', trend: '-15%', improving: true },
+                        { period: 'Last Week', time: '2.8h', trend: '-8%', improving: true },
+                        { period: '2 Weeks Ago', time: '3.0h', trend: '+5%', improving: false },
+                        { period: '3 Weeks Ago', time: '2.9h', trend: '-12%', improving: true }
+                      ].map(item => (
+                        <div key={item.period} className="flex items-center justify-between p-3 border rounded-lg">
+                          <span className="text-sm">{item.period}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold">{item.time}</span>
+                            <Badge className={item.improving ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                              {item.trend}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageCircle className="w-5 h-5 text-indigo-500" />
+                      Recent Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { action: 'New channel created', channel: '#marketing-2025', time: '5 min ago' },
+                        { action: 'File shared', channel: '#general', time: '12 min ago' },
+                        { action: 'New member joined', channel: '#engineering', time: '25 min ago' },
+                        { action: 'Thread started', channel: '#support', time: '1 hour ago' },
+                        { action: 'Reaction added', channel: '#random', time: '2 hours ago' }
+                      ].map((activity, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                            <MessageCircle className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{activity.action}</p>
+                            <p className="text-xs text-muted-foreground">{activity.channel}</p>
+                          </div>
+                          <span className="text-xs text-muted-foreground">{activity.time}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Platform Usage */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-cyan-500" />
+                    Platform Usage
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { platform: 'Desktop App', percent: 45, users: 234 },
+                      { platform: 'Web Browser', percent: 35, users: 182 },
+                      { platform: 'Mobile iOS', percent: 12, users: 62 },
+                      { platform: 'Mobile Android', percent: 8, users: 41 }
+                    ].map(item => (
+                      <div key={item.platform} className="p-4 border rounded-lg text-center">
+                        <div className="text-2xl font-bold">{item.percent}%</div>
+                        <div className="text-sm font-medium mt-1">{item.platform}</div>
+                        <div className="text-xs text-muted-foreground">{item.users} users</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
         {/* Channel Header */}
-        {selectedChannel && (
+        {activeView !== 'settings' && activeView !== 'analytics' && selectedChannel && (
           <div className="h-14 px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">

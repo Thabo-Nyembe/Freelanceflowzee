@@ -53,8 +53,27 @@ import {
   Code,
   Palette,
   SlidersHorizontal,
-  Sparkles
+  Sparkles,
+  Bell,
+  Zap,
+  FileSpreadsheet,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Lightbulb,
+  BarChart2,
+  TrendingUp as TrendUp,
+  ArrowRight,
+  Bookmark,
+  History,
+  FileBarChart,
+  PieChart as PieChartIcon,
+  AreaChart
 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -398,6 +417,7 @@ export default function ReportingClient() {
   const [showDataSourceDialog, setShowDataSourceDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filterFavorites, setFilterFavorites] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const totalDashboards = mockDashboards.length
@@ -523,6 +543,7 @@ export default function ReportingClient() {
               <TabsTrigger value="worksheets" className="rounded-lg">Worksheets</TabsTrigger>
               <TabsTrigger value="datasources" className="rounded-lg">Data Sources</TabsTrigger>
               <TabsTrigger value="scheduled" className="rounded-lg">Scheduled</TabsTrigger>
+              <TabsTrigger value="settings" className="rounded-lg">Settings</TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -569,6 +590,93 @@ export default function ReportingClient() {
 
           {/* Dashboards Tab */}
           <TabsContent value="dashboards" className="mt-6">
+            {/* Dashboards Overview Banner */}
+            <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <LayoutDashboard className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Dashboard Gallery</h3>
+                      <p className="text-indigo-100">Explore, create, and manage your business dashboards</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredDashboards.length}</div>
+                      <div className="text-sm text-indigo-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredDashboards.filter(d => d.isFavorite).length}</div>
+                      <div className="text-sm text-indigo-100">Favorites</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredDashboards.filter(d => d.isPublished).length}</div>
+                      <div className="text-sm text-indigo-100">Published</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dashboard Quick Stats */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <Eye className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalViews.toLocaleString()}</div>
+                      <div className="text-sm text-gray-500">Total Views</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">+23%</div>
+                      <div className="text-sm text-gray-500">Growth Rate</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">156</div>
+                      <div className="text-sm text-gray-500">Active Viewers</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">4.2m</div>
+                      <div className="text-sm text-gray-500">Avg. Session</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredDashboards.map(dashboard => (
@@ -726,6 +834,56 @@ export default function ReportingClient() {
 
           {/* Worksheets Tab */}
           <TabsContent value="worksheets" className="mt-6">
+            {/* Worksheets Overview Banner */}
+            <Card className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <FileSpreadsheet className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Data Worksheets</h3>
+                      <p className="text-green-100">Build and customize individual visualizations</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockWorksheets.length}</div>
+                      <div className="text-sm text-green-100">Worksheets</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{chartTypes.length}</div>
+                      <div className="text-sm text-green-100">Chart Types</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockDataSources.filter(d => d.status === 'connected').length}</div>
+                      <div className="text-sm text-green-100">Data Sources</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Worksheet Stats */}
+            <div className="grid grid-cols-5 gap-4 mb-6">
+              {[
+                { type: 'bar', count: mockWorksheets.filter(w => w.chartType === 'bar').length, icon: BarChart3, color: 'indigo' },
+                { type: 'line', count: mockWorksheets.filter(w => w.chartType === 'line').length, icon: LineChart, color: 'blue' },
+                { type: 'pie', count: mockWorksheets.filter(w => w.chartType === 'pie').length, icon: PieChart, color: 'purple' },
+                { type: 'heatmap', count: mockWorksheets.filter(w => w.chartType === 'heatmap').length, icon: Grid3X3, color: 'orange' },
+                { type: 'table', count: mockWorksheets.filter(w => w.chartType === 'table').length, icon: Table, color: 'green' }
+              ].map((stat, idx) => (
+                <Card key={idx} className="bg-white dark:bg-gray-800">
+                  <CardContent className="p-3 text-center">
+                    <stat.icon className={`w-6 h-6 mx-auto mb-1 text-${stat.color}-500`} />
+                    <div className="font-bold text-lg">{stat.count}</div>
+                    <div className="text-xs text-gray-500 capitalize">{stat.type}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500 dark:text-gray-400">{mockWorksheets.length} worksheets</span>
@@ -793,6 +951,80 @@ export default function ReportingClient() {
 
           {/* Data Sources Tab */}
           <TabsContent value="datasources" className="mt-6">
+            {/* Data Sources Overview Banner */}
+            <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Database className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Data Connections</h3>
+                      <p className="text-blue-100">Manage and monitor your data source connections</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockDataSources.filter(d => d.status === 'connected').length}</div>
+                      <div className="text-sm text-blue-100">Connected</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockDataSources.reduce((sum, d) => sum + d.tables, 0)}</div>
+                      <div className="text-sm text-blue-100">Tables</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{(mockDataSources.reduce((sum, d) => sum + d.rowCount, 0) / 1000000).toFixed(1)}M</div>
+                      <div className="text-sm text-blue-100">Total Rows</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Connection Health */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <Card className="bg-white dark:bg-gray-800 border-l-4 border-l-green-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {mockDataSources.filter(d => d.status === 'connected').length}
+                      </div>
+                      <div className="text-sm text-gray-500">Healthy Connections</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800 border-l-4 border-l-yellow-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="w-8 h-8 text-yellow-500" />
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {mockDataSources.filter(d => d.status === 'disconnected').length}
+                      </div>
+                      <div className="text-sm text-gray-500">Disconnected</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800 border-l-4 border-l-red-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <XCircle className="w-8 h-8 text-red-500" />
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {mockDataSources.filter(d => d.status === 'error').length}
+                      </div>
+                      <div className="text-sm text-gray-500">Errors</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -877,6 +1109,97 @@ export default function ReportingClient() {
 
           {/* Scheduled Reports Tab */}
           <TabsContent value="scheduled" className="mt-6">
+            {/* Scheduled Reports Overview Banner */}
+            <Card className="bg-gradient-to-r from-orange-600 to-red-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Calendar className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Report Automation</h3>
+                      <p className="text-orange-100">Schedule and automate your report delivery</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockScheduledReports.filter(r => r.enabled).length}</div>
+                      <div className="text-sm text-orange-100">Active</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'daily').length}</div>
+                      <div className="text-sm text-orange-100">Daily</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'weekly').length}</div>
+                      <div className="text-sm text-orange-100">Weekly</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{mockScheduledReports.reduce((sum, r) => sum + r.recipients.length, 0)}</div>
+                      <div className="text-sm text-orange-100">Recipients</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Schedule Types Overview */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="bg-white dark:bg-gray-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'daily').length}</div>
+                      <div className="text-sm text-gray-500">Daily Reports</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'weekly').length}</div>
+                      <div className="text-sm text-gray-500">Weekly Reports</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'monthly').length}</div>
+                      <div className="text-sm text-gray-500">Monthly Reports</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.lastRun !== null).length}</div>
+                      <div className="text-sm text-gray-500">Delivered</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -957,6 +1280,359 @@ export default function ReportingClient() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            {/* Settings Banner */}
+            <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white border-0 mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">Tableau-Level Reporting Platform</h2>
+                      <p className="text-indigo-100 mt-1">Configure dashboards, data sources, and scheduled reports</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-8">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{totalDashboards}</div>
+                      <div className="text-sm text-indigo-100">Dashboards</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{totalWorksheets}</div>
+                      <div className="text-sm text-indigo-100">Worksheets</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{totalDataSources}</div>
+                      <div className="text-sm text-indigo-100">Data Sources</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">{totalViews.toLocaleString()}</div>
+                      <div className="text-sm text-indigo-100">Total Views</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'datasources', icon: Database, label: 'Data Sources' },
+                      { id: 'sharing', icon: Share2, label: 'Sharing' },
+                      { id: 'exports', icon: Download, label: 'Export Settings' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </CardContent>
+              </Card>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card>
+                    <CardHeader><CardTitle>General Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Default Dashboard View</div>
+                          <div className="text-sm text-muted-foreground">Choose default view mode</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>Grid View</option>
+                          <option>List View</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Auto-refresh Dashboards</div>
+                          <div className="text-sm text-muted-foreground">Automatically refresh data</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Refresh Interval</div>
+                          <div className="text-sm text-muted-foreground">How often to refresh data</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>Every 5 minutes</option>
+                          <option>Every 15 minutes</option>
+                          <option>Every 30 minutes</option>
+                          <option>Every hour</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Enable Caching</div>
+                          <div className="text-sm text-muted-foreground">Cache data for faster loading</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'datasources' && (
+                  <Card>
+                    <CardHeader><CardTitle>Data Source Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Connection Timeout</div>
+                          <div className="text-sm text-muted-foreground">Max wait time for connections</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>30 seconds</option>
+                          <option>60 seconds</option>
+                          <option>2 minutes</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Query Timeout</div>
+                          <div className="text-sm text-muted-foreground">Max query execution time</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>5 minutes</option>
+                          <option>10 minutes</option>
+                          <option>30 minutes</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">SSL Encryption</div>
+                          <div className="text-sm text-muted-foreground">Require SSL for all connections</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Connection Pooling</div>
+                          <div className="text-sm text-muted-foreground">Reuse database connections</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'sharing' && (
+                  <Card>
+                    <CardHeader><CardTitle>Sharing Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Default Share Permission</div>
+                          <div className="text-sm text-muted-foreground">Default access level for shared items</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>View Only</option>
+                          <option>Can Edit</option>
+                          <option>Full Access</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Link Expiration</div>
+                          <div className="text-sm text-muted-foreground">When shared links expire</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>Never</option>
+                          <option>7 days</option>
+                          <option>30 days</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Allow External Sharing</div>
+                          <div className="text-sm text-muted-foreground">Share dashboards outside organization</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Require Password</div>
+                          <div className="text-sm text-muted-foreground">Password protect shared links</div>
+                        </div>
+                        <input type="checkbox" className="toggle" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'exports' && (
+                  <Card>
+                    <CardHeader><CardTitle>Export Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Default Export Format</div>
+                          <div className="text-sm text-muted-foreground">Preferred format for exports</div>
+                        </div>
+                        <select className="p-2 border rounded-lg dark:bg-gray-700">
+                          <option>PDF</option>
+                          <option>Excel</option>
+                          <option>CSV</option>
+                          <option>PNG</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Include Filters</div>
+                          <div className="text-sm text-muted-foreground">Export with current filter state</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Include Timestamp</div>
+                          <div className="text-sm text-muted-foreground">Add export date to filename</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Compress Large Exports</div>
+                          <div className="text-sm text-muted-foreground">Automatically zip large files</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card>
+                    <CardHeader><CardTitle>Notification Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Report Ready Notifications</div>
+                          <div className="text-sm text-muted-foreground">Notify when scheduled reports complete</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Data Refresh Alerts</div>
+                          <div className="text-sm text-muted-foreground">Alert on data refresh failures</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Share Notifications</div>
+                          <div className="text-sm text-muted-foreground">Notify when dashboards are shared</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Threshold Alerts</div>
+                          <div className="text-sm text-muted-foreground">Alert when metrics exceed thresholds</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Email Digest</div>
+                          <div className="text-sm text-muted-foreground">Daily summary of activity</div>
+                        </div>
+                        <input type="checkbox" className="toggle" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card>
+                    <CardHeader><CardTitle>Advanced Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Enable SQL Access</div>
+                          <div className="text-sm text-muted-foreground">Allow custom SQL queries</div>
+                        </div>
+                        <input type="checkbox" className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Debug Mode</div>
+                          <div className="text-sm text-muted-foreground">Show query execution details</div>
+                        </div>
+                        <input type="checkbox" className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">Performance Logging</div>
+                          <div className="text-sm text-muted-foreground">Log query performance metrics</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">API Access</div>
+                          <div className="text-sm text-muted-foreground">Enable REST API endpoints</div>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle" />
+                      </div>
+                      <div className="flex gap-3 mt-4">
+                        <Button variant="outline">Export Configuration</Button>
+                        <Button variant="outline">Import Configuration</Button>
+                        <Button variant="destructive">Reset to Defaults</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mt-6">
+              {[
+                { icon: LayoutDashboard, label: 'New Dashboard', desc: 'Create report', color: 'from-indigo-500 to-purple-600' },
+                { icon: FileSpreadsheet, label: 'New Worksheet', desc: 'Add data view', color: 'from-green-500 to-emerald-600' },
+                { icon: Database, label: 'Connect Data', desc: 'Add source', color: 'from-blue-500 to-cyan-600' },
+                { icon: Clock, label: 'Schedule', desc: 'Set automation', color: 'from-orange-500 to-red-600' },
+                { icon: Download, label: 'Export All', desc: 'Bulk export', color: 'from-purple-500 to-pink-600' },
+                { icon: Share2, label: 'Share', desc: 'Collaborate', color: 'from-teal-500 to-green-600' },
+                { icon: TrendingUp, label: 'Analytics', desc: 'View insights', color: 'from-yellow-500 to-orange-600' },
+                { icon: RefreshCw, label: 'Refresh All', desc: 'Update data', color: 'from-cyan-500 to-blue-600' }
+              ].map((action, idx) => (
+                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                      <action.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="font-medium text-sm">{action.label}</div>
+                    <div className="text-xs text-muted-foreground">{action.desc}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
         </Tabs>

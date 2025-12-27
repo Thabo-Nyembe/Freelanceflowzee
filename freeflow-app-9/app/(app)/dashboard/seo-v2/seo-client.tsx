@@ -28,6 +28,7 @@ import {
   XCircle,
   AlertTriangle,
   Plus,
+  Lightbulb,
   RefreshCw,
   Trash2,
   ExternalLink,
@@ -400,6 +401,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   const [showKeywordDialog, setShowKeywordDialog] = useState(false)
   const [selectedBacklinks, setSelectedBacklinks] = useState<Set<string>>(new Set())
   const [sortBy, setSortBy] = useState<'position' | 'volume' | 'traffic'>('position')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Computed values
   const totalTraffic = useMemo(() => keywords.reduce((sum, k) => sum + k.traffic, 0), [keywords])
@@ -518,6 +520,65 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
           ))}
         </div>
 
+        {/* SEO Overview Banner */}
+        <Card className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white border-0">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Search className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">SEMrush-Level SEO Analytics</h2>
+                  <p className="text-blue-100 mt-1">Track rankings, analyze backlinks, audit your site, and outperform competitors</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{keywords.length}</div>
+                  <div className="text-sm text-blue-100">Tracked Keywords</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{top10Keywords}</div>
+                  <div className="text-sm text-blue-100">Top 10 Rankings</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{activeBacklinks}</div>
+                  <div className="text-sm text-blue-100">Active Backlinks</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{healthScore}%</div>
+                  <div className="text-sm text-blue-100">Site Health</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          {[
+            { icon: Search, label: 'Keyword Research', desc: 'Find opportunities', color: 'from-blue-500 to-indigo-600' },
+            { icon: Link, label: 'Link Building', desc: 'Acquire backlinks', color: 'from-green-500 to-emerald-600' },
+            { icon: Target, label: 'Rank Tracking', desc: 'Monitor positions', color: 'from-purple-500 to-violet-600' },
+            { icon: Users, label: 'Competitor Spy', desc: 'Analyze rivals', color: 'from-orange-500 to-red-600' },
+            { icon: FileText, label: 'Content Optimizer', desc: 'Improve content', color: 'from-pink-500 to-rose-600' },
+            { icon: ShieldCheck, label: 'Site Audit', desc: 'Fix issues', color: 'from-cyan-500 to-blue-600' },
+            { icon: TrendingUp, label: 'SERP Analysis', desc: 'Search results', color: 'from-teal-500 to-cyan-600' },
+            { icon: BarChart3, label: 'SEO Reports', desc: 'Generate reports', color: 'from-amber-500 to-orange-600' }
+          ].map((action, idx) => (
+            <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group">
+              <CardContent className="p-4 text-center">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
+                  <action.icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="font-medium text-sm">{action.label}</div>
+                <div className="text-xs text-muted-foreground">{action.desc}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white dark:bg-gray-800 p-1 h-auto flex-wrap">
@@ -547,6 +608,10 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
               <ShieldCheck className="w-4 h-4" />
               Site Audit
               {criticalIssues > 0 && <Badge variant="destructive" className="ml-1">{criticalIssues}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -660,10 +725,148 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                 </div>
               </CardContent>
             </Card>
+
+            {/* SEO Insights & Recommendations */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5 text-yellow-500" />
+                    SEO Insights & Recommendations
+                  </CardTitle>
+                  <Badge variant="secondary">{6} new insights</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { title: 'Content Opportunity', description: 'Your competitors rank for 234 keywords you are not targeting. Consider expanding your content strategy.', priority: 'high', impact: '+45% potential traffic' },
+                    { title: 'Quick Win Keywords', description: '18 keywords are ranking on page 2 (positions 11-20). Small optimizations could push them to page 1.', priority: 'high', impact: '+2,400 monthly visitors' },
+                    { title: 'Featured Snippet Opportunities', description: '12 keywords have featured snippet potential. Restructure content with clear answers and lists.', priority: 'medium', impact: '+35% CTR' },
+                    { title: 'Mobile Optimization', description: 'Page speed on mobile is affecting 8 important landing pages. Consider lazy loading images.', priority: 'medium', impact: '+15% rankings' },
+                    { title: 'Internal Linking', description: '23 pages have fewer than 3 internal links. Improve internal linking to distribute page authority.', priority: 'low', impact: '+8% crawl efficiency' },
+                    { title: 'Schema Markup', description: 'Add FAQ schema to 15 blog posts to improve SERP visibility and CTR.', priority: 'low', impact: '+12% CTR' }
+                  ].map((insight, idx) => (
+                    <div key={idx} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{insight.title}</span>
+                            <Badge variant={insight.priority === 'high' ? 'destructive' : insight.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs">
+                              {insight.priority}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{insight.description}</p>
+                        </div>
+                        <div className="text-right ml-4">
+                          <div className="text-sm font-medium text-green-600">{insight.impact}</div>
+                          <Button size="sm" variant="outline" className="mt-2">Implement</Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ranking Trends Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Weekly Ranking Changes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { week: 'This Week', improved: 24, declined: 8, unchanged: 68 },
+                      { week: 'Last Week', improved: 18, declined: 12, unchanged: 70 },
+                      { week: '2 Weeks Ago', improved: 31, declined: 5, unchanged: 64 },
+                      { week: '3 Weeks Ago', improved: 15, declined: 20, unchanged: 65 }
+                    ].map((week, idx) => (
+                      <div key={idx} className="flex items-center gap-4">
+                        <span className="text-sm w-24">{week.week}</span>
+                        <div className="flex-1 flex items-center gap-2">
+                          <span className="text-xs text-green-600 w-12 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />{week.improved}
+                          </span>
+                          <span className="text-xs text-red-600 w-12 flex items-center gap-1">
+                            <TrendingDown className="w-3 h-3" />{week.declined}
+                          </span>
+                          <span className="text-xs text-gray-500 w-12">={week.unchanged}</span>
+                          <Progress value={(week.improved / (week.improved + week.declined + week.unchanged)) * 100} className="flex-1" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Movers This Week</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { keyword: 'project management software', change: +12, from: 25, to: 13 },
+                      { keyword: 'team collaboration tools', change: +8, from: 18, to: 10 },
+                      { keyword: 'freelance invoicing', change: +6, from: 14, to: 8 },
+                      { keyword: 'client portal solution', change: -4, from: 7, to: 11 },
+                      { keyword: 'time tracking app', change: +15, from: 32, to: 17 }
+                    ].map((mover, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{mover.keyword}</p>
+                          <p className="text-xs text-muted-foreground">#{mover.from} → #{mover.to}</p>
+                        </div>
+                        <Badge className={mover.change > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                          {mover.change > 0 ? '+' : ''}{mover.change}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Keywords Tab */}
           <TabsContent value="keywords" className="space-y-4">
+            {/* Keywords Banner */}
+            <Card className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Target className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Keyword Research & Tracking</h3>
+                      <p className="text-purple-100 text-sm">Track {keywords.length} keywords across {keywords.filter(k => k.currentPosition && k.currentPosition <= 10).length} top 10 positions</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{formatNumber(totalTraffic)}</div>
+                      <div className="text-xs text-purple-100">Monthly Traffic</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">${formatNumber(totalTrafficValue)}</div>
+                      <div className="text-xs text-purple-100">Traffic Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{avgPosition.toFixed(1)}</div>
+                      <div className="text-xs text-purple-100">Avg Position</div>
+                    </div>
+                    <Button className="bg-white text-purple-600 hover:bg-purple-50 gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add Keywords
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -758,6 +961,41 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
           {/* Backlinks Tab */}
           <TabsContent value="backlinks" className="space-y-4">
+            {/* Backlinks Banner */}
+            <Card className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Link className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Backlink Profile Analysis</h3>
+                      <p className="text-green-100 text-sm">Monitor {activeBacklinks} active backlinks from {new Set(backlinks.map(b => b.sourceDomain)).size} referring domains</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">76</div>
+                      <div className="text-xs text-green-100">Domain Rating</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">+{newBacklinks}</div>
+                      <div className="text-xs text-green-100">New (30 days)</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-200">-{lostBacklinks}</div>
+                      <div className="text-xs text-green-100">Lost</div>
+                    </div>
+                    <Button className="bg-white text-green-600 hover:bg-green-50 gap-2">
+                      <Plus className="w-4 h-4" />
+                      Find Prospects
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
@@ -880,6 +1118,37 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
           {/* Competitors Tab */}
           <TabsContent value="competitors" className="space-y-4">
+            {/* Competitors Banner */}
+            <Card className="bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Competitor Intelligence</h3>
+                      <p className="text-orange-100 text-sm">Analyze {competitors.length} competitors and discover keyword gaps</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{competitors.reduce((sum, c) => sum + c.keywordGap, 0)}</div>
+                      <div className="text-xs text-orange-100">Keyword Gaps</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{competitors.reduce((sum, c) => sum + c.commonKeywords, 0)}</div>
+                      <div className="text-xs text-orange-100">Common Keywords</div>
+                    </div>
+                    <Button className="bg-white text-orange-600 hover:bg-orange-50 gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add Competitor
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Competitor Analysis</CardTitle>
@@ -938,6 +1207,41 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
           {/* Content Tab */}
           <TabsContent value="content" className="space-y-4">
+            {/* Content Banner */}
+            <Card className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Content Optimization</h3>
+                      <p className="text-pink-100 text-sm">Optimize {content.length} pages for better rankings and engagement</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{content.filter(c => c.status === 'performing').length}</div>
+                      <div className="text-xs text-pink-100">Performing</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-200">{content.filter(c => c.status === 'declining').length}</div>
+                      <div className="text-xs text-pink-100">Declining</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{content.filter(c => c.status === 'opportunity').length}</div>
+                      <div className="text-xs text-pink-100">Opportunities</div>
+                    </div>
+                    <Button className="bg-white text-pink-600 hover:bg-pink-50 gap-2">
+                      <Plus className="w-4 h-4" />
+                      Create Content
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Content Performance</CardTitle>
@@ -1000,6 +1304,41 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
           {/* Audit Tab */}
           <TabsContent value="audit" className="space-y-4">
+            {/* Site Audit Banner */}
+            <Card className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white border-0">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <ShieldCheck className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Technical SEO Audit</h3>
+                      <p className="text-cyan-100 text-sm">Crawled 1,247 pages and analyzed {auditIssues.length} issues</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{healthScore}%</div>
+                      <div className="text-xs text-cyan-100">Health Score</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-200">{criticalIssues}</div>
+                      <div className="text-xs text-cyan-100">Critical</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-200">{warnings}</div>
+                      <div className="text-xs text-cyan-100">Warnings</div>
+                    </div>
+                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      Run Audit
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
                 <div className="text-center">
@@ -1075,6 +1414,296 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                 </div>
               </CardContent>
             </Card>
+
+            {/* Crawl Analytics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Crawl Statistics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { label: 'Pages Crawled', value: '1,247', progress: 100 },
+                      { label: 'Pages Indexed', value: '1,156', progress: 93 },
+                      { label: 'Pages with Issues', value: '234', progress: 19 },
+                      { label: 'Pages Blocked', value: '42', progress: 3 },
+                      { label: 'Orphan Pages', value: '18', progress: 1 }
+                    ].map((stat, idx) => (
+                      <div key={idx} className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>{stat.label}</span>
+                          <span className="font-medium">{stat.value}</span>
+                        </div>
+                        <Progress value={stat.progress} />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Core Web Vitals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { label: 'LCP (Largest Contentful Paint)', value: '2.1s', status: 'good', target: '< 2.5s' },
+                      { label: 'FID (First Input Delay)', value: '45ms', status: 'good', target: '< 100ms' },
+                      { label: 'CLS (Cumulative Layout Shift)', value: '0.08', status: 'needs-improvement', target: '< 0.1' },
+                      { label: 'TTFB (Time to First Byte)', value: '0.8s', status: 'good', target: '< 0.8s' },
+                      { label: 'FCP (First Contentful Paint)', value: '1.4s', status: 'good', target: '< 1.8s' }
+                    ].map((metric, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{metric.label}</p>
+                          <p className="text-xs text-muted-foreground">Target: {metric.target}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold">{metric.value}</span>
+                          <Badge className={metric.status === 'good' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                            {metric.status === 'good' ? 'Good' : 'Needs Work'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <Card className="col-span-3 h-fit">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'crawling', icon: Globe, label: 'Crawling' },
+                      { id: 'tracking', icon: Target, label: 'Tracking' },
+                      { id: 'integrations', icon: Link, label: 'Integrations' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'advanced', icon: Layers, label: 'Advanced' },
+                    ].map(item => (
+                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-green-100 dark:bg-green-900/30 text-green-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                        <item.icon className="h-4 w-4" /><span className="text-sm font-medium">{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </CardContent>
+              </Card>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <Card>
+                    <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure SEO tracking preferences</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">Primary Domain</label><Input defaultValue="example.com" className="mt-1" /></div>
+                        <div><label className="text-sm font-medium">Default Location</label><Input defaultValue="United States" className="mt-1" /></div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Daily rank tracking</p><p className="text-sm text-gray-500">Track keyword positions daily</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Auto-discover keywords</p><p className="text-sm text-gray-500">Find new ranking opportunities</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Competitor monitoring</p><p className="text-sm text-gray-500">Track competitor rankings</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Backlink monitoring</p><p className="text-sm text-gray-500">Monitor new and lost backlinks</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <Button className="bg-green-600 hover:bg-green-700">Save General Settings</Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'crawling' && (
+                  <Card>
+                    <CardHeader><CardTitle>Crawling Settings</CardTitle><CardDescription>Configure site audit and crawling behavior</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">Crawl Frequency</label><Input defaultValue="Weekly" className="mt-1" /></div>
+                        <div><label className="text-sm font-medium">Max Pages per Crawl</label><Input type="number" defaultValue="10000" className="mt-1" /></div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Follow robots.txt</p><p className="text-sm text-gray-500">Respect robots.txt directives</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">JavaScript rendering</p><p className="text-sm text-gray-500">Render JavaScript for SPA sites</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Check external links</p><p className="text-sm text-gray-500">Validate outbound links</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <Button className="bg-green-600 hover:bg-green-700">Save Crawling Settings</Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'tracking' && (
+                  <Card>
+                    <CardHeader><CardTitle>Tracking Settings</CardTitle><CardDescription>Configure rank tracking and keyword monitoring</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        {[
+                          { name: 'Desktop', desc: 'Google Desktop', enabled: true },
+                          { name: 'Mobile', desc: 'Google Mobile', enabled: true },
+                          { name: 'Local', desc: 'Local Pack', enabled: false },
+                        ].map((device, i) => (
+                          <Card key={i} className="border"><CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-medium">{device.name}</h4>
+                              <Switch defaultChecked={device.enabled} />
+                            </div>
+                            <p className="text-sm text-gray-500">{device.desc}</p>
+                          </CardContent></Card>
+                        ))}
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Track featured snippets</p><p className="text-sm text-gray-500">Monitor SERP features</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Track local pack</p><p className="text-sm text-gray-500">Monitor local search results</p></div>
+                          <Switch />
+                        </div>
+                      </div>
+                      <Button className="bg-green-600 hover:bg-green-700">Save Tracking Settings</Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <Card>
+                    <CardHeader><CardTitle>Integrations</CardTitle><CardDescription>Connect with SEO tools and services</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { name: 'Google Search Console', status: 'connected', icon: '🔍' },
+                          { name: 'Google Analytics', status: 'connected', icon: '📊' },
+                          { name: 'Ahrefs', status: 'available', icon: '🔗' },
+                          { name: 'SEMrush', status: 'available', icon: '📈' },
+                        ].map((integration, i) => (
+                          <Card key={i} className={`border ${integration.status === 'connected' ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-2xl">{integration.icon}</span>
+                                  <h4 className="font-medium">{integration.name}</h4>
+                                </div>
+                                <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{integration.status}</Badge>
+                              </div>
+                              <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full" size="sm">
+                                {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <Card>
+                    <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure SEO alerts and reports</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        <Card className="border"><CardContent className="p-4 text-center">
+                          <Bell className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                          <p className="font-medium">Email Alerts</p><p className="text-sm text-gray-500">Enabled</p>
+                        </CardContent></Card>
+                        <Card className="border"><CardContent className="p-4 text-center">
+                          <MessageSquare className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                          <p className="font-medium">Slack</p><p className="text-sm text-gray-500">Connected</p>
+                        </CardContent></Card>
+                        <Card className="border"><CardContent className="p-4 text-center">
+                          <Globe className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                          <p className="font-medium">Weekly Reports</p><p className="text-sm text-gray-500">Enabled</p>
+                        </CardContent></Card>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Ranking changes</p><p className="text-sm text-gray-500">Alert on significant position changes</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">New backlinks</p><p className="text-sm text-gray-500">Alert on new backlinks discovered</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Lost backlinks</p><p className="text-sm text-gray-500">Alert when backlinks are lost</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Site audit issues</p><p className="text-sm text-gray-500">Alert on critical SEO issues</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <Button className="bg-green-600 hover:bg-green-700">Save Notification Settings</Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <Card>
+                    <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and data management</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-sm font-medium">API Rate Limit</label><Input type="number" defaultValue="1000" className="mt-1" /></div>
+                        <div><label className="text-sm font-medium">Data Retention (days)</label><Input type="number" defaultValue="365" className="mt-1" /></div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">Debug mode</p><p className="text-sm text-gray-500">Enable detailed logging</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div><p className="font-medium">API access</p><p className="text-sm text-gray-500">Enable REST API endpoints</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <h4 className="font-medium">Data Management</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Keywords</Button>
+                          <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Backlinks</Button>
+                          <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Audit Report</Button>
+                          <Button variant="outline" className="justify-start"><RefreshCw className="w-4 h-4 mr-2" />Re-crawl Site</Button>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                        <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Danger Zone</h4>
+                        <p className="text-sm text-red-600 dark:text-red-300 mb-3">These actions are irreversible.</p>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Clear All Data</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset Settings</Button>
+                        </div>
+                      </div>
+                      <Button className="bg-green-600 hover:bg-green-700">Save Advanced Settings</Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
