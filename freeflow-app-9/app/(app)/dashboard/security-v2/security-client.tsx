@@ -490,6 +490,7 @@ export default function SecurityClient() {
   const [selectedDevice, setSelectedDevice] = useState<AuthorizedDevice | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -572,6 +573,62 @@ export default function SecurityClient() {
       </div>
 
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+        {/* Hero Security Banner */}
+        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 rounded-2xl p-8 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Security Center</h2>
+              <p className="text-red-100 text-lg">Enterprise-grade password management and security monitoring</p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                <Download className="w-4 h-4 mr-2" />Security Report
+              </Button>
+              <Button className="bg-white text-red-600 hover:bg-red-50">
+                <Shield className="w-4 h-4 mr-2" />Run Security Check
+              </Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-8 gap-4 mt-8">
+            {[
+              { label: 'Score', value: stats.securityScore, suffix: '%' },
+              { label: 'Items', value: stats.totalItems },
+              { label: 'Compromised', value: stats.compromised },
+              { label: 'Weak', value: stats.weakPasswords },
+              { label: 'Reused', value: stats.reusedPasswords },
+              { label: 'Issues', value: stats.totalIssues },
+              { label: 'Devices', value: stats.activeDevices },
+              { label: 'Keys', value: stats.activeKeys }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-center">
+                <div className="text-2xl font-bold">{stat.value}{stat.suffix || ''}</div>
+                <div className="text-sm text-red-100">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions Bar */}
+        <div className="grid grid-cols-8 gap-3">
+          {[
+            { icon: Plus, label: 'Add Login', color: 'red' },
+            { icon: Key, label: 'API Key', color: 'blue' },
+            { icon: CreditCard, label: 'Card', color: 'purple' },
+            { icon: FileKey, label: 'Note', color: 'green' },
+            { icon: Shield, label: 'Scan', color: 'orange' },
+            { icon: Upload, label: 'Import', color: 'cyan' },
+            { icon: Download, label: 'Export', color: 'gray' },
+            { icon: RefreshCw, label: 'Sync', color: 'teal' }
+          ].map(action => (
+            <Card key={action.label} className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center">
+              <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 mx-auto w-fit group-hover:scale-110 transition-transform`}>
+                <action.icon className={`w-4 h-4 text-${action.color}-600`} />
+              </div>
+              <p className="text-xs font-medium mt-1 text-gray-900 dark:text-white">{action.label}</p>
+            </Card>
+          ))}
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {[
@@ -636,6 +693,69 @@ export default function SecurityClient() {
 
           {/* Vault Tab */}
           <TabsContent value="vault" className="space-y-6">
+            {/* Vault Overview Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Secure Vault</h2>
+                  <p className="text-red-100">Store and manage your passwords, keys, and secrets securely</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-red-600 hover:bg-red-50">
+                    <Plus className="w-4 h-4 mr-2" />Add Item
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.totalItems}</div>
+                  <div className="text-sm text-red-100">Total Items</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockVaultItems.filter(i => i.type === 'login').length}</div>
+                  <div className="text-sm text-red-100">Logins</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockVaultItems.filter(i => i.type === 'api_key' || i.type === 'ssh_key').length}</div>
+                  <div className="text-sm text-red-100">Keys</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockVaultItems.filter(i => i.favorite).length}</div>
+                  <div className="text-sm text-red-100">Favorites</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.securityScore}%</div>
+                  <div className="text-sm text-red-100">Score</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.totalIssues}</div>
+                  <div className="text-sm text-red-100">Issues</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-6 gap-4">
+              {[
+                { icon: Plus, label: 'Add Login', color: 'red' },
+                { icon: Key, label: 'Add Key', color: 'blue' },
+                { icon: CreditCard, label: 'Add Card', color: 'purple' },
+                { icon: FileKey, label: 'Add Note', color: 'green' },
+                { icon: Upload, label: 'Import', color: 'orange' },
+                { icon: RefreshCw, label: 'Sync', color: 'cyan' }
+              ].map(action => (
+                <Card key={action.label} className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center">
+                  <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 mx-auto w-fit group-hover:scale-110 transition-transform`}>
+                    <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+                  </div>
+                  <p className="text-sm font-medium mt-2 text-gray-900 dark:text-white">{action.label}</p>
+                </Card>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {['all', 'login', 'credit_card', 'api_key', 'ssh_key', 'secure_note'].map((type) => (
@@ -718,6 +838,46 @@ export default function SecurityClient() {
 
           {/* Watchtower Tab */}
           <TabsContent value="watchtower" className="space-y-6">
+            {/* Watchtower Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Security Watchtower</h2>
+                  <p className="text-orange-100">Monitor for compromised passwords and security vulnerabilities</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Report
+                  </Button>
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                    <RefreshCw className="w-4 h-4 mr-2" />Scan Now
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.securityScore}%</div>
+                  <div className="text-sm text-orange-100">Score</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-red-300">{stats.compromised}</div>
+                  <div className="text-sm text-orange-100">Compromised</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.weakPasswords}</div>
+                  <div className="text-sm text-orange-100">Weak</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.reusedPasswords}</div>
+                  <div className="text-sm text-orange-100">Reused</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.totalIssues}</div>
+                  <div className="text-sm text-orange-100">Issues</div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2">
                 <CardHeader>
@@ -809,6 +969,46 @@ export default function SecurityClient() {
 
           {/* Devices Tab */}
           <TabsContent value="devices" className="space-y-6">
+            {/* Devices Overview Banner */}
+            <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Authorized Devices</h2>
+                  <p className="text-teal-100">Manage devices that can access your secure vault</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <UserX className="w-4 h-4 mr-2" />Revoke All
+                  </Button>
+                  <Button className="bg-white text-teal-600 hover:bg-teal-50">
+                    <Plus className="w-4 h-4 mr-2" />Add Device
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.activeDevices}</div>
+                  <div className="text-sm text-teal-100">Total</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockDevices.filter(d => d.trusted).length}</div>
+                  <div className="text-sm text-teal-100">Trusted</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockDevices.filter(d => d.type === 'desktop').length}</div>
+                  <div className="text-sm text-teal-100">Desktops</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockDevices.filter(d => d.type === 'mobile').length}</div>
+                  <div className="text-sm text-teal-100">Mobile</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">1</div>
+                  <div className="text-sm text-teal-100">Active Now</div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold">Authorized Devices</h2>
@@ -865,6 +1065,46 @@ export default function SecurityClient() {
 
           {/* Secret Keys Tab */}
           <TabsContent value="keys" className="space-y-6">
+            {/* Keys Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Secret Keys Management</h2>
+                  <p className="text-purple-100">API keys, SSH keys, webhooks, and authentication secrets</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                    <Plus className="w-4 h-4 mr-2" />Generate Key
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockSecretKeys.length}</div>
+                  <div className="text-sm text-purple-100">Total Keys</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{stats.activeKeys}</div>
+                  <div className="text-sm text-purple-100">Active</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockSecretKeys.filter(k => k.status === 'expired').length}</div>
+                  <div className="text-sm text-purple-100">Expired</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockSecretKeys.filter(k => k.type === 'api').length}</div>
+                  <div className="text-sm text-purple-100">API Keys</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockSecretKeys.filter(k => k.type === 'ssh').length}</div>
+                  <div className="text-sm text-purple-100">SSH Keys</div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold">Secret Keys</h2>
@@ -934,6 +1174,46 @@ export default function SecurityClient() {
 
           {/* Activity Tab */}
           <TabsContent value="activity" className="space-y-6">
+            {/* Activity Overview Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-slate-700 to-zinc-700 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Activity Log</h2>
+                  <p className="text-gray-300">Monitor all security events and access patterns</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                    <Download className="w-4 h-4 mr-2" />Export
+                  </Button>
+                  <Button className="bg-white text-gray-700 hover:bg-gray-100">
+                    <RefreshCw className="w-4 h-4 mr-2" />Refresh
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-4 mt-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">{mockActivityLog.length}</div>
+                  <div className="text-sm text-gray-300">Total Events</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-green-400">{mockActivityLog.filter(l => l.status === 'success').length}</div>
+                  <div className="text-sm text-gray-300">Successful</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold text-red-400">{mockActivityLog.filter(l => l.status === 'blocked').length}</div>
+                  <div className="text-sm text-gray-300">Blocked</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">3</div>
+                  <div className="text-sm text-gray-300">Locations</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="text-2xl font-bold">2</div>
+                  <div className="text-sm text-gray-300">Devices</div>
+                </div>
+              </div>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -978,84 +1258,373 @@ export default function SecurityClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  Security Policies
-                </CardTitle>
-                <CardDescription>Configure security requirements and policies</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mockPolicies.map((policy) => (
-                  <div key={policy.id} className="flex items-center justify-between p-4 rounded-lg border">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium">{policy.name}</p>
-                        {policy.enforced && <Badge className="bg-blue-100 text-blue-800">Enforced</Badge>}
-                        <Badge variant="outline">{policy.category}</Badge>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                    <CardDescription>Configure your vault</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'security', icon: Shield, label: 'Security', desc: 'Protection' },
+                        { id: '2fa', icon: Fingerprint, label: '2FA', desc: 'Authentication' },
+                        { id: 'devices', icon: Laptop, label: 'Devices', desc: 'Device policy' },
+                        { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alert prefs' },
+                        { id: 'advanced', icon: Server, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-l-4 border-red-600'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-red-600" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>Configure basic vault settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Vault Name</label>
+                          <Input defaultValue="My Personal Vault" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Recovery Email</label>
+                          <Input defaultValue="recovery@email.com" />
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{policy.description}</p>
-                    </div>
-                    <Switch checked={policy.enabled} />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Show Vault in Quick Access</p>
+                          <p className="text-sm text-gray-500">Display vault items in browser extension</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Auto-fill Login Forms</p>
+                          <p className="text-sm text-gray-500">Automatically fill credentials on websites</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Save New Logins</p>
+                          <p className="text-sm text-gray-500">Prompt to save new credentials</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Password Generator</p>
+                          <p className="text-sm text-gray-500">Generate strong passwords automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Browser Extension</p>
+                          <p className="text-sm text-gray-500">Enable vault access in browser</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">Installed</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Dark Mode</p>
+                          <p className="text-sm text-gray-500">Use system preference</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Compact Mode</p>
+                          <p className="text-sm text-gray-500">Reduce spacing in vault view</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Show Favicons</p>
+                          <p className="text-sm text-gray-500">Display website icons</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Two-Factor Authentication</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Fingerprint className="w-5 h-5 text-muted-foreground" />
-                      <span>Authenticator App</span>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800">Enabled</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Smartphone className="w-5 h-5 text-muted-foreground" />
-                      <span>SMS Recovery</span>
-                    </div>
-                    <Badge variant="outline">Not configured</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Key className="w-5 h-5 text-muted-foreground" />
-                      <span>Security Keys</span>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800">2 keys</Badge>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                        Security Policies
+                      </CardTitle>
+                      <CardDescription>Configure security requirements and policies</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockPolicies.map((policy) => (
+                        <div key={policy.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium">{policy.name}</p>
+                              {policy.enforced && <Badge className="bg-blue-100 text-blue-800">Enforced</Badge>}
+                              <Badge variant="outline">{policy.category}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-500">{policy.description}</p>
+                          </div>
+                          <Switch checked={policy.enabled} />
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Session Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Auto-lock after inactivity</span>
-                    <span className="font-medium">5 minutes</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Require master password</span>
-                    <span className="font-medium">Always</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Clear clipboard after</span>
-                    <span className="font-medium">30 seconds</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Lock on device sleep</span>
-                    <Switch checked={true} />
-                  </div>
-                </CardContent>
-              </Card>
+                {/* 2FA Settings */}
+                {settingsTab === '2fa' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Fingerprint className="w-5 h-5 text-green-600" />
+                        Two-Factor Authentication
+                      </CardTitle>
+                      <CardDescription>Configure authentication methods</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Fingerprint className="w-5 h-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">Authenticator App</p>
+                            <p className="text-sm text-gray-500">Use Google Authenticator or similar</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Smartphone className="w-5 h-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">SMS Recovery</p>
+                            <p className="text-sm text-gray-500">Receive codes via text message</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline">Configure</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Key className="w-5 h-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">Security Keys</p>
+                            <p className="text-sm text-gray-500">Use hardware security keys</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">2 keys</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Globe className="w-5 h-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">Passkeys</p>
+                            <p className="text-sm text-gray-500">Passwordless authentication</p>
+                          </div>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Device Settings */}
+                {settingsTab === 'devices' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Laptop className="w-5 h-5 text-purple-600" />
+                        Device Policy
+                      </CardTitle>
+                      <CardDescription>Configure device access rules</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Require Device Authorization</p>
+                          <p className="text-sm text-gray-500">New devices need approval</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Auto-Revoke Inactive Devices</p>
+                          <p className="text-sm text-gray-500">Remove devices after 30 days inactive</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Location-Based Access</p>
+                          <p className="text-sm text-gray-500">Restrict access to trusted locations</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Device Limit</p>
+                          <p className="text-sm text-gray-500">Maximum authorized devices</p>
+                        </div>
+                        <span className="font-medium">10 devices</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notification Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                        Notification Settings
+                      </CardTitle>
+                      <CardDescription>Configure alert preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">New Device Login</p>
+                          <p className="text-sm text-gray-500">Alert when new device accesses vault</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Password Breach Alert</p>
+                          <p className="text-sm text-gray-500">Notify if passwords found in breach</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Failed Login Attempts</p>
+                          <p className="text-sm text-gray-500">Alert on failed access attempts</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Weekly Security Report</p>
+                          <p className="text-sm text-gray-500">Receive security summary weekly</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Server className="w-5 h-5 text-orange-600" />
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>Power user configurations</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Auto-lock after inactivity</p>
+                          <p className="text-sm text-gray-500">Lock vault when idle</p>
+                        </div>
+                        <span className="font-medium">5 minutes</span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Clear clipboard after</p>
+                          <p className="text-sm text-gray-500">Auto-clear copied passwords</p>
+                        </div>
+                        <span className="font-medium">30 seconds</span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Lock on device sleep</p>
+                          <p className="text-sm text-gray-500">Require unlock after sleep</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">CLI Access</p>
+                          <p className="text-sm text-gray-500">Enable command-line access</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">SSH Key Authentication</p>
+                          <p className="text-sm text-gray-500">Use SSH keys for secure access</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">WebAuthn/FIDO2</p>
+                          <p className="text-sm text-gray-500">Hardware security key support</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">API Rate Limiting</p>
+                          <p className="text-sm text-gray-500">Limit API requests per minute</p>
+                        </div>
+                        <span className="font-medium">100/min</span>
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Vault</p>
+                            <p className="text-sm text-red-600">Permanently delete all vault data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

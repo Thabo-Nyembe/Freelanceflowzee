@@ -115,6 +115,7 @@ interface TeamMember {
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBoard, setSelectedBoard] = useState<CanvasBoard | null>(null)
   const [showNewBoard, setShowNewBoard] = useState(false)
@@ -678,6 +679,56 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Dashboard Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Layout className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Welcome to Canvas Studio</h2>
+                    <p className="text-indigo-100">Your collaborative design workspace • {stats.totalBoards} boards, {stats.totalElements.toLocaleString()} elements</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm text-indigo-200">Active Collaborators</p>
+                    <p className="text-2xl font-bold">{stats.activeCollaborators}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-indigo-200">Open Comments</p>
+                    <p className="text-2xl font-bold">{stats.unresolvedComments}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { label: 'New Canvas', icon: Plus, color: 'from-indigo-500 to-purple-500' },
+                { label: 'Whiteboard', icon: Sticky, color: 'from-purple-500 to-pink-500' },
+                { label: 'Wireframe', icon: Monitor, color: 'from-blue-500 to-cyan-500' },
+                { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500' },
+                { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500' },
+                { label: 'Templates', icon: FileText, color: 'from-pink-500 to-rose-500' },
+                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500' },
+                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500' }
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  onClick={() => action.label === 'New Canvas' && setShowNewBoard(true)}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Boards */}
               <Card className="lg:col-span-2">
@@ -792,6 +843,35 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
           {/* Boards Tab */}
           <TabsContent value="boards" className="space-y-6">
+            {/* Boards Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Grid3X3 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Your Canvas Boards</h2>
+                    <p className="text-purple-100">Manage and organize all your design canvases</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{boards.length}</p>
+                    <p className="text-sm text-purple-200">Total Boards</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{boards.filter(b => b.status === 'in_progress').length}</p>
+                    <p className="text-sm text-purple-200">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{boards.filter(b => b.is_starred).length}</p>
+                    <p className="text-sm text-purple-200">Starred</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {boards.map(board => (
                 <Card key={board.id} className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
@@ -847,6 +927,35 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <FileText className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Template Gallery</h2>
+                    <p className="text-pink-100">Start faster with professionally designed templates</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{templates.length}</p>
+                    <p className="text-sm text-pink-200">Templates</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{templates.filter(t => t.is_premium).length}</p>
+                    <p className="text-sm text-pink-200">Premium</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(templates.reduce((sum, t) => sum + t.downloads, 0) / 1000).toFixed(0)}K</p>
+                    <p className="text-sm text-pink-200">Downloads</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map(template => (
                 <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
@@ -886,6 +995,35 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
           {/* Components Tab */}
           <TabsContent value="components" className="space-y-6">
+            {/* Components Overview Banner */}
+            <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Component className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Design System Components</h2>
+                    <p className="text-teal-100">Reusable components for consistent designs</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{components.length}</p>
+                    <p className="text-sm text-teal-200">Components</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{components.reduce((sum, c) => sum + c.variants, 0)}</p>
+                    <p className="text-sm text-teal-200">Variants</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.totalInstances}</p>
+                    <p className="text-sm text-teal-200">Instances</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {components.map(comp => (
                 <Card key={comp.id} className="p-4 hover:shadow-md hover:border-indigo-400 transition-all cursor-pointer text-center group">
@@ -929,6 +1067,35 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
           {/* Team Tab */}
           <TabsContent value="team" className="space-y-6">
+            {/* Team Overview Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Team Collaboration</h2>
+                    <p className="text-green-100">Manage team access and collaboration settings</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{teamMembers.length}</p>
+                    <p className="text-sm text-green-200">Members</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{teamMembers.filter(m => m.status === 'active').length}</p>
+                    <p className="text-sm text-green-200">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{teamMembers.filter(m => m.last_active === 'Now').length}</p>
+                    <p className="text-sm text-green-200">Online</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Team Members</CardTitle>
@@ -975,135 +1142,526 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Workspace Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Workspace Name</label>
-                    <Input defaultValue="Design Team Workspace" />
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Settings className="h-8 w-8" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default Board Type</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                      <option>Whiteboard</option>
-                      <option>Wireframe</option>
-                      <option>Diagram</option>
-                      <option>Prototype</option>
-                    </select>
+                    <h2 className="text-2xl font-bold">Canvas Settings</h2>
+                    <p className="text-gray-300">Configure your workspace, editor, and collaboration preferences</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto-save</p>
-                      <p className="text-sm text-gray-500">Automatically save changes</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Version History</p>
-                      <p className="text-sm text-gray-500">Keep history for 30 days</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">All Systems Operational</Badge>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Settings
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Editor Preferences</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Snap to Grid</p>
-                      <p className="text-sm text-gray-500">Align elements to grid</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Show Guides</p>
-                      <p className="text-sm text-gray-500">Display alignment guides</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
-                      <p className="text-sm text-gray-500">Enable keyboard shortcuts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Real-time Cursors</p>
-                      <p className="text-sm text-gray-500">Show collaborator cursors</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Settings Sidebar Layout */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Workspace basics' },
+                        { id: 'editor', icon: Edit2, label: 'Editor', desc: 'Design tools' },
+                        { id: 'collaboration', icon: Users, label: 'Collaboration', desc: 'Team settings' },
+                        { id: 'export', icon: Download, label: 'Export', desc: 'Output formats' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications', desc: 'Alert prefs' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power settings' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div className="text-left">
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sharing & Permissions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Public Sharing</p>
-                      <p className="text-sm text-gray-500">Allow public board links</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Comment Access</p>
-                      <p className="text-sm text-gray-500">Anyone can comment on shared boards</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Export Access</p>
-                      <p className="text-sm text-gray-500">Allow viewers to export</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-indigo-600" />
+                        General Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Workspace Name</label>
+                        <Input defaultValue="Design Team Workspace" className="max-w-md" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Workspace URL</label>
+                        <div className="flex items-center gap-2 max-w-md">
+                          <span className="text-sm text-gray-500">canvas.io/</span>
+                          <Input defaultValue="design-team" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Board Type</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                          <option>Whiteboard</option>
+                          <option>Wireframe</option>
+                          <option>Diagram</option>
+                          <option>Prototype</option>
+                          <option>Presentation</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-save</p>
+                          <p className="text-sm text-gray-500">Automatically save changes every 30 seconds</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Version History</p>
+                          <p className="text-sm text-gray-500">Keep history for 30 days (90 days on Pro)</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show Tutorials</p>
+                          <p className="text-sm text-gray-500">Display helpful tips for new features</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Dark Mode</p>
+                          <p className="text-sm text-gray-500">Use dark theme across the platform</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Compact Mode</p>
+                          <p className="text-sm text-gray-500">Reduce spacing and padding in UI</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">High Contrast</p>
+                          <p className="text-sm text-gray-500">Increase contrast for accessibility</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>English (US)</option>
+                          <option>English (UK)</option>
+                          <option>Spanish</option>
+                          <option>French</option>
+                          <option>German</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Timezone</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>UTC (Coordinated Universal Time)</option>
+                          <option>EST (Eastern Standard Time)</option>
+                          <option>PST (Pacific Standard Time)</option>
+                          <option>GMT (Greenwich Mean Time)</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Remember Recent Files</p>
+                          <p className="text-sm text-gray-500">Quick access to recently opened boards</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Spell Check</p>
+                          <p className="text-sm text-gray-500">Check spelling in text elements</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">New Comments</p>
-                      <p className="text-sm text-gray-500">Notify when someone comments</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Mentions</p>
-                      <p className="text-sm text-gray-500">Notify when mentioned</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Board Updates</p>
-                      <p className="text-sm text-gray-500">Notify on board changes</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Editor Settings */}
+                {settingsTab === 'editor' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Edit2 className="w-5 h-5 text-purple-600" />
+                        Editor Preferences
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Snap to Grid</p>
+                          <p className="text-sm text-gray-500">Align elements to grid automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show Guides</p>
+                          <p className="text-sm text-gray-500">Display alignment guides when moving elements</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
+                          <p className="text-sm text-gray-500">Enable keyboard shortcuts for faster workflows</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Pen Pressure Sensitivity</p>
+                          <p className="text-sm text-gray-500">Enable stylus pressure for drawing tools</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show Pixel Grid</p>
+                          <p className="text-sm text-gray-500">Display pixel grid at high zoom levels</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Grid Size</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>8px</option>
+                          <option>10px</option>
+                          <option>16px</option>
+                          <option>20px</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Font</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>Inter</option>
+                          <option>Roboto</option>
+                          <option>SF Pro</option>
+                          <option>Open Sans</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-close Shapes</p>
+                          <p className="text-sm text-gray-500">Automatically close pen paths</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Collaboration Settings */}
+                {settingsTab === 'collaboration' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-green-600" />
+                        Collaboration Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Real-time Cursors</p>
+                          <p className="text-sm text-gray-500">Show collaborator cursors on the canvas</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Cursor Chat</p>
+                          <p className="text-sm text-gray-500">Enable quick messages via cursor</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Follow Mode</p>
+                          <p className="text-sm text-gray-500">Allow team members to follow your view</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Public Sharing</p>
+                          <p className="text-sm text-gray-500">Allow anyone with link to view boards</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Comment Access</p>
+                          <p className="text-sm text-gray-500">Anyone can comment on shared boards</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Voice Chat</p>
+                          <p className="text-sm text-gray-500">Enable voice communication during collaboration</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Permission</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>Can View</option>
+                          <option>Can Comment</option>
+                          <option>Can Edit</option>
+                        </select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Export Settings */}
+                {settingsTab === 'export' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Download className="w-5 h-5 text-blue-600" />
+                        Export Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Image Format</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>PNG (Recommended)</option>
+                          <option>JPG</option>
+                          <option>SVG</option>
+                          <option>WebP</option>
+                          <option>PDF</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Export Resolution</label>
+                        <select className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                          <option>1x (Standard)</option>
+                          <option>2x (Retina)</option>
+                          <option>3x (High DPI)</option>
+                          <option>4x (Print Quality)</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Include Background</p>
+                          <p className="text-sm text-gray-500">Export with canvas background color</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Allow Viewer Export</p>
+                          <p className="text-sm text-gray-500">Let viewers download board exports</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Add Watermark</p>
+                          <p className="text-sm text-gray-500">Include workspace branding on exports</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Optimize for Web</p>
+                          <p className="text-sm text-gray-500">Compress images for faster loading</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-orange-600" />
+                        Notification Preferences
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">New Comments</p>
+                          <p className="text-sm text-gray-500">Get notified when someone comments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Mentions</p>
+                          <p className="text-sm text-gray-500">Notify when mentioned in comments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Board Updates</p>
+                          <p className="text-sm text-gray-500">Notify on significant board changes</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Team Invitations</p>
+                          <p className="text-sm text-gray-500">When invited to new boards or teams</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Weekly Digest</p>
+                          <p className="text-sm text-gray-500">Receive weekly activity summary</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Desktop Notifications</p>
+                          <p className="text-sm text-gray-500">Show browser notifications</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Mobile Push</p>
+                          <p className="text-sm text-gray-500">Send push notifications to mobile app</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-yellow-600" />
+                        Advanced Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Hardware Acceleration</p>
+                          <p className="text-sm text-gray-500">Use GPU for better performance</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Offline Mode</p>
+                          <p className="text-sm text-gray-500">Cache boards for offline editing</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Developer Tools</p>
+                          <p className="text-sm text-gray-500">Enable developer debugging options</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Plugin System</p>
+                          <p className="text-sm text-gray-500">Allow third-party plugins</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                          <p className="text-sm text-gray-500">Try experimental features early</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Analytics</p>
+                          <p className="text-sm text-gray-500">Help improve Canvas with usage data</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="pt-6 border-t dark:border-gray-700">
+                        <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Clear Local Cache</p>
+                              <p className="text-sm text-red-600">Remove all cached data</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Clear
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete All Boards</p>
+                              <p className="text-sm text-red-600">Permanently delete all your boards</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Delete
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div>
+                              <p className="font-medium text-red-700 dark:text-red-400">Delete Workspace</p>
+                              <p className="text-sm text-red-600">This action cannot be undone</p>
+                            </div>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
