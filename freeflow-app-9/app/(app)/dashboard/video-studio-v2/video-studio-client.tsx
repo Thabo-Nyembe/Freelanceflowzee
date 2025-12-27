@@ -321,6 +321,7 @@ export default function VideoStudioClient() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [volume, setVolume] = useState(100)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats = useMemo(() => {
@@ -539,10 +540,68 @@ export default function VideoStudioClient() {
               <Grid3X3 className="w-4 h-4" />
               Templates
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
+            {/* Projects Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Video className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Video Projects</h3>
+                    <p className="text-purple-100">Create and manage your video productions</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.totalProjects}</div>
+                    <div className="text-sm text-purple-100">Projects</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.publishedCount}</div>
+                    <div className="text-sm text-purple-100">Published</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{formatDuration(stats.totalDuration)}</div>
+                    <div className="text-sm text-purple-100">Total Duration</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{formatFileSize(stats.totalStorage)}</div>
+                    <div className="text-sm text-purple-100">Storage</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'from-purple-500 to-pink-600' },
+                { icon: Upload, label: 'Import Media', desc: 'Upload files', color: 'from-blue-500 to-cyan-600' },
+                { icon: Grid3X3, label: 'Templates', desc: 'Browse templates', color: 'from-green-500 to-emerald-600' },
+                { icon: Cloud, label: 'Cloud Storage', desc: 'Manage files', color: 'from-amber-500 to-orange-600' },
+                { icon: Users, label: 'Collaborate', desc: 'Team projects', color: 'from-indigo-500 to-violet-600' }
+              ].map((action, idx) => (
+                <button key={idx} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all text-left">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center`}>
+                    <action.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{action.label}</p>
+                    <p className="text-xs text-gray-500">{action.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-3 flex-wrap">
               <Button
                 variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -765,6 +824,39 @@ export default function VideoStudioClient() {
 
           {/* Assets Tab */}
           <TabsContent value="assets" className="space-y-6">
+            {/* Assets Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Layers className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Media Assets</h3>
+                    <p className="text-blue-100">Manage your video, audio, and graphic files</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.totalAssets}</div>
+                    <div className="text-sm text-blue-100">Total Assets</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{assets.filter(a => a.type === 'video').length}</div>
+                    <div className="text-sm text-blue-100">Videos</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{assets.filter(a => a.type === 'audio').length}</div>
+                    <div className="text-sm text-blue-100">Audio</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{formatFileSize(assets.reduce((s, a) => s + a.size, 0))}</div>
+                    <div className="text-sm text-blue-100">Storage</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 flex-wrap">
               <Button
                 variant={assetTypeFilter === 'all' ? 'default' : 'outline'}
@@ -822,6 +914,39 @@ export default function VideoStudioClient() {
 
           {/* Effects Tab */}
           <TabsContent value="effects" className="space-y-6">
+            {/* Effects Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Wand2 className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Effects & Filters</h3>
+                    <p className="text-amber-100">Apply professional video effects and color grading</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{effects.length}</div>
+                    <div className="text-sm text-amber-100">Effects</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{effects.filter(e => e.enabled).length}</div>
+                    <div className="text-sm text-amber-100">Active</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">6</div>
+                    <div className="text-sm text-amber-100">Categories</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">4</div>
+                    <div className="text-sm text-amber-100">AI Features</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card className="border-0 shadow-sm">
@@ -916,6 +1041,39 @@ export default function VideoStudioClient() {
 
           {/* Render Queue Tab */}
           <TabsContent value="render" className="space-y-6">
+            {/* Render Queue Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Target className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Render Queue</h3>
+                    <p className="text-emerald-100">Export and render your video projects</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{renderJobs.length}</div>
+                    <div className="text-sm text-emerald-100">Total Jobs</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{renderJobs.filter(j => j.status === 'rendering').length}</div>
+                    <div className="text-sm text-emerald-100">Rendering</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{renderJobs.filter(j => j.status === 'completed').length}</div>
+                    <div className="text-sm text-emerald-100">Completed</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{renderJobs.filter(j => j.status === 'queued').length}</div>
+                    <div className="text-sm text-emerald-100">Queued</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card className="border-0 shadow-sm">
@@ -1026,6 +1184,39 @@ export default function VideoStudioClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Overview Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Grid3X3 className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Video Templates</h3>
+                    <p className="text-violet-100">Browse and use professional video templates</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{templates.length}</div>
+                    <div className="text-sm text-violet-100">Templates</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{templates.filter(t => t.isPremium).length}</div>
+                    <div className="text-sm text-violet-100">Premium</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.avgRating.toFixed(1)}</div>
+                    <div className="text-sm text-violet-100">Avg Rating</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.totalDownloads.toLocaleString()}</div>
+                    <div className="text-sm text-violet-100">Downloads</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map(template => (
                 <Card key={template.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
@@ -1064,6 +1255,429 @@ export default function VideoStudioClient() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Comprehensive 6 Sub-tab Version */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Settings className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Studio Settings</h3>
+                    <p className="text-gray-200">Configure your video production preferences</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                    Export Settings
+                  </Button>
+                  <Button className="bg-white hover:bg-gray-100 text-gray-800">
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm sticky top-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold text-gray-500 uppercase">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                        { id: 'project', icon: Film, label: 'Project', desc: 'Default project' },
+                        { id: 'export', icon: Download, label: 'Export', desc: 'Render settings' },
+                        { id: 'storage', icon: HardDrive, label: 'Storage', desc: 'Media location' },
+                        { id: 'notifications', icon: AlertCircle, label: 'Notifications', desc: 'Alerts' },
+                        { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power features' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <div>
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <p className={`text-xs ${settingsTab === item.id ? 'text-white/70' : 'text-gray-500'}`}>{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Film className="w-5 h-5 text-purple-600" />
+                          Default Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Resolution</label>
+                            <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                              <option>1920x1080 (1080p)</option>
+                              <option>3840x2160 (4K)</option>
+                              <option>1280x720 (720p)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Frame Rate</label>
+                            <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                              <option>30 fps</option>
+                              <option>24 fps</option>
+                              <option>60 fps</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Timeline Units</label>
+                            <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                              <option>Timecode</option>
+                              <option>Frames</option>
+                              <option>Seconds</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Audio Sample Rate</label>
+                            <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                              <option>48000 Hz</option>
+                              <option>44100 Hz</option>
+                              <option>96000 Hz</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layout className="w-5 h-5 text-blue-600" />
+                          Interface Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Auto-save projects', desc: 'Save every 5 minutes', checked: true },
+                          { label: 'Show audio waveforms', desc: 'Display waveforms on timeline', checked: true },
+                          { label: 'Snapping enabled', desc: 'Snap clips to playhead', checked: true },
+                          { label: 'Show thumbnails', desc: 'Display video thumbnails on timeline', checked: true }
+                        ].map((option, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{option.label}</p>
+                              <p className="text-sm text-gray-500">{option.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${option.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${option.checked ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Project Settings */}
+                {settingsTab === 'project' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Monitor className="w-5 h-5 text-indigo-600" />
+                          Project Defaults
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          {[
+                            { label: '16:9 Landscape', icon: Monitor, selected: true },
+                            { label: '9:16 Portrait', icon: Smartphone, selected: false },
+                            { label: '1:1 Square', icon: Square, selected: false }
+                          ].map((preset, idx) => (
+                            <button key={idx} className={`p-4 rounded-lg border-2 text-center transition-all ${preset.selected ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}>
+                              <preset.icon className={`w-8 h-8 mx-auto mb-2 ${preset.selected ? 'text-purple-600' : 'text-gray-400'}`} />
+                              <p className="text-sm font-medium">{preset.label}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-pink-600" />
+                          Color Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Color Space</label>
+                          <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                            <option>Rec. 709 (Standard HD)</option>
+                            <option>Rec. 2020 (HDR)</option>
+                            <option>sRGB</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Bit Depth</label>
+                          <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                            <option>8-bit</option>
+                            <option>10-bit</option>
+                            <option>12-bit</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Export Settings */}
+                {settingsTab === 'export' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Download className="w-5 h-5 text-green-600" />
+                          Export Presets
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'YouTube Optimized', codec: 'H.264', bitrate: '20 Mbps', resolution: '1080p' },
+                          { name: '4K Master', codec: 'ProRes 422', bitrate: '150 Mbps', resolution: '4K' },
+                          { name: 'Instagram Reel', codec: 'H.264', bitrate: '8 Mbps', resolution: '1080x1920' },
+                          { name: 'Web Preview', codec: 'H.264', bitrate: '5 Mbps', resolution: '720p' }
+                        ].map((preset, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{preset.name}</p>
+                              <p className="text-sm text-gray-500">{preset.codec} • {preset.bitrate} • {preset.resolution}</p>
+                            </div>
+                            <Button variant="outline" size="sm">Edit</Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full border-dashed">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Custom Preset
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Storage Settings */}
+                {settingsTab === 'storage' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-600" />
+                          Storage Locations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <Folder className="w-5 h-5 text-yellow-500" />
+                              <div>
+                                <p className="font-medium">Project Files</p>
+                                <p className="text-sm text-gray-500">/Users/Studio/Projects</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Change</Button>
+                          </div>
+                          <Progress value={65} className="h-2" />
+                          <p className="text-xs text-gray-500 mt-1">156 GB used of 240 GB</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <Cloud className="w-5 h-5 text-blue-500" />
+                              <div>
+                                <p className="font-medium">Cloud Storage</p>
+                                <p className="text-sm text-gray-500">Connected to FreeFlow Cloud</p>
+                              </div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <Progress value={42} className="h-2" />
+                          <p className="text-xs text-gray-500 mt-1">42 GB used of 100 GB</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-purple-600" />
+                          Cache & Temp Files
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Media Cache</p>
+                            <p className="text-sm text-gray-500">12.4 GB</p>
+                          </div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Preview Files</p>
+                            <p className="text-sm text-gray-500">8.2 GB</p>
+                          </div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-amber-600" />
+                          Notification Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Render complete', desc: 'Notify when rendering finishes', checked: true },
+                          { label: 'Export failed', desc: 'Alert on export errors', checked: true },
+                          { label: 'Auto-save completed', desc: 'Show save confirmations', checked: false },
+                          { label: 'Cloud sync status', desc: 'Notify on sync events', checked: true },
+                          { label: 'New template available', desc: 'Alert for new templates', checked: true }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${notif.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notif.checked ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Brain className="w-5 h-5 text-purple-600" />
+                          AI Features
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'AI Scene Detection', desc: 'Auto-detect scene changes', checked: true },
+                          { label: 'Smart Color Match', desc: 'AI-powered color grading', checked: true },
+                          { label: 'Auto Captions', desc: 'Generate subtitles automatically', checked: true },
+                          { label: 'Content-Aware Fill', desc: 'AI background removal', checked: false }
+                        ].map((feature, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{feature.label}</p>
+                              <p className="text-sm text-gray-500">{feature.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${feature.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${feature.checked ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-yellow-600" />
+                          Performance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Playback Quality</label>
+                          <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                            <option>Full Quality</option>
+                            <option>Half Resolution</option>
+                            <option>Quarter Resolution</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">GPU Acceleration</label>
+                          <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                            <option>Auto (Recommended)</option>
+                            <option>Force GPU</option>
+                            <option>Software Only</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+                          <AlertCircle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
+                            <p className="text-xs text-gray-500">Restore default preferences</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Clear All Data</p>
+                            <p className="text-xs text-gray-500">Delete all local data</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

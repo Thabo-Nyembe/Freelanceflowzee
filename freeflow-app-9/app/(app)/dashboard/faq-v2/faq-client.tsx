@@ -401,6 +401,7 @@ export default function FAQClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredArticles = useMemo(() => {
     return articles.filter(article => {
@@ -548,6 +549,56 @@ export default function FAQClient() {
 
           {/* Articles Tab */}
           <TabsContent value="articles" className="space-y-6">
+            {/* Articles Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Book className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Knowledge Base Articles</h3>
+                    <p className="text-indigo-100">Create and manage help articles for your customers</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.totalArticles}</div>
+                    <div className="text-sm text-indigo-100">Articles</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.publishedArticles}</div>
+                    <div className="text-sm text-indigo-100">Published</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</div>
+                    <div className="text-sm text-indigo-100">Views</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.avgHelpfulRating}%</div>
+                    <div className="text-sm text-indigo-100">Helpful</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-5 gap-4">
+              {[
+                { status: 'published', count: articles.filter(a => a.status === 'published').length, icon: CheckCircle2, color: 'green' },
+                { status: 'draft', count: articles.filter(a => a.status === 'draft').length, icon: FileText, color: 'gray' },
+                { status: 'review', count: articles.filter(a => a.status === 'review').length, icon: Clock, color: 'yellow' },
+                { status: 'archived', count: articles.filter(a => a.status === 'archived').length, icon: Archive, color: 'gray' },
+                { status: 'featured', count: featuredArticles.length, icon: Star, color: 'amber' }
+              ].map((stat, idx) => (
+                <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                  <stat.icon className={`w-6 h-6 mx-auto mb-2 text-${stat.color}-500`} />
+                  <div className="text-xl font-bold">{stat.count}</div>
+                  <div className="text-xs text-gray-500 capitalize">{stat.status}</div>
+                </div>
+              ))}
+            </div>
+
             {/* Filters */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -714,8 +765,57 @@ export default function FAQClient() {
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
+            {/* Collections Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <FolderOpen className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Content Collections</h3>
+                    <p className="text-emerald-100">Organize articles into logical categories</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{collections.length}</div>
+                    <div className="text-sm text-emerald-100">Collections</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{collections.reduce((sum, c) => sum + c.articleCount, 0)}</div>
+                    <div className="text-sm text-emerald-100">Articles</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{collections.filter(c => c.isPublic).length}</div>
+                    <div className="text-sm text-emerald-100">Public</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: Plus, label: 'Add Collection', desc: 'Create new category', color: 'bg-blue-500' },
+                { icon: Upload, label: 'Import', desc: 'Bulk import articles', color: 'bg-purple-500' },
+                { icon: RefreshCw, label: 'Reorder', desc: 'Change order', color: 'bg-amber-500' },
+                { icon: Archive, label: 'Archive', desc: 'Archive old content', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <button key={idx} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
+                  <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center`}>
+                    <action.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{action.label}</p>
+                    <p className="text-xs text-gray-500">{action.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Collections</h2>
+              <h2 className="text-xl font-semibold">All Collections</h2>
               <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 New Collection
@@ -754,6 +854,60 @@ export default function FAQClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <BarChart3 className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Knowledge Base Analytics</h3>
+                    <p className="text-violet-100">Track performance and user engagement</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{formatNumber(stats.totalViews)}</div>
+                    <div className="text-sm text-violet-100">Total Views</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{formatNumber(stats.totalSearches)}</div>
+                    <div className="text-sm text-violet-100">Searches</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.avgHelpfulRating}%</div>
+                    <div className="text-sm text-violet-100">Satisfaction</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">+15%</div>
+                    <div className="text-sm text-violet-100">This Month</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Stats */}
+            <div className="grid grid-cols-6 gap-4">
+              {[
+                { label: 'Views Today', value: '2.4K', change: '+12%', positive: true, icon: Eye },
+                { label: 'Avg Session', value: '4:32', change: '+8%', positive: true, icon: Clock },
+                { label: 'Bounce Rate', value: '24%', change: '-5%', positive: true, icon: TrendingUp },
+                { label: 'Helpful Votes', value: '847', change: '+23', positive: true, icon: ThumbsUp },
+                { label: 'Not Helpful', value: '32', change: '-8', positive: true, icon: ThumbsDown },
+                { label: 'Comments', value: '156', change: '+12', positive: true, icon: MessageSquare }
+              ].map((stat, idx) => (
+                <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <stat.icon className="w-4 h-4 text-gray-400" />
+                    <span className="text-xs text-gray-500">{stat.label}</span>
+                  </div>
+                  <div className="text-xl font-bold">{stat.value}</div>
+                  <div className={`text-xs ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>{stat.change}</div>
+                </div>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -850,6 +1004,58 @@ export default function FAQClient() {
 
           {/* Search Insights Tab */}
           <TabsContent value="search-insights" className="space-y-6">
+            {/* Search Insights Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Search className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Search Analytics & Insights</h3>
+                    <p className="text-amber-100">Understand what your users are looking for</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{formatNumber(stats.totalSearches)}</div>
+                    <div className="text-sm text-amber-100">Total Searches</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{searchQueries.length}</div>
+                    <div className="text-sm text-amber-100">Unique Queries</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">92%</div>
+                    <div className="text-sm text-amber-100">Results Found</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">1.4</div>
+                    <div className="text-sm text-amber-100">Avg Click Position</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Performance Cards */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { label: 'Zero Results', value: '8%', desc: 'Queries with no matches', icon: AlertCircle, color: 'text-red-500' },
+                { label: 'Top Result Clicks', value: '67%', desc: 'Click first result', icon: Target, color: 'text-green-500' },
+                { label: 'Avg Search Depth', value: '2.3', desc: 'Results viewed', icon: List, color: 'text-blue-500' },
+                { label: 'Refinement Rate', value: '12%', desc: 'Modified searches', icon: RefreshCw, color: 'text-purple-500' }
+              ].map((stat, idx) => (
+                <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-500">{stat.label}</span>
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <p className="text-xs text-gray-500 mt-1">{stat.desc}</p>
+                </div>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -914,124 +1120,545 @@ export default function FAQClient() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Comprehensive 6 Sub-tab Version */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-pink-600" />
-                  Help Center Branding
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                    <input
-                      type="text"
-                      value={helpCenterSettings.title}
-                      className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                      readOnly
-                    />
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Settings className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
-                    <input
-                      type="text"
-                      value={helpCenterSettings.subtitle}
-                      className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                      readOnly
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Primary Color</label>
-                    <div className="mt-1 flex items-center gap-2">
-                      <div
-                        className="w-10 h-10 rounded-lg border border-gray-200"
-                        style={{ backgroundColor: helpCenterSettings.primaryColor }}
-                      />
-                      <input
-                        type="text"
-                        value={helpCenterSettings.primaryColor}
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                        readOnly
-                      />
-                    </div>
+                    <h3 className="text-xl font-bold">Knowledge Base Settings</h3>
+                    <p className="text-gray-200">Configure your help center and preferences</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Languages className="w-5 h-5 text-green-600" />
-                  Languages
-                </h3>
-                <div className="space-y-3">
-                  {helpCenterSettings.languages.map(lang => (
-                    <div key={lang} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">
-                          {lang === 'en' ? '🇺🇸' : lang === 'es' ? '🇪🇸' : lang === 'fr' ? '🇫🇷' : lang === 'de' ? '🇩🇪' : '🌐'}
-                        </span>
-                        <span className="font-medium">{lang === 'en' ? 'English' : lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}</span>
-                      </div>
-                      {lang === helpCenterSettings.defaultLanguage && (
-                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded">
-                          Default
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                  <button className="w-full py-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors">
-                    + Add Language
+                <div className="flex items-center gap-4">
+                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors">
+                    Export Settings
+                  </button>
+                  <button className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
+                    Save Changes
                   </button>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-blue-600" />
-                  Custom Domain
-                </h3>
-                <div className="space-y-4">
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                      <span className="font-medium text-green-900 dark:text-green-100">Domain Connected</span>
-                    </div>
-                    <p className="text-sm text-green-700 dark:text-green-300">{helpCenterSettings.customDomain}</p>
+            {/* Settings Sidebar Navigation */}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Sidebar */}
+              <div className="col-span-3">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden sticky top-6">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <h4 className="font-semibold text-sm text-gray-500 uppercase tracking-wide">Settings</h4>
                   </div>
-                  <button className="w-full py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    Change Domain
-                  </button>
+                  <nav className="p-2">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General', desc: 'Basic settings' },
+                      { id: 'branding', icon: Palette, label: 'Branding', desc: 'Theme & colors' },
+                      { id: 'languages', icon: Languages, label: 'Languages', desc: 'Multi-language' },
+                      { id: 'integrations', icon: Link, label: 'Integrations', desc: 'Third-party apps' },
+                      { id: 'notifications', icon: MessageSquare, label: 'Notifications', desc: 'Alerts & emails' },
+                      { id: 'advanced', icon: Zap, label: 'Advanced', desc: 'Power features' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all mb-1 ${
+                          settingsTab === item.id
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <div>
+                          <p className="font-medium text-sm">{item.label}</p>
+                          <p className="text-xs text-gray-500">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </nav>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-amber-500" />
-                  Integrations
-                </h3>
-                <div className="space-y-3">
-                  {[
-                    { name: 'Live Chat', icon: MessageCircle, connected: true },
-                    { name: 'Email Support', icon: Mail, connected: true },
-                    { name: 'Slack', icon: MessageSquare, connected: false },
-                    { name: 'Webhooks', icon: Link, connected: true }
-                  ].map((integration, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <integration.icon className="w-5 h-5 text-gray-500" />
-                        <span>{integration.name}</span>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-blue-600" />
+                        Help Center Details
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Help Center Name</label>
+                          <input
+                            type="text"
+                            defaultValue={helpCenterSettings.title}
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tagline</label>
+                          <input
+                            type="text"
+                            defaultValue={helpCenterSettings.subtitle}
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Custom Domain</label>
+                          <div className="mt-1 flex gap-2">
+                            <input
+                              type="text"
+                              defaultValue={helpCenterSettings.customDomain || ''}
+                              placeholder="help.yourdomain.com"
+                              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                            />
+                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                              Verify
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">Configure a custom domain for your help center</p>
+                        </div>
                       </div>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        integration.connected
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                      }`}>
-                        {integration.connected ? 'Connected' : 'Connect'}
-                      </span>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Layout className="w-5 h-5 text-purple-600" />
+                        Display Options
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: 'Show Search Bar', desc: 'Display search on homepage', checked: helpCenterSettings.showSearch },
+                          { label: 'Show Categories', desc: 'Display category sections', checked: helpCenterSettings.showCategories },
+                          { label: 'Show Popular Articles', desc: 'Feature top articles', checked: helpCenterSettings.showPopularArticles },
+                          { label: 'Show Contact Button', desc: 'Display contact support link', checked: helpCenterSettings.showContactButton }
+                        ].map((option, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div>
+                              <p className="font-medium">{option.label}</p>
+                              <p className="text-xs text-gray-500">{option.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${option.checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${option.checked ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Headphones className="w-5 h-5 text-green-600" />
+                        Support Contact
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Support Email</label>
+                          <input
+                            type="email"
+                            defaultValue={helpCenterSettings.contactEmail}
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Response Time</label>
+                          <select className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                            <option>Within 24 hours</option>
+                            <option>Within 4 hours</option>
+                            <option>Within 1 hour</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Branding Settings */}
+                {settingsTab === 'branding' && (
+                  <>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Palette className="w-5 h-5 text-pink-600" />
+                        Theme & Colors
+                      </h3>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Primary Color</label>
+                          <div className="mt-2 flex items-center gap-3">
+                            <div
+                              className="w-12 h-12 rounded-lg border-2 border-gray-200 cursor-pointer"
+                              style={{ backgroundColor: helpCenterSettings.primaryColor }}
+                            />
+                            <input
+                              type="text"
+                              defaultValue={helpCenterSettings.primaryColor}
+                              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Accent Color</label>
+                          <div className="mt-2 flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg border-2 border-gray-200 cursor-pointer bg-purple-500" />
+                            <input
+                              type="text"
+                              defaultValue="#8b5cf6"
+                              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-6">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Color Presets</label>
+                        <div className="mt-2 flex gap-2">
+                          {['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'].map(color => (
+                            <button
+                              key={color}
+                              className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:scale-110 transition-transform"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Image className="w-5 h-5 text-blue-600" />
+                        Logo & Images
+                      </h3>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">Logo</label>
+                          <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
+                            <p className="text-xs text-gray-400 mt-1">PNG, SVG up to 2MB</p>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">Favicon</label>
+                          <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
+                            <p className="text-xs text-gray-400 mt-1">ICO, PNG 32x32px</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Layout className="w-5 h-5 text-indigo-600" />
+                        Custom CSS
+                      </h3>
+                      <textarea
+                        rows={6}
+                        placeholder="/* Add your custom CSS here */"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">Add custom CSS to further customize your help center appearance</p>
+                    </div>
+                  </>
+                )}
+
+                {/* Languages Settings */}
+                {settingsTab === 'languages' && (
+                  <>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <Languages className="w-5 h-5 text-green-600" />
+                          Supported Languages
+                        </h3>
+                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Add Language
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {helpCenterSettings.languages.map((lang, idx) => (
+                          <div key={lang} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <span className="text-3xl">
+                                {lang === 'en' ? '🇺🇸' : lang === 'es' ? '🇪🇸' : lang === 'fr' ? '🇫🇷' : lang === 'de' ? '🇩🇪' : '🌐'}
+                              </span>
+                              <div>
+                                <p className="font-medium">{lang === 'en' ? 'English' : lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}</p>
+                                <p className="text-xs text-gray-500">{lang === helpCenterSettings.defaultLanguage ? 'Default language' : `${Math.floor(Math.random() * 50) + 50}% translated`}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {lang === helpCenterSettings.defaultLanguage ? (
+                                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
+                                  Default
+                                </span>
+                              ) : (
+                                <button className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-medium hover:bg-gray-200">
+                                  Set as Default
+                                </button>
+                              )}
+                              <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
+                                <Edit className="w-4 h-4 text-gray-500" />
+                              </button>
+                              {lang !== helpCenterSettings.defaultLanguage && (
+                                <button className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Bot className="w-5 h-5 text-purple-600" />
+                        Auto-Translation
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium">Enable AI Translation</p>
+                            <p className="text-xs text-gray-500">Automatically translate new articles</p>
+                          </div>
+                          <div className="w-12 h-6 rounded-full p-1 cursor-pointer transition-colors bg-blue-600">
+                            <div className="w-4 h-4 rounded-full bg-white translate-x-6" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium">Review Before Publish</p>
+                            <p className="text-xs text-gray-500">Require review for auto-translated content</p>
+                          </div>
+                          <div className="w-12 h-6 rounded-full p-1 cursor-pointer transition-colors bg-blue-600">
+                            <div className="w-4 h-4 rounded-full bg-white translate-x-6" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Link className="w-5 h-5 text-blue-600" />
+                        Connected Integrations
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { name: 'Live Chat', icon: MessageCircle, connected: true, desc: 'Intercom' },
+                          { name: 'Email Support', icon: Mail, connected: true, desc: 'SendGrid' },
+                          { name: 'Slack', icon: MessageSquare, connected: false, desc: 'Not connected' },
+                          { name: 'Webhooks', icon: Zap, connected: true, desc: '3 active hooks' },
+                          { name: 'CRM', icon: Users, connected: true, desc: 'Salesforce' },
+                          { name: 'Analytics', icon: BarChart3, connected: false, desc: 'Not connected' }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.connected ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                <integration.icon className={`w-5 h-5 ${integration.connected ? 'text-blue-600' : 'text-gray-500'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-xs text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <button className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                              integration.connected
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            }`}>
+                              {integration.connected ? 'Connected' : 'Connect'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <ExternalLink className="w-5 h-5 text-purple-600" />
+                        API Access
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">API Key</label>
+                          <div className="mt-1 flex gap-2">
+                            <input
+                              type="password"
+                              defaultValue="sk_live_abc123xyz..."
+                              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
+                              readOnly
+                            />
+                            <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                            <button className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
+                              Regenerate
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <p className="text-sm text-blue-900 dark:text-blue-100">
+                            <strong>Rate Limits:</strong> 1000 requests/minute • <strong>Docs:</strong> <a href="#" className="underline">API Documentation</a>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Mail className="w-5 h-5 text-blue-600" />
+                        Email Notifications
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: 'New feedback received', desc: 'When users rate articles', enabled: true },
+                          { label: 'Low satisfaction alert', desc: 'Articles below 70% rating', enabled: true },
+                          { label: 'Weekly digest', desc: 'Summary of KB performance', enabled: true },
+                          { label: 'New comments', desc: 'When users comment on articles', enabled: false },
+                          { label: 'Content review due', desc: 'Articles needing review', enabled: true }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div>
+                              <p className="font-medium">{notif.label}</p>
+                              <p className="text-xs text-gray-500">{notif.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${notif.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notif.enabled ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-purple-600" />
+                        In-App Notifications
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: 'Browser notifications', desc: 'Push notifications in browser', enabled: true },
+                          { label: 'Sound alerts', desc: 'Play sound for notifications', enabled: false },
+                          { label: 'Desktop alerts', desc: 'Show desktop notification', enabled: true }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div>
+                              <p className="font-medium">{notif.label}</p>
+                              <p className="text-xs text-gray-500">{notif.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${notif.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notif.enabled ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Bot className="w-5 h-5 text-purple-600" />
+                        AI Features
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: 'AI Article Suggestions', desc: 'Get AI-powered content recommendations', enabled: true },
+                          { label: 'Smart Search', desc: 'AI-enhanced search results', enabled: true },
+                          { label: 'Auto-Categorization', desc: 'Automatically categorize new articles', enabled: false },
+                          { label: 'Content Quality Score', desc: 'AI-powered content scoring', enabled: true }
+                        ].map((feature, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div>
+                              <p className="font-medium">{feature.label}</p>
+                              <p className="text-xs text-gray-500">{feature.desc}</p>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${feature.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${feature.enabled ? 'translate-x-6' : ''}`} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Download className="w-5 h-5 text-green-600" />
+                        Data Management
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                          <Download className="w-5 h-5 text-blue-600 mb-2" />
+                          <p className="font-medium">Export All Data</p>
+                          <p className="text-xs text-gray-500">Download all articles as JSON</p>
+                        </button>
+                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                          <Upload className="w-5 h-5 text-green-600 mb-2" />
+                          <p className="font-medium">Import Data</p>
+                          <p className="text-xs text-gray-500">Bulk import articles</p>
+                        </button>
+                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                          <History className="w-5 h-5 text-purple-600 mb-2" />
+                          <p className="font-medium">Version History</p>
+                          <p className="text-xs text-gray-500">View all article revisions</p>
+                        </button>
+                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
+                          <Archive className="w-5 h-5 text-amber-600 mb-2" />
+                          <p className="font-medium">Bulk Archive</p>
+                          <p className="text-xs text-gray-500">Archive multiple articles</p>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <h3 className="font-semibold mb-4 flex items-center gap-2 text-red-700 dark:text-red-400">
+                        <AlertCircle className="w-5 h-5" />
+                        Danger Zone
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Analytics</p>
+                            <p className="text-xs text-gray-500">Clear all view counts and feedback</p>
+                          </div>
+                          <button className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
+                            Reset
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Articles</p>
+                            <p className="text-xs text-gray-500">Permanently delete all content</p>
+                          </div>
+                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                            Delete All
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>
