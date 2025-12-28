@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import {
-  Layout, Square, Circle, Triangle, Minus, Type, Image, Sticky,
+  Layout, Square, Circle, Triangle, Minus, Type, Image, StickyNote,
   MousePointer, Hand, Pencil, Eraser, PenTool, Palette, Layers,
   Plus, Search, Filter, Grid3X3, Users, Clock, Star, Heart,
   Folder, Tag, Settings, Zap, Play, Pause, ZoomIn, ZoomOut,
@@ -275,7 +275,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     { id: 'ellipse' as ToolType, name: 'Ellipse', icon: Circle, shortcut: 'O' },
     { id: 'line' as ToolType, name: 'Line', icon: Minus, shortcut: 'L' },
     { id: 'text' as ToolType, name: 'Text', icon: Type, shortcut: 'T' },
-    { id: 'sticky' as ToolType, name: 'Sticky', icon: Sticky, shortcut: 'S' },
+    { id: 'sticky' as ToolType, name: 'Sticky', icon: StickyNote, shortcut: 'S' },
     { id: 'pen' as ToolType, name: 'Pen', icon: PenTool, shortcut: 'P' },
     { id: 'image' as ToolType, name: 'Image', icon: Image, shortcut: 'I' },
     { id: 'component' as ToolType, name: 'Component', icon: Component, shortcut: 'A' },
@@ -708,7 +708,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { label: 'New Canvas', icon: Plus, color: 'from-indigo-500 to-purple-500' },
-                { label: 'Whiteboard', icon: Sticky, color: 'from-purple-500 to-pink-500' },
+                { label: 'Whiteboard', icon: StickyNote, color: 'from-purple-500 to-pink-500' },
                 { label: 'Wireframe', icon: Monitor, color: 'from-blue-500 to-cyan-500' },
                 { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500' },
                 { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500' },
@@ -1691,7 +1691,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Canvas Type</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: 'whiteboard', name: 'Whiteboard', icon: Sticky, desc: 'Free-form collaboration' },
+                  { id: 'whiteboard', name: 'Whiteboard', icon: StickyNote, desc: 'Free-form collaboration' },
                   { id: 'wireframe', name: 'Wireframe', icon: Monitor, desc: 'UI/UX mockups' },
                   { id: 'diagram', name: 'Diagram', icon: Workflow, desc: 'Flowcharts & processes' },
                   { id: 'prototype', name: 'Prototype', icon: Smartphone, desc: 'Interactive designs' }

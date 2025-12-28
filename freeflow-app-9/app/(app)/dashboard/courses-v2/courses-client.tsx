@@ -683,7 +683,7 @@ export default function CoursesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{courses.length}</p>
+                    <p className="text-3xl font-bold">{mockCourses.length}</p>
                     <p className="text-orange-200 text-sm">Courses</p>
                   </div>
                 </div>

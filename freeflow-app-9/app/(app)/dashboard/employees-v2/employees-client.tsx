@@ -447,7 +447,7 @@ export default function EmployeesClient() {
                     <p className="text-blue-200 text-sm">Employees</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{employees.filter(e => e.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{mockEmployees.filter(e => e.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -502,11 +502,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{timeOffRequests.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{mockTimeOffRequests.filter(r => r.status === 'pending').length}</p>
                     <p className="text-emerald-200 text-sm">Pending</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{timeOffRequests.length}</p>
+                    <p className="text-3xl font-bold">{mockTimeOffRequests.length}</p>
                     <p className="text-emerald-200 text-sm">Requests</p>
                   </div>
                 </div>
@@ -550,11 +550,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{performanceReviews.length}</p>
+                    <p className="text-3xl font-bold">{mockReviews.length}</p>
                     <p className="text-orange-200 text-sm">Reviews</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{performanceReviews.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{mockReviews.filter(r => r.status === 'completed').length}</p>
                     <p className="text-orange-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -726,11 +726,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(employees.reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-3xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
                     <p className="text-purple-200 text-sm">Total Payroll</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(employees.reduce((sum, e) => sum + e.salary, 0) / employees.length / 1000).toFixed(0)}K</p>
+                    <p className="text-3xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / mockEmployees.length / 1000).toFixed(0)}K</p>
                     <p className="text-purple-200 text-sm">Avg Salary</p>
                   </div>
                 </div>
