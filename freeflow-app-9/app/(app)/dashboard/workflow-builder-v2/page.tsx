@@ -1,6 +1,6 @@
-'use client'
-
 import WorkflowBuilderClient from './workflow-builder-client'
+
+export const dynamic = 'force-dynamic'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

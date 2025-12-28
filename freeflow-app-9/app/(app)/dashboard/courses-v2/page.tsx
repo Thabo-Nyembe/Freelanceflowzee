@@ -1,6 +1,6 @@
-'use client'
-
 import CoursesClient from './courses-client'
+
+export const dynamic = 'force-dynamic'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

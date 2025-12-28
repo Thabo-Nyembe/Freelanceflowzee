@@ -1,6 +1,6 @@
-'use client'
-
 import AICreateClient from './ai-create-client'
+
+export const dynamic = 'force-dynamic'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware
