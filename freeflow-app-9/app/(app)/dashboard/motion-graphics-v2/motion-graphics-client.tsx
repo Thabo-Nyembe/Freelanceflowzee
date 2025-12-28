@@ -93,7 +93,6 @@ import {
   Globe,
   HardDrive,
   Activity,
-  FolderOpen,
   FileText,
   Cpu,
   Video as VideoIcon,

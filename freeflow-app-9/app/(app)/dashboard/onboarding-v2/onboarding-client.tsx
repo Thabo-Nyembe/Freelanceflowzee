@@ -81,8 +81,7 @@ import {
   Terminal,
   Shield,
   Archive,
-  Code,
-  Trash2
+  Code
 } from 'lucide-react'
 
 // Types

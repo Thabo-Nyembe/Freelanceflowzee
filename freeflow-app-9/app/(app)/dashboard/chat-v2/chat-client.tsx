@@ -1678,6 +1678,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </div>
         )}
       </div>
+      )}
 
       {/* Saved Replies Dialog */}
       <Dialog open={showSavedReplies} onOpenChange={setShowSavedReplies}>

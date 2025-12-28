@@ -95,7 +95,6 @@ import {
   HardDrive,
   Terminal,
   History,
-  Copy,
   AlertTriangle
 } from 'lucide-react'
 

@@ -1427,7 +1427,6 @@ export default function CollaborationClient() {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
                   </>
                 )}
 

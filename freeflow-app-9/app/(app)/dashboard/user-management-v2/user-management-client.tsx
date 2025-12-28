@@ -7,7 +7,7 @@ import {
   Eye, EyeOff, Smartphone, Globe, Monitor, Activity, Filter, ChevronDown, ChevronRight,
   ShieldCheck, ShieldAlert, UserCheck, UserX, Fingerprint, QrCode, LogIn, LogOut,
   AlertCircle, CheckCircle, Info, ArrowUpRight, Copy, ExternalLink, Bell, Palette,
-  Database, Server, Zap, Languages, Mail, MessageSquare, Webhook
+  Database, Server, Zap, Languages, MessageSquare, Webhook
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
