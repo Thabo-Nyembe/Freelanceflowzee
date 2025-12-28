@@ -55,7 +55,13 @@ import {
   RotateCcw,
   Eye,
   Shield,
-  Layers
+  Layers,
+  Download,
+  Link,
+  PieChart,
+  AlertCircle,
+  Workflow,
+  Sparkles
 } from 'lucide-react'
 
 // Types
@@ -650,6 +656,53 @@ export default function IntegrationsClient() {
 
           {/* Zaps Tab */}
           <TabsContent value="zaps" className="space-y-4">
+            {/* Zaps Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Automation Zaps</h2>
+                  <p className="text-orange-100">Zapier-level workflow automation</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockZaps.length}</p>
+                    <p className="text-orange-200 text-sm">Total Zaps</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockZaps.filter(z => z.status === 'active').length}</p>
+                    <p className="text-orange-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockZaps.reduce((sum, z) => sum + z.taskCount, 0).toLocaleString()}</p>
+                    <p className="text-orange-200 text-sm">Tasks</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Zaps Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Create Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Zap, label: 'Templates', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: History, label: 'History', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-2 mb-4">
               <Button
                 variant={zapFilter === 'all' ? 'default' : 'outline'}
@@ -762,6 +815,53 @@ export default function IntegrationsClient() {
 
           {/* Apps Tab */}
           <TabsContent value="apps" className="space-y-4">
+            {/* Apps Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Connected Apps</h2>
+                  <p className="text-blue-100">Workato-level app connectivity</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApps.length}</p>
+                    <p className="text-blue-200 text-sm">Apps</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApps.filter(a => a.isConnected).length}</p>
+                    <p className="text-blue-200 text-sm">Connected</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{categories.length}</p>
+                    <p className="text-blue-200 text-sm">Categories</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Apps Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Key, label: 'API Keys', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-2 flex-wrap mb-4">
               {categories.map(cat => (
                 <Button
@@ -836,6 +936,53 @@ export default function IntegrationsClient() {
 
           {/* Task History Tab */}
           <TabsContent value="tasks" className="space-y-4">
+            {/* Tasks Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Task History</h2>
+                  <p className="text-emerald-100">Make-level task execution tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTasks.length}</p>
+                    <p className="text-emerald-200 text-sm">Total Tasks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTasks.filter(t => t.status === 'success').length}</p>
+                    <p className="text-emerald-200 text-sm">Succeeded</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTasks.filter(t => t.status === 'error').length}</p>
+                    <p className="text-emerald-200 text-sm">Failed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tasks Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Play, label: 'Replay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Filter, label: 'Filter', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Search, label: 'Search', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Trash2, label: 'Clear', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
               <CardContent className="p-0">
                 <ScrollArea className="h-[600px]">
@@ -910,6 +1057,53 @@ export default function IntegrationsClient() {
 
           {/* Webhooks Tab */}
           <TabsContent value="webhooks" className="space-y-4">
+            {/* Webhooks Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Webhooks</h2>
+                  <p className="text-purple-100">Stripe-level webhook reliability</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWebhooks.length}</p>
+                    <p className="text-purple-200 text-sm">Endpoints</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWebhooks.filter(w => w.status === 'active').length}</p>
+                    <p className="text-purple-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWebhooks.reduce((sum, w) => sum + w.successRate, 0) / mockWebhooks.length}%</p>
+                    <p className="text-purple-200 text-sm">Success</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Webhooks Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Download, label: 'Export', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Webhook Endpoints</h2>
               <Button>
@@ -976,6 +1170,53 @@ export default function IntegrationsClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Integration Analytics</h2>
+                  <p className="text-cyan-100">Mixpanel-level insights and monitoring</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockZaps.reduce((sum, z) => sum + z.taskCount, 0).toLocaleString()}</p>
+                    <p className="text-cyan-200 text-sm">Total Tasks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">99.2%</p>
+                    <p className="text-cyan-200 text-sm">Success Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">45ms</p>
+                    <p className="text-cyan-200 text-sm">Avg Latency</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: Activity, label: 'Real-time', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: AlertCircle, label: 'Errors', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                 <CardHeader>

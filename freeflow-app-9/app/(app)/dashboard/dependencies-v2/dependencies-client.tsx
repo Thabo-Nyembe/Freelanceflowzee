@@ -517,6 +517,50 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
           {/* Vulnerabilities Tab */}
           <TabsContent value="vulnerabilities" className="space-y-4">
+            {/* Vulnerabilities Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Security Vulnerabilities</h2>
+                  <p className="text-red-100">Snyk-level vulnerability scanning and remediation</p>
+                  <p className="text-red-200 text-xs mt-1">CVE tracking • SBOM export • Auto-fix suggestions</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVulnerabilities.filter(v => v.severity === 'critical').length}</p>
+                    <p className="text-red-200 text-sm">Critical</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVulnerabilities.filter(v => v.severity === 'high').length}</p>
+                    <p className="text-red-200 text-sm">High</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVulnerabilities.length}</p>
+                    <p className="text-red-200 text-sm">Total</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Shield, label: 'Scan Now', color: 'text-red-600 dark:text-red-400' },
+                { icon: AlertTriangle, label: 'Critical', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Zap, label: 'Auto-Fix', color: 'text-green-600 dark:text-green-400' },
+                { icon: FileText, label: 'Reports', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Download, label: 'Export SBOM', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Bell, label: 'Alerts', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: GitBranch, label: 'PR Checks', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Filters */}
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
@@ -620,6 +664,27 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
           {/* Dependencies Tab */}
           <TabsContent value="dependencies" className="space-y-4">
+            {/* Dependencies Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Package Dependencies</h2>
+                  <p className="text-blue-100">Dependabot-level dependency management and tracking</p>
+                  <p className="text-blue-200 text-xs mt-1">Version tracking • Outdated alerts • License compliance</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDependencies.length}</p>
+                    <p className="text-blue-200 text-sm">Packages</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDependencies.filter(d => d.hasUpdate).length}</p>
+                    <p className="text-blue-200 text-sm">Outdated</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between gap-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -725,6 +790,27 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
           {/* Updates Tab */}
           <TabsContent value="updates" className="space-y-4">
+            {/* Updates Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Available Updates</h2>
+                  <p className="text-emerald-100">Renovate-level automated dependency updates</p>
+                  <p className="text-emerald-200 text-xs mt-1">Security patches • Feature updates • Breaking changes</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDependencies.filter(d => d.hasUpdate).length}</p>
+                    <p className="text-emerald-200 text-sm">Available</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDependencies.filter(d => d.hasUpdate && d.updateType === 'security').length || 0}</p>
+                    <p className="text-emerald-200 text-sm">Security</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Suggested Updates</h2>
               <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 flex items-center gap-2">
@@ -803,6 +889,27 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
           {/* Licenses Tab */}
           <TabsContent value="licenses" className="space-y-4">
+            {/* Licenses Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">License Compliance</h2>
+                  <p className="text-purple-100">FOSSA-level license scanning and compliance reporting</p>
+                  <p className="text-purple-200 text-xs mt-1">OSS licenses • Policy violations • Attribution reports</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDependencies.length}</p>
+                    <p className="text-purple-200 text-sm">Packages</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">✓</p>
+                    <p className="text-purple-200 text-sm">Compliant</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">License Compliance</h2>
               <button className="px-4 py-2 border dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-300">
@@ -848,6 +955,46 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
           {/* Settings Tab - npm/Maven Level with 6 Sub-tabs */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Dependency Settings</h2>
+                  <p className="text-slate-300">Configure scanning schedules, notifications, and policies</p>
+                  <p className="text-slate-400 text-xs mt-1">Auto-updates • Security policies • Ignore rules • Integrations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">Daily</p>
+                    <p className="text-slate-400 text-sm">Scan</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">ON</p>
+                    <p className="text-slate-400 text-sm">Auto-PR</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Settings, label: 'General', color: 'text-gray-600 dark:text-gray-400' },
+                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400' },
+                { icon: Bell, label: 'Alerts', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: GitBranch, label: 'Branches', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: RefreshCw, label: 'Schedule', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: FileText, label: 'Policies', color: 'text-green-600 dark:text-green-400' },
+                { icon: Link2, label: 'Integrations', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Key, label: 'API Keys', color: 'text-orange-600 dark:text-orange-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex gap-6">
               {/* Settings Sidebar */}
               <div className="w-64 shrink-0">

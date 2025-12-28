@@ -620,6 +620,27 @@ export default function ThreeDModelingClient() {
 
           {/* Models Tab */}
           <TabsContent value="models" className="space-y-6">
+            {/* Models Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">3D Model Library</h2>
+                  <p className="text-purple-100">Blender-level model management and organization</p>
+                  <p className="text-purple-200 text-xs mt-1">GLB/GLTF • OBJ • FBX • Version control</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredModels.length}</p>
+                    <p className="text-purple-200 text-sm">Models</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{models.filter(m => m.status === 'published').length}</p>
+                    <p className="text-purple-200 text-sm">Published</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex flex-col md:flex-row gap-4">
@@ -722,6 +743,23 @@ export default function ThreeDModelingClient() {
 
           {/* Viewport Tab */}
           <TabsContent value="viewport" className="space-y-6">
+            {/* Viewport Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">3D Viewport</h2>
+                  <p className="text-blue-100">Three.js-powered real-time 3D editing</p>
+                  <p className="text-blue-200 text-xs mt-1">WebGL rendering • Scene graph • Transform tools</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{selectedModel?.polygons.toLocaleString() || '0'}</p>
+                    <p className="text-blue-200 text-sm">Polygons</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid lg:grid-cols-4 gap-4">
               {/* Toolbar */}
               <Card className="lg:col-span-4 bg-white dark:bg-gray-800 border-0 shadow-sm">
@@ -858,6 +896,23 @@ export default function ThreeDModelingClient() {
 
           {/* Materials Tab */}
           <TabsContent value="materials" className="space-y-6">
+            {/* Materials Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Material Library</h2>
+                  <p className="text-emerald-100">Substance Painter-level PBR materials</p>
+                  <p className="text-emerald-200 text-xs mt-1">PBR workflow • Texture maps • Material presets</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{materials.length}</p>
+                    <p className="text-emerald-200 text-sm">Materials</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Material Library</h2>
               <Button className="gap-2">
@@ -935,6 +990,40 @@ export default function ThreeDModelingClient() {
 
           {/* Render Queue Tab */}
           <TabsContent value="render" className="space-y-6">
+            {/* Render Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Render Engine</h2>
+                  <p className="text-orange-100">Cinema 4D-level rendering and output</p>
+                  <p className="text-orange-200 text-xs mt-1">Ray tracing • GPU acceleration • Batch rendering</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{renderQueue.length}</p>
+                    <p className="text-orange-200 text-sm">In Queue</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{renderQueue.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-orange-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Render Feature Badges */}
+            <div className="flex flex-wrap gap-2">
+              <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">Ray Tracing</Badge>
+              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Path Tracing</Badge>
+              <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">GPU Acceleration</Badge>
+              <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">Denoising AI</Badge>
+              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">HDR Output</Badge>
+              <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">Multi-Pass</Badge>
+              <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">Batch Render</Badge>
+              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Network Render</Badge>
+              <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">CUDA Support</Badge>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Render Queue</h2>
               <Button className="gap-2" onClick={() => setShowRenderDialog(true)}>

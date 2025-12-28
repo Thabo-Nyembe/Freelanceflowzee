@@ -527,6 +527,50 @@ export default function InvestorMetricsClient() {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
+              {/* Overview Banner */}
+              <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Investor Dashboard</h2>
+                    <p className="text-emerald-100">Carta-level cap table and investor relations management</p>
+                    <p className="text-emerald-200 text-xs mt-1">Real-time metrics • Funding progress • KPI tracking</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">${Math.round(mockCapTable.reduce((s, c) => s + (c.shares * c.sharePrice), 0) / 1000000)}M</p>
+                      <p className="text-emerald-200 text-sm">Valuation</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">${Math.round(mockFundingRounds.reduce((s, r) => s + r.raisedAmount, 0) / 1000000)}M</p>
+                      <p className="text-emerald-200 text-sm">Total Raised</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockInvestors.length}</p>
+                      <p className="text-emerald-200 text-sm">Investors</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Overview Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+                {[
+                  { icon: CircleDollarSign, label: 'Raise Fund', color: 'text-emerald-600 dark:text-emerald-400' },
+                  { icon: PieChart, label: 'Cap Table', color: 'text-blue-600 dark:text-blue-400' },
+                  { icon: Users, label: 'Investors', color: 'text-purple-600 dark:text-purple-400' },
+                  { icon: TrendingUp, label: 'KPIs', color: 'text-green-600 dark:text-green-400' },
+                  { icon: FileText, label: 'Reports', color: 'text-amber-600 dark:text-amber-400' },
+                  { icon: Mail, label: 'Updates', color: 'text-pink-600 dark:text-pink-400' },
+                  { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
+                  { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+                ].map((action, i) => (
+                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                    <action.icon className={`h-5 w-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <div className="grid lg:grid-cols-3 gap-6">
                 {/* Funding Progress */}
                 <Card className="bg-white dark:bg-gray-800 lg:col-span-2">
@@ -632,6 +676,27 @@ export default function InvestorMetricsClient() {
 
             {/* Cap Table Tab */}
             <TabsContent value="cap-table" className="space-y-4">
+              {/* Cap Table Banner */}
+              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Cap Table Management</h2>
+                    <p className="text-blue-100">Carta/Pulley-level equity and ownership tracking</p>
+                    <p className="text-blue-200 text-xs mt-1">Shareholder registry • Vesting schedules • Option pools</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockCapTable.length}</p>
+                      <p className="text-blue-200 text-sm">Shareholders</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockCapTable.reduce((s, c) => s + c.shares, 0).toLocaleString()}</p>
+                      <p className="text-blue-200 text-sm">Total Shares</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <Card className="bg-white dark:bg-gray-800">
                 <CardContent className="p-0">
                   <table className="w-full">
@@ -706,6 +771,27 @@ export default function InvestorMetricsClient() {
 
             {/* Funding Rounds Tab */}
             <TabsContent value="funding" className="space-y-4">
+              {/* Funding Banner */}
+              <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Funding Rounds</h2>
+                    <p className="text-amber-100">AngelList-level fundraising and investment tracking</p>
+                    <p className="text-amber-200 text-xs mt-1">Deal flow • Term sheets • Investment pipeline</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockFundingRounds.length}</p>
+                      <p className="text-amber-200 text-sm">Rounds</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockFundingRounds.filter(r => r.status === 'closed').length}</p>
+                      <p className="text-amber-200 text-sm">Closed</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-6">
                 {mockFundingRounds.map(round => (
                   <Card key={round.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRound(round)}>
@@ -774,6 +860,27 @@ export default function InvestorMetricsClient() {
 
             {/* Investors Tab */}
             <TabsContent value="investors" className="space-y-4">
+              {/* Investors Banner */}
+              <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Investor Relations</h2>
+                    <p className="text-purple-100">Visible-level investor communication and updates</p>
+                    <p className="text-purple-200 text-xs mt-1">Investor profiles • Communication history • Portfolio insights</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockInvestors.length}</p>
+                      <p className="text-purple-200 text-sm">Investors</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockInvestors.filter(i => i.type === 'lead').length}</p>
+                      <p className="text-purple-200 text-sm">Lead</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mockInvestors.map(investor => (
                   <Card key={investor.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedInvestor(investor)}>
@@ -834,6 +941,27 @@ export default function InvestorMetricsClient() {
 
             {/* KPIs Tab */}
             <TabsContent value="kpis" className="space-y-6">
+              {/* KPIs Banner */}
+              <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Key Performance Indicators</h2>
+                    <p className="text-rose-100">Geckoboard-level startup metrics and tracking</p>
+                    <p className="text-rose-200 text-xs mt-1">ARR • MRR • Burn Rate • Runway • Growth metrics</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockKPIs.length}</p>
+                      <p className="text-rose-200 text-sm">Metrics</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{mockKPIs.filter(k => k.trend === 'up').length}</p>
+                      <p className="text-rose-200 text-sm">Improving</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 mb-4">
                 <Button
                   variant={periodFilter === 'monthly' ? 'default' : 'outline'}
@@ -906,6 +1034,27 @@ export default function InvestorMetricsClient() {
 
             {/* Settings Tab */}
             <TabsContent value="settings" className="space-y-6">
+              {/* Settings Banner */}
+              <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Investor Settings</h2>
+                    <p className="text-slate-300">Configure investor portal and reporting preferences</p>
+                    <p className="text-slate-400 text-xs mt-1">Branding • Reports • Access control • Integrations</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">4</p>
+                      <p className="text-slate-400 text-sm">Admins</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">ON</p>
+                      <p className="text-slate-400 text-sm">Portal</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 {/* Settings Sub-tabs */}
                 <div className="border-b border-gray-200 dark:border-gray-700">

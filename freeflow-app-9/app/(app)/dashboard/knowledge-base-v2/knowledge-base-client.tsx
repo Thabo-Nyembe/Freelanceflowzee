@@ -55,8 +55,17 @@ import {
   BellOff,
   Link as LinkIcon,
   ExternalLink,
-  Settings
+  Settings,
+  Sliders,
+  Terminal,
+  Webhook,
+  Key,
+  Network,
+  Shield
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type SpaceType = 'team' | 'personal' | 'project' | 'documentation' | 'archive'
@@ -631,6 +640,7 @@ export default function KnowledgeBaseClient() {
   const [selectedPage, setSelectedPage] = useState<Page | null>(null)
   const [showPageDialog, setShowPageDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredPages = useMemo(() => {
     return mockPages.filter(page => {
@@ -782,10 +792,57 @@ export default function KnowledgeBaseClient() {
               <TrendingUp className="w-4 h-4 mr-2" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Pages Tab */}
           <TabsContent value="pages" className="mt-6">
+            {/* Pages Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Knowledge Pages</h2>
+                  <p className="text-indigo-100">Confluence-level documentation and wikis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredPages.length}</p>
+                    <p className="text-indigo-200 text-sm">Pages</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredPages.filter(p => p.status === 'published').length}</p>
+                    <p className="text-indigo-200 text-sm">Published</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Page', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Layout, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+                { icon: Download, label: 'Export', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Sidebar */}
               <Card className="lg:col-span-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -1275,6 +1332,281 @@ export default function KnowledgeBaseClient() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Confluence Level Configuration */}
+          <TabsContent value="settings" className="mt-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Knowledge Base Settings</h2>
+                  <p className="text-slate-200">Confluence-level configuration and preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-slate-200 text-sm">Setting Groups</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">32+</p>
+                    <p className="text-slate-200 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: BookOpen, label: 'Content', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'content', label: 'Content', icon: BookOpen },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Space Preferences</CardTitle>
+                        <CardDescription>Configure default space settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">List or tree view</p></div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm"><List className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm"><Grid3X3 className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Auto-Save Drafts</Label><p className="text-sm text-gray-500">Save changes automatically</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Show Page Tree</Label><p className="text-sm text-gray-500">Display sidebar navigation</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Default Language</Label><p className="text-sm text-gray-500">Content language</p></div>
+                          <Input defaultValue="English" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'content' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Content Settings</CardTitle>
+                        <CardDescription>Configure content behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Enable Comments</Label><p className="text-sm text-gray-500">Allow page comments</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Version History</Label><p className="text-sm text-gray-500">Track page changes</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Page Templates</Label><p className="text-sm text-gray-500">Enable template library</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Max File Size (MB)</Label><p className="text-sm text-gray-500">Attachment limit</p></div>
+                          <Input type="number" defaultValue="25" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Notification Preferences</CardTitle>
+                        <CardDescription>Control what notifications you receive</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Page Updates</Label><p className="text-sm text-gray-500">Notify on changes</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">New Comments</Label><p className="text-sm text-gray-500">Comment notifications</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Mentions</Label><p className="text-sm text-gray-500">@mention alerts</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Daily Digest</Label><p className="text-sm text-gray-500">Summary email</p></div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Manage knowledge base integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Slack', connected: true, icon: '💬' },
+                          { name: 'Google Drive', connected: true, icon: '📁' },
+                          { name: 'Jira', connected: true, icon: '🎫' },
+                          { name: 'GitHub', connected: false, icon: '🐙' },
+                          { name: 'Figma', connected: false, icon: '🎨' },
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                              {integration.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Protect your knowledge base</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Public Spaces</Label><p className="text-sm text-gray-500">Allow public access</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">SSO Required</Label><p className="text-sm text-gray-500">Enforce single sign-on</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Export Restrictions</Label><p className="text-sm text-gray-500">Limit PDF/Word export</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Audit Logging</Label><p className="text-sm text-gray-500">Track all actions</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Advanced Options</CardTitle>
+                        <CardDescription>Power user settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">API Access</Label><p className="text-sm text-gray-500">Enable REST API</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Webhooks</Label><p className="text-sm text-gray-500">Real-time events</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Custom CSS</Label><p className="text-sm text-gray-500">Theme customization</p></div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage knowledge base data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Export All Content</p><p className="text-sm text-gray-500">Download as ZIP</p></div>
+                          <Button variant="outline" size="sm">Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Clear Cache</p><p className="text-sm text-gray-500">256 MB used</p></div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

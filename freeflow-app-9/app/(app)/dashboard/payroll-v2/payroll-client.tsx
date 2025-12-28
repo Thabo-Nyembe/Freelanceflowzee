@@ -61,7 +61,11 @@ import {
   FileClock,
   Landmark,
   Scale,
-  FileSpreadsheet
+  FileSpreadsheet,
+  CheckCircle,
+  History,
+  UserPlus,
+  Mail
 } from 'lucide-react'
 
 // Types
@@ -839,6 +843,53 @@ export default function PayrollClient() {
 
           {/* Pay Runs Tab */}
           <TabsContent value="pay-runs" className="space-y-4">
+            {/* Pay Runs Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Pay Runs</h2>
+                  <p className="text-green-100">ADP-level payroll processing and management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{payRuns.length}</p>
+                    <p className="text-green-200 text-sm">Total Runs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{payRuns.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-green-200 text-sm">Completed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{payRuns.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-green-200 text-sm">Pending</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pay Runs Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Run', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: PlayCircle, label: 'Process', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: History, label: 'History', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 {filteredPayRuns.map((run) => (
@@ -1011,6 +1062,53 @@ export default function PayrollClient() {
 
           {/* Employees Tab */}
           <TabsContent value="employees" className="space-y-4">
+            {/* Employees Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Employees</h2>
+                  <p className="text-blue-100">Workday-level employee payroll management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{employees.length}</p>
+                    <p className="text-blue-200 text-sm">Total Employees</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{employees.filter(e => e.status === 'active').length}</p>
+                    <p className="text-blue-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{employees.filter(e => e.paymentMethod === 'direct_deposit').length}</p>
+                    <p className="text-blue-200 text-sm">Direct Deposit</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Employees Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: UserPlus, label: 'Add Employee', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Upload, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: CreditCard, label: 'Payment', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileText, label: 'Tax Forms', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Mail, label: 'Notify All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid gap-4">
               {filteredEmployees.map((employee) => (
                 <Card
@@ -1083,6 +1181,53 @@ export default function PayrollClient() {
 
           {/* Taxes Tab */}
           <TabsContent value="taxes" className="space-y-4">
+            {/* Taxes Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Tax Management</h2>
+                  <p className="text-amber-100">Gusto-level tax filing and compliance</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{taxes.length}</p>
+                    <p className="text-amber-200 text-sm">Tax Types</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{taxes.filter(t => t.status === 'filed').length}</p>
+                    <p className="text-amber-200 text-sm">Filed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{taxes.filter(t => t.status === 'pending').length}</p>
+                    <p className="text-amber-200 text-sm">Pending</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Taxes Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FileText, label: 'File Taxes', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Calculator, label: 'Calculate', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Calendar, label: 'Deadlines', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Download, label: 'Forms', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Shield, label: 'Compliance', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: History, label: 'History', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
@@ -1190,6 +1335,53 @@ export default function PayrollClient() {
 
           {/* Benefits Tab */}
           <TabsContent value="benefits" className="space-y-4">
+            {/* Benefits Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Benefits Administration</h2>
+                  <p className="text-pink-100">Zenefits-level benefits management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBenefits.length}</p>
+                    <p className="text-pink-200 text-sm">Total Plans</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBenefits.filter(b => b.enrolled > 0).length}</p>
+                    <p className="text-pink-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBenefits.reduce((sum, b) => sum + b.enrolled, 0)}</p>
+                    <p className="text-pink-200 text-sm">Enrolled</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Benefits Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Plan', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Heart, label: 'Health', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Shield, label: 'Insurance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Briefcase, label: '401k', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Users, label: 'Enrollment', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: FileText, label: 'Documents', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockBenefits.map((benefit) => {
                 const BenefitIcon = getBenefitIcon(benefit.type)
@@ -1238,6 +1430,53 @@ export default function PayrollClient() {
 
           {/* Time & Attendance Tab */}
           <TabsContent value="time" className="space-y-4">
+            {/* Time Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Time & Attendance</h2>
+                  <p className="text-cyan-100">When I Work-level time tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{timeEntries.length}</p>
+                    <p className="text-cyan-200 text-sm">Entries</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{timeEntries.reduce((sum, t) => sum + t.hours, 0)}</p>
+                    <p className="text-cyan-200 text-sm">Total Hours</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{timeEntries.filter(t => t.status === 'approved').length}</p>
+                    <p className="text-cyan-200 text-sm">Approved</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Time Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Entry', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Clock, label: 'Clock In', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Users, label: 'Team View', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1300,6 +1539,26 @@ export default function PayrollClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-4">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-gray-600 via-slate-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Payroll Settings</h2>
+                  <p className="text-gray-200">Configure your payroll system preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-gray-300 text-sm">Categories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">24</p>
+                    <p className="text-gray-300 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
                 <CardHeader>

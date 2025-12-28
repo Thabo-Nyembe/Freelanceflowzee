@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Sparkles,
   Wand2,
@@ -65,7 +67,21 @@ import {
   Maximize2,
   Square,
   RectangleHorizontal,
-  RectangleVertical
+  RectangleVertical,
+  Sliders,
+  Bell,
+  Webhook,
+  Key,
+  Database,
+  Mail,
+  HardDrive,
+  Archive,
+  Workflow,
+  Shield,
+  AlertTriangle,
+  UploadCloud,
+  Cpu,
+  Terminal
 } from 'lucide-react'
 
 // ============================================================================
@@ -533,6 +549,7 @@ export default function AICreateClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<GenerationStatus | 'all'>('all')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered generations
   const filteredGenerations = useMemo(() => {
@@ -658,10 +675,52 @@ export default function AICreateClient() {
               <BarChart3 className="w-4 h-4" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Generator Tab */}
           <TabsContent value="generator" className="space-y-6">
+            {/* Generator Banner */}
+            <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">AI Image Generator</h3>
+                  <p className="text-violet-100">Create stunning visuals with state-of-the-art AI models</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockUsageStats.remainingCredits}</p>
+                    <p className="text-violet-200 text-sm">Credits Available</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Generator Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Sparkles, label: 'Generate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: RefreshCw, label: 'Regenerate', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Layers, label: 'Variations', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Maximize2, label: 'Upscale', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: UploadCloud, label: 'Import', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Download, label: 'Export', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Bookmark, label: 'Templates', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: History, label: 'History', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Prompt Builder */}
               <div className="lg:col-span-2 space-y-4">
@@ -880,7 +939,45 @@ export default function AICreateClient() {
           </TabsContent>
 
           {/* Gallery Tab */}
-          <TabsContent value="gallery" className="space-y-4">
+          <TabsContent value="gallery" className="space-y-6">
+            {/* Gallery Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Your Creations</h3>
+                  <p className="text-blue-100">Browse and manage all your AI-generated artwork</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockGenerations.length}</p>
+                    <p className="text-blue-200 text-sm">Total Creations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Gallery Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Grid, label: 'Grid View', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: List, label: 'List View', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Heart, label: 'Favorites', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: Download, label: 'Batch Export', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Share2, label: 'Share', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Archive, label: 'Archive', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Trash2, label: 'Delete', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -985,7 +1082,45 @@ export default function AICreateClient() {
           </TabsContent>
 
           {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-4">
+          <TabsContent value="templates" className="space-y-6">
+            {/* Templates Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Prompt Templates</h3>
+                  <p className="text-green-100">Start with proven templates for stunning results</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-green-200 text-sm">Available Templates</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Templates Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Create New', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Star, label: 'Featured', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                { icon: TrendingUp, label: 'Trending', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Crown, label: 'Premium', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Users, label: 'Community', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Bookmark, label: 'Saved', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Filter, label: 'Categories', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Search, label: 'Search', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Popular Templates</h3>
               <Button variant="outline">
@@ -1036,7 +1171,45 @@ export default function AICreateClient() {
           </TabsContent>
 
           {/* History Tab */}
-          <TabsContent value="history" className="space-y-4">
+          <TabsContent value="history" className="space-y-6">
+            {/* History Banner */}
+            <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Generation History</h3>
+                  <p className="text-orange-100">Track all your previous AI generations</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockUsageStats.totalGenerations}</p>
+                    <p className="text-orange-200 text-sm">Total Generations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* History Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: RefreshCw, label: 'Retry', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Download, label: 'Export', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Clock, label: 'Today', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Calendar, label: 'This Week', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Archive, label: 'Archive', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Trash2, label: 'Clear All', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Generation History</h3>
               <Button variant="outline" size="sm">
@@ -1092,7 +1265,45 @@ export default function AICreateClient() {
           </TabsContent>
 
           {/* Models Tab */}
-          <TabsContent value="models" className="space-y-4">
+          <TabsContent value="models" className="space-y-6">
+            {/* Models Banner */}
+            <div className="bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">AI Models</h3>
+                  <p className="text-indigo-100">Choose from industry-leading AI models for your creations</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockModels.length}</p>
+                    <p className="text-indigo-200 text-sm">Available Models</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Models Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Cpu, label: 'All Models', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Zap, label: 'Fast', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                { icon: Star, label: 'Quality', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Crown, label: 'Pro', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Globe, label: 'Free', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Image, label: 'Image', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Video, label: 'Video', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Settings, label: 'Compare', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Available Models</h3>
             </div>
@@ -1267,6 +1478,405 @@ export default function AICreateClient() {
                   ))}
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-0">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-purple-600" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'generation', label: 'Generation', icon: Sparkles },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Configure your AI Create experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Model</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                              {mockModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Default Style</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                              {styles.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-save Prompts</p>
+                            <p className="text-sm text-gray-500">Automatically save prompts to history</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Prompt Suggestions</p>
+                            <p className="text-sm text-gray-500">Get AI-powered prompt improvements</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Display Settings</CardTitle>
+                        <CardDescription>Customize how content is displayed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show NSFW Filter</p>
+                            <p className="text-sm text-gray-500">Filter mature content</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-expand Details</p>
+                            <p className="text-sm text-gray-500">Show generation details by default</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Watermarks</p>
+                            <p className="text-sm text-gray-500">Add watermarks to generated images</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Generation Settings */}
+                {settingsTab === 'generation' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Generation Defaults</CardTitle>
+                        <CardDescription>Set default values for new generations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Quality</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                              <option value="draft">Draft</option>
+                              <option value="standard">Standard</option>
+                              <option value="high">High</option>
+                              <option value="ultra">Ultra</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Default Aspect Ratio</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                              {aspectRatios.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Default Guidance Scale: {guidance[0]}</Label>
+                          <Slider value={guidance} onValueChange={setGuidance} min={1} max={20} step={0.5} className="mt-2" />
+                        </div>
+                        <div>
+                          <Label>Default Steps: {steps[0]}</Label>
+                          <Slider value={steps} onValueChange={setSteps} min={10} max={100} step={5} className="mt-2" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Random Seed</p>
+                            <p className="text-sm text-gray-500">Use random seed for each generation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Output Settings</CardTitle>
+                        <CardDescription>Configure output file settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Format</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                              <option value="png">PNG</option>
+                              <option value="jpg">JPEG</option>
+                              <option value="webp">WebP</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Compression Quality</Label>
+                            <Input type="number" defaultValue="95" min="1" max="100" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Include Metadata</p>
+                            <p className="text-sm text-gray-500">Embed prompt and settings in image</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle>Notification Settings</CardTitle>
+                      <CardDescription>Manage your notification preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { icon: Mail, name: 'Email Notifications', desc: 'Receive updates via email' },
+                        { icon: Bell, name: 'Push Notifications', desc: 'Browser push notifications' },
+                        { icon: Sparkles, name: 'Generation Complete', desc: 'Notify when generation finishes' },
+                        { icon: AlertTriangle, name: 'Credit Alerts', desc: 'Low credit warnings' },
+                        { icon: TrendingUp, name: 'Weekly Report', desc: 'Weekly usage summary' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                              <item.icon className="h-4 w-4 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                              <p className="text-sm text-gray-500">{item.desc}</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={i < 3} />
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Manage API keys and integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <Key className="h-5 w-5 text-gray-400" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 dark:text-white">API Key</p>
+                            <Input type="password" value="sk-************************" readOnly className="mt-2 font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                          <Button variant="outline" size="sm">Regenerate</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Integrate with external platforms</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Dropbox', desc: 'Auto-sync generated images', connected: false },
+                          { name: 'Google Drive', desc: 'Backup to Google Drive', connected: true },
+                          { name: 'Notion', desc: 'Save prompts to Notion', connected: false },
+                          { name: 'Slack', desc: 'Share generations to Slack', connected: false },
+                        ].map((service, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
+                              <p className="text-sm text-gray-500">{service.desc}</p>
+                            </div>
+                            <Button variant={service.connected ? "outline" : "default"} size="sm">
+                              {service.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle>Security & Privacy</CardTitle>
+                      <CardDescription>Manage your security preferences</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Private by Default</p>
+                          <p className="text-sm text-gray-500">New generations are private</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Auth</p>
+                          <p className="text-sm text-gray-500">Add extra security to your account</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Activity Logging</p>
+                          <p className="text-sm text-gray-500">Log all generation activities</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Content Safety</p>
+                          <p className="text-sm text-gray-500">Enable content moderation</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Advanced Options</CardTitle>
+                        <CardDescription>Fine-tune your generation experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Developer Mode</p>
+                            <p className="text-sm text-gray-500">Enable advanced API features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Experimental Models</p>
+                            <p className="text-sm text-gray-500">Access beta AI models</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Debug Console</p>
+                            <p className="text-sm text-gray-500">Show generation debug info</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Storage Management</CardTitle>
+                        <CardDescription>Manage your storage and cache</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Generation Cache</p>
+                              <p className="text-sm text-gray-500">1.2 GB used</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <HardDrive className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Downloaded Models</p>
+                              <p className="text-sm text-gray-500">4.5 GB used</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Manage</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800 dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Delete All Generations</p>
+                            <p className="text-sm text-gray-500">Remove all your generated content</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete All</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset Settings</p>
+                            <p className="text-sm text-gray-500">Reset all settings to defaults</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

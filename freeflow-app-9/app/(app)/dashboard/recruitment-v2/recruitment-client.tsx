@@ -936,6 +936,26 @@ export default function RecruitmentClient() {
 
             {/* Jobs Tab */}
             <TabsContent value="jobs" className="space-y-4">
+              {/* Jobs Banner */}
+              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Job Postings</h2>
+                    <p className="text-blue-100">Greenhouse-level recruitment management</p>
+                    <p className="text-blue-200 text-xs mt-1">Multi-channel posting • Tracking • Analytics</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{jobs.length}</p>
+                      <p className="text-blue-200 text-sm">Open Positions</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{candidates.length}</p>
+                      <p className="text-blue-200 text-sm">Candidates</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center gap-2 mb-4">
                 <Button
                   variant={jobFilter === 'all' ? 'default' : 'outline'}
@@ -1050,6 +1070,22 @@ export default function RecruitmentClient() {
 
             {/* Candidates Tab */}
             <TabsContent value="candidates" className="space-y-4">
+              {/* Candidates Banner */}
+              <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Candidate Pool</h2>
+                    <p className="text-emerald-100">Lever-level applicant tracking</p>
+                    <p className="text-emerald-200 text-xs mt-1">Resume parsing • Scoring • Stage tracking</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{candidates.length}</p>
+                      <p className="text-emerald-200 text-sm">Candidates</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <Button
                   variant={stageFilter === 'all' ? 'default' : 'outline'}

@@ -412,6 +412,55 @@ export default function SettingsClient() {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
+            {/* Profile Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Profile Settings</h2>
+                  <p className="text-blue-100">Manage your personal information and preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">
+                      <CheckCircle2 className="w-6 h-6 mx-auto" />
+                    </p>
+                    <p className="text-blue-200 text-sm">Verified</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">85%</p>
+                    <p className="text-blue-200 text-sm">Complete</p>
+                  </div>
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Camera, label: 'Change Photo', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: User, label: 'Edit Profile', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Lock, label: 'Password', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Shield, label: 'Privacy', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Link2, label: 'Connections', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export Data', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <Card className="border-0 shadow-sm">
@@ -571,6 +620,58 @@ export default function SettingsClient() {
 
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-6">
+            {/* Security Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Security Center</h2>
+                  <p className="text-green-100">Protect your account with enterprise-grade security</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold flex items-center gap-1">
+                      <Shield className="w-6 h-6" />
+                      Strong
+                    </p>
+                    <p className="text-green-200 text-sm">Security Level</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">
+                      <CheckCircle2 className="w-6 h-6 mx-auto" />
+                    </p>
+                    <p className="text-green-200 text-sm">2FA Enabled</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">3</p>
+                    <p className="text-green-200 text-sm">Active Sessions</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Lock, label: 'Password', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Fingerprint, label: '2FA Setup', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Key, label: 'API Keys', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Monitor, label: 'Sessions', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: History, label: 'Activity Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: AlertTriangle, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Download, label: 'Backup Codes', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: LogOut, label: 'Log Out All', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <Card className="border-0 shadow-sm">
@@ -726,6 +827,45 @@ export default function SettingsClient() {
 
           {/* Notifications Tab */}
           <TabsContent value="notifications" className="space-y-6">
+            {/* Notifications Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Notification Center</h2>
+                  <p className="text-amber-100">Customize how and when you receive alerts</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Test Notification
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Notifications Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Mail, label: 'Email', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Bell, label: 'Push', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Smartphone, label: 'SMS', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Volume2, label: 'Sounds', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Moon, label: 'Do Not Disturb', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Clock, label: 'Schedule', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Filter, label: 'Filters', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: XCircle, label: 'Mute All', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
@@ -787,6 +927,43 @@ export default function SettingsClient() {
 
           {/* Integrations Tab */}
           <TabsContent value="integrations" className="space-y-6">
+            {/* Integrations Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Connected Apps</h2>
+                  <p className="text-purple-100">Manage your third-party integrations and connections</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold">{integrations.filter(i => i.status === 'connected').length}</p>
+                  <p className="text-purple-200 text-sm">Active</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Integrations Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add New', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Globe, label: 'Browse All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Link2, label: 'OAuth Apps', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Key, label: 'API Tokens', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Database, label: 'Webhooks', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: History, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Unlink, label: 'Revoke All', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {integrations.map(integration => (
                 <Card key={integration.id} className="border-0 shadow-sm">
@@ -849,6 +1026,45 @@ export default function SettingsClient() {
 
           {/* Billing Tab */}
           <TabsContent value="billing" className="space-y-6">
+            {/* Billing Banner */}
+            <div className="bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Billing & Subscription</h2>
+                  <p className="text-teal-100">Manage your plan, payments, and invoices</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${billing.amount}</p>
+                    <p className="text-teal-200 text-sm">/{billing.billingCycle}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Billing Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: ArrowUpRight, label: 'Upgrade', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: CreditCard, label: 'Payment', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: FileText, label: 'Invoices', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Download, label: 'Download', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: RefreshCw, label: 'Auto-Renew', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Mail, label: 'Receipts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: XCircle, label: 'Cancel', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <Card className="border-0 shadow-sm">
@@ -954,6 +1170,45 @@ export default function SettingsClient() {
 
           {/* Appearance Tab */}
           <TabsContent value="appearance" className="space-y-6">
+            {/* Appearance Banner */}
+            <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Appearance & Display</h2>
+                  <p className="text-pink-100">Customize your visual experience</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Reset to Defaults
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Appearance Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Sun, label: 'Light Mode', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Moon, label: 'Dark Mode', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Palette, label: 'Colors', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Type, label: 'Fonts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Contrast, label: 'Contrast', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Languages, label: 'Language', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Accessibility, label: 'A11y', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Monitor, label: 'Display', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="border-0 shadow-sm">
                 <CardHeader>
@@ -1057,6 +1312,45 @@ export default function SettingsClient() {
 
           {/* Advanced Tab - System Preferences level */}
           <TabsContent value="advanced" className="space-y-6">
+            {/* Advanced Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Advanced Settings</h2>
+                  <p className="text-slate-200">Developer options and system configuration</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Key, label: 'API Keys', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Database, label: 'Webhooks', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+                { icon: HardDrive, label: 'Storage', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
+                { icon: Cloud, label: 'Backups', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: History, label: 'Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Zap, label: 'Performance', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Trash2, label: 'Delete Account', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 {/* Developer Settings */}

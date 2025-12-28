@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +27,9 @@ import {
   MapPin, Smartphone, Monitor, Tablet, ArrowUp, ArrowDown,
   ThumbsUp, ThumbsDown, Star, Heart, Ban, AlertTriangle, CheckCircle,
   XCircle, Timer, TrendingDown, MailOpen, MousePointerClick, UserMinus,
-  Unlink, ExternalLink, Hash, AtSign, Percent, LineChart, AreaChart
+  Unlink, ExternalLink, Hash, AtSign, Percent, LineChart, AreaChart,
+  Sliders, Webhook, Key, Database, HardDrive, Terminal, Lock, Archive,
+  Trash2 as TrashIcon, Bell, Server, Code, Folder, FileCode
 } from 'lucide-react'
 
 // ============== MAILCHIMP-LEVEL INTERFACES ==============
@@ -572,6 +574,7 @@ export default function CampaignsClient() {
   const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showAudienceDialog, setShowAudienceDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const stats = useMemo(() => ({
     totalCampaigns: mockCampaigns.length,
@@ -745,6 +748,10 @@ export default function CampaignsClient() {
                 <Shield className="w-4 h-4" />
                 Deliverability
               </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -763,6 +770,56 @@ export default function CampaignsClient() {
           {/* Campaigns Tab */}
           <TabsContent value="campaigns">
             <div className="space-y-6">
+              {/* Campaigns Overview Banner */}
+              <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">Email Campaigns</h3>
+                    <p className="text-rose-100 mb-4">Create, send, and analyze email marketing campaigns</p>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-rose-100">Total Campaigns</p>
+                        <p className="text-xl font-bold">{stats.totalCampaigns}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-rose-100">Active</p>
+                        <p className="text-xl font-bold">{stats.activeCampaigns}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-rose-100">Avg Open Rate</p>
+                        <p className="text-xl font-bold">{stats.avgOpenRate.toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hidden lg:block">
+                    <Mail className="w-24 h-24 text-white/20" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { icon: Plus, label: 'New Campaign', color: 'text-rose-500' },
+                  { icon: Copy, label: 'Duplicate', color: 'text-blue-500' },
+                  { icon: Zap, label: 'Automate', color: 'text-amber-500' },
+                  { icon: Split, label: 'A/B Test', color: 'text-purple-500' },
+                  { icon: Layout, label: 'Templates', color: 'text-green-500' },
+                  { icon: Users, label: 'Audiences', color: 'text-indigo-500' },
+                  { icon: BarChart3, label: 'Reports', color: 'text-cyan-500' },
+                  { icon: Download, label: 'Export', color: 'text-pink-500' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  >
+                    <action.icon className={`w-5 h-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               {/* Filters */}
               <div className="flex items-center gap-4">
                 <select
@@ -907,10 +964,60 @@ export default function CampaignsClient() {
           {/* Automations Tab */}
           <TabsContent value="automations">
             <div className="space-y-6">
+              {/* Automations Overview Banner */}
+              <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">Email Automations</h3>
+                    <p className="text-indigo-100 mb-4">Create automated email journeys that nurture leads</p>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-indigo-100">Active Automations</p>
+                        <p className="text-xl font-bold">{mockAutomations.filter(a => a.status === 'active').length}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-indigo-100">Total Enrolled</p>
+                        <p className="text-xl font-bold">{formatNumber(mockAutomations.reduce((sum, a) => sum + a.stats.enrolled, 0))}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-indigo-100">Revenue Generated</p>
+                        <p className="text-xl font-bold">${formatNumber(mockAutomations.reduce((sum, a) => sum + a.stats.revenue, 0))}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hidden lg:block">
+                    <Zap className="w-24 h-24 text-white/20" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { icon: Plus, label: 'New Flow', color: 'text-indigo-500' },
+                  { icon: GitBranch, label: 'Branches', color: 'text-purple-500' },
+                  { icon: Timer, label: 'Delays', color: 'text-amber-500' },
+                  { icon: Split, label: 'A/B Split', color: 'text-pink-500' },
+                  { icon: Target, label: 'Triggers', color: 'text-green-500' },
+                  { icon: Filter, label: 'Conditions', color: 'text-blue-500' },
+                  { icon: BarChart3, label: 'Analytics', color: 'text-cyan-500' },
+                  { icon: Copy, label: 'Templates', color: 'text-rose-500' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  >
+                    <action.icon className={`w-5 h-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold">Email Automations</h2>
-                  <p className="text-gray-500">Create automated email journeys</p>
+                  <h2 className="text-xl font-semibold">Active Workflows</h2>
+                  <p className="text-gray-500">Manage your automation workflows</p>
                 </div>
                 <Button><Plus className="w-4 h-4 mr-2" />Create Automation</Button>
               </div>
@@ -978,10 +1085,60 @@ export default function CampaignsClient() {
           {/* Templates Tab */}
           <TabsContent value="templates">
             <div className="space-y-6">
+              {/* Templates Overview Banner */}
+              <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">Email Templates</h3>
+                    <p className="text-emerald-100 mb-4">Design beautiful emails with drag-and-drop editor</p>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-emerald-100">Total Templates</p>
+                        <p className="text-xl font-bold">{mockTemplates.length}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-emerald-100">Custom Templates</p>
+                        <p className="text-xl font-bold">{mockTemplates.filter(t => t.isCustom).length}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-emerald-100">Avg Open Rate</p>
+                        <p className="text-xl font-bold">{(mockTemplates.reduce((sum, t) => sum + t.openRate, 0) / mockTemplates.length).toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hidden lg:block">
+                    <Layout className="w-24 h-24 text-white/20" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { icon: Plus, label: 'New Template', color: 'text-emerald-500' },
+                  { icon: Wand2, label: 'AI Generate', color: 'text-purple-500' },
+                  { icon: Image, label: 'Media', color: 'text-blue-500' },
+                  { icon: Type, label: 'Typography', color: 'text-amber-500' },
+                  { icon: Palette, label: 'Colors', color: 'text-pink-500' },
+                  { icon: Code, label: 'HTML Edit', color: 'text-gray-500' },
+                  { icon: Copy, label: 'Duplicate', color: 'text-indigo-500' },
+                  { icon: Download, label: 'Export', color: 'text-cyan-500' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  >
+                    <action.icon className={`w-5 h-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold">Email Templates</h2>
-                  <p className="text-gray-500">Design beautiful emails with drag-and-drop</p>
+                  <h2 className="text-xl font-semibold">Template Library</h2>
+                  <p className="text-gray-500">Choose from pre-built or custom templates</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline"><Wand2 className="w-4 h-4 mr-2" />AI Generate</Button>
@@ -1023,10 +1180,60 @@ export default function CampaignsClient() {
           {/* Audiences Tab */}
           <TabsContent value="audiences">
             <div className="space-y-6">
+              {/* Audiences Overview Banner */}
+              <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">Audience Management</h3>
+                    <p className="text-violet-100 mb-4">Segment and manage your subscriber lists</p>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-violet-100">Total Audiences</p>
+                        <p className="text-xl font-bold">{mockAudiences.length}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-violet-100">Total Subscribers</p>
+                        <p className="text-xl font-bold">{formatNumber(stats.totalSubscribers)}</p>
+                      </div>
+                      <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                        <p className="text-sm text-violet-100">Segments</p>
+                        <p className="text-xl font-bold">{mockAudiences.reduce((sum, a) => sum + a.segments.length, 0)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hidden lg:block">
+                    <Users className="w-24 h-24 text-white/20" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { icon: Plus, label: 'New List', color: 'text-violet-500' },
+                  { icon: Download, label: 'Import CSV', color: 'text-blue-500' },
+                  { icon: Target, label: 'New Segment', color: 'text-green-500' },
+                  { icon: Tag, label: 'Manage Tags', color: 'text-amber-500' },
+                  { icon: UserPlus, label: 'Add Subscriber', color: 'text-pink-500' },
+                  { icon: UserMinus, label: 'Clean List', color: 'text-red-500' },
+                  { icon: RefreshCw, label: 'Sync CRM', color: 'text-indigo-500' },
+                  { icon: Share2, label: 'Export', color: 'text-cyan-500' },
+                ].map((action, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  >
+                    <action.icon className={`w-5 h-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold">Audience Lists</h2>
-                  <p className="text-gray-500">Segment and manage your subscribers</p>
+                  <p className="text-gray-500">All your subscriber lists and segments</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline"><Download className="w-4 h-4 mr-2" />Import</Button>
@@ -1293,6 +1500,461 @@ export default function CampaignsClient() {
                     </div>
                   </div>
                 </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'sending', label: 'Sending', icon: Send },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Configure your campaign defaults</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default From Name</Label>
+                            <Input defaultValue="FreeFlow Marketing" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default From Email</Label>
+                            <Input defaultValue="hello@freeflow.com" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Reply-To Email</Label>
+                            <Input defaultValue="support@freeflow.com" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Timezone</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>America/New_York</option>
+                              <option>America/Los_Angeles</option>
+                              <option>Europe/London</option>
+                              <option>Asia/Tokyo</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Archive Completed Campaigns</p>
+                              <p className="text-sm text-muted-foreground">Auto-archive after 30 days</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Show Unsubscribe Link</p>
+                              <p className="text-sm text-muted-foreground">Required for compliance</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Branding</CardTitle>
+                        <CardDescription>Customize your email appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Primary Brand Color</Label>
+                            <div className="flex gap-2">
+                              <Input type="color" defaultValue="#e11d48" className="w-12 h-10 p-1" />
+                              <Input defaultValue="#e11d48" className="flex-1" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Logo URL</Label>
+                            <Input placeholder="https://your-domain.com/logo.png" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'sending' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sending Configuration</CardTitle>
+                        <CardDescription>Configure email sending behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Sending Rate Limit</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>No limit</option>
+                              <option>100/hour</option>
+                              <option>500/hour</option>
+                              <option>1000/hour</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Send Time Optimization</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>Disabled</option>
+                              <option>Optimize for opens</option>
+                              <option>Optimize for clicks</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Track Opens</p>
+                              <p className="text-sm text-muted-foreground">Track email open events</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Track Clicks</p>
+                              <p className="text-sm text-muted-foreground">Track link click events</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Google Analytics</p>
+                              <p className="text-sm text-muted-foreground">Add UTM parameters to links</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Plain Text Fallback</p>
+                              <p className="text-sm text-muted-foreground">Auto-generate plain text version</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Validation</CardTitle>
+                        <CardDescription>Configure email validation settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg border">
+                          <div>
+                            <p className="font-medium">Verify on Import</p>
+                            <p className="text-sm text-muted-foreground">Validate emails when importing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border">
+                          <div>
+                            <p className="font-medium">Remove Invalid Emails</p>
+                            <p className="text-sm text-muted-foreground">Auto-clean invalid addresses</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Campaign Notifications</CardTitle>
+                        <CardDescription>Configure when to receive alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'Campaign Sent', description: 'When a campaign finishes sending', enabled: true },
+                          { title: 'Campaign Completed', description: 'Daily summary of campaign performance', enabled: true },
+                          { title: 'Low Open Rate Alert', description: 'When open rate drops below threshold', enabled: true },
+                          { title: 'High Unsubscribe Alert', description: 'When unsubscribes exceed threshold', enabled: true },
+                          { title: 'New Subscriber', description: 'When someone joins your list', enabled: false },
+                          { title: 'Bounce Alert', description: 'When bounce rate is high', enabled: true },
+                        ].map((notification, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{notification.title}</p>
+                              <p className="text-sm text-muted-foreground">{notification.description}</p>
+                            </div>
+                            <Switch defaultChecked={notification.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Channels</CardTitle>
+                        <CardDescription>Choose how to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { icon: Mail, label: 'Email', active: true },
+                            { icon: MessageSquare, label: 'In-App', active: true },
+                            { icon: Smartphone, label: 'Mobile Push', active: false },
+                            { icon: Globe, label: 'Slack', active: true },
+                          ].map((channel, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+                                  <channel.icon className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                                </div>
+                                <span className="font-medium">{channel.label}</span>
+                              </div>
+                              <Switch defaultChecked={channel.active} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Integrations</CardTitle>
+                        <CardDescription>Manage your third-party connections</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Salesforce', description: 'Sync subscribers with Salesforce', connected: true },
+                            { name: 'Shopify', description: 'E-commerce integration', connected: true },
+                            { name: 'Stripe', description: 'Payment and revenue tracking', connected: true },
+                            { name: 'Google Analytics', description: 'Campaign tracking', connected: false },
+                            { name: 'Zapier', description: 'Connect with 3000+ apps', connected: false },
+                          ].map((integration, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                  <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{integration.name}</p>
+                                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                                </div>
+                              </div>
+                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                                {integration.connected ? 'Connected' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Manage API keys and webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="mc_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-app.com/webhook/campaigns" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Authentication</CardTitle>
+                        <CardDescription>Configure domain authentication</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {[
+                            { name: 'SPF Record', status: 'pass', description: 'Sender Policy Framework' },
+                            { name: 'DKIM Signature', status: 'pass', description: 'DomainKeys Identified Mail' },
+                            { name: 'DMARC Policy', status: 'pass', description: 'Domain-based Message Authentication' },
+                          ].map((auth, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                <div>
+                                  <p className="font-medium">{auth.name}</p>
+                                  <p className="text-sm text-muted-foreground">{auth.description}</p>
+                                </div>
+                              </div>
+                              <Badge className="bg-green-100 text-green-700">{auth.status.toUpperCase()}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Compliance Settings</CardTitle>
+                        <CardDescription>Manage data privacy compliance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg border">
+                          <div>
+                            <p className="font-medium">GDPR Mode</p>
+                            <p className="text-sm text-muted-foreground">Enable GDPR-compliant features</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border">
+                          <div>
+                            <p className="font-medium">Double Opt-In</p>
+                            <p className="text-sm text-muted-foreground">Require email confirmation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border">
+                          <div>
+                            <p className="font-medium">Data Retention</p>
+                            <p className="text-sm text-muted-foreground">Auto-delete unsubscribed after 2 years</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Advanced Settings</CardTitle>
+                        <CardDescription>Configure advanced campaign options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'Custom Tracking Domain', description: 'Use your own domain for tracking links', enabled: false },
+                          { title: 'IP Warming', description: 'Gradually increase sending volume', enabled: true },
+                          { title: 'List-Unsubscribe Header', description: 'Add one-click unsubscribe', enabled: true },
+                          { title: 'Debug Mode', description: 'Enable detailed logging', enabled: false },
+                        ].map((setting, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{setting.title}</p>
+                              <p className="text-sm text-muted-foreground">{setting.description}</p>
+                            </div>
+                            <Switch defaultChecked={setting.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage your campaign data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export All Data</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Archive className="w-5 h-5" />
+                            <span>Archive Old Campaigns</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <RefreshCw className="w-5 h-5" />
+                            <span>Reset Statistics</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600">
+                            <TrashIcon className="w-5 h-5" />
+                            <span>Purge Test Emails</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription className="text-amber-600 dark:text-amber-500">
+                          Irreversible actions
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Campaigns</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently delete all campaign data</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>

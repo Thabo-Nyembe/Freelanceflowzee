@@ -15,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   UserPlus,
   Users,
@@ -70,7 +72,17 @@ import {
   LayoutDashboard,
   UserCheck,
   UserX,
-  Bell
+  Bell,
+  Sliders,
+  Webhook,
+  Key,
+  Database,
+  HardDrive,
+  Terminal,
+  Shield,
+  Archive,
+  Code,
+  Trash2
 } from 'lucide-react'
 
 // Types
@@ -413,6 +425,7 @@ export default function OnboardingClient() {
   const [typeFilter, setTypeFilter] = useState<FlowType | 'all'>('all')
   const [selectedFlow, setSelectedFlow] = useState<Flow | null>(null)
   const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats: OnboardingStats = useMemo(() => ({
@@ -592,6 +605,44 @@ export default function OnboardingClient() {
 
           {/* Flows Tab */}
           <TabsContent value="flows" className="space-y-6">
+            {/* Flows Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Onboarding Flows</h3>
+                  <p className="text-green-100">Create engaging user onboarding experiences</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.activeFlows}</p>
+                    <p className="text-green-200 text-sm">Active Flows</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Flows Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Flow', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             {/* Filters */}
             <div className="flex items-center gap-4">
               <div className="relative flex-1 max-w-md">
@@ -716,6 +767,44 @@ export default function OnboardingClient() {
 
           {/* Checklists Tab */}
           <TabsContent value="checklists" className="space-y-6">
+            {/* Checklists Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">User Checklists</h3>
+                  <p className="text-blue-100">Guide users through setup with interactive checklists</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.activeChecklists}</p>
+                    <p className="text-blue-200 text-sm">Active Checklists</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Checklists Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -790,6 +879,44 @@ export default function OnboardingClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Flow Analytics</h3>
+                  <p className="text-purple-100">Track and optimize your onboarding performance</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.avgCompletionRate.toFixed(1)}%</p>
+                    <p className="text-purple-200 text-sm">Avg Completion</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Views & Completions Chart */}
               <Card>
@@ -898,6 +1025,44 @@ export default function OnboardingClient() {
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-6">
+            {/* Users Banner */}
+            <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">User Journeys</h3>
+                  <p className="text-orange-100">Track individual user progress through onboarding</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.usersOnboarded}</p>
+                    <p className="text-orange-200 text-sm">Fully Onboarded</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Users Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4 mb-6">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -997,6 +1162,22 @@ export default function OnboardingClient() {
 
           {/* Segments Tab */}
           <TabsContent value="segments" className="space-y-6">
+            {/* Segments Banner */}
+            <div className="bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">User Segments</h3>
+                  <p className="text-cyan-100">Target specific user groups with personalized flows</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockSegments.length}</p>
+                    <p className="text-cyan-200 text-sm">Active Segments</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1058,148 +1239,361 @@ export default function OnboardingClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Branding */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Palette className="w-5 h-5" />
-                    Branding
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Primary Color</label>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-600 border-2 border-gray-200" />
-                      <Input defaultValue="#16a34a" className="max-w-[150px]" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Font Family</label>
-                    <select className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
-                      <option>Inter</option>
-                      <option>Roboto</option>
-                      <option>Open Sans</option>
-                      <option>System Default</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Border Radius</label>
-                    <select className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
-                      <option>Rounded (8px)</option>
-                      <option>Square (0px)</option>
-                      <option>Pill (999px)</option>
-                    </select>
-                  </div>
-                  <Button className="w-full">Save Branding</Button>
-                </CardContent>
-              </Card>
+          <TabsContent value="settings" className="mt-0">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-green-600" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'branding', label: 'Branding', icon: Palette },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Defaults */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    Default Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Allow Skip</p>
-                      <p className="text-xs text-gray-500">Let users skip flows</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Show Progress</p>
-                      <p className="text-xs text-gray-500">Display step progress indicator</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Keyboard Navigation</p>
-                      <p className="text-xs text-gray-500">Allow arrow key navigation</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Click Outside to Close</p>
-                      <p className="text-xs text-gray-500">Close modals on backdrop click</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Skip</p>
+                            <p className="text-sm text-gray-500">Let users skip flows</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Progress</p>
+                            <p className="text-sm text-gray-500">Display step progress indicator</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Keyboard Navigation</p>
+                            <p className="text-sm text-gray-500">Allow arrow key navigation</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Click Outside to Close</p>
+                            <p className="text-sm text-gray-500">Close modals on backdrop click</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-advance</p>
+                            <p className="text-sm text-gray-500">Automatically move to next step</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Integrations */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Integrations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { name: 'Segment', description: 'Send events to Segment', connected: true, icon: '📊' },
-                    { name: 'Mixpanel', description: 'Track flow analytics', connected: true, icon: '📈' },
-                    { name: 'Slack', description: 'Get notified on completions', connected: false, icon: '💬' },
-                    { name: 'HubSpot', description: 'Sync user data', connected: false, icon: '🔶' }
-                  ].map((integration) => (
-                    <div key={integration.name} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{integration.icon}</span>
-                        <div>
-                          <p className="font-medium text-sm">{integration.name}</p>
-                          <p className="text-xs text-gray-500">{integration.description}</p>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Display Options</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Position</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                              <option>Center</option>
+                              <option>Top</option>
+                              <option>Bottom</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Animation Style</Label>
+                            <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                              <option>Fade</option>
+                              <option>Slide</option>
+                              <option>Scale</option>
+                              <option>None</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Branding Settings */}
+                {settingsTab === 'branding' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Palette className="w-5 h-5" />
+                        Branding Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <Label>Primary Color</Label>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <div className="w-10 h-10 rounded-lg bg-green-600 border-2 border-gray-200" />
+                          <Input defaultValue="#16a34a" className="max-w-[150px] dark:bg-gray-800" />
                         </div>
                       </div>
-                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
-                        {integration.connected ? 'Connected' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                      <div>
+                        <Label>Secondary Color</Label>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <div className="w-10 h-10 rounded-lg bg-emerald-500 border-2 border-gray-200" />
+                          <Input defaultValue="#10b981" className="max-w-[150px] dark:bg-gray-800" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Font Family</Label>
+                        <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                          <option>Inter</option>
+                          <option>Roboto</option>
+                          <option>Open Sans</option>
+                          <option>System Default</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Border Radius</Label>
+                        <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                          <option>Rounded (8px)</option>
+                          <option>Square (0px)</option>
+                          <option>Pill (999px)</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Dark Mode Support</p>
+                          <p className="text-sm text-gray-500">Adapt to user's theme preference</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <Button className="w-full">Save Branding</Button>
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Email on Flow Completion</p>
-                      <p className="text-xs text-gray-500">Get notified when users complete flows</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Weekly Reports</p>
-                      <p className="text-xs text-gray-500">Receive weekly performance summary</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Low Completion Alerts</p>
-                      <p className="text-xs text-gray-500">Alert when completion drops below 50%</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5" />
+                        Notification Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'Email on Flow Completion', desc: 'Get notified when users complete flows', enabled: true },
+                        { name: 'Weekly Reports', desc: 'Receive weekly performance summary', enabled: true },
+                        { name: 'Low Completion Alerts', desc: 'Alert when completion drops below 50%', enabled: false },
+                        { name: 'New User Notifications', desc: 'Notify when new users start onboarding', enabled: true },
+                        { name: 'Drop-off Alerts', desc: 'Alert on high drop-off rates', enabled: false },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                            <p className="text-sm text-gray-500">{item.desc}</p>
+                          </div>
+                          <Switch defaultChecked={item.enabled} />
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="w-5 h-5" />
+                        Integrations
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'Segment', description: 'Send events to Segment', connected: true },
+                        { name: 'Mixpanel', description: 'Track flow analytics', connected: true },
+                        { name: 'Slack', description: 'Get notified on completions', connected: false },
+                        { name: 'HubSpot', description: 'Sync user data', connected: false },
+                        { name: 'Intercom', description: 'Sync with Intercom contacts', connected: false },
+                      ].map((integration, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                            <p className="text-sm text-gray-500">{integration.description}</p>
+                          </div>
+                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            {integration.connected ? 'Connected' : 'Connect'}
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5" />
+                        Security Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">API Key Access</p>
+                          <p className="text-sm text-gray-500">Require API key for SDK</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Domain Whitelist</p>
+                          <p className="text-sm text-gray-500">Only load on approved domains</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                          <p className="text-sm text-gray-500">Log all configuration changes</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <Label>API Key</Label>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Input type="password" value="ob_live_************************" readOnly className="font-mono dark:bg-gray-900" />
+                          <Button variant="outline" size="sm">Regenerate</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Advanced Options</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                            <p className="text-sm text-gray-500">Show debug info in console</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Custom CSS</p>
+                            <p className="text-sm text-gray-500">Allow custom styling</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">A/B Testing</p>
+                            <p className="text-sm text-gray-500">Enable flow experiments</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Analytics Data</p>
+                              <p className="text-sm text-gray-500">2.4 GB stored</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <HardDrive className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">User Sessions</p>
+                              <p className="text-sm text-gray-500">156,234 recorded</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Manage</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset All Flows</p>
+                            <p className="text-sm text-gray-500">Delete all flow configurations</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Clear Analytics</p>
+                            <p className="text-sm text-gray-500">Remove all analytics data</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

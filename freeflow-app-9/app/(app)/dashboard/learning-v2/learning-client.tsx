@@ -55,11 +55,30 @@ import {
   ArrowUpRight,
   ArrowRight,
   Grid3X3,
-  List
+  List,
+  Shield,
+  Sliders,
+  Bell,
+  Webhook,
+  Key,
+  Database,
+  HardDrive,
+  Terminal,
+  History,
+  Copy,
+  RefreshCw,
+  AlertTriangle,
+  Mail,
+  Globe
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 // ============================================================================
 // TYPE DEFINITIONS - LinkedIn Learning Level
@@ -502,6 +521,7 @@ export default function LearningClient() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const categories = useMemo(() => {
     const cats = new Set(courses.map(c => c.category))
@@ -642,6 +662,10 @@ export default function LearningClient() {
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Analytics
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
               </TabsTrigger>
             </TabsList>
 
@@ -1259,6 +1283,499 @@ export default function LearningClient() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="border-0 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Learning Settings</h3>
+                      <p className="text-white/80">Configure your learning experience preferences</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'goals', label: 'Goals', icon: Target },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-emerald-500" />
+                          General Preferences
+                        </CardTitle>
+                        <CardDescription>Configure your learning experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Language</Label>
+                            <Input defaultValue="English" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Timezone</Label>
+                            <Input defaultValue="America/New_York" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Autoplay Videos</p>
+                            <p className="text-sm text-gray-500">Automatically play next lesson</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Captions</p>
+                            <p className="text-sm text-gray-500">Display captions by default</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">HD Video Quality</p>
+                            <p className="text-sm text-gray-500">Default to high-definition videos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Playback Speed Memory</p>
+                            <p className="text-sm text-gray-500">Remember last playback speed</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-500" />
+                          Profile Visibility
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Public Profile</p>
+                            <p className="text-sm text-gray-500">Allow others to see your learning activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Certificates</p>
+                            <p className="text-sm text-gray-500">Display earned certificates on profile</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Skills</p>
+                            <p className="text-sm text-gray-500">Display skill levels on profile</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+                          Save Preferences
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Goals Settings */}
+                {settingsTab === 'goals' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5 text-orange-500" />
+                          Learning Goals
+                        </CardTitle>
+                        <CardDescription>Set and track your learning objectives</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Weekly Hours Goal</Label>
+                            <Input type="number" defaultValue="5" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Monthly Courses Goal</Label>
+                            <Input type="number" defaultValue="2" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Daily Learning Reminders</p>
+                            <p className="text-sm text-gray-500">Remind me to learn every day</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Streak Protection</p>
+                            <p className="text-sm text-gray-500">Allow one skip day per week</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Weekly Progress Reports</p>
+                            <p className="text-sm text-gray-500">Email weekly learning summary</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="w-5 h-5 text-purple-500" />
+                          Skill Goals
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {skills.slice(0, 3).map((skill, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{skill.name}</p>
+                              <p className="text-sm text-gray-500">Current: {skill.level}%</p>
+                            </div>
+                            <Input type="number" defaultValue={skill.level + 20} className="w-20" />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Skill Goal
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-blue-500" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Course Recommendations', desc: 'Get personalized course suggestions' },
+                          { label: 'New Course Alerts', desc: 'Notify about new courses in your topics' },
+                          { label: 'Learning Reminders', desc: 'Daily nudges to continue learning' },
+                          { label: 'Goal Progress', desc: 'Updates on your learning goals' },
+                          { label: 'Certificate Earned', desc: 'Celebrate your achievements' },
+                          { label: 'Instructor Updates', desc: 'New content from followed instructors' }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={idx < 4} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-green-500" />
+                          Digest Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Email Digest Frequency</Label>
+                          <Input defaultValue="Weekly" className="mt-1" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Include Recommendations</p>
+                            <p className="text-sm text-gray-500">Add course suggestions to digest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-500" />
+                          Connected Accounts
+                        </CardTitle>
+                        <CardDescription>Link external accounts and services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'LinkedIn', desc: 'Share certificates and skills', status: 'connected' },
+                          { name: 'Slack', desc: 'Learning notifications', status: 'connected' },
+                          { name: 'Google Calendar', desc: 'Schedule learning time', status: 'disconnected' },
+                          { name: 'Notion', desc: 'Sync notes and bookmarks', status: 'disconnected' },
+                          { name: 'GitHub', desc: 'Track coding exercises', status: 'disconnected' }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                {integration.name[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              {integration.status === 'connected' ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-green-500" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input type="password" value="sk_learning_****************************" readOnly className="font-mono" />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-500" />
+                          Account Security
+                        </CardTitle>
+                        <CardDescription>Protect your learning account</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Login Notifications</p>
+                            <p className="text-sm text-gray-500">Get notified of new sign-ins</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Session Timeout</p>
+                            <p className="text-sm text-gray-500">Auto-logout after inactivity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-yellow-500" />
+                          Privacy
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Learning Activity Tracking</p>
+                            <p className="text-sm text-gray-500">Track for personalized recommendations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Share Progress with Manager</p>
+                            <p className="text-sm text-gray-500">Allow manager to view your progress</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-cyan-500" />
+                          Advanced Configuration
+                        </CardTitle>
+                        <CardDescription>Advanced settings for power users</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Developer Mode</p>
+                            <p className="text-sm text-gray-500">Enable developer features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Offline Mode</p>
+                            <p className="text-sm text-gray-500">Download courses for offline viewing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                            <p className="text-sm text-gray-500">Try new features early</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Video Bitrate (kbps)</Label>
+                          <Input type="number" defaultValue="5000" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-blue-500" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Download Storage Location</Label>
+                          <Input defaultValue="~/Learning/Downloads" className="mt-1 font-mono" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Learning Data
+                          </Button>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900 bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Reset All Progress</p>
+                            <p className="text-sm text-red-600/70">Clear all learning progress</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Delete Account</p>
+                            <p className="text-sm text-red-600/70">Permanently delete all data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>

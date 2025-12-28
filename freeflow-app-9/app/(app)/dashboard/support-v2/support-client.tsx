@@ -595,6 +595,26 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
           {/* Tickets Tab */}
           <TabsContent value="tickets" className="space-y-4">
+            {/* Tickets Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Tickets</h2>
+                  <p className="text-orange-100">Zendesk-level ticket management</p>
+                  <p className="text-orange-200 text-xs mt-1">Priority queues • SLA tracking • Automation</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredTickets.length}</p>
+                    <p className="text-orange-200 text-sm">Open Tickets</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredTickets.filter(t => t.priority === 'urgent').length}</p>
+                    <p className="text-orange-200 text-sm">Urgent</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Search and Filters */}
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
               <CardContent className="p-4">
@@ -722,6 +742,22 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
           {/* Agents Tab */}
           <TabsContent value="agents" className="space-y-4">
+            {/* Agents Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Team</h2>
+                  <p className="text-purple-100">Freshdesk-level agent management</p>
+                  <p className="text-purple-200 text-xs mt-1">Workload • Skills • Performance</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAgents.length}</p>
+                    <p className="text-purple-200 text-sm">Agents</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockAgents.map(agent => (
                 <Card key={agent.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">

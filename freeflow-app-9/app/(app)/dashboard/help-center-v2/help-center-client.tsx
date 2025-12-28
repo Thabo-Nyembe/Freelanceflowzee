@@ -57,7 +57,13 @@ import {
   Languages,
   History,
   ArrowUpRight,
-  PenTool
+  PenTool,
+  Upload,
+  Settings,
+  Layers,
+  Sparkles,
+  Download,
+  Target
 } from 'lucide-react'
 
 // ============================================================================
@@ -964,6 +970,50 @@ export default function HelpCenterClient() {
 
           {/* Articles Tab */}
           <TabsContent value="articles" className="space-y-6">
+            {/* Articles Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Knowledge Base Articles</h2>
+                  <p className="text-blue-100">Zendesk-level help documentation with smart search</p>
+                  <p className="text-blue-200 text-xs mt-1">AI-powered search • Multi-language • Version control</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{articles.length}</p>
+                    <p className="text-blue-200 text-sm">Articles</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{articles.filter(a => a.status === 'published').length}</p>
+                    <p className="text-blue-200 text-sm">Published</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round(articles.reduce((sum, a) => sum + (a.views || 0), 0) / 1000)}K</p>
+                    <p className="text-blue-200 text-sm">Total Views</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Articles Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FileText, label: 'New Article', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Search, label: 'Smart Search', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Upload, label: 'Import', color: 'text-green-600 dark:text-green-400' },
+                { icon: Tag, label: 'Manage Tags', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Globe, label: 'Translate', color: 'text-pink-600 dark:text-pink-400' },
+                { icon: Archive, label: 'Archives', color: 'text-gray-600 dark:text-gray-400' },
+                { icon: Settings, label: 'Settings', color: 'text-indigo-600 dark:text-indigo-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Filters */}
             <Card className="dark:bg-gray-800/50">
               <CardContent className="p-4">
@@ -1116,6 +1166,50 @@ export default function HelpCenterClient() {
 
           {/* Categories Tab */}
           <TabsContent value="categories" className="space-y-6">
+            {/* Categories Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Content Categories</h2>
+                  <p className="text-emerald-100">Notion-level content organization and taxonomy</p>
+                  <p className="text-emerald-200 text-xs mt-1">Hierarchical categories • Subcategories • Auto-tagging</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{categories.length}</p>
+                    <p className="text-emerald-200 text-sm">Categories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{categories.reduce((sum, c) => sum + (c.subcategories?.length || 0), 0)}</p>
+                    <p className="text-emerald-200 text-sm">Subcategories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{categories.reduce((sum, c) => sum + c.articleCount, 0)}</p>
+                    <p className="text-emerald-200 text-sm">Total Articles</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Categories Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FolderOpen, label: 'New Category', color: 'text-emerald-600 dark:text-emerald-400' },
+                { icon: FolderOpen, label: 'Subcategory', color: 'text-teal-600 dark:text-teal-400' },
+                { icon: Layers, label: 'Organize', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Tag, label: 'Tags', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Sparkles, label: 'Auto-Sort', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Link, label: 'Cross-Link', color: 'text-pink-600 dark:text-pink-400' },
+                { icon: Trash2, label: 'Cleanup', color: 'text-red-600 dark:text-red-400' },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {categories.map((category) => (
                 <Card key={category.id} className="dark:bg-gray-800/50">
@@ -1184,6 +1278,31 @@ export default function HelpCenterClient() {
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
+            {/* Collections Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Curated Collections</h2>
+                  <p className="text-violet-100">Gitbook-level content curation and learning paths</p>
+                  <p className="text-violet-200 text-xs mt-1">Learning paths • Topic bundles • User journeys</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.length}</p>
+                    <p className="text-violet-200 text-sm">Collections</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.reduce((sum, c) => sum + c.articleIds.length, 0)}</p>
+                    <p className="text-violet-200 text-sm">Articles</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round(collections.reduce((sum, c) => sum + c.views, 0) / 1000)}K</p>
+                    <p className="text-violet-200 text-sm">Views</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {collections.map((collection) => (
                 <Card key={collection.id} className="hover:shadow-lg transition-shadow dark:bg-gray-800/50">
@@ -1227,6 +1346,50 @@ export default function HelpCenterClient() {
 
           {/* Feedback Tab */}
           <TabsContent value="feedback" className="space-y-6">
+            {/* Feedback Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">User Feedback Hub</h2>
+                  <p className="text-amber-100">Intercom-level customer feedback and insights</p>
+                  <p className="text-amber-200 text-xs mt-1">Ratings • Comments • Improvement suggestions</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{feedback.length}</p>
+                    <p className="text-amber-200 text-sm">Responses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{feedback.filter(f => f.type === 'helpful').length}</p>
+                    <p className="text-amber-200 text-sm">Helpful</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{feedback.filter(f => f.type === 'needs_update').length}</p>
+                    <p className="text-amber-200 text-sm">Needs Update</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feedback Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: MessageSquare, label: 'All Feedback', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: ThumbsUp, label: 'Positive', color: 'text-green-600 dark:text-green-400' },
+                { icon: ThumbsDown, label: 'Negative', color: 'text-red-600 dark:text-red-400' },
+                { icon: AlertCircle, label: 'Incorrect', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: RefreshCw, label: 'Needs Update', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Download, label: 'Export', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: BarChart3, label: 'Reports', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Feedback */}
               <div className="lg:col-span-2">
@@ -1359,6 +1522,50 @@ export default function HelpCenterClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Help Center Analytics</h2>
+                  <p className="text-cyan-100">Google Analytics-level content performance insights</p>
+                  <p className="text-cyan-200 text-xs mt-1">Real-time metrics • Content gaps • User journeys</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{analytics.selfServiceRate}%</p>
+                    <p className="text-cyan-200 text-sm">Self-Service</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{analytics.avgSearches}</p>
+                    <p className="text-cyan-200 text-sm">Avg Searches</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{analytics.topSearches?.length || 0}</p>
+                    <p className="text-cyan-200 text-sm">Top Topics</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: BarChart3, label: 'Overview', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 dark:text-green-400' },
+                { icon: Search, label: 'Search Terms', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Eye, label: 'Page Views', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Clock, label: 'Time on Page', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Target, label: 'Gaps', color: 'text-red-600 dark:text-red-400' },
+                { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400' },
+                { icon: Calendar, label: 'Schedule', color: 'text-pink-600 dark:text-pink-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="dark:bg-gray-800/50">
                 <CardContent className="p-6">

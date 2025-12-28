@@ -854,6 +854,46 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
           {/* Assets Tab */}
           <TabsContent value="assets" className="mt-6">
+            {/* Assets Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Asset Library</h2>
+                  <p className="text-purple-100">Bynder-level digital asset management and organization</p>
+                  <p className="text-purple-200 text-xs mt-1">Multi-format support • Version control • Smart tagging</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredAssets.length}</p>
+                    <p className="text-purple-200 text-sm">Assets Found</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{assets.filter(a => a.status === 'published').length}</p>
+                    <p className="text-purple-200 text-sm">Published</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Assets Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: <Upload className="w-4 h-4" />, label: 'Upload', color: 'text-purple-600' },
+                { icon: <Folder className="w-4 h-4" />, label: 'New Folder', color: 'text-blue-600' },
+                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600' },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600' },
+                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600' },
+                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600' },
+                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600' },
+                { icon: <RefreshCw className="w-4 h-4" />, label: 'Sync', color: 'text-cyan-600' }
+              ].map((action, index) => (
+                <Button key={index} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <span className={action.color}>{action.icon}</span>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -1055,6 +1095,27 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="mt-6">
+            {/* Collections Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Asset Collections</h2>
+                  <p className="text-blue-100">Brandfolder-level organization with smart collections</p>
+                  <p className="text-blue-200 text-xs mt-1">Auto-tagging • Nested folders • Access permissions</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.length}</p>
+                    <p className="text-blue-200 text-sm">Collections</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.reduce((sum, c) => sum + c.assetCount, 0)}</p>
+                    <p className="text-blue-200 text-sm">Total Assets</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {collections.map((collection) => (
                 <Card key={collection.id} className="group cursor-pointer hover:shadow-lg transition-all">
@@ -1102,6 +1163,27 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
           {/* Brand Portal Tab */}
           <TabsContent value="brand" className="mt-6">
+            {/* Brand Portal Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Brand Portal</h2>
+                  <p className="text-amber-100">Frontify-level brand management and consistency</p>
+                  <p className="text-amber-200 text-xs mt-1">Style guides • Color palettes • Typography systems</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{brandPortal.assetCount}</p>
+                    <p className="text-amber-200 text-sm">Brand Assets</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{brandPortal.guidelines.length}</p>
+                    <p className="text-amber-200 text-sm">Guidelines</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <Card>
@@ -1251,6 +1333,27 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="mt-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Asset Analytics</h2>
+                  <p className="text-emerald-100">Canto-level insights and performance tracking</p>
+                  <p className="text-emerald-200 text-xs mt-1">Usage reports • Download trends • Team metrics</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(stats.totalDownloads / 1000).toFixed(1)}K</p>
+                    <p className="text-emerald-200 text-sm">Downloads</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(stats.totalViews / 1000).toFixed(1)}K</p>
+                    <p className="text-emerald-200 text-sm">Views</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -1354,6 +1457,46 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">DAM Settings</h2>
+                  <p className="text-slate-100">Enterprise-level configuration and controls</p>
+                  <p className="text-slate-200 text-xs mt-1">Storage • Access control • Integrations • Templates</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{formatFileSize(stats.totalSize)}</p>
+                    <p className="text-slate-200 text-sm">Storage Used</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">4</p>
+                    <p className="text-slate-200 text-sm">Integrations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: <Settings className="w-4 h-4" />, label: 'General', color: 'text-slate-600' },
+                { icon: <Shield className="w-4 h-4" />, label: 'Security', color: 'text-blue-600' },
+                { icon: <Users className="w-4 h-4" />, label: 'Access', color: 'text-green-600' },
+                { icon: <Link2 className="w-4 h-4" />, label: 'Integrations', color: 'text-purple-600' },
+                { icon: <Tag className="w-4 h-4" />, label: 'Metadata', color: 'text-orange-600' },
+                { icon: <Archive className="w-4 h-4" />, label: 'Storage', color: 'text-amber-600' },
+                { icon: <Zap className="w-4 h-4" />, label: 'Automation', color: 'text-yellow-600' },
+                { icon: <ExternalLink className="w-4 h-4" />, label: 'Export', color: 'text-pink-600' }
+              ].map((action, index) => (
+                <Button key={index} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <span className={action.color}>{action.icon}</span>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>

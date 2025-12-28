@@ -27,7 +27,7 @@ import {
   ClipboardCheck, ClipboardList, FileWarning, Scale, Building, Globe,
   Shield, Zap, RefreshCw, ChevronRight, X, Check, ArrowRight,
   Key, Webhook, Mail, Database, AlertOctagon, Trash2, Copy, Bell,
-  GitBranch, FileCode, BookOpen, Cpu
+  GitBranch, FileCode, BookOpen, Cpu, CheckCircle, Send
 } from 'lucide-react'
 
 // ServiceNow GRC level interfaces
@@ -575,6 +575,53 @@ export default function ComplianceClient() {
 
           {/* Frameworks Tab */}
           <TabsContent value="frameworks" className="space-y-4">
+            {/* Frameworks Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Compliance Frameworks</h2>
+                  <p className="text-blue-100">Vanta-level compliance automation and tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockFrameworks.length}</p>
+                    <p className="text-blue-200 text-sm">Frameworks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockFrameworks.filter(f => f.status === 'compliant').length}</p>
+                    <p className="text-blue-200 text-sm">Compliant</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(mockFrameworks.reduce((sum, f) => sum + f.complianceScore, 0) / mockFrameworks.length).toFixed(0)}%</p>
+                    <p className="text-blue-200 text-sm">Avg Score</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Frameworks Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Framework', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: FileCheck, label: 'Audit', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Shield, label: 'Controls', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: AlertTriangle, label: 'Gaps', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Download, label: 'Export', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               {mockFrameworks.map(framework => (
                 <Card key={framework.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedFramework(framework)}>
@@ -641,6 +688,53 @@ export default function ComplianceClient() {
 
           {/* Controls Tab */}
           <TabsContent value="controls" className="space-y-4">
+            {/* Controls Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Security Controls</h2>
+                  <p className="text-emerald-100">Drata-level control monitoring and testing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockControls.length}</p>
+                    <p className="text-emerald-200 text-sm">Controls</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockControls.filter(c => c.status === 'passing').length}</p>
+                    <p className="text-emerald-200 text-sm">Passing</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockControls.filter(c => c.status === 'failing').length}</p>
+                    <p className="text-emerald-200 text-sm">Failing</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Controls Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Control', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: CheckCircle, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Shield, label: 'Evidence', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: AlertTriangle, label: 'Failures', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Upload, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -719,6 +813,53 @@ export default function ComplianceClient() {
 
           {/* Risks Tab */}
           <TabsContent value="risks" className="space-y-4">
+            {/* Risks Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-red-600 to-orange-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Risk Management</h2>
+                  <p className="text-rose-100">LogicGate-level risk assessment and tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRisks.length}</p>
+                    <p className="text-rose-200 text-sm">Total Risks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRisks.filter(r => r.severity === 'critical').length}</p>
+                    <p className="text-rose-200 text-sm">Critical</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRisks.filter(r => r.status === 'mitigated').length}</p>
+                    <p className="text-rose-200 text-sm">Mitigated</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Risks Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Risk', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Target, label: 'Assess', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Shield, label: 'Mitigate', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: BarChart3, label: 'Matrix', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: AlertTriangle, label: 'Critical', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Risk Register</h2>
               <Button>
@@ -785,6 +926,53 @@ export default function ComplianceClient() {
 
           {/* Audits Tab */}
           <TabsContent value="audits" className="space-y-4">
+            {/* Audits Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-yellow-600 to-lime-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Audit Management</h2>
+                  <p className="text-amber-100">AuditBoard-level audit lifecycle management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAudits.length}</p>
+                    <p className="text-amber-200 text-sm">Audits</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAudits.filter(a => a.status === 'in_progress').length}</p>
+                    <p className="text-amber-200 text-sm">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAudits.filter(a => a.status === 'completed').length}</p>
+                    <p className="text-amber-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Audits Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Audit', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: ClipboardCheck, label: 'Findings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Users, label: 'Assign', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Upload, label: 'Evidence', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Audit Management</h2>
               <Button>
@@ -862,6 +1050,53 @@ export default function ComplianceClient() {
 
           {/* Policies Tab */}
           <TabsContent value="policies" className="space-y-4">
+            {/* Policies Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Policy Management</h2>
+                  <p className="text-violet-100">PowerDMS-level policy lifecycle management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPolicies.length}</p>
+                    <p className="text-violet-200 text-sm">Policies</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPolicies.filter(p => p.status === 'active').length}</p>
+                    <p className="text-violet-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPolicies.filter(p => p.status === 'pending_review').length}</p>
+                    <p className="text-violet-200 text-sm">Review</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Policies Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Policy', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileText, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: History, label: 'Versions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Users, label: 'Attestation', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Send, label: 'Distribute', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Download, label: 'Export', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Policy Management</h2>
               <Button>
@@ -921,6 +1156,26 @@ export default function ComplianceClient() {
 
           {/* Evidence Tab */}
           <TabsContent value="evidence" className="space-y-4">
+            {/* Evidence Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Evidence Repository</h2>
+                  <p className="text-cyan-100">Box-level evidence collection and storage</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEvidence.length}</p>
+                    <p className="text-cyan-200 text-sm">Evidence</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEvidence.filter(e => e.status === 'approved').length}</p>
+                    <p className="text-cyan-200 text-sm">Approved</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Evidence Repository</h2>
               <Button>

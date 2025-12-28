@@ -988,6 +988,26 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
           {/* Today Tab */}
           <TabsContent value="today" className="space-y-6">
+            {/* Today Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">My Day</h2>
+                  <p className="text-orange-100">Todoist-level daily task planning</p>
+                  <p className="text-orange-200 text-xs mt-1">Focus mode • Smart scheduling • Priority matrix</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{todaysTasks.length}</p>
+                    <p className="text-orange-200 text-sm">Today's Tasks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{todaysTasks.filter(t => t.status === 'completed').length}</p>
+                    <p className="text-orange-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Task List */}
               <div className="lg:col-span-2 space-y-6">
@@ -1199,6 +1219,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
+            {/* Projects Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Project Overview</h2>
+                  <p className="text-blue-100">Asana-level project organization</p>
+                  <p className="text-blue-200 text-xs mt-1">Workspaces • Task grouping • Progress tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{projects.length}</p>
+                    <p className="text-blue-200 text-sm">Projects</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Project List */}
               <div className="space-y-2">
@@ -1287,6 +1323,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
           {/* Labels Tab */}
           <TabsContent value="labels" className="space-y-6">
+            {/* Labels Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Label Management</h2>
+                  <p className="text-pink-100">Notion-level tagging and categorization</p>
+                  <p className="text-pink-200 text-xs mt-1">Color coding • Smart filters • Multi-labels</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{labels.length}</p>
+                    <p className="text-pink-200 text-sm">Labels</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Label List */}
               <div className="space-y-2">
@@ -1349,6 +1401,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
           {/* Filters Tab */}
           <TabsContent value="filters" className="space-y-6">
+            {/* Filters Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Custom Filters</h2>
+                  <p className="text-cyan-100">ClickUp-level saved filter views</p>
+                  <p className="text-cyan-200 text-xs mt-1">Boolean logic • Custom criteria • Quick access</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filters.length}</p>
+                    <p className="text-cyan-200 text-sm">Saved Filters</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filters.map(filter => (
                 <Card key={filter.id} className="cursor-pointer hover:shadow-md transition-all">
@@ -1379,6 +1447,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
+            {/* Calendar Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Calendar View</h2>
+                  <p className="text-purple-100">Google Calendar-level task visualization</p>
+                  <p className="text-purple-200 text-xs mt-1">Week view • Month view • Drag & drop scheduling</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTasks.filter(t => t.dueDate).length}</p>
+                    <p className="text-purple-200 text-sm">Scheduled</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -1441,6 +1525,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Productivity Analytics</h2>
+                  <p className="text-slate-100">RescueTime-level productivity insights</p>
+                  <p className="text-slate-200 text-xs mt-1">Focus time • Completion rates • Trend analysis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round((mockTasks.filter(t => t.status === 'completed').length / mockTasks.length) * 100)}%</p>
+                    <p className="text-slate-200 text-sm">Completion Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>

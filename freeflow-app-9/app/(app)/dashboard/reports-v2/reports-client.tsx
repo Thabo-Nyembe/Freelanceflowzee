@@ -534,6 +534,27 @@ export default function ReportsClient() {
 
           {/* Dashboards Tab */}
           <TabsContent value="dashboard" className="mt-6">
+            {/* Dashboard Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Report Dashboards</h2>
+                  <p className="text-blue-100">Looker-level dashboard creation and management</p>
+                  <p className="text-blue-200 text-xs mt-1">Interactive charts • Drill-down • Real-time data</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{dashboards.length}</p>
+                    <p className="text-blue-200 text-sm">Dashboards</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{folders.length}</p>
+                    <p className="text-blue-200 text-sm">Folders</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Folders Sidebar */}
               <div className="col-span-3">
@@ -626,6 +647,27 @@ export default function ReportsClient() {
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="mt-6">
+            {/* Reports Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Report Library</h2>
+                  <p className="text-purple-100">Tableau-level report generation and sharing</p>
+                  <p className="text-purple-200 text-xs mt-1">PDF export • Scheduling • Team sharing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{reports.length}</p>
+                    <p className="text-purple-200 text-sm">Reports</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{reports.filter(r => r.favorite).length}</p>
+                    <p className="text-purple-200 text-sm">Favorites</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -698,6 +740,23 @@ export default function ReportsClient() {
 
           {/* Builder Tab */}
           <TabsContent value="builder" className="mt-6">
+            {/* Builder Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Report Builder</h2>
+                  <p className="text-emerald-100">Power BI-level drag-and-drop report creation</p>
+                  <p className="text-emerald-200 text-xs mt-1">Visual editor • Custom queries • Live preview</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{datasources.length}</p>
+                    <p className="text-emerald-200 text-sm">Data Sources</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <Card className="col-span-2 border-gray-200 dark:border-gray-700">
                 <CardHeader>
@@ -747,6 +806,27 @@ export default function ReportsClient() {
 
           {/* Data Sources Tab */}
           <TabsContent value="datasources" className="mt-6">
+            {/* Datasources Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Data Sources</h2>
+                  <p className="text-amber-100">Metabase-level data connectivity and management</p>
+                  <p className="text-amber-200 text-xs mt-1">Multiple databases • API connectors • Real-time sync</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{datasources.length}</p>
+                    <p className="text-amber-200 text-sm">Connected</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{datasources.filter(d => d.status === 'connected').length}</p>
+                    <p className="text-amber-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -814,6 +894,27 @@ export default function ReportsClient() {
 
           {/* Scheduled Tab */}
           <TabsContent value="scheduled" className="mt-6">
+            {/* Scheduled Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Scheduled Reports</h2>
+                  <p className="text-pink-100">Automated report delivery and distribution</p>
+                  <p className="text-pink-200 text-xs mt-1">Email delivery • Slack integration • PDF/CSV export</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{scheduledReports.length}</p>
+                    <p className="text-pink-200 text-sm">Scheduled</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{scheduledReports.filter(s => s.status === 'active').length}</p>
+                    <p className="text-pink-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">

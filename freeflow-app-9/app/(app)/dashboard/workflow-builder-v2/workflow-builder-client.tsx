@@ -664,6 +664,53 @@ export default function WorkflowBuilderClient() {
 
           {/* Workflows Tab */}
           <TabsContent value="workflows">
+            {/* Workflows Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Automation</h2>
+                  <p className="text-violet-100">n8n-level automation with visual workflow builder and 200+ integrations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{workflows.length}</p>
+                    <p className="text-violet-200 text-sm">Workflows</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{workflows.filter(w => w.status === 'active').length}</p>
+                    <p className="text-violet-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{executions.length}</p>
+                    <p className="text-violet-200 text-sm">Executions</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Workflows Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Workflow', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Play, label: 'Run All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Pause, label: 'Pause All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="relative flex-1">
@@ -755,6 +802,53 @@ export default function WorkflowBuilderClient() {
 
           {/* Executions Tab */}
           <TabsContent value="executions">
+            {/* Executions Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Execution Monitor</h2>
+                  <p className="text-emerald-100">Real-time execution tracking with logs, metrics, and error handling</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'success').length}</p>
+                    <p className="text-emerald-200 text-sm">Successful</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'running').length}</p>
+                    <p className="text-emerald-200 text-sm">Running</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'error').length}</p>
+                    <p className="text-emerald-200 text-sm">Failed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Executions Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Play, label: 'Run Now', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Pause, label: 'Stop All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Bug, label: 'Debug', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: Eye, label: 'Live View', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Export Logs', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Trash2, label: 'Clear', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Execution History</CardTitle>
@@ -800,6 +894,53 @@ export default function WorkflowBuilderClient() {
 
           {/* Nodes Tab */}
           <TabsContent value="nodes">
+            {/* Nodes Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Node Library</h2>
+                  <p className="text-blue-100">200+ pre-built integrations and custom node development</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{NODE_DEFINITIONS.filter(n => n.category === 'trigger').length}</p>
+                    <p className="text-blue-200 text-sm">Triggers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{NODE_DEFINITIONS.filter(n => n.category === 'action').length}</p>
+                    <p className="text-blue-200 text-sm">Actions</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{NODE_DEFINITIONS.length}</p>
+                    <p className="text-blue-200 text-sm">Total</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Nodes Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Create Node', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Code, label: 'Custom Code', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Webhook, label: 'Webhooks', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Database, label: 'Data', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Mail, label: 'Email', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Globe, label: 'HTTP', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Star, label: 'Favorites', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="space-y-6">
               <div className="flex gap-2 flex-wrap">
                 {['all', 'trigger', 'action', 'condition', 'loop', 'control'].map(cat => (
@@ -847,6 +988,49 @@ export default function WorkflowBuilderClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates">
+            {/* Templates Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Templates</h2>
+                  <p className="text-amber-100">Pre-built automations to jumpstart your workflows in minutes</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-amber-200 text-sm">Templates</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTemplates.filter(t => t.featured).length}</p>
+                    <p className="text-amber-200 text-sm">Featured</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Templates Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Sparkles, label: 'Featured', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Star, label: 'Popular', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Clock, label: 'Recent', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Mail, label: 'Email', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Database, label: 'Data Sync', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: MessageSquare, label: 'Chat', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Upload, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Share2, label: 'Share', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               {mockTemplates.map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -881,6 +1065,49 @@ export default function WorkflowBuilderClient() {
 
           {/* Credentials Tab */}
           <TabsContent value="credentials">
+            {/* Credentials Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Credentials Vault</h2>
+                  <p className="text-slate-100">Enterprise-grade secret management with encryption at rest</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCredentials.length}</p>
+                    <p className="text-slate-200 text-sm">Credentials</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCredentials.filter(c => c.isShared).length}</p>
+                    <p className="text-slate-200 text-sm">Shared</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Credentials Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Key', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Key, label: 'API Keys', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+                { icon: Lock, label: 'OAuth', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
+                { icon: Shield, label: 'Security', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
+                { icon: Users, label: 'Share', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400' },
+                { icon: RefreshCw, label: 'Rotate', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Download, label: 'Export', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -920,6 +1147,49 @@ export default function WorkflowBuilderClient() {
 
           {/* Variables Tab */}
           <TabsContent value="variables">
+            {/* Variables Banner */}
+            <div className="bg-gradient-to-r from-teal-600 via-emerald-600 to-green-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Environment Variables</h2>
+                  <p className="text-teal-100">Global configuration and secrets management across workflows</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVariables.length}</p>
+                    <p className="text-teal-200 text-sm">Variables</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVariables.filter(v => v.isSecret).length}</p>
+                    <p className="text-teal-200 text-sm">Secrets</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Variables Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Variable', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Lock, label: 'Add Secret', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Upload, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Download, label: 'Export', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Eye, label: 'View All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -963,6 +1233,49 @@ export default function WorkflowBuilderClient() {
 
           {/* Settings Tab - Make.com Level Configuration */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-slate-700 to-zinc-700 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Settings</h2>
+                  <p className="text-gray-100">Configure execution, notifications, security, and advanced options</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-gray-200 text-sm">Categories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">24</p>
+                    <p className="text-gray-200 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+                { icon: Play, label: 'Execution', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
+                { icon: Shield, label: 'Security', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
+                { icon: Network, label: 'Integrations', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400' },
+                { icon: Sliders, label: 'Advanced', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Save, label: 'Save All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: RotateCcw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Settings Sidebar */}
               <div className="col-span-12 md:col-span-3">

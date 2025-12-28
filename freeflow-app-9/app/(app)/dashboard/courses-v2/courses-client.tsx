@@ -673,6 +673,22 @@ export default function CoursesClient() {
 
           {/* Courses Tab */}
           <TabsContent value="courses" className="space-y-4">
+            {/* Courses Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Course Library</h2>
+                  <p className="text-orange-100">Udemy-level course management</p>
+                  <p className="text-orange-200 text-xs mt-1">Curriculum builder • Student tracking • Certificates</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{courses.length}</p>
+                    <p className="text-orange-200 text-sm">Courses</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex gap-4 mb-4">
               <select
                 value={statusFilter}

@@ -310,6 +310,53 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
           {/* Tickets Tab */}
           <TabsContent value="tickets">
+            {/* Tickets Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Tickets</h2>
+                  <p className="text-blue-100">Zendesk-level ticket management and resolution</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredTickets.length}</p>
+                    <p className="text-blue-200 text-sm">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredTickets.filter(t => t.status === 'open').length}</p>
+                    <p className="text-blue-200 text-sm">Open</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredTickets.filter(t => t.priority === 'urgent').length}</p>
+                    <p className="text-blue-200 text-sm">Urgent</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tickets Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: MessageSquare, label: 'New Ticket', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Inbox, label: 'Inbox', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Clock, label: 'Pending', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: CheckCircle, label: 'Resolved', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Users, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Tag, label: 'Tags', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex gap-6">
               {/* Ticket List */}
               <div className="flex-1">
@@ -499,6 +546,49 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
           {/* Agents Tab */}
           <TabsContent value="agents">
+            {/* Agents Overview Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Agents</h2>
+                  <p className="text-green-100">Manage your support team performance</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{agents.length}</p>
+                    <p className="text-green-200 text-sm">Agents</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{agents.filter(a => a.status === 'online').length}</p>
+                    <p className="text-green-200 text-sm">Online</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Agents Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: User, label: 'Add Agent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Users, label: 'Teams', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Target, label: 'Goals', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Star, label: 'Ratings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Headphones, label: 'Training', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               {agents.map(agent => (
                 <Card key={agent.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedAgent(agent); setShowAgentDialog(true) }}>
@@ -556,6 +646,49 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
           {/* Customers Tab */}
           <TabsContent value="customers">
+            {/* Customers Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Customer Directory</h2>
+                  <p className="text-purple-100">Complete customer relationship management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{customers.length}</p>
+                    <p className="text-purple-200 text-sm">Customers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{customers.filter(c => c.tier === 'enterprise').length}</p>
+                    <p className="text-purple-200 text-sm">Enterprise</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Customers Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: User, label: 'Add', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Mail, label: 'Email All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Tag, label: 'Segments', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Star, label: 'VIP', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: TrendingUp, label: 'Insights', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: FileText, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Globe, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -603,6 +736,49 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
+            {/* Analytics Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Analytics</h2>
+                  <p className="text-amber-100">Track performance and identify trends</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">94%</p>
+                    <p className="text-amber-200 text-sm">CSAT</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">2.4h</p>
+                    <p className="text-amber-200 text-sm">Avg Response</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: FileText, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <Card className="col-span-2">
                 <CardHeader>
@@ -700,6 +876,49 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Settings</h2>
+                  <p className="text-slate-200">Zendesk-level configuration and preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-slate-200 text-sm">Setting Groups</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">48+</p>
+                    <p className="text-slate-200 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Headphones, label: 'Channels', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Timer, label: 'SLA', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Zap, label: 'Automation', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Link2, label: 'Integrations', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Shield, label: 'Security', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Bell, label: 'Notifications', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
               {/* Settings Sub-tabs */}
               <div className="border-b border-gray-200 dark:border-gray-700">
@@ -1470,6 +1689,173 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   </div>
                 </div>
               </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Detail Dialog */}
+      <Dialog open={showAgentDialog} onOpenChange={setShowAgentDialog}>
+        <DialogContent className="max-w-3xl">
+          {selectedAgent && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={selectedAgent.avatar} />
+                    <AvatarFallback>{selectedAgent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <span className="text-xl">{selectedAgent.name}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline" className="capitalize">{selectedAgent.role}</Badge>
+                      <div className={`h-2 w-2 rounded-full ${getAgentStatusColor(selectedAgent.status)}`} />
+                      <span className="text-sm text-gray-500 capitalize">{selectedAgent.status}</span>
+                    </div>
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Agent Stats */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Performance Metrics</h4>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-blue-200 dark:border-blue-700">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{selectedAgent.activeTickets}</p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400">Active Tickets</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border-green-200 dark:border-green-700">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{selectedAgent.resolvedToday}</p>
+                        <p className="text-xs text-green-600 dark:text-green-400">Resolved Today</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">{selectedAgent.avgResponseTime}m</p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400">Avg Response</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border-purple-200 dark:border-purple-700">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
+                          <Star className="h-5 w-5 fill-current" />
+                          {selectedAgent.satisfactionScore}
+                        </p>
+                        <p className="text-xs text-purple-600 dark:text-purple-400">CSAT Score</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Weekly Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-500">Response Time</span>
+                            <span className="font-medium text-green-600">Excellent</span>
+                          </div>
+                          <Progress value={92} className="h-2" />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-500">Resolution Rate</span>
+                            <span className="font-medium text-green-600">Outstanding</span>
+                          </div>
+                          <Progress value={88} className="h-2" />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-500">Customer Satisfaction</span>
+                            <span className="font-medium text-green-600">Top Performer</span>
+                          </div>
+                          <Progress value={95} className="h-2" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Agent Info */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Agent Details</h4>
+
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          Email
+                        </span>
+                        <span className="font-medium">{selectedAgent.email}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          Avg Resolution
+                        </span>
+                        <span className="font-medium">{selectedAgent.avgResolutionTime}m</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Languages className="h-4 w-4" />
+                        Languages
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedAgent.languages.map((lang, i) => (
+                          <Badge key={i} variant="secondary">{lang}</Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Zap className="h-4 w-4" />
+                        Skills & Expertise
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedAgent.skills.map((skill, i) => (
+                          <Badge key={i} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">{skill}</Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <DialogFooter className="mt-4">
+                <div className="flex items-center gap-3 w-full">
+                  <Button variant="outline" className="flex-1">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    View Schedule
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Full Report
+                  </Button>
+                  <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send Message
+                  </Button>
+                </div>
+              </DialogFooter>
             </>
           )}
         </DialogContent>

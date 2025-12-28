@@ -319,6 +319,26 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
           {/* Expense Reports Tab */}
           <TabsContent value="reports">
+            {/* Reports Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Expense Reports</h2>
+                  <p className="text-emerald-100">Expensify-level expense management</p>
+                  <p className="text-emerald-200 text-xs mt-1">Receipt scanning • Approval workflows • Reimbursements</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{expenseReports.length}</p>
+                    <p className="text-emerald-200 text-sm">Reports</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${expenseReports.reduce((sum, r) => sum + r.total, 0).toLocaleString()}</p>
+                    <p className="text-emerald-200 text-sm">Total</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex gap-6">
               {/* Report List */}
               <div className="flex-1">

@@ -433,6 +433,27 @@ export default function EmployeesClient() {
 
           {/* Directory Tab */}
           <TabsContent value="directory" className="mt-6 space-y-6">
+            {/* Directory Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Employee Directory</h2>
+                  <p className="text-blue-100">BambooHR-level employee management and search</p>
+                  <p className="text-blue-200 text-xs mt-1">Advanced search • Org chart • Team views</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredEmployees.length}</p>
+                    <p className="text-blue-200 text-sm">Employees</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{employees.filter(e => e.status === 'active').length}</p>
+                    <p className="text-blue-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 flex-wrap">
               {['all', 'Engineering', 'Design', 'Product', 'Marketing', 'Sales'].map(dept => (
                 <Button key={dept} variant={departmentFilter === dept.toLowerCase() ? 'default' : 'outline'} size="sm" onClick={() => setDepartmentFilter(dept.toLowerCase())} className={departmentFilter === dept.toLowerCase() ? 'bg-blue-600' : ''}>{dept === 'all' ? 'All Departments' : dept}</Button>
@@ -471,6 +492,27 @@ export default function EmployeesClient() {
 
           {/* Time Off Tab */}
           <TabsContent value="time-off" className="mt-6 space-y-6">
+            {/* Time Off Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Time Off Management</h2>
+                  <p className="text-emerald-100">Gusto-level PTO tracking and approval workflows</p>
+                  <p className="text-emerald-200 text-xs mt-1">Leave balances • Request approvals • Calendar sync</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{timeOffRequests.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-emerald-200 text-sm">Pending</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{timeOffRequests.length}</p>
+                    <p className="text-emerald-200 text-sm">Requests</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
               {[{ type: 'Vacation', icon: Plane, available: 12, used: 3, total: 15, color: 'blue' }, { type: 'Sick Leave', icon: Heart, available: 8, used: 2, total: 10, color: 'red' }, { type: 'Personal', icon: Coffee, available: 3, used: 0, total: 3, color: 'purple' }, { type: 'Parental', icon: Home, available: 12, used: 0, total: 12, color: 'green' }].map(balance => (
                 <Card key={balance.type} className="border-gray-200 dark:border-gray-700">
@@ -498,6 +540,27 @@ export default function EmployeesClient() {
 
           {/* Performance Tab */}
           <TabsContent value="performance" className="mt-6 space-y-6">
+            {/* Performance Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Performance Management</h2>
+                  <p className="text-orange-100">Lattice-level reviews and goal tracking</p>
+                  <p className="text-orange-200 text-xs mt-1">360° reviews • OKRs • Continuous feedback</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{performanceReviews.length}</p>
+                    <p className="text-orange-200 text-sm">Reviews</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{performanceReviews.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-orange-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex gap-2">
                 {['reviews', 'goals', 'metrics'].map(tab => (
@@ -603,6 +666,27 @@ export default function EmployeesClient() {
 
           {/* Onboarding Tab */}
           <TabsContent value="onboarding" className="mt-6 space-y-6">
+            {/* Onboarding Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Employee Onboarding</h2>
+                  <p className="text-pink-100">Rippling-level onboarding automation</p>
+                  <p className="text-pink-200 text-xs mt-1">Task checklists • IT provisioning • Welcome workflows</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockOnboardingTasks.length}</p>
+                    <p className="text-pink-200 text-sm">Tasks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockOnboardingTasks.filter(t => t.completed).length}</p>
+                    <p className="text-pink-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <Card className="md:col-span-2">
                 <CardHeader><CardTitle>Onboarding Progress - Jordan Lee</CardTitle></CardHeader>
@@ -632,6 +716,27 @@ export default function EmployeesClient() {
 
           {/* Compensation Tab */}
           <TabsContent value="compensation" className="mt-6 space-y-6">
+            {/* Compensation Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Compensation & Benefits</h2>
+                  <p className="text-purple-100">Carta-level compensation and equity management</p>
+                  <p className="text-purple-200 text-xs mt-1">Salary bands • Benefits admin • Equity tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(employees.reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-purple-200 text-sm">Total Payroll</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(employees.reduce((sum, e) => sum + e.salary, 0) / employees.length / 1000).toFixed(0)}K</p>
+                    <p className="text-purple-200 text-sm">Avg Salary</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex gap-2">
                 {['salary', 'benefits', 'equity'].map(tab => (
@@ -754,6 +859,27 @@ export default function EmployeesClient() {
 
           {/* Learning Tab */}
           <TabsContent value="learning" className="mt-6 space-y-6">
+            {/* Learning Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Learning & Development</h2>
+                  <p className="text-cyan-100">Udemy Business-level training management</p>
+                  <p className="text-cyan-200 text-xs mt-1">Course library • Skill tracking • Certifications</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCourses.length}</p>
+                    <p className="text-cyan-200 text-sm">Courses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCourses.filter(c => c.status === 'completed').length}</p>
+                    <p className="text-cyan-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
               <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockCourses.length}</p><p className="text-sm text-gray-500">Total Courses</p></CardContent></Card>
               <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">{mockCourses.filter(c => c.status === 'completed').length}</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>

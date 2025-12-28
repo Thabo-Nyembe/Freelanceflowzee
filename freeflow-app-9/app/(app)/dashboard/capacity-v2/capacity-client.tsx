@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Settings, Bell, Calendar, Users, Clock, Briefcase, Globe, Zap, Download, Upload, RefreshCw, Plus, Link2, BarChart3, Shield, Palette, AlertTriangle } from 'lucide-react'
+import { Settings, Bell, Calendar, Users, Clock, Briefcase, Globe, Zap, Download, Upload, RefreshCw, Plus, Link2, BarChart3, Shield, Palette, AlertTriangle, UserPlus, Shuffle, Mail, Target, TrendingUp } from 'lucide-react'
 
 // Resource Guru / Float level interfaces
 interface TeamMember {
@@ -404,6 +404,50 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Capacity Overview</h2>
+                  <p className="text-indigo-100">Resource Guru-level capacity planning and utilization</p>
+                  <p className="text-indigo-200 text-xs mt-1">Team workload • Project allocation • Utilization rates</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTeamMembers.length}</p>
+                    <p className="text-indigo-200 text-sm">Team Members</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-indigo-200 text-sm">Active Projects</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round(mockTeamMembers.reduce((s, m) => s + m.utilizationRate, 0) / mockTeamMembers.length)}%</p>
+                    <p className="text-indigo-200 text-sm">Avg Utilization</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Overview Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Users, label: 'Team View', color: 'text-indigo-600 dark:text-indigo-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Calendar, label: 'Schedule', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: TrendingUp, label: 'Forecast', color: 'text-green-600 dark:text-green-400' },
+                { icon: AlertTriangle, label: 'Overload', color: 'text-red-600 dark:text-red-400' },
+                { icon: Target, label: 'Optimize', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Team Utilization */}
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -493,6 +537,50 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
           {/* Team Tab */}
           <TabsContent value="team" className="space-y-6">
+            {/* Team Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Team Capacity</h2>
+                  <p className="text-blue-100">Float-level team availability and allocation tracking</p>
+                  <p className="text-blue-200 text-xs mt-1">Skill matrix • Availability • Workload balancing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTeamMembers.filter(m => m.status === 'available').length}</p>
+                    <p className="text-blue-200 text-sm">Available</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTeamMembers.filter(m => m.utilizationRate > 85).length}</p>
+                    <p className="text-blue-200 text-sm">High Load</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round(mockTeamMembers.reduce((s, m) => s + m.availableHours, 0))}h</p>
+                    <p className="text-blue-200 text-sm">Free Hours</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Team Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: UserPlus, label: 'Add Member', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Users, label: 'View All', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: BarChart3, label: 'Utilization', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Clock, label: 'Time Off', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: Zap, label: 'Skills', color: 'text-green-600 dark:text-green-400' },
+                { icon: Shuffle, label: 'Reassign', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400' },
+                { icon: Mail, label: 'Notify', color: 'text-pink-600 dark:text-pink-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex gap-3">
                 <select
@@ -668,6 +756,31 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
+            {/* Projects Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Project Allocation</h2>
+                  <p className="text-emerald-100">Harvest-level project resource allocation and tracking</p>
+                  <p className="text-emerald-200 text-xs mt-1">Budget tracking • Team assignments • Milestone progress</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-emerald-200 text-sm">Projects</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-emerald-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'at_risk').length}</p>
+                    <p className="text-emerald-200 text-sm">At Risk</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex gap-3">
                 <select
@@ -811,6 +924,27 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
           {/* Schedule Tab */}
           <TabsContent value="schedule" className="space-y-6">
+            {/* Schedule Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Capacity Schedule</h2>
+                  <p className="text-amber-100">Teamup-level visual scheduling and timeline management</p>
+                  <p className="text-amber-200 text-xs mt-1">Drag & drop • Gantt views • Resource timelines</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">52</p>
+                    <p className="text-amber-200 text-sm">Week</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTeamMembers.length * 40}h</p>
+                    <p className="text-amber-200 text-sm">Total Capacity</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Schedule</h3>
@@ -885,6 +1019,27 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
           {/* Forecast Tab */}
           <TabsContent value="forecast" className="space-y-6">
+            {/* Forecast Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Capacity Forecasting</h2>
+                  <p className="text-violet-100">Forecast-level AI-powered capacity prediction</p>
+                  <p className="text-violet-200 text-xs mt-1">Predictive analytics • Trend analysis • Hiring recommendations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockForecast.length}</p>
+                    <p className="text-violet-200 text-sm">Weeks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockForecast.filter(f => f.predictedUtilization > 90).length}</p>
+                    <p className="text-violet-200 text-sm">Overloaded</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">6-Week Capacity Forecast</h3>
 
@@ -971,6 +1126,27 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Capacity Settings</h2>
+                  <p className="text-slate-300">Configure capacity thresholds and notification preferences</p>
+                  <p className="text-slate-400 text-xs mt-1">Alerts • Working hours • Holidays • Integrations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">40h</p>
+                    <p className="text-slate-400 text-sm">Work Week</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">85%</p>
+                    <p className="text-slate-400 text-sm">Target</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
               {/* Settings Sub-tabs */}
               <div className="border-b border-gray-200 dark:border-gray-700">

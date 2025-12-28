@@ -67,8 +67,16 @@ import {
   Receipt,
   CreditCard,
   Wallet,
-  Banknote
+  Banknote,
+  Sliders,
+  Terminal,
+  Webhook,
+  Key,
+  Network
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type RenewalStatus = 'upcoming' | 'in_progress' | 'negotiating' | 'at_risk' | 'won' | 'lost' | 'churned'
@@ -547,6 +555,7 @@ interface RenewalsClientProps {
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<RenewalStatus | 'all'>('all')
   const [selectedRenewal, setSelectedRenewal] = useState<Renewal | null>(null)
@@ -768,6 +777,53 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="mt-6">
+            {/* Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Renewal Overview</h2>
+                  <p className="text-blue-100">Gainsight-level renewal management and forecasting</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.totalValue.toLocaleString()}</p>
+                    <p className="text-blue-200 text-sm">Pipeline Value</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.renewalRate}%</p>
+                    <p className="text-blue-200 text-sm">Renewal Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.atRiskCount}</p>
+                    <p className="text-blue-200 text-sm">At Risk</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Overview Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: RefreshCw, label: 'New Renewal', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Target, label: 'Forecast', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: AlertTriangle, label: 'At Risk', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Play, label: 'Playbooks', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Users, label: 'Customers', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 {/* Renewal Pipeline */}
@@ -1074,6 +1130,20 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
           {/* Customers Tab */}
           <TabsContent value="customers" className="mt-6">
+            {/* Customers Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Customer Accounts</h2>
+                  <p className="text-purple-100">Manage customer health and renewal readiness</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold">{renewals.length}</p>
+                  <p className="text-purple-200 text-sm">Active Accounts</p>
+                </div>
+              </div>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Customer Accounts</CardTitle>
@@ -1251,56 +1321,294 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Renewal Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { title: 'Auto-create renewals', description: '90 days before expiration', enabled: true },
-                    { title: 'Risk alerts', description: 'Notify when health drops below 50', enabled: true },
-                    { title: 'Escalation rules', description: 'Auto-escalate at-risk accounts', enabled: false },
-                    { title: 'Renewal reminders', description: 'Weekly pipeline digest', enabled: true }
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div>
-                        <p className="font-medium">{setting.title}</p>
-                        <p className="text-sm text-muted-foreground">{setting.description}</p>
-                      </div>
-                      <div className={`w-10 h-6 rounded-full transition-colors ${setting.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                        <div className={`w-4 h-4 rounded-full bg-white shadow mt-1 transition-transform ${setting.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Renewal Settings</h2>
+                  <p className="text-slate-200">Configure your renewal management preferences</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notification Preferences</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { icon: <Bell className="w-4 h-4" />, title: 'Renewal due reminders', enabled: true },
-                    { icon: <AlertTriangle className="w-4 h-4" />, title: 'At-risk alerts', enabled: true },
-                    { icon: <CheckCircle className="w-4 h-4" />, title: 'Won/Lost notifications', enabled: true },
-                    { icon: <Mail className="w-4 h-4" />, title: 'Weekly summary email', enabled: false }
-                  ].map((pref, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                          {pref.icon}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'automation', label: 'Automation', icon: Zap },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="h-5 w-5 text-blue-600" />
+                          Renewal Defaults
+                        </CardTitle>
+                        <CardDescription>Default settings for new renewals</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Renewal Period</Label>
+                            <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                              <option value="1">1 Year</option>
+                              <option value="2">2 Years</option>
+                              <option value="3">3 Years</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Advance Notice (Days)</Label>
+                            <Input defaultValue="90" type="number" className="mt-1" />
+                          </div>
                         </div>
-                        <span className="font-medium">{pref.title}</span>
-                      </div>
-                      <div className={`w-10 h-6 rounded-full transition-colors ${pref.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                        <div className={`w-4 h-4 rounded-full bg-white shadow mt-1 transition-transform ${pref.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-create Renewal Opportunities</Label>
+                            <p className="text-sm text-gray-500">Automatically create when contract nears expiration</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Gauge className="h-5 h-5 text-green-600" />
+                          Health Score Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Healthy Threshold</Label>
+                            <Input defaultValue="70" type="number" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>At-Risk Threshold</Label>
+                            <Input defaultValue="40" type="number" className="mt-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Automation Settings */}
+                {settingsTab === 'automation' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="h-5 w-5 text-amber-600" />
+                          Workflow Automation
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Auto-assign renewals', desc: 'Based on account owner' },
+                          { label: 'Auto-escalate at-risk', desc: 'When health drops below threshold' },
+                          { label: 'Auto-trigger playbooks', desc: 'Based on renewal stage' },
+                          { label: 'Auto-update forecasts', desc: 'When renewal status changes' },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>{item.label}</Label>
+                              <p className="text-sm text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={idx < 2} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-purple-600" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Renewal due reminders', desc: 'Notify before renewal date' },
+                          { label: 'At-risk alerts', desc: 'When accounts become at-risk' },
+                          { label: 'Won/Lost notifications', desc: 'When renewal status changes' },
+                          { label: 'Weekly pipeline digest', desc: 'Summary of renewal pipeline' },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>{item.label}</Label>
+                              <p className="text-sm text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={idx < 3} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5 text-indigo-600" />
+                          Connected Platforms
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Salesforce', status: 'Connected', icon: Building2 },
+                          { name: 'Gainsight', status: 'Not Connected', icon: Gauge },
+                          { name: 'HubSpot', status: 'Connected', icon: Target },
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <integration.icon className="h-6 w-6 text-gray-600" />
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.status}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.status === 'Connected' ? 'outline' : 'default'} size="sm">
+                              {integration.status === 'Connected' ? 'Manage' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5 text-red-600" />
+                          Access Control
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Require approval for discounts</Label>
+                            <p className="text-sm text-gray-500">Discounts over 15% need approval</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Audit logging</Label>
+                            <p className="text-sm text-gray-500">Track all renewal changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="h-5 w-5 text-gray-600" />
+                          Advanced Options
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Multi-year renewals</Label>
+                            <p className="text-sm text-gray-500">Enable multi-year contract options</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Custom health metrics</Label>
+                            <p className="text-sm text-gray-500">Define custom health score factors</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Archive Old Renewals</Label>
+                            <p className="text-sm text-red-600">Archive renewals older than 2 years</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Archive</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Reset Settings</Label>
+                            <p className="text-sm text-red-600">Reset to default configuration</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -463,6 +463,27 @@ export default function ThirdPartyIntegrationsClient() {
           </TabsList>
 
           <TabsContent value="zaps" className="space-y-6">
+            {/* Zaps Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Automation Zaps</h2>
+                  <p className="text-orange-100">Zapier-level workflow automation and triggers</p>
+                  <p className="text-orange-200 text-xs mt-1">Multi-step workflows • Conditional logic • Error handling</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredZaps.length}</p>
+                    <p className="text-orange-200 text-sm">Zaps</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{zaps.filter(z => z.status === 'active').length}</p>
+                    <p className="text-orange-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -554,6 +575,27 @@ export default function ThirdPartyIntegrationsClient() {
           </TabsContent>
 
           <TabsContent value="apps" className="space-y-6">
+            {/* Apps Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Directory</h2>
+                  <p className="text-purple-100">Workato-level app connectivity and ecosystem</p>
+                  <p className="text-purple-200 text-xs mt-1">1000+ apps • OAuth • API keys • Webhooks</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApps.length}</p>
+                    <p className="text-purple-200 text-sm">Available</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApps.filter(a => a.connected).length}</p>
+                    <p className="text-purple-200 text-sm">Connected</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -633,6 +675,27 @@ export default function ThirdPartyIntegrationsClient() {
           </TabsContent>
 
           <TabsContent value="connections" className="space-y-6">
+            {/* Connections Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Active Connections</h2>
+                  <p className="text-emerald-100">Tray.io-level connection management and monitoring</p>
+                  <p className="text-emerald-200 text-xs mt-1">Health checks • Credential rotation • Usage stats</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{connections.length}</p>
+                    <p className="text-emerald-200 text-sm">Connections</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{connections.filter(c => c.status === 'active').length}</p>
+                    <p className="text-emerald-200 text-sm">Healthy</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 {connections.map(conn => (
@@ -739,6 +802,33 @@ export default function ThirdPartyIntegrationsClient() {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
+            {/* History Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Execution History</h2>
+                  <p className="text-pink-100">n8n-level execution logs and debugging</p>
+                  <p className="text-pink-200 text-xs mt-1">Step-by-step logs • Error replay • Data inspection</p>
+                  <div className="flex gap-2 mt-3">
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Real-time</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Retry Failed</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Export Logs</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Debug Mode</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{executionHistory.length}</p>
+                    <p className="text-pink-200 text-sm">Executions</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{executionHistory.filter(e => e.status === 'success').length}</p>
+                    <p className="text-pink-200 text-sm">Successful</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Execution History</h2>
               <div className="flex items-center gap-2">

@@ -523,6 +523,53 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Dashboard Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Document Management</h2>
+                  <p className="text-blue-100">Google Docs-level collaboration with real-time editing and versioning</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDocuments.length}</p>
+                    <p className="text-blue-200 text-sm">Documents</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockFolders.length}</p>
+                    <p className="text-blue-200 text-sm">Folders</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{((storageInfo.used / storageInfo.total) * 100).toFixed(0)}%</p>
+                    <p className="text-blue-200 text-sm">Storage</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FilePlus, label: 'New Doc', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Upload, label: 'Upload', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: FolderPlus, label: 'New Folder', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Share2, label: 'Share', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Clock, label: 'Recent', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Documents */}
               <Card className="lg:col-span-2">
@@ -628,6 +675,49 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
           {/* Documents Tab */}
           <TabsContent value="documents">
+            {/* Documents Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">All Documents</h2>
+                  <p className="text-emerald-100">Browse, search, and manage all your documents in one place</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredDocuments.length}</p>
+                    <p className="text-emerald-200 text-sm">Files</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDocuments.filter(d => d.starred).length}</p>
+                    <p className="text-emerald-200 text-sm">Starred</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Documents Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FilePlus, label: 'New Doc', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: FileSpreadsheet, label: 'Spreadsheet', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Presentation, label: 'Slides', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Upload, label: 'Upload', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: Download, label: 'Export', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Move, label: 'Move', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>All Documents</CardTitle>
@@ -720,6 +810,49 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
           {/* Folders Tab */}
           <TabsContent value="folders">
+            {/* Folders Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Folder Organization</h2>
+                  <p className="text-amber-100">Organize your documents with smart folders and nested hierarchies</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockFolders.length}</p>
+                    <p className="text-amber-200 text-sm">Folders</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockFolders.filter(f => f.shared).length}</p>
+                    <p className="text-amber-200 text-sm">Shared</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Folders Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FolderPlus, label: 'New Folder', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: FolderTree, label: 'Organize', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Share2, label: 'Share', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Move, label: 'Move', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Palette, label: 'Color', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {mockFolders.map(folder => (
                 <Card key={folder.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedFolder(folder)}>
@@ -754,6 +887,49 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Document Templates</h2>
+                  <p className="text-violet-100">Start with pre-built templates to save time and ensure consistency</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-violet-200 text-sm">Templates</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTemplates.filter(t => t.isPremium).length}</p>
+                    <p className="text-violet-200 text-sm">Premium</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Templates Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FilePlus, label: 'Create New', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Sparkles, label: 'AI Generate', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Star, label: 'Premium', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: FileText, label: 'Documents', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: FileSpreadsheet, label: 'Spreadsheets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Presentation, label: 'Slides', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Share2, label: 'Share', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Document Templates</h2>
@@ -792,6 +968,49 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
           {/* Shared Tab */}
           <TabsContent value="shared">
+            {/* Shared Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Shared Documents</h2>
+                  <p className="text-cyan-100">Collaborate on documents shared with you by team members</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDocuments.filter(d => d.shared).length}</p>
+                    <p className="text-cyan-200 text-sm">Shared</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDocuments.filter(d => d.sharingType === 'team').length}</p>
+                    <p className="text-cyan-200 text-sm">Team</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Shared Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Users, label: 'Team Files', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Globe, label: 'Public', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: Link2, label: 'Get Link', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Mail, label: 'Email', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Lock, label: 'Private', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Shield, label: 'Permissions', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Download, label: 'Download', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Shared with Me</CardTitle>
@@ -824,6 +1043,49 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
           {/* Settings Tab */}
           {/* Settings Tab - Google Docs Level with 6 Sub-tabs */}
           <TabsContent value="settings">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-slate-700 to-zinc-700 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Document Settings</h2>
+                  <p className="text-gray-100">Configure storage, notifications, sharing, and advanced options</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-gray-200 text-sm">Categories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">18</p>
+                    <p className="text-gray-200 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
+                { icon: HardDrive, label: 'Storage', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
+                { icon: Share2, label: 'Sharing', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
+                { icon: Zap, label: 'Integrations', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Lock, label: 'Security', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Download, label: 'Export', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex gap-6">
               {/* Settings Sidebar */}
               <div className="w-64 shrink-0">

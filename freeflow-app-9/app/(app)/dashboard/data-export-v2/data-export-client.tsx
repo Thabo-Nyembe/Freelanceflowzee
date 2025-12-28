@@ -555,7 +555,45 @@ export default function DataExportClient() {
           </TabsList>
 
           {/* Pipelines Tab */}
-          <TabsContent value="pipelines" className="space-y-4">
+          <TabsContent value="pipelines" className="space-y-6">
+            {/* Pipelines Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Data Pipelines</h3>
+                  <p className="text-green-100">Manage your ETL workflows and data synchronization</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockPipelines.length}</p>
+                    <p className="text-green-200 text-sm">Active Pipelines</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pipelines Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Pipeline', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: GitBranch, label: 'Clone', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Download, label: 'Export', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: History, label: 'History', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -698,7 +736,45 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Sources Tab */}
-          <TabsContent value="sources" className="space-y-4">
+          <TabsContent value="sources" className="space-y-6">
+            {/* Sources Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Data Sources</h3>
+                  <p className="text-blue-100">Connect and manage your data sources</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.connectedSources}</p>
+                    <p className="text-blue-200 text-sm">Connected Sources</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sources Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Add Source', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: RefreshCw, label: 'Sync All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Server, label: 'Databases', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Cloud, label: 'SaaS', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: FileCode, label: 'APIs', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Archive, label: 'Files', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Key, label: 'Credentials', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Connected Data Sources</h2>
               <Button>
@@ -774,7 +850,45 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Jobs Tab */}
-          <TabsContent value="jobs" className="space-y-4">
+          <TabsContent value="jobs" className="space-y-6">
+            {/* Jobs Banner */}
+            <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Export Jobs</h3>
+                  <p className="text-orange-100">Monitor and manage data export tasks</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.runningJobs}</p>
+                    <p className="text-orange-200 text-sm">Running Jobs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Jobs Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Job', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Play, label: 'Run Now', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Pause, label: 'Pause', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: XCircle, label: 'Cancel All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: RefreshCw, label: 'Retry Failed', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Download, label: 'Download', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: History, label: 'History', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Export Jobs</h2>
               <div className="flex items-center gap-2">
@@ -844,7 +958,45 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Transforms Tab */}
-          <TabsContent value="transforms" className="space-y-4">
+          <TabsContent value="transforms" className="space-y-6">
+            {/* Transforms Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Data Transformations</h3>
+                  <p className="text-purple-100">Configure how your data is processed and transformed</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-purple-200 text-sm">Transform Types</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Transforms Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: ArrowRight, label: 'Map', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Layers, label: 'Aggregate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: GitBranch, label: 'Join', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Copy, label: 'Dedupe', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: FileCode, label: 'Custom SQL', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Eye, label: 'Preview', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Data Transformations</h2>
               <Button>
@@ -876,7 +1028,45 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Schema Mapping Tab */}
-          <TabsContent value="schema" className="space-y-4">
+          <TabsContent value="schema" className="space-y-6">
+            {/* Schema Banner */}
+            <div className="bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Schema Mapping</h3>
+                  <p className="text-cyan-100">Configure how source columns map to destination tables</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockSchemaMappings.length}</p>
+                    <p className="text-cyan-200 text-sm">Column Mappings</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Schema Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: RefreshCw, label: 'Auto-detect', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Plus, label: 'Add Column', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Table, label: 'View Schema', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: ArrowRight, label: 'Map All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Zap, label: 'Transform', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: History, label: 'History', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Eye, label: 'Preview', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-semibold">Schema Mapping</h2>
@@ -951,7 +1141,45 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Monitoring Tab */}
-          <TabsContent value="monitoring" className="space-y-4">
+          <TabsContent value="monitoring" className="space-y-6">
+            {/* Monitoring Banner */}
+            <div className="bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Pipeline Monitoring</h3>
+                  <p className="text-indigo-100">Real-time health and performance metrics</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{stats.successRate.toFixed(1)}%</p>
+                    <p className="text-indigo-200 text-sm">Success Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Monitoring Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: RefreshCw, label: 'Refresh', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: BarChart3, label: 'Dashboard', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: AlertTriangle, label: 'Alerts', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: Activity, label: 'Metrics', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Clock, label: 'History', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Shield, label: 'Health', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-4 gap-4 mb-6">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
@@ -1051,7 +1279,45 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Destinations Tab */}
-          <TabsContent value="destinations" className="space-y-4">
+          <TabsContent value="destinations" className="space-y-6">
+            {/* Destinations Banner */}
+            <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Data Destinations</h3>
+                  <p className="text-rose-100">Configure where your data flows to</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockDestinations.length}</p>
+                    <p className="text-rose-200 text-sm">Destinations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Destinations Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Add', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Cloud, label: 'Warehouses', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Server, label: 'Lakes', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Zap, label: 'Streams', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Globe, label: 'APIs', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Archive, label: 'Files', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: RefreshCw, label: 'Test', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-semibold">Data Destinations</h2>
@@ -1185,23 +1451,48 @@ export default function DataExportClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-white dark:bg-gray-800">
-              <div className="flex border-b border-gray-200 dark:border-gray-700">
-                {['general', 'security', 'notifications', 'api', 'billing'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setSettingsTab(tab)}
-                    className={`px-6 py-4 text-sm font-medium capitalize ${
-                      settingsTab === tab
-                        ? 'border-b-2 border-green-600 text-green-600'
-                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
+          <TabsContent value="settings" className="mt-0">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-white dark:bg-gray-800">
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-green-600" />
+                      Settings
+                    </h3>
+                  </div>
+                  <div className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Database },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'notifications', label: 'Notifications', icon: AlertTriangle },
+                        { id: 'api', label: 'API Access', icon: Key },
+                        { id: 'billing', label: 'Usage & Billing', icon: BarChart3 },
+                        { id: 'advanced', label: 'Advanced', icon: Zap },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                </Card>
               </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9">
+                <Card className="bg-white dark:bg-gray-800">
 
               <div className="p-6">
                 {settingsTab === 'general' && (
@@ -1395,8 +1686,114 @@ export default function DataExportClient() {
                     </div>
                   </div>
                 )}
+
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Advanced Settings</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                          <p className="text-sm text-gray-500">Enable verbose logging for troubleshooting</p>
+                        </div>
+                        <Badge className="bg-gray-100 text-gray-700">Disabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Schema Evolution</p>
+                          <p className="text-sm text-gray-500">Automatically handle schema changes</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Data Compression</p>
+                          <p className="text-sm text-gray-500">Compress data during transfer</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">GZIP</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Batch Size</p>
+                          <p className="text-sm text-gray-500">Records per batch</p>
+                        </div>
+                        <Badge variant="outline">10,000</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Parallel Threads</p>
+                          <p className="text-sm text-gray-500">Concurrent extraction threads</p>
+                        </div>
+                        <Badge variant="outline">8</Badge>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
+                      <h5 className="font-medium text-gray-900 dark:text-white mb-4">Data Management</h5>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <HardDrive className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Job Logs</p>
+                              <p className="text-sm text-gray-500">2.4 GB of log files</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Archive className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Archived Data</p>
+                              <p className="text-sm text-gray-500">15.8 GB archived exports</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Manage</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Cache Storage</p>
+                              <p className="text-sm text-gray-500">890 MB cached schemas</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Purge</Button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
+                      <h5 className="font-medium text-red-600 mb-4">Danger Zone</h5>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset All Pipelines</p>
+                            <p className="text-sm text-gray-500">Delete all pipeline configurations</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
+                            <p className="text-sm text-gray-500">Permanently remove all exported data</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Disconnect All Sources</p>
+                            <p className="text-sm text-gray-500">Remove all data source connections</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Disconnect</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </Card>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

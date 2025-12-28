@@ -603,6 +603,50 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
           {/* Browse Tab */}
           <TabsContent value="browse" className="space-y-8">
+            {/* Browse Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Learning Library</h2>
+                  <p className="text-rose-100">Udemy-level course catalog with personalized recommendations</p>
+                  <p className="text-rose-200 text-xs mt-1">Video tutorials • Interactive exercises • Certifications</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCourses.length}</p>
+                    <p className="text-rose-200 text-sm">Courses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{categories.length}</p>
+                    <p className="text-rose-200 text-sm">Categories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCourses.reduce((s, c) => s + c.lessons, 0)}</p>
+                    <p className="text-rose-200 text-sm">Lessons</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Browse Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Search, label: 'Search', color: 'text-rose-600 dark:text-rose-400' },
+                { icon: Star, label: 'Top Rated', color: 'text-yellow-600 dark:text-yellow-400' },
+                { icon: Clock, label: 'New', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: TrendingUp, label: 'Trending', color: 'text-green-600 dark:text-green-400' },
+                { icon: Bookmark, label: 'Saved', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Award, label: 'Certified', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: Users, label: 'Popular', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Filter, label: 'Filter', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Categories */}
             <section>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Browse by Category</h2>
@@ -636,6 +680,31 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
           {/* My Learning Tab */}
           <TabsContent value="my-learning" className="space-y-6">
+            {/* My Learning Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">My Learning Dashboard</h2>
+                  <p className="text-blue-100">Coursera-level progress tracking and learning analytics</p>
+                  <p className="text-blue-200 text-xs mt-1">Resume courses • Track progress • Set goals</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProgress.length}</p>
+                    <p className="text-blue-200 text-sm">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">12</p>
+                    <p className="text-blue-200 text-sm">Completed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">156h</p>
+                    <p className="text-blue-200 text-sm">Total Time</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-4 mb-6">
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-rose-100 rounded-lg"><Play className="w-5 h-5 text-rose-600" /></div><div><div className="text-2xl font-bold">{mockProgress.length}</div><div className="text-sm text-gray-500">In Progress</div></div></div></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-green-100 rounded-lg"><CheckCircle className="w-5 h-5 text-green-600" /></div><div><div className="text-2xl font-bold">12</div><div className="text-sm text-gray-500">Completed</div></div></div></CardContent></Card>
@@ -675,6 +744,27 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
           {/* Learning Paths Tab */}
           <TabsContent value="paths" className="space-y-6">
+            {/* Learning Paths Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Learning Paths</h2>
+                  <p className="text-emerald-100">LinkedIn Learning-level guided career development</p>
+                  <p className="text-emerald-200 text-xs mt-1">Curated sequences • Career tracks • Skill progression</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockLearningPaths.length}</p>
+                    <p className="text-emerald-200 text-sm">Paths</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockLearningPaths.reduce((s, p) => s + p.courses.length, 0)}</p>
+                    <p className="text-emerald-200 text-sm">Total Courses</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {mockLearningPaths.map(path => (
                 <Card key={path.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
@@ -698,11 +788,53 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
           {/* Certificates Tab */}
           <TabsContent value="certificates" className="space-y-6">
+            {/* Certificates Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Certificates & Credentials</h2>
+                  <p className="text-amber-100">Credly-level verified credentials and digital badges</p>
+                  <p className="text-amber-200 text-xs mt-1">Blockchain verified • Shareable • Industry recognized</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">0</p>
+                    <p className="text-amber-200 text-sm">Certificates</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">12</p>
+                    <p className="text-amber-200 text-sm">Available</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card><CardContent className="p-12 text-center"><Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" /><h3 className="text-lg font-semibold text-gray-900 mb-2">Your Certificates</h3><p className="text-gray-500 mb-4">Complete courses to earn certificates</p><Button className="bg-rose-600" onClick={() => setActiveTab('browse')}>Find Courses</Button></CardContent></Card>
           </TabsContent>
 
           {/* Achievements Tab */}
           <TabsContent value="achievements" className="space-y-6">
+            {/* Achievements Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Achievements & Badges</h2>
+                  <p className="text-violet-100">Xbox-level gamification with rewards and milestones</p>
+                  <p className="text-violet-200 text-xs mt-1">Streaks • XP points • Leaderboards • Special badges</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">8</p>
+                    <p className="text-violet-200 text-sm">Earned</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">2,450</p>
+                    <p className="text-violet-200 text-sm">XP Points</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-4 gap-4 mb-6">
               <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-rose-600">{mockAchievements.filter(a => a.unlockedAt).length}</div><div className="text-sm text-gray-500">Unlocked</div></CardContent></Card>
               <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-amber-600">{mockAchievements.reduce((acc, a) => acc + (a.unlockedAt ? a.points : 0), 0)}</div><div className="text-sm text-gray-500">Total Points</div></CardContent></Card>
@@ -747,6 +879,27 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
           {/* Goals Tab */}
           <TabsContent value="goals" className="space-y-6">
+            {/* Goals Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Learning Goals</h2>
+                  <p className="text-cyan-100">Duolingo-level goal setting with streaks and reminders</p>
+                  <p className="text-cyan-200 text-xs mt-1">Daily targets • Weekly goals • Long-term milestones</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockGoals.length}</p>
+                    <p className="text-cyan-200 text-sm">Active Goals</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockGoals.filter(g => g.completed).length}</p>
+                    <p className="text-cyan-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-end mb-4">
               <Button className="bg-rose-600" onClick={() => setShowGoalDialog(true)}><Plus className="w-4 h-4 mr-2" />Set New Goal</Button>
             </div>
@@ -810,6 +963,27 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
           {/* Settings Tab - Udemy Level */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Learning Preferences</h2>
+                  <p className="text-slate-300">Customize your learning experience and notifications</p>
+                  <p className="text-slate-400 text-xs mt-1">Display • Notifications • Privacy • Integrations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">EN</p>
+                    <p className="text-slate-400 text-sm">Language</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">1x</p>
+                    <p className="text-slate-400 text-sm">Speed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Settings Sidebar */}
               <div className="col-span-3 space-y-2">

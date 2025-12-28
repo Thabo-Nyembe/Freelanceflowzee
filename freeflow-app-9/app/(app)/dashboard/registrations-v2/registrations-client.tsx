@@ -61,8 +61,17 @@ import {
   ArrowDownRight,
   Activity,
   Layers,
-  Hash
+  Hash,
+  Sliders,
+  Terminal,
+  Webhook,
+  Bell,
+  Key,
+  Network
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
 
 // ============================================================================
 // TYPE DEFINITIONS - Salesforce Level Event Registration
@@ -656,6 +665,7 @@ export default function RegistrationsClient() {
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null)
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered registrations
   const filteredRegistrations = useMemo(() => {
@@ -805,6 +815,10 @@ export default function RegistrationsClient() {
                 <BarChart3 className="w-4 h-4" />
                 Analytics
               </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -838,6 +852,53 @@ export default function RegistrationsClient() {
 
           {/* Registrations Tab */}
           <TabsContent value="registrations" className="space-y-6">
+            {/* Registrations Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Event Registrations</h2>
+                  <p className="text-purple-100">Eventbrite-level registration management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.total}</p>
+                    <p className="text-purple-200 text-sm">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.confirmed}</p>
+                    <p className="text-purple-200 text-sm">Confirmed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.checkedIn}</p>
+                    <p className="text-purple-200 text-sm">Checked In</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: UserPlus, label: 'New', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: QrCode, label: 'Check-In', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Ticket, label: 'Tickets', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Tag, label: 'Badges', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Filters */}
             <Card className="dark:bg-gray-800/50">
               <CardContent className="p-4">
@@ -1294,6 +1355,294 @@ export default function RegistrationsClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Eventbrite Level Configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Registration Settings</h2>
+                  <p className="text-slate-200">Eventbrite-level configuration and preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-slate-200 text-sm">Setting Groups</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">28+</p>
+                    <p className="text-slate-200 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Ticket, label: 'Tickets', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Network, label: 'Integrations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'tickets', label: 'Tickets', icon: Ticket },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Registration Preferences</CardTitle>
+                        <CardDescription>Configure default registration behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Auto-Confirm Registrations</Label><p className="text-sm text-gray-500">Automatically confirm new signups</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Waitlist Enabled</Label><p className="text-sm text-gray-500">Allow waitlist when sold out</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Group Registration</Label><p className="text-sm text-gray-500">Allow bulk registrations</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Registration Limit</Label><p className="text-sm text-gray-500">Max attendees per event</p></div>
+                          <Input type="number" defaultValue="500" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Check-In Settings</CardTitle>
+                        <CardDescription>Configure check-in preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">QR Code Check-In</Label><p className="text-sm text-gray-500">Enable QR scanning</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Self Check-In</Label><p className="text-sm text-gray-500">Allow kiosk mode</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'tickets' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Ticket Configuration</CardTitle>
+                        <CardDescription>Configure ticket types and pricing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Early Bird Pricing</Label><p className="text-sm text-gray-500">Enable early bird discounts</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">VIP Tickets</Label><p className="text-sm text-gray-500">Offer premium tickets</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Group Discounts</Label><p className="text-sm text-gray-500">Bulk pricing available</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Refund Window (days)</Label><p className="text-sm text-gray-500">Days before event</p></div>
+                          <Input type="number" defaultValue="7" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Control automated emails</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Confirmation Email</Label><p className="text-sm text-gray-500">Send on registration</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Reminder Emails</Label><p className="text-sm text-gray-500">Before event starts</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Post-Event Survey</Label><p className="text-sm text-gray-500">Request feedback</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">SMS Notifications</Label><p className="text-sm text-gray-500">Text message alerts</p></div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Manage registration integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Stripe Payments', connected: true, icon: '💳' },
+                          { name: 'Mailchimp', connected: true, icon: '📧' },
+                          { name: 'Salesforce', connected: false, icon: '☁️' },
+                          { name: 'Zoom', connected: true, icon: '📹' },
+                          { name: 'Slack', connected: true, icon: '💬' },
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                              {integration.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Protect your registration data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">CAPTCHA Verification</Label><p className="text-sm text-gray-500">Prevent bot registrations</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Email Verification</Label><p className="text-sm text-gray-500">Confirm email addresses</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">PCI Compliance</Label><p className="text-sm text-gray-500">Secure payment handling</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">GDPR Mode</Label><p className="text-sm text-gray-500">EU data protection</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Advanced Options</CardTitle>
+                        <CardDescription>Power user settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Custom Fields</Label><p className="text-sm text-gray-500">Add registration fields</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">API Access</Label><p className="text-sm text-gray-500">Enable API endpoints</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Webhooks</Label><p className="text-sm text-gray-500">Real-time notifications</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage registration data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Export All Data</p><p className="text-sm text-gray-500">Download CSV/Excel</p></div>
+                          <Button variant="outline" size="sm">Export</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Clear Cache</p><p className="text-sm text-gray-500">128 MB used</p></div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

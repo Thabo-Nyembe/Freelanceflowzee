@@ -85,8 +85,12 @@ import {
   Network,
   GitBranch,
   Info,
-  HelpCircle
+  HelpCircle,
+  Sliders,
+  Terminal,
+  Webhook
 } from 'lucide-react'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type BackupStatus = 'completed' | 'running' | 'failed' | 'scheduled' | 'cancelled' | 'warning' | 'pending'
@@ -483,6 +487,7 @@ export default function BackupsClient() {
   const [selectedCompliance, setSelectedCompliance] = useState<ComplianceReport | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showLegalHoldDialog, setShowLegalHoldDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter jobs
   const filteredJobs = useMemo(() => {
@@ -704,6 +709,53 @@ export default function BackupsClient() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="mt-6">
+            {/* Dashboard Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Backup Dashboard</h2>
+                  <p className="text-blue-100">AWS Backup-level enterprise backup management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.completed}</p>
+                    <p className="text-blue-200 text-sm">Successful</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.running}</p>
+                    <p className="text-blue-200 text-sm">Running</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round(stats.successRate)}%</p>
+                    <p className="text-blue-200 text-sm">Success Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Job', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Play, label: 'Run Now', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: RotateCw, label: 'Restore', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Archive, label: 'Vaults', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Shield, label: 'Compliance', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: HardDrive, label: 'Storage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Recent Jobs */}
               <Card className="col-span-8 border-gray-200 dark:border-gray-700">
@@ -878,6 +930,19 @@ export default function BackupsClient() {
 
           {/* Backup Jobs Tab */}
           <TabsContent value="jobs" className="mt-6">
+            {/* Jobs Overview Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Backup Jobs</h2>
+                  <p className="text-green-100">Manage and monitor all backup jobs</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center"><p className="text-3xl font-bold">{filteredJobs.length}</p><p className="text-green-200 text-sm">Jobs</p></div>
+                  <div className="text-center"><p className="text-3xl font-bold">{filteredJobs.filter(j => j.status === 'running').length}</p><p className="text-green-200 text-sm">Running</p></div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center gap-2 mb-4">
               <Button variant={selectedStatus === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedStatus('all')}>All</Button>
               <Button variant={selectedStatus === 'completed' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedStatus('completed')} className={selectedStatus === 'completed' ? 'bg-green-600' : ''}>Completed</Button>
@@ -932,6 +997,18 @@ export default function BackupsClient() {
 
           {/* Recovery Points Tab */}
           <TabsContent value="recovery" className="mt-6">
+            {/* Recovery Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Point-in-Time Recovery</h2>
+                  <p className="text-purple-100">Restore any backup to any point in time</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center"><p className="text-3xl font-bold">{mockRecoveryPoints.length}</p><p className="text-purple-200 text-sm">Points</p></div>
+                </div>
+              </div>
+            </div>
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -982,6 +1059,49 @@ export default function BackupsClient() {
 
           {/* Vaults Tab */}
           <TabsContent value="vaults" className="mt-6">
+            {/* Vaults Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Backup Vaults</h2>
+                  <p className="text-amber-100">AWS Backup Vault-level security and compliance</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVaults.length}</p>
+                    <p className="text-amber-200 text-sm">Vaults</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockVaults.filter(v => v.locked).length}</p>
+                    <p className="text-amber-200 text-sm">Locked</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Vaults Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Shield, label: 'Compliance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-2 gap-6">
               {mockVaults.map(vault => (
                 <Card key={vault.id} className="border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-300" onClick={() => setSelectedVault(vault)}>
@@ -1191,84 +1311,299 @@ export default function BackupsClient() {
           </TabsContent>
 
           {/* Settings Tab */}
+          {/* Settings Tab - AWS Backup Level Configuration */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Backup Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Automatic Verification</p><p className="text-sm text-gray-500">Verify backups after completion</p></div>
-                    <Switch defaultChecked />
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Backup Settings</h2>
+                  <p className="text-slate-200">AWS Backup-level configuration and preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-slate-200 text-sm">Setting Groups</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Encryption at Rest</p><p className="text-sm text-gray-500">Encrypt all backup data using AWS KMS</p></div>
-                    <Switch defaultChecked />
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">32+</p>
+                    <p className="text-slate-200 text-sm">Options</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Compression</p><p className="text-sm text-gray-500">Compress backups to save storage</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Cross-Region Backup</p><p className="text-sm text-gray-500">Replicate backups to secondary region</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Notification Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Failure Alerts</p><p className="text-sm text-gray-500">Notify on backup failures via SNS</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Daily Summary</p><p className="text-sm text-gray-500">Send daily backup report</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Storage Warnings</p><p className="text-sm text-gray-500">Alert when storage is 80% full</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Compliance Alerts</p><p className="text-sm text-gray-500">Notify on compliance violations</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Security Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Vault Lock</p><p className="text-sm text-gray-500">Enable WORM compliance mode</p></div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">MFA Delete</p><p className="text-sm text-gray-500">Require MFA for deletion</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Access Logging</p><p className="text-sm text-gray-500">Log all vault access to CloudTrail</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Recovery Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Automatic Recovery Testing</p><p className="text-sm text-gray-500">Schedule quarterly DR tests</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Point-in-Time Recovery</p><p className="text-sm text-gray-500">Enable continuous backups</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Fast Restore</p><p className="text-sm text-gray-500">Keep recent backups in hot tier</p></div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'storage', label: 'Storage', icon: HardDrive },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Network },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Backup Preferences</CardTitle>
+                        <CardDescription>Configure default backup behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Automatic Verification</Label><p className="text-sm text-gray-500">Verify backups after completion</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Compression</Label><p className="text-sm text-gray-500">Compress backups to save storage</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Deduplication</Label><p className="text-sm text-gray-500">Enable block-level deduplication</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Parallel Backups</Label><p className="text-sm text-gray-500">Max concurrent jobs</p></div>
+                          <Input type="number" defaultValue="5" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Scheduling</CardTitle>
+                        <CardDescription>Set default scheduling preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Default Schedule</Label><p className="text-sm text-gray-500">New job default</p></div>
+                          <Input defaultValue="Daily at 2:00 AM" className="w-48" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Timezone</Label><p className="text-sm text-gray-500">Schedule timezone</p></div>
+                          <Input defaultValue="UTC" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'storage' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Storage Configuration</CardTitle>
+                        <CardDescription>Configure storage and replication settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Cross-Region Backup</Label><p className="text-sm text-gray-500">Replicate to secondary region</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Encryption at Rest</Label><p className="text-sm text-gray-500">AWS KMS encryption</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Storage Class</Label><p className="text-sm text-gray-500">Default tier</p></div>
+                          <Input defaultValue="Standard" className="w-32" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Lifecycle Rules</Label><p className="text-sm text-gray-500">Auto-transition to cold</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Alert Configuration</CardTitle>
+                        <CardDescription>Control backup notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Failure Alerts</Label><p className="text-sm text-gray-500">Notify on backup failures</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Daily Summary</Label><p className="text-sm text-gray-500">Send daily report</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Storage Warnings</Label><p className="text-sm text-gray-500">Alert at 80% capacity</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Compliance Alerts</Label><p className="text-sm text-gray-500">Notify on violations</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">SNS Topic ARN</Label><p className="text-sm text-gray-500">Notification target</p></div>
+                          <Input defaultValue="arn:aws:sns:..." className="w-64" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Manage backup integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'AWS S3', connected: true, icon: '☁️' },
+                          { name: 'Azure Blob Storage', connected: true, icon: '🔷' },
+                          { name: 'Google Cloud Storage', connected: false, icon: '🔵' },
+                          { name: 'Slack Notifications', connected: true, icon: '💬' },
+                          { name: 'PagerDuty', connected: true, icon: '📟' },
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                              {integration.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Protect your backup infrastructure</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Vault Lock</Label><p className="text-sm text-gray-500">Enable WORM compliance</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">MFA Delete</Label><p className="text-sm text-gray-500">Require MFA for deletion</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Access Logging</Label><p className="text-sm text-gray-500">Log to CloudTrail</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">IAM Policies</Label><p className="text-sm text-gray-500">Enforce least privilege</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Recovery Options</CardTitle>
+                        <CardDescription>Configure recovery settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Auto Recovery Testing</Label><p className="text-sm text-gray-500">Quarterly DR tests</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Point-in-Time Recovery</Label><p className="text-sm text-gray-500">Continuous backups</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Fast Restore</Label><p className="text-sm text-gray-500">Keep in hot tier</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>System Settings</CardTitle>
+                        <CardDescription>Advanced configuration options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Backup Agent Version</p><p className="text-sm text-gray-500">v2.5.1</p></div>
+                          <Button variant="outline" size="sm">Update</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Cache Size</p><p className="text-sm text-gray-500">2.1 GB used</p></div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Debug Logging</p><p className="text-sm text-gray-500">Disabled</p></div>
+                          <Button variant="outline" size="sm">Enable</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

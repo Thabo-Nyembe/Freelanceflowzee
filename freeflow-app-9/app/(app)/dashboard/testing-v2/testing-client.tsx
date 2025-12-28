@@ -68,6 +68,12 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Sliders, Bell, Webhook, Key, Database, Mail, Archive, Workflow } from 'lucide-react'
 
 // Types
 type TestStatus = 'passed' | 'failed' | 'skipped' | 'pending' | 'running' | 'flaky'
@@ -461,6 +467,7 @@ export default function TestingClient() {
   const [showSpecDetail, setShowSpecDetail] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter specs
   const filteredSpecs = useMemo(() => {
@@ -658,6 +665,10 @@ export default function TestingClient() {
                 <GitBranch className="h-4 w-4" />
                 CI/CD
               </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -687,6 +698,44 @@ export default function TestingClient() {
 
           {/* Test Runs Tab */}
           <TabsContent value="runs" className="mt-0 space-y-6">
+            {/* Runs Banner */}
+            <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Test Run Management</h3>
+                  <p className="text-indigo-100">Monitor and analyze your test executions across all browsers</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockTestRuns.length}</p>
+                    <p className="text-indigo-200 text-sm">Recent Runs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Runs Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Play, label: 'Run All', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Repeat, label: 'Retry Failed', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Square, label: 'Stop All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: Download, label: 'Export', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Runs List */}
               <div className="lg:col-span-1 space-y-3">
@@ -816,7 +865,45 @@ export default function TestingClient() {
           </TabsContent>
 
           {/* Explorer Tab */}
-          <TabsContent value="explorer" className="mt-0">
+          <TabsContent value="explorer" className="mt-0 space-y-6">
+            {/* Explorer Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Test Explorer</h3>
+                  <p className="text-green-100">Browse and organize your test files and suites</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockTestSuites[0]?.tests || 0}</p>
+                    <p className="text-green-200 text-sm">Total Tests</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Explorer Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: FolderOpen, label: 'Expand All', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                { icon: Folder, label: 'Collapse All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: FileCode, label: 'New Test', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Search, label: 'Find Test', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Play, label: 'Run Selected', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: RefreshCw, label: 'Reload', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Code, label: 'Open File', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid lg:grid-cols-3 gap-6">
               {/* File Tree */}
               <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -895,7 +982,45 @@ export default function TestingClient() {
           </TabsContent>
 
           {/* Results Tab */}
-          <TabsContent value="results" className="mt-0">
+          <TabsContent value="results" className="mt-0 space-y-6">
+            {/* Results Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Test Results</h3>
+                  <p className="text-blue-100">Detailed view of all test execution results</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockTestSpecs.length}</p>
+                    <p className="text-blue-200 text-sm">Test Specs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Results Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Download, label: 'Export All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Filter, label: 'Filter', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: XCircle, label: 'Failed Only', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: CheckCircle2, label: 'Passed Only', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
+                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">
@@ -987,6 +1112,44 @@ export default function TestingClient() {
 
           {/* Coverage Tab */}
           <TabsContent value="coverage" className="mt-0 space-y-6">
+            {/* Coverage Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Code Coverage</h3>
+                  <p className="text-purple-100">Track and improve your test coverage metrics</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{overallStats.avgCoverage.toFixed(1)}%</p>
+                    <p className="text-purple-200 text-sm">Average Coverage</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Coverage Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: RefreshCw, label: 'Regenerate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Download, label: 'Export', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: Target, label: 'Set Target', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: AlertTriangle, label: 'Low Coverage', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: TrendingUp, label: 'Trending', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: FileCode, label: 'By File', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: BarChart3, label: 'History', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                { icon: Shield, label: 'Quality', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Overall Coverage</h3>
@@ -1074,6 +1237,44 @@ export default function TestingClient() {
 
           {/* CI/CD Tab */}
           <TabsContent value="ci" className="mt-0 space-y-6">
+            {/* CI/CD Banner */}
+            <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">CI/CD Integration</h3>
+                  <p className="text-orange-100">Connect your test suite with continuous integration pipelines</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">{mockCIConfigs.length}</p>
+                    <p className="text-orange-200 text-sm">Integrations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CI/CD Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Add CI', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                { icon: RefreshCw, label: 'Sync All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { icon: GitBranch, label: 'Branches', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                { icon: Webhook, label: 'Webhooks', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
+                { icon: Key, label: 'Secrets', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                { icon: Terminal, label: 'Logs', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Chrome, label: 'Browsers', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                { icon: Workflow, label: 'Workflows', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+              ].map((action, i) => (
+                <button
+                  key={i}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">CI Integrations</h3>
@@ -1165,6 +1366,484 @@ export default defineConfig({
   ],
 });`}
                 </pre>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-0">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-indigo-600" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'execution', label: 'Execution', icon: Play },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Test Configuration</CardTitle>
+                        <CardDescription>Configure default test execution settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Test Directory</Label>
+                            <Input defaultValue="./tests" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                          <div>
+                            <Label>Config File</Label>
+                            <Input defaultValue="playwright.config.ts" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Timeout (ms)</Label>
+                            <Input type="number" defaultValue="30000" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                          <div>
+                            <Label>Expect Timeout (ms)</Label>
+                            <Input type="number" defaultValue="5000" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Fully Parallel</p>
+                            <p className="text-sm text-gray-500">Run all tests in parallel across files</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Forbid Only</p>
+                            <p className="text-sm text-gray-500">Fail if test.only is used in CI</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Reporter Settings</CardTitle>
+                        <CardDescription>Configure test report generation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'HTML Reporter', desc: 'Generate interactive HTML reports', enabled: true },
+                          { name: 'JSON Reporter', desc: 'Output results as JSON files', enabled: true },
+                          { name: 'JUnit Reporter', desc: 'Generate JUnit XML reports', enabled: false },
+                          { name: 'List Reporter', desc: 'Console output with test list', enabled: true },
+                        ].map((reporter, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{reporter.name}</p>
+                              <p className="text-sm text-gray-500">{reporter.desc}</p>
+                            </div>
+                            <Switch defaultChecked={reporter.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Execution Settings */}
+                {settingsTab === 'execution' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Execution Settings</CardTitle>
+                        <CardDescription>Configure how tests are executed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Parallel Workers</Label>
+                            <Input type="number" defaultValue="4" min="1" max="16" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                          <div>
+                            <Label>Max Retries</Label>
+                            <Input type="number" defaultValue="2" min="0" max="5" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Screenshots on Failure</p>
+                            <p className="text-sm text-gray-500">Capture screenshot when test fails</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Video Recording</p>
+                            <p className="text-sm text-gray-500">Record video for failed tests</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Trace Collection</p>
+                            <p className="text-sm text-gray-500">Collect trace on first retry</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Headless Mode</p>
+                            <p className="text-sm text-gray-500">Run browsers in headless mode</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Browser Projects</CardTitle>
+                        <CardDescription>Configure browser targets for testing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {browserConfigs.map((browser, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                {getBrowserIcon(browser.type)}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white capitalize">{browser.type}</p>
+                                <p className="text-sm text-gray-500">{browser.viewport.width}x{browser.viewport.height}</p>
+                              </div>
+                            </div>
+                            <Switch defaultChecked={browser.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle>Notification Settings</CardTitle>
+                      <CardDescription>Configure test result notifications</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { icon: Mail, name: 'Email Notifications', desc: 'Send test results via email' },
+                        { icon: Bell, name: 'Push Notifications', desc: 'Browser push notifications' },
+                        { icon: Webhook, name: 'Slack Integration', desc: 'Post results to Slack channels' },
+                        { icon: GitBranch, name: 'GitHub Comments', desc: 'Comment on pull requests' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                              <item.icon className="h-4 w-4 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                              <p className="text-sm text-gray-500">{item.desc}</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked={i < 2} />
+                        </div>
+                      ))}
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <Label>Notification Threshold</Label>
+                        <p className="text-sm text-gray-500 mb-3">Only notify when conditions are met</p>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" defaultChecked className="rounded" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">On failure</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" className="rounded" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">On success</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" defaultChecked className="rounded" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">Coverage below threshold</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" defaultChecked className="rounded" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">Flaky tests detected</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>CI/CD Integrations</CardTitle>
+                        <CardDescription>Connect with your CI/CD pipelines</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockCIConfigs.map((config, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <GitBranch className="h-4 w-4 text-indigo-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{config.name}</p>
+                                <p className="text-sm text-gray-500">Last sync: {config.lastSync.toLocaleString()}</p>
+                              </div>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                              config.status === 'connected'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                            }`}>
+                              {config.status}
+                            </span>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full mt-4">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Integration
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>External Services</CardTitle>
+                        <CardDescription>Connect with external testing services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Playwright Cloud', desc: 'Run tests on cloud infrastructure', connected: false },
+                          { name: 'BrowserStack', desc: 'Cross-browser testing platform', connected: false },
+                          { name: 'Percy', desc: 'Visual regression testing', connected: true },
+                          { name: 'Checkly', desc: 'API and E2E monitoring', connected: false },
+                        ].map((service, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
+                              <p className="text-sm text-gray-500">{service.desc}</p>
+                            </div>
+                            <Button variant={service.connected ? "outline" : "default"} size="sm">
+                              {service.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Configure security and access controls</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Secure Artifacts</p>
+                            <p className="text-sm text-gray-500">Encrypt screenshots and videos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Mask Sensitive Data</p>
+                            <p className="text-sm text-gray-500">Hide passwords in traces</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all test run activities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Environment Variables</CardTitle>
+                        <CardDescription>Securely manage test environment secrets</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { key: 'TEST_BASE_URL', value: '***hidden***' },
+                          { key: 'TEST_API_KEY', value: '***hidden***' },
+                          { key: 'TEST_USERNAME', value: 'test@example.com' },
+                        ].map((env, i) => (
+                          <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <Key className="h-4 w-4 text-gray-400" />
+                            <div className="flex-1 grid grid-cols-2 gap-4">
+                              <Input value={env.key} readOnly className="font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
+                              <Input type="password" value={env.value} className="font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Variable
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Advanced Configuration</CardTitle>
+                        <CardDescription>Fine-tune test execution behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Global Timeout (ms)</Label>
+                            <Input type="number" defaultValue="60000" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                          <div>
+                            <Label>Action Timeout (ms)</Label>
+                            <Input type="number" defaultValue="10000" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Preserve Output</p>
+                            <p className="text-sm text-gray-500">Keep test output between runs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Update Snapshots</p>
+                            <p className="text-sm text-gray-500">Automatically update visual snapshots</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Quiet Mode</p>
+                            <p className="text-sm text-gray-500">Suppress console output during tests</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="dark:bg-gray-800 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle>Maintenance</CardTitle>
+                        <CardDescription>Manage test artifacts and cache</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Test Cache</p>
+                              <p className="text-sm text-gray-500">245 MB used</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Clear Cache</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <Archive className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Old Reports</p>
+                              <p className="text-sm text-gray-500">127 reports (1.2 GB)</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Clean Up</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <HardDrive className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Browser Binaries</p>
+                              <p className="text-sm text-gray-500">3 browsers installed (890 MB)</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Manage</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800 dark:bg-gray-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Reset All Settings</p>
+                            <p className="text-sm text-gray-500">Reset to default configuration</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
+                            <p className="text-sm text-gray-500">Remove all test results and artifacts</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>

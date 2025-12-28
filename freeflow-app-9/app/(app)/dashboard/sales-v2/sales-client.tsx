@@ -487,6 +487,27 @@ export default function SalesClient() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Dashboard Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Sales Dashboard</h2>
+                  <p className="text-green-100">Salesforce-level CRM and pipeline management</p>
+                  <p className="text-green-200 text-xs mt-1">Pipeline tracking • Revenue analytics • Team performance</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(stats.totalValue / 1000000).toFixed(1)}M</p>
+                    <p className="text-green-200 text-sm">Pipeline</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.wonDeals}</p>
+                    <p className="text-green-200 text-sm">Won Deals</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Pipeline Funnel */}
             <Card>
               <CardHeader>
@@ -647,6 +668,27 @@ export default function SalesClient() {
 
           {/* Opportunities Tab */}
           <TabsContent value="opportunities" className="space-y-6">
+            {/* Opportunities Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Opportunities</h2>
+                  <p className="text-blue-100">HubSpot-level deal tracking and management</p>
+                  <p className="text-blue-200 text-xs mt-1">Stage management • Activity tracking • Win probability</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredOpportunities.length}</p>
+                    <p className="text-blue-200 text-sm">Opportunities</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.avgDealSize}K</p>
+                    <p className="text-blue-200 text-sm">Avg Deal</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex gap-2 flex-wrap">
                 {['all', 'prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won'].map((stage) => (
@@ -708,6 +750,27 @@ export default function SalesClient() {
 
           {/* Accounts Tab */}
           <TabsContent value="accounts" className="space-y-6">
+            {/* Accounts Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Accounts</h2>
+                  <p className="text-purple-100">Pipedrive-level account management</p>
+                  <p className="text-purple-200 text-xs mt-1">Account health • Revenue tracking • Contact history</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAccounts.length}</p>
+                    <p className="text-purple-200 text-sm">Accounts</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(mockAccounts.reduce((sum, a) => sum + a.value, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-purple-200 text-sm">Total Value</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-4">
               {mockAccounts.map((account) => (
                 <Card key={account.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedAccount(account)}>
@@ -781,6 +844,20 @@ export default function SalesClient() {
 
           {/* Quotes Tab */}
           <TabsContent value="quotes" className="space-y-6">
+            {/* Quotes Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Quotes & Proposals</h2>
+                  <p className="text-cyan-100">PandaDoc-level quote generation and e-signatures</p>
+                  <p className="text-cyan-200 text-xs mt-1">Templates • E-sign • Approval workflows</p>
+                  <div className="flex gap-2 mt-2">
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Auto-pricing</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quotes & Proposals</h2>
               <Button><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
@@ -819,6 +896,27 @@ export default function SalesClient() {
 
           {/* Forecasts Tab */}
           <TabsContent value="forecasts" className="space-y-6">
+            {/* Forecasts Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Sales Forecasts</h2>
+                  <p className="text-amber-100">Clari-level revenue intelligence and forecasting</p>
+                  <p className="text-amber-200 text-xs mt-1">AI predictions • Trend analysis • Quota tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.winRate}%</p>
+                    <p className="text-amber-200 text-sm">Win Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(stats.closedValue / 1000000).toFixed(1)}M</p>
+                    <p className="text-amber-200 text-sm">Closed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Sales Forecasts - {forecastPeriod}</h2>
               <Select value={forecastPeriod} onValueChange={setForecastPeriod}>

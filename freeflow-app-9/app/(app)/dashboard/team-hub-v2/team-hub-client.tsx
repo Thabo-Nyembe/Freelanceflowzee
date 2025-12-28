@@ -91,7 +91,16 @@ import {
   Info,
   Inbox,
   PanelLeft,
-  X
+  X,
+  Sliders,
+  Webhook,
+  Key,
+  Database,
+  HardDrive,
+  Terminal,
+  History,
+  AlertTriangle,
+  Upload
 } from 'lucide-react'
 
 // Types
@@ -441,6 +450,7 @@ export default function TeamHubClient() {
   const [selectedApp, setSelectedApp] = useState<SlackApp | null>(null)
   const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all')
   const [showSearch, setShowSearch] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats = useMemo(() => {
@@ -665,10 +675,70 @@ export default function TeamHubClient() {
               <Workflow className="w-4 h-4" />
               Workflows
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
+            {/* Members Banner */}
+            <Card className="border-0 bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Users className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Team Members</h3>
+                      <p className="text-white/80">Manage your workspace members and permissions</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{stats.totalMembers}</p>
+                      <p className="text-sm text-white/80">Total</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats.onlineNow}</p>
+                      <p className="text-sm text-white/80">Online</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats.admins}</p>
+                      <p className="text-sm text-white/80">Admins</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Members Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: UserPlus, label: 'Invite', color: 'bg-purple-500' },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-500' },
+                { icon: UserCheck, label: 'Approve', color: 'bg-green-500' },
+                { icon: Shield, label: 'Roles', color: 'bg-orange-500' },
+                { icon: Crown, label: 'Admins', color: 'bg-yellow-500' },
+                { icon: Download, label: 'Export', color: 'bg-pink-500' },
+                { icon: Filter, label: 'Filter', color: 'bg-indigo-500' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-3 flex-wrap">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1179,6 +1249,428 @@ export default function TeamHubClient() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="border-0 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Workspace Settings</h3>
+                      <p className="text-white/80">Configure your team hub preferences</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'members', label: 'Members', icon: Users },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-purple-500" />
+                          Workspace Settings
+                        </CardTitle>
+                        <CardDescription>Configure basic workspace preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Workspace Name</Label>
+                            <Input defaultValue="FreeFlow Team" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Workspace URL</Label>
+                            <Input defaultValue="freeflow.slack.com" className="mt-1" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Workspace Description</Label>
+                          <Input defaultValue="The central hub for FreeFlow team communication" className="mt-1" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Public Channels</p>
+                            <p className="text-sm text-gray-500">Members can create public channels</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Direct Messages</p>
+                            <p className="text-sm text-gray-500">Members can DM each other</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Huddles</p>
+                            <p className="text-sm text-gray-500">Enable voice and video huddles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+                          Save Settings
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Members Settings */}
+                {settingsTab === 'members' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-blue-500" />
+                          Member Settings
+                        </CardTitle>
+                        <CardDescription>Configure member permissions and access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Self-Registration</p>
+                            <p className="text-sm text-gray-500">New users can request to join</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Admin Approval</p>
+                            <p className="text-sm text-gray-500">Admins must approve new members</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Guest Access</p>
+                            <p className="text-sm text-gray-500">Invite external guests to channels</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Member Directory</p>
+                            <p className="text-sm text-gray-500">Members can see the full directory</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Default Role for New Members</Label>
+                          <Input defaultValue="Member" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-500" />
+                          Notification Preferences
+                        </CardTitle>
+                        <CardDescription>Configure workspace notification defaults</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Direct Messages', desc: 'Notify on all DMs', checked: true },
+                          { label: 'Mentions', desc: 'Notify when mentioned', checked: true },
+                          { label: 'Thread Replies', desc: 'Notify on thread replies', checked: true },
+                          { label: 'Channel Messages', desc: 'Notify on channel messages', checked: false },
+                          { label: 'Huddle Invites', desc: 'Notify on huddle invitations', checked: true },
+                          { label: 'Workflow Runs', desc: 'Notify on workflow completions', checked: false }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={notif.checked} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-green-500" />
+                          Connected Apps
+                        </CardTitle>
+                        <CardDescription>Manage workspace integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Google Drive', desc: 'File sharing', status: 'connected' },
+                          { name: 'Jira', desc: 'Issue tracking', status: 'connected' },
+                          { name: 'GitHub', desc: 'Code repositories', status: 'connected' },
+                          { name: 'Zoom', desc: 'Video meetings', status: 'disconnected' },
+                          { name: 'Salesforce', desc: 'CRM', status: 'disconnected' }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                {integration.name[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Integration
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-purple-500" />
+                          API & Webhooks
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>API Token</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input type="password" value="xoxb-****************************" readOnly className="font-mono" />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Webhook URL</Label>
+                          <Input defaultValue="https://hooks.slack.com/services/..." className="mt-1 font-mono" />
+                        </div>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate Token
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-500" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Protect your workspace</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500">Require 2FA for all members</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">SSO Required</p>
+                            <p className="text-sm text-gray-500">Require single sign-on</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Session Timeout</p>
+                            <p className="text-sm text-gray-500">Auto-logout after inactivity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all workspace activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-yellow-500" />
+                          Data Protection
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Message Encryption</p>
+                            <p className="text-sm text-gray-500">Encrypt messages at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">File Scanning</p>
+                            <p className="text-sm text-gray-500">Scan uploads for malware</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-cyan-500" />
+                          Advanced Configuration
+                        </CardTitle>
+                        <CardDescription>Advanced settings for power users</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Developer Mode</p>
+                            <p className="text-sm text-gray-500">Enable developer features</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                            <p className="text-sm text-gray-500">Try new features early</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Message Retention (days)</Label>
+                          <Input type="number" defaultValue="365" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>File Storage Limit (GB)</Label>
+                          <Input type="number" defaultValue="100" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-blue-500" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex gap-2">
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Workspace Data
+                          </Button>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Reset Workspace</p>
+                            <p className="text-sm text-red-600/70">Reset all workspace settings</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Delete Workspace</p>
+                            <p className="text-sm text-red-600/70">Permanently delete workspace</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

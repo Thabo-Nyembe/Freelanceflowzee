@@ -296,6 +296,53 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* Overview Tab */}
           <TabsContent value="overview">
+            {/* Overview Banner */}
+            <div className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Overview</h2>
+                  <p className="text-fuchsia-100">App Store Connect-level mobile app management dashboard</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.downloads.toLocaleString()}</p>
+                    <p className="text-fuchsia-200 text-sm">Downloads</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.activeUsers.toLocaleString()}</p>
+                    <p className="text-fuchsia-200 text-sm">Active Users</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.rating.toFixed(1)}</p>
+                    <p className="text-fuchsia-200 text-sm">Rating</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Overview Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Upload, label: 'Submit', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Smartphone, label: 'TestFlight', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Star, label: 'Reviews', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Bell, label: 'Push', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Key, label: 'In-App', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Shield, label: 'Privacy', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               {/* Recent Builds */}
               <div className="col-span-2">
@@ -483,6 +530,27 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* Builds Tab */}
           <TabsContent value="builds">
+            {/* Builds Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Build Management</h2>
+                  <p className="text-emerald-100">TestFlight and Google Play Console integration</p>
+                  <p className="text-emerald-200 text-xs mt-1">Auto-deploy • Beta testing • Phased rollouts</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBuilds.length}</p>
+                    <p className="text-emerald-200 text-sm">Builds</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBuilds.filter(b => b.status === 'released').length}</p>
+                    <p className="text-emerald-200 text-sm">Released</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -547,6 +615,27 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* Reviews Tab */}
           <TabsContent value="reviews">
+            {/* Reviews Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Reviews</h2>
+                  <p className="text-amber-100">Monitor ratings and respond to user feedback</p>
+                  <p className="text-amber-200 text-xs mt-1">Sentiment analysis • Auto-replies • Trending topics</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockReviews.length}</p>
+                    <p className="text-amber-200 text-sm">Reviews</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.rating.toFixed(1)}</p>
+                    <p className="text-amber-200 text-sm">Avg Rating</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <div className="col-span-2">
                 <Card>
@@ -669,6 +758,39 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Analytics</h2>
+                  <p className="text-indigo-100">Firebase Analytics-level insights and metrics</p>
+                  <p className="text-indigo-200 text-xs mt-1">Real-time data from iOS and Android</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.activeUsers.toLocaleString()}</p>
+                    <p className="text-indigo-200 text-sm">MAU</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.sessions.toLocaleString()}</p>
+                    <p className="text-indigo-200 text-sm">Sessions</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(stats.revenue / 1000).toFixed(1)}k</p>
+                    <p className="text-indigo-200 text-sm">Revenue</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.crashes}</p>
+                    <p className="text-indigo-200 text-sm">Crashes</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">4.5m</p>
+                    <p className="text-indigo-200 text-sm">Events</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -742,6 +864,27 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* Push Notifications Tab */}
           <TabsContent value="push">
+            {/* Push Notifications Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Push Notifications</h2>
+                  <p className="text-rose-100">OneSignal-level push notification management</p>
+                  <p className="text-rose-200 text-xs mt-1">Automated campaigns • A/B testing • Segmentation</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPushCampaigns.length}</p>
+                    <p className="text-rose-200 text-sm">Campaigns</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPushCampaigns.reduce((sum, c) => sum + c.sent, 0).toLocaleString()}</p>
+                    <p className="text-rose-200 text-sm">Sent</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <div className="col-span-2">
                 <Card>
@@ -830,6 +973,38 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* In-App Purchases Tab */}
           <TabsContent value="iap">
+            {/* In-App Purchases Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">In-App Purchases</h2>
+                  <p className="text-green-100">RevenueCat-level subscription and purchase management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProducts.length}</p>
+                    <p className="text-green-200 text-sm">Products</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(stats.revenue / 1000).toFixed(1)}k</p>
+                    <p className="text-green-200 text-sm">Revenue</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.type === 'subscription').length}</p>
+                    <p className="text-green-200 text-sm">Subs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.type === 'consumable').length}</p>
+                    <p className="text-green-200 text-sm">Consumable</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">85%</p>
+                    <p className="text-green-200 text-sm">Retention</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <div className="col-span-2">
                 <Card>
@@ -907,6 +1082,27 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
           {/* Settings Tab - App Store Connect Level with 6 Sub-tabs */}
           <TabsContent value="settings">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Settings</h2>
+                  <p className="text-slate-100">Configure app metadata, privacy, and distribution</p>
+                  <p className="text-slate-200 text-xs mt-1">App Info • Pricing • Availability • Privacy</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">v{mockBuilds[0]?.version || '1.0'}</p>
+                    <p className="text-slate-200 text-sm">Version</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">2</p>
+                    <p className="text-slate-200 text-sm">Platforms</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-6">
               {/* Settings Sidebar */}
               <div className="w-64 shrink-0">

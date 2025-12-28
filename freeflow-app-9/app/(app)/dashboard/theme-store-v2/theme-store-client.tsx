@@ -19,7 +19,8 @@ import {
   Tablet, Zap, Shield, Clock, Users, TrendingUp, Package,
   Settings, Code, Paintbrush, Type, Layers, ChevronRight,
   Bell, Lock, Key, Globe, RefreshCw, Upload, Link2, AlertTriangle,
-  CreditCard, Wallet, FileText, Info, Database, Server
+  CreditCard, Wallet, FileText, Info, Database, Server,
+  Copy, Trash2, Share2, Grid3x3, Gift, Save, Archive
 } from 'lucide-react'
 
 // Types
@@ -323,6 +324,54 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
           {/* Browse Tab */}
           <TabsContent value="browse">
+            {/* Browse Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Theme Marketplace</h2>
+                  <p className="text-violet-100">Envato Elements-level theme marketplace with instant preview</p>
+                  <p className="text-violet-200 text-xs mt-1">Premium themes • Designer verified • Live customization</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockThemes.length}</p>
+                    <p className="text-violet-200 text-sm">Themes</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockThemes.filter(t => t.pricing === 'free').length}</p>
+                    <p className="text-violet-200 text-sm">Free</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDesigners.length}</p>
+                    <p className="text-violet-200 text-sm">Designers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Browse Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Sparkles, label: 'Popular', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: TrendingUp, label: 'Trending', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Star, label: 'Top Rated', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Downloads', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Clock, label: 'New', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Heart, label: 'Favorites', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Filter, label: 'Filters', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex gap-6">
               {/* Sidebar Filters */}
               <div className="w-64 shrink-0 space-y-6">
@@ -549,6 +598,50 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
           {/* Installed Tab */}
           <TabsContent value="installed">
             <div className="space-y-6">
+              {/* Installed Banner */}
+              <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">My Themes Library</h2>
+                    <p className="text-emerald-100">Shopify-level theme management with instant switching</p>
+                    <p className="text-emerald-200 text-xs mt-1">Active theme • Custom presets • Auto-updates enabled</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{installedThemes.length}</p>
+                      <p className="text-emerald-200 text-sm">Installed</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{installedThemes.filter(t => t.status === 'active').length}</p>
+                      <p className="text-emerald-200 text-sm">Active</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{installedThemes.filter(t => t.hasUpdate).length || 0}</p>
+                      <p className="text-emerald-200 text-sm">Updates</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Installed Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+                {[
+                  { icon: Check, label: 'Switch Theme', color: 'text-emerald-600 dark:text-emerald-400' },
+                  { icon: Paintbrush, label: 'Customize', color: 'text-purple-600 dark:text-purple-400' },
+                  { icon: Download, label: 'Export', color: 'text-blue-600 dark:text-blue-400' },
+                  { icon: RefreshCw, label: 'Check Updates', color: 'text-orange-600 dark:text-orange-400' },
+                  { icon: Copy, label: 'Duplicate', color: 'text-cyan-600 dark:text-cyan-400' },
+                  { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' },
+                  { icon: Trash2, label: 'Uninstall', color: 'text-red-600 dark:text-red-400' },
+                  { icon: Upload, label: 'Import', color: 'text-indigo-600 dark:text-indigo-400' }
+                ].map((action, i) => (
+                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                    <action.icon className={`h-5 w-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               {/* Active Theme */}
               {activeTheme && (
                 <Card className="border-green-200 bg-green-50/50">
@@ -630,6 +723,50 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
           {/* Collections Tab */}
           <TabsContent value="collections">
             <div className="space-y-6">
+              {/* Collections Banner */}
+              <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Curated Collections</h2>
+                    <p className="text-amber-100">Dribbble-level curated theme bundles by top designers</p>
+                    <p className="text-amber-200 text-xs mt-1">Featured collections • Industry-specific • Seasonal picks</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{collections.length}</p>
+                      <p className="text-amber-200 text-sm">Collections</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{collections.filter(c => c.featured).length}</p>
+                      <p className="text-amber-200 text-sm">Featured</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{collections.reduce((sum, c) => sum + c.themes.length, 0)}</p>
+                      <p className="text-amber-200 text-sm">Total Themes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Collections Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+                {[
+                  { icon: Star, label: 'Featured', color: 'text-yellow-600 dark:text-yellow-400' },
+                  { icon: Grid3x3, label: 'Browse All', color: 'text-purple-600 dark:text-purple-400' },
+                  { icon: Heart, label: 'Favorites', color: 'text-pink-600 dark:text-pink-400' },
+                  { icon: Users, label: 'By Designer', color: 'text-blue-600 dark:text-blue-400' },
+                  { icon: Palette, label: 'By Style', color: 'text-emerald-600 dark:text-emerald-400' },
+                  { icon: Zap, label: 'New Arrivals', color: 'text-orange-600 dark:text-orange-400' },
+                  { icon: TrendingUp, label: 'Trending', color: 'text-cyan-600 dark:text-cyan-400' },
+                  { icon: Gift, label: 'Bundle Deals', color: 'text-red-600 dark:text-red-400' }
+                ].map((action, i) => (
+                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                    <action.icon className={`h-5 w-5 ${action.color}`} />
+                    <span className="text-xs">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+
               {collections.map(collection => (
                 <Card key={collection.id}>
                   <CardHeader>
@@ -668,6 +805,50 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
           {/* Customizer Tab */}
           <TabsContent value="customizer">
+            {/* Customizer Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Visual Theme Editor</h2>
+                  <p className="text-pink-100">Figma-level live customization with real-time preview</p>
+                  <p className="text-pink-200 text-xs mt-1">CSS variables • Color palettes • Typography controls • Layout presets</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Object.keys(customColors).length || 0}</p>
+                    <p className="text-pink-200 text-sm">Custom Colors</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">5</p>
+                    <p className="text-pink-200 text-sm">Fonts</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold capitalize">{previewDevice}</p>
+                    <p className="text-pink-200 text-sm">Preview</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Customizer Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Paintbrush, label: 'Colors', color: 'text-pink-600 dark:text-pink-400' },
+                { icon: Type, label: 'Typography', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Layout, label: 'Layout', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Layers, label: 'Components', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Eye, label: 'Preview', color: 'text-emerald-600 dark:text-emerald-400' },
+                { icon: Save, label: 'Save Preset', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'text-gray-600 dark:text-gray-400' },
+                { icon: Share2, label: 'Export', color: 'text-indigo-600 dark:text-indigo-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
               <div className="col-span-2">
                 <Card>
@@ -778,6 +959,50 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Theme Store Settings</h2>
+                  <p className="text-slate-200">WordPress Customizer-level theme configuration hub</p>
+                  <p className="text-slate-300 text-xs mt-1">License management • Auto-updates • CDN config • Backup settings</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{installedThemes.length}</p>
+                    <p className="text-slate-300 text-sm">Licenses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">✓</p>
+                    <p className="text-slate-300 text-sm">Auto-Update</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">CDN</p>
+                    <p className="text-slate-300 text-sm">Enabled</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Settings, label: 'General', color: 'text-gray-600 dark:text-gray-400' },
+                { icon: Key, label: 'Licenses', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: RefreshCw, label: 'Updates', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Shield, label: 'Security', color: 'text-green-600 dark:text-green-400' },
+                { icon: Globe, label: 'CDN', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Archive, label: 'Backups', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Bell, label: 'Notifications', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Link2, label: 'Integrations', color: 'text-pink-600 dark:text-pink-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
               {/* Settings Sub-tabs */}
               <div className="border-b border-gray-200 dark:border-gray-700">

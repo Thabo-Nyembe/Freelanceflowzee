@@ -55,8 +55,17 @@ import {
   Image,
   MoreHorizontal,
   ArrowUpRight,
-  Layers
+  Layers,
+  Sliders,
+  Terminal,
+  Webhook,
+  Bell,
+  Key,
+  Network
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
 
 // ============================================================================
 // TYPE DEFINITIONS - App Store Connect Level
@@ -571,6 +580,7 @@ export default function AppStoreClient() {
   const [selectedApp, setSelectedApp] = useState<App | null>(null)
   const [showAppDialog, setShowAppDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered apps
   const filteredApps = useMemo(() => {
@@ -728,6 +738,10 @@ export default function AppStoreClient() {
                 <BarChart3 className="w-4 h-4" />
                 Analytics
               </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -781,6 +795,29 @@ export default function AppStoreClient() {
                 </div>
               </div>
             </Card>
+
+            {/* Discover Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: TrendingUp, label: 'Trending', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Award, label: 'Top Charts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Heart, label: 'Wishlist', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
 
             {/* Editor's Choice */}
             <div>
@@ -1166,6 +1203,19 @@ export default function AppStoreClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Analytics</h2>
+                  <p className="text-emerald-100">Track usage, performance, and spending</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center"><p className="text-3xl font-bold">{analytics.installedApps}</p><p className="text-emerald-200 text-sm">Apps</p></div>
+                  <div className="text-center"><p className="text-3xl font-bold">${analytics.totalSpend}</p><p className="text-emerald-200 text-sm">Spent</p></div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="dark:bg-gray-800/50">
                 <CardContent className="p-6">
@@ -1277,6 +1327,312 @@ export default function AppStoreClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - App Store Connect Level Configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">App Store Settings</h2>
+                  <p className="text-slate-200">App Store Connect-level configuration and preferences</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">6</p>
+                    <p className="text-slate-200 text-sm">Setting Groups</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">32+</p>
+                    <p className="text-slate-200 text-sm">Options</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Download, label: 'Downloads', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Terminal, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: DollarSign, label: 'Billing', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'downloads', label: 'Downloads', icon: Download },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Display Preferences</CardTitle>
+                        <CardDescription>Customize how apps are displayed in the store</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">Grid or list view</p></div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm"><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm"><List className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Apps Per Page</Label><p className="text-sm text-gray-500">Number of apps to display</p></div>
+                          <Input type="number" defaultValue="24" className="w-24" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Show Ratings</Label><p className="text-sm text-gray-500">Display star ratings</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Show Prices</Label><p className="text-sm text-gray-500">Display pricing info</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Region & Language</CardTitle>
+                        <CardDescription>Set your store region and language preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Store Region</Label><p className="text-sm text-gray-500">Your geographic region</p></div>
+                          <Input defaultValue="United States" className="w-48" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Language</Label><p className="text-sm text-gray-500">Display language</p></div>
+                          <Input defaultValue="English" className="w-48" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Currency</Label><p className="text-sm text-gray-500">Price display currency</p></div>
+                          <Input defaultValue="USD" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'downloads' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Download Preferences</CardTitle>
+                        <CardDescription>Configure how apps are downloaded and installed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Auto-Install Updates</Label><p className="text-sm text-gray-500">Install updates automatically</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Download Over WiFi Only</Label><p className="text-sm text-gray-500">Save mobile data</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Parallel Downloads</Label><p className="text-sm text-gray-500">Max concurrent downloads</p></div>
+                          <Input type="number" defaultValue="3" className="w-24" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Download Location</Label><p className="text-sm text-gray-500">Default install path</p></div>
+                          <Input defaultValue="/Applications" className="w-48" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Notification Preferences</CardTitle>
+                        <CardDescription>Control what notifications you receive</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Update Notifications</Label><p className="text-sm text-gray-500">App update alerts</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">New App Recommendations</Label><p className="text-sm text-gray-500">Personalized suggestions</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Price Drop Alerts</Label><p className="text-sm text-gray-500">Wishlist price changes</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Trial Expiration Reminders</Label><p className="text-sm text-gray-500">Before trial ends</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Email Notifications</Label><p className="text-sm text-gray-500">Receive via email</p></div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Manage app store integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Apple App Store', connected: true, icon: '🍎' },
+                          { name: 'Google Play', connected: true, icon: '🤖' },
+                          { name: 'Microsoft Store', connected: false, icon: '🪟' },
+                          { name: 'Slack', connected: true, icon: '💬' },
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
+                              </div>
+                            </div>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                              {integration.connected ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Protect your app store account</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Require Password for Purchases</Label><p className="text-sm text-gray-500">Additional verification</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Biometric Authentication</Label><p className="text-sm text-gray-500">Face ID or Touch ID</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">App Permissions Review</Label><p className="text-sm text-gray-500">Review before install</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Malware Scanning</Label><p className="text-sm text-gray-500">Scan before install</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Developer Options</CardTitle>
+                        <CardDescription>Advanced settings for developers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Developer Mode</Label><p className="text-sm text-gray-500">Enable developer features</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Beta Apps</Label><p className="text-sm text-gray-500">Show beta versions</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">Debug Logging</Label><p className="text-sm text-gray-500">Enable verbose logs</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div><Label className="text-base">API Access</Label><p className="text-sm text-gray-500">Enable API endpoints</p></div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardTitle>Cache & Storage</CardTitle>
+                        <CardDescription>Manage app store data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">App Cache</p><p className="text-sm text-gray-500">1.2 GB used</p></div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Download History</p><p className="text-sm text-gray-500">256 MB used</p></div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                          <div><p className="font-medium">Search History</p><p className="text-sm text-gray-500">12 MB used</p></div>
+                          <Button variant="outline" size="sm">Clear</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

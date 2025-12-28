@@ -588,6 +588,27 @@ export default function ExtensionsClient() {
 
           {/* Discover Tab */}
           <TabsContent value="discover" className="space-y-6">
+            {/* Discover Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Extension Marketplace</h2>
+                  <p className="text-violet-100">VS Code Marketplace-level extensibility</p>
+                  <p className="text-violet-200 text-xs mt-1">Curated • Verified • Enterprise-ready</p>
+                  <p className="text-violet-200 text-xs mt-1">Auto-updates • Sandboxed • Reviews</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockExtensions.length}</p>
+                    <p className="text-violet-200 text-sm">Extensions</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockExtensions.filter(e => e.isInstalled).length}</p>
+                    <p className="text-violet-200 text-sm">Installed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Category Filter */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               <Button

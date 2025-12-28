@@ -423,6 +423,22 @@ export default function ProjectsHubClient() {
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="mt-6 space-y-4">
+            {/* Projects Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Projects Hub</h2>
+                  <p className="text-violet-100">Monday.com-level project management</p>
+                  <p className="text-violet-200 text-xs mt-1">Board • Timeline • Automations • Insights</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{projects.length}</p>
+                    <p className="text-violet-200 text-sm">Projects</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <Button variant={viewType === 'board' ? 'default' : 'outline'} size="sm" onClick={() => setViewType('board')}><LayoutGrid className="h-4 w-4 mr-1" />Board</Button>
               <Button variant={viewType === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewType('list')}><List className="h-4 w-4 mr-1" />List</Button>

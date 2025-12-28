@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
@@ -67,7 +69,23 @@ import {
   Copy,
   Share2,
   Heart,
-  Flame
+  Flame,
+  Sliders,
+  Webhook,
+  Key,
+  Database,
+  HardDrive,
+  Terminal,
+  Shield,
+  Archive,
+  Lock,
+  Palette,
+  Layers,
+  Rocket,
+  Megaphone,
+  ListChecks,
+  GitBranch,
+  Network
 } from 'lucide-react'
 
 // Types
@@ -535,6 +553,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const [selectedPriority, setSelectedPriority] = useState<LeadPriority | 'all'>('all')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const leads = mockLeads
   const campaigns = mockCampaigns
@@ -766,7 +785,57 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           </TabsList>
 
           {/* Leads Tab */}
-          <TabsContent value="leads" className="mt-6">
+          <TabsContent value="leads" className="mt-6 space-y-6">
+            {/* Leads Overview Banner */}
+            <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Lead Database</h3>
+                  <p className="text-pink-100 mb-4">Manage, track and nurture your leads through the sales funnel</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-pink-100">Active Leads</p>
+                      <p className="text-xl font-bold">{stats.totalLeads - stats.lost}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-pink-100">Hot Leads</p>
+                      <p className="text-xl font-bold">{stats.hotLeads}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-pink-100">Pipeline Value</p>
+                      <p className="text-xl font-bold">{formatCurrency(stats.pipelineValue)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Users className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: UserPlus, label: 'Add Lead', color: 'text-pink-500' },
+                { icon: Upload, label: 'Import CSV', color: 'text-blue-500' },
+                { icon: Download, label: 'Export All', color: 'text-green-500' },
+                { icon: Mail, label: 'Email Blast', color: 'text-purple-500' },
+                { icon: Filter, label: 'Smart Filter', color: 'text-amber-500' },
+                { icon: Layers, label: 'Segments', color: 'text-indigo-500' },
+                { icon: Tag, label: 'Bulk Tag', color: 'text-rose-500' },
+                { icon: RefreshCw, label: 'Sync CRM', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -892,7 +961,57 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           </TabsContent>
 
           {/* Pipeline Tab */}
-          <TabsContent value="pipeline" className="mt-6">
+          <TabsContent value="pipeline" className="mt-6 space-y-6">
+            {/* Pipeline Overview Banner */}
+            <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Sales Pipeline</h3>
+                  <p className="text-indigo-100 mb-4">Visual Kanban board for tracking deal progression</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-indigo-100">Total Deals</p>
+                      <p className="text-xl font-bold">{stats.totalLeads}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-indigo-100">In Progress</p>
+                      <p className="text-xl font-bold">{stats.qualified}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-indigo-100">Win Rate</p>
+                      <p className="text-xl font-bold">{stats.conversionRate.toFixed(1)}%</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Activity className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Deal', color: 'text-pink-500' },
+                { icon: GitBranch, label: 'Stage Rules', color: 'text-indigo-500' },
+                { icon: Zap, label: 'Automation', color: 'text-amber-500' },
+                { icon: BarChart3, label: 'Pipeline Report', color: 'text-green-500' },
+                { icon: Users, label: 'Assign Leads', color: 'text-blue-500' },
+                { icon: Clock, label: 'Stale Deals', color: 'text-red-500' },
+                { icon: TrendingUp, label: 'Forecasting', color: 'text-purple-500' },
+                { icon: RefreshCw, label: 'Refresh View', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-7 gap-4">
               {(['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'] as LeadStatus[]).map((status) => {
                 const statusLeads = leadsByStatus[status]
@@ -940,7 +1059,57 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           </TabsContent>
 
           {/* Activities Tab */}
-          <TabsContent value="activities" className="mt-6">
+          <TabsContent value="activities" className="mt-6 space-y-6">
+            {/* Activities Overview Banner */}
+            <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Activity Timeline</h3>
+                  <p className="text-cyan-100 mb-4">Track all interactions and touchpoints with your leads</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-cyan-100">Total Activities</p>
+                      <p className="text-xl font-bold">{leads.reduce((sum, l) => sum + l.activities.length, 0)}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-cyan-100">Pending Follow-ups</p>
+                      <p className="text-xl font-bold">{leads.filter(l => l.nextFollowUp).length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-cyan-100">Emails Sent</p>
+                      <p className="text-xl font-bold">{leads.reduce((sum, l) => sum + l.activities.filter(a => a.type === 'email').length, 0)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Clock className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Mail, label: 'Log Email', color: 'text-blue-500' },
+                { icon: Phone, label: 'Log Call', color: 'text-green-500' },
+                { icon: Users, label: 'Log Meeting', color: 'text-purple-500' },
+                { icon: FileText, label: 'Add Note', color: 'text-amber-500' },
+                { icon: CheckCircle, label: 'Create Task', color: 'text-pink-500' },
+                { icon: Calendar, label: 'Schedule', color: 'text-indigo-500' },
+                { icon: MessageSquare, label: 'Send Message', color: 'text-cyan-500' },
+                { icon: Download, label: 'Export Log', color: 'text-red-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -1008,7 +1177,57 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           </TabsContent>
 
           {/* Campaigns Tab */}
-          <TabsContent value="campaigns" className="mt-6">
+          <TabsContent value="campaigns" className="mt-6 space-y-6">
+            {/* Campaigns Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Lead Campaigns</h3>
+                  <p className="text-amber-100 mb-4">Create and manage lead nurturing campaigns</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-amber-100">Active Campaigns</p>
+                      <p className="text-xl font-bold">{campaigns.filter(c => c.status === 'active').length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-amber-100">Total Leads</p>
+                      <p className="text-xl font-bold">{campaigns.reduce((sum, c) => sum + c.leads, 0)}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-amber-100">Conversions</p>
+                      <p className="text-xl font-bold">{campaigns.reduce((sum, c) => sum + c.converted, 0)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Send className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Rocket, label: 'New Campaign', color: 'text-pink-500' },
+                { icon: Mail, label: 'Email Blast', color: 'text-blue-500' },
+                { icon: Megaphone, label: 'Announcement', color: 'text-amber-500' },
+                { icon: ListChecks, label: 'Sequences', color: 'text-green-500' },
+                { icon: Zap, label: 'Workflows', color: 'text-purple-500' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-indigo-500' },
+                { icon: Users, label: 'Audience', color: 'text-cyan-500' },
+                { icon: Copy, label: 'Duplicate', color: 'text-rose-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {campaigns.map((campaign) => (
                 <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
@@ -1070,7 +1289,57 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           </TabsContent>
 
           {/* Scoring Tab */}
-          <TabsContent value="scoring" className="mt-6">
+          <TabsContent value="scoring" className="mt-6 space-y-6">
+            {/* Scoring Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Lead Scoring Engine</h3>
+                  <p className="text-purple-100 mb-4">AI-powered lead qualification and prioritization</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-purple-100">Scoring Rules</p>
+                      <p className="text-xl font-bold">{scoringRules.length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-purple-100">Avg Score</p>
+                      <p className="text-xl font-bold">{stats.avgScore.toFixed(0)}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-purple-100">High-Quality Leads</p>
+                      <p className="text-xl font-bold">{leads.filter(l => l.score >= 80).length}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Brain className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Rule', color: 'text-pink-500' },
+                { icon: Brain, label: 'AI Scoring', color: 'text-purple-500' },
+                { icon: Activity, label: 'Behavioral', color: 'text-blue-500' },
+                { icon: Building2, label: 'Demographic', color: 'text-green-500' },
+                { icon: BarChart3, label: 'Distribution', color: 'text-amber-500' },
+                { icon: RefreshCw, label: 'Recalculate', color: 'text-indigo-500' },
+                { icon: Download, label: 'Export Rules', color: 'text-cyan-500' },
+                { icon: Settings, label: 'Configure', color: 'text-rose-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -1141,54 +1410,493 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Lead Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { title: 'Auto-assign leads', description: 'Automatically assign leads to sales reps', enabled: true },
-                    { title: 'Lead notifications', description: 'Get notified of new leads instantly', enabled: true },
-                    { title: 'Duplicate detection', description: 'Prevent duplicate lead entries', enabled: true },
-                    { title: 'Auto-scoring', description: 'Automatically calculate lead scores', enabled: false }
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div>
-                        <p className="font-medium">{setting.title}</p>
-                        <p className="text-sm text-muted-foreground">{setting.description}</p>
-                      </div>
-                      <div className={`w-10 h-6 rounded-full transition-colors ${setting.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                        <div className={`w-4 h-4 rounded-full bg-white shadow mt-1 transition-transform ${setting.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'scoring', label: 'Scoring', icon: Brain },
+                        { id: 'notifications', label: 'Notifications', icon: Mail },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Integrations</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    { name: 'Salesforce', description: 'Sync leads with Salesforce CRM', connected: true },
-                    { name: 'Mailchimp', description: 'Sync with email lists', connected: true },
-                    { name: 'LinkedIn', description: 'Import leads from LinkedIn', connected: false },
-                    { name: 'Zapier', description: 'Connect with 3000+ apps', connected: false }
-                  ].map((integration, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div>
-                        <p className="font-medium">{integration.name}</p>
-                        <p className="text-sm text-muted-foreground">{integration.description}</p>
-                      </div>
-                      <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
-                        {integration.connected ? 'Connected' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Configure your lead generation preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Lead Owner</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>Auto-assign (Round Robin)</option>
+                              <option>Mike Wilson</option>
+                              <option>Emma Davis</option>
+                              <option>Unassigned</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Lead Status</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>New</option>
+                              <option>Contacted</option>
+                              <option>Qualified</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Auto-assign Leads</p>
+                              <p className="text-sm text-muted-foreground">Automatically assign new leads to sales reps</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Duplicate Detection</p>
+                              <p className="text-sm text-muted-foreground">Prevent duplicate lead entries</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Lead Enrichment</p>
+                              <p className="text-sm text-muted-foreground">Auto-enrich leads with company data</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Website Tracking</p>
+                              <p className="text-sm text-muted-foreground">Track lead website activity</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Lead Sources</CardTitle>
+                        <CardDescription>Configure lead capture sources</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {['Website Forms', 'LinkedIn', 'Paid Ads', 'Referrals', 'Events', 'Cold Outreach'].map((source, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                  <Globe className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                                </div>
+                                <span className="font-medium">{source}</span>
+                              </div>
+                              <Switch defaultChecked={i < 4} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'scoring' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Lead Scoring Configuration</CardTitle>
+                        <CardDescription>Configure how leads are scored and prioritized</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Scoring Model</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>Point-based (Default)</option>
+                              <option>AI Predictive</option>
+                              <option>Hybrid Model</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Hot Lead Threshold</Label>
+                            <Input type="number" defaultValue="80" />
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Auto-scoring</p>
+                              <p className="text-sm text-muted-foreground">Automatically calculate lead scores</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Score Decay</p>
+                              <p className="text-sm text-muted-foreground">Reduce scores for inactive leads</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">AI Suggestions</p>
+                              <p className="text-sm text-muted-foreground">Get AI recommendations for scoring rules</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Score Thresholds</CardTitle>
+                        <CardDescription>Define lead priority thresholds</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Flame className="w-4 h-4 text-red-500" />
+                                <span className="font-medium">Hot</span>
+                              </div>
+                              <Input type="number" defaultValue="80" className="mt-2" />
+                              <p className="text-xs text-muted-foreground mt-1">Score above</p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20">
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingUp className="w-4 h-4 text-orange-500" />
+                                <span className="font-medium">Warm</span>
+                              </div>
+                              <Input type="number" defaultValue="50" className="mt-2" />
+                              <p className="text-xs text-muted-foreground mt-1">Score above</p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingDown className="w-4 h-4 text-blue-500" />
+                                <span className="font-medium">Cold</span>
+                              </div>
+                              <Input type="number" defaultValue="0" className="mt-2" />
+                              <p className="text-xs text-muted-foreground mt-1">Score above</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Preferences</CardTitle>
+                        <CardDescription>Configure how you receive lead notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'New Lead Alerts', description: 'Get notified when new leads are captured', enabled: true },
+                          { title: 'Hot Lead Alerts', description: 'Instant alerts for high-scoring leads', enabled: true },
+                          { title: 'Lead Assignment', description: 'Notifications when leads are assigned to you', enabled: true },
+                          { title: 'Activity Updates', description: 'Updates on lead engagement activity', enabled: false },
+                          { title: 'Daily Digest', description: 'Daily summary of lead activities', enabled: true },
+                          { title: 'Weekly Report', description: 'Weekly lead generation report', enabled: false },
+                        ].map((notification, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{notification.title}</p>
+                              <p className="text-sm text-muted-foreground">{notification.description}</p>
+                            </div>
+                            <Switch defaultChecked={notification.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Channels</CardTitle>
+                        <CardDescription>Choose where to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { icon: Mail, label: 'Email', active: true },
+                            { icon: MessageSquare, label: 'In-App', active: true },
+                            { icon: Phone, label: 'SMS', active: false },
+                            { icon: Network, label: 'Slack', active: true },
+                          ].map((channel, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                  <channel.icon className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                                </div>
+                                <span className="font-medium">{channel.label}</span>
+                              </div>
+                              <Switch defaultChecked={channel.active} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>CRM Integrations</CardTitle>
+                        <CardDescription>Connect your lead generation with CRM platforms</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Salesforce', description: 'Bi-directional sync with Salesforce', connected: true },
+                            { name: 'HubSpot', description: 'Sync leads with HubSpot CRM', connected: false },
+                            { name: 'Pipedrive', description: 'Push leads to Pipedrive', connected: false },
+                            { name: 'Zoho CRM', description: 'Integration with Zoho CRM', connected: false },
+                          ].map((integration, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                  <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{integration.name}</p>
+                                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                                </div>
+                              </div>
+                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                                {integration.connected ? 'Connected' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Marketing Integrations</CardTitle>
+                        <CardDescription>Connect with marketing platforms</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Mailchimp', description: 'Sync with email marketing lists', connected: true },
+                            { name: 'LinkedIn Ads', description: 'Import leads from LinkedIn campaigns', connected: false },
+                            { name: 'Google Ads', description: 'Sync leads from Google Ads', connected: true },
+                            { name: 'Facebook Ads', description: 'Import leads from Facebook campaigns', connected: false },
+                          ].map((integration, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                  <Megaphone className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{integration.name}</p>
+                                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                                </div>
+                              </div>
+                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                                {integration.connected ? 'Connected' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks & API</CardTitle>
+                        <CardDescription>Configure custom integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="lg_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-app.com/webhook/leads" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Privacy</CardTitle>
+                        <CardDescription>Manage lead data privacy settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'GDPR Compliance', description: 'Enable GDPR-compliant data handling', enabled: true },
+                          { title: 'Consent Tracking', description: 'Track lead marketing consent', enabled: true },
+                          { title: 'Data Retention', description: 'Auto-delete leads after 2 years', enabled: false },
+                          { title: 'Anonymize Data', description: 'Anonymize personal data in exports', enabled: true },
+                        ].map((setting, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{setting.title}</p>
+                              <p className="text-sm text-muted-foreground">{setting.description}</p>
+                            </div>
+                            <Switch defaultChecked={setting.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage who can access lead data</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { role: 'Admin', access: 'Full Access', users: 2 },
+                            { role: 'Sales Manager', access: 'View & Edit', users: 3 },
+                            { role: 'Sales Rep', access: 'View Own', users: 8 },
+                            { role: 'Marketing', access: 'View Only', users: 4 },
+                          ].map((role, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                  <Lock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{role.role}</p>
+                                  <p className="text-sm text-muted-foreground">{role.access}</p>
+                                </div>
+                              </div>
+                              <Badge variant="secondary">{role.users} users</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Advanced Settings</CardTitle>
+                        <CardDescription>Configure advanced lead generation options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'Lead Auto-Merging', description: 'Automatically merge duplicate leads', enabled: false },
+                          { title: 'Real-time Sync', description: 'Enable real-time data synchronization', enabled: true },
+                          { title: 'Bulk Operations', description: 'Allow bulk lead modifications', enabled: true },
+                          { title: 'Debug Mode', description: 'Enable detailed logging for troubleshooting', enabled: false },
+                        ].map((setting, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{setting.title}</p>
+                              <p className="text-sm text-muted-foreground">{setting.description}</p>
+                            </div>
+                            <Switch defaultChecked={setting.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage your lead data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export All Leads</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Upload className="w-5 h-5" />
+                            <span>Import Leads</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Archive className="w-5 h-5" />
+                            <span>Archive Old Leads</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600">
+                            <Trash2 className="w-5 h-5" />
+                            <span>Purge Lost Leads</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                          <AlertCircle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription className="text-amber-600 dark:text-amber-500">
+                          Irreversible actions that affect all lead data
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset All Scoring</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Reset all lead scores to zero</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

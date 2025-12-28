@@ -912,6 +912,50 @@ export default function ApiKeysClient() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6 mt-6">
+            {/* Dashboard Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Overview Dashboard</h2>
+                  <p className="text-slate-200">Stripe-level API management and analytics</p>
+                  <p className="text-slate-300 text-xs mt-1">Real-time monitoring • Usage tracking • Performance metrics</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiKeys.length}</p>
+                    <p className="text-slate-300 text-sm">API Keys</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiLogs.length}</p>
+                    <p className="text-slate-300 text-sm">Requests Today</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">99.9%</p>
+                    <p className="text-slate-300 text-sm">Uptime</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Key, label: 'New Key', color: 'text-slate-600 dark:text-slate-400' },
+                { icon: Activity, label: 'Live Feed', color: 'text-green-600 dark:text-green-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400' },
+                { icon: AlertTriangle, label: 'Alerts', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: FileText, label: 'Docs', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Activity */}
               <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-gray-800">
@@ -1010,6 +1054,50 @@ export default function ApiKeysClient() {
 
           {/* API Keys Tab */}
           <TabsContent value="keys" className="space-y-6 mt-6">
+            {/* Keys Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Keys Management</h2>
+                  <p className="text-amber-100">GitHub-level token management with fine-grained permissions</p>
+                  <p className="text-amber-200 text-xs mt-1">Rotating keys • Scoped access • Expiration control</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiKeys.filter(k => k.status === 'active').length}</p>
+                    <p className="text-amber-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiKeys.filter(k => k.status === 'revoked').length}</p>
+                    <p className="text-amber-200 text-sm">Revoked</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiKeys.length}</p>
+                    <p className="text-amber-200 text-sm">Total</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Keys Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Generate Key', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: RefreshCw, label: 'Rotate All', color: 'text-blue-600 dark:text-blue-400' },
+                { icon: Copy, label: 'Copy Key', color: 'text-green-600 dark:text-green-400' },
+                { icon: Lock, label: 'Revoke', color: 'text-red-600 dark:text-red-400' },
+                { icon: Clock, label: 'Set Expiry', color: 'text-purple-600 dark:text-purple-400' },
+                { icon: Shield, label: 'Permissions', color: 'text-orange-600 dark:text-orange-400' },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
+                { icon: History, label: 'History', color: 'text-gray-600 dark:text-gray-400' }
+              ].map((action, i) => (
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -1122,6 +1210,27 @@ export default function ApiKeysClient() {
 
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6 mt-6">
+            {/* Applications Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">OAuth Applications</h2>
+                  <p className="text-blue-100">Auth0-level application management with OAuth 2.0</p>
+                  <p className="text-blue-200 text-xs mt-1">Client credentials • Scopes • Redirect URIs</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApplications.length}</p>
+                    <p className="text-blue-200 text-sm">Apps</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApplications.filter(a => a.status === 'active').length}</p>
+                    <p className="text-blue-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -1202,6 +1311,31 @@ export default function ApiKeysClient() {
 
           {/* Logs Tab */}
           <TabsContent value="logs" className="space-y-6 mt-6">
+            {/* Logs Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Request Logs</h2>
+                  <p className="text-emerald-100">Datadog-level request logging and debugging</p>
+                  <p className="text-emerald-200 text-xs mt-1">Request/response inspection • Latency tracking • Error analysis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiLogs.length}</p>
+                    <p className="text-emerald-200 text-sm">Logs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiLogs.filter(l => l.status_code >= 400).length}</p>
+                    <p className="text-emerald-200 text-sm">Errors</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{Math.round(mockApiLogs.reduce((s, l) => s + l.response_time_ms, 0) / mockApiLogs.length)}ms</p>
+                    <p className="text-emerald-200 text-sm">Avg Latency</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -1272,6 +1406,31 @@ export default function ApiKeysClient() {
 
           {/* Webhooks Tab */}
           <TabsContent value="webhooks" className="space-y-6 mt-6">
+            {/* Webhooks Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Webhook Management</h2>
+                  <p className="text-purple-100">Stripe Webhooks-level event delivery system</p>
+                  <p className="text-purple-200 text-xs mt-1">Retry logic • Signature verification • Event filtering</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWebhooks.length}</p>
+                    <p className="text-purple-200 text-sm">Endpoints</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWebhooks.filter(w => w.status === 'active').length}</p>
+                    <p className="text-purple-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">99.5%</p>
+                    <p className="text-purple-200 text-sm">Success Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Webhook Endpoints</h2>
               <Button>
@@ -1362,6 +1521,31 @@ export default function ApiKeysClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6 mt-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-gray-700 via-slate-700 to-zinc-700 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Configuration</h2>
+                  <p className="text-gray-300">AWS IAM-level security and access configuration</p>
+                  <p className="text-gray-400 text-xs mt-1">Rate limits • IP whitelisting • CORS settings • Encryption</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">256-bit</p>
+                    <p className="text-gray-400 text-sm">Encryption</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">MFA</p>
+                    <p className="text-gray-400 text-sm">Enabled</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">SOC2</p>
+                    <p className="text-gray-400 text-sm">Compliant</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Security Settings */}
               <Card className="border-0 shadow-sm dark:bg-gray-800">

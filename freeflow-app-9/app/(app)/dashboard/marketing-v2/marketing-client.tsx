@@ -832,6 +832,53 @@ export default function MarketingClient() {
 
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-4">
+            {/* Campaigns Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Campaign Management</h2>
+                  <p className="text-rose-100">HubSpot-level marketing automation with multi-channel campaigns</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCampaigns.length}</p>
+                    <p className="text-rose-200 text-sm">Campaigns</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCampaigns.filter(c => c.status === 'active').length}</p>
+                    <p className="text-rose-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{((mockCampaigns.reduce((sum, c) => sum + c.spent, 0) / mockCampaigns.reduce((sum, c) => sum + c.budget, 0)) * 100).toFixed(0)}%</p>
+                    <p className="text-rose-200 text-sm">Budget Used</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Campaigns Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Campaign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Play, label: 'Launch', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Pause, label: 'Pause', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Target, label: 'Targeting', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: DollarSign, label: 'Budget', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
@@ -938,6 +985,53 @@ export default function MarketingClient() {
 
           {/* Leads Tab */}
           <TabsContent value="leads" className="space-y-4">
+            {/* Leads Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Lead Management</h2>
+                  <p className="text-amber-100">Salesforce-level CRM with lead scoring and pipeline management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockLeads.length}</p>
+                    <p className="text-amber-200 text-sm">Total Leads</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockLeads.filter(l => l.status === 'new').length}</p>
+                    <p className="text-amber-200 text-sm">New</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockLeads.filter(l => l.status === 'qualified').length}</p>
+                    <p className="text-amber-200 text-sm">Qualified</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Leads Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Lead', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Phone, label: 'Call', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Mail, label: 'Email', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Users, label: 'Assign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Star, label: 'Score', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: GitBranch, label: 'Workflow', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
@@ -1035,6 +1129,53 @@ export default function MarketingClient() {
 
           {/* Email Tab */}
           <TabsContent value="email" className="space-y-4">
+            {/* Email Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Email Marketing</h2>
+                  <p className="text-violet-100">Mailchimp-level email automation and sequence management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEmailSequences.length}</p>
+                    <p className="text-violet-200 text-sm">Sequences</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEmailSequences.reduce((sum, s) => sum + s.enrolled, 0).toLocaleString()}</p>
+                    <p className="text-violet-200 text-sm">Enrolled</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(mockEmailSequences.reduce((sum, s) => sum + s.openRate, 0) / mockEmailSequences.length).toFixed(0)}%</p>
+                    <p className="text-violet-200 text-sm">Avg Open Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Email Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Sequence', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Send, label: 'Send Now', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: FileText, label: 'Templates', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Users, label: 'Segments', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Sparkles, label: 'A/B Test', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email Sequences</h3>
               <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
@@ -1097,6 +1238,53 @@ export default function MarketingClient() {
 
           {/* Content Tab */}
           <TabsContent value="content" className="space-y-4">
+            {/* Content Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Content Hub</h2>
+                  <p className="text-cyan-100">Notion-level content calendar with multi-platform publishing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockContent.length}</p>
+                    <p className="text-cyan-200 text-sm">Content Items</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockContent.filter(c => c.status === 'published').length}</p>
+                    <p className="text-cyan-200 text-sm">Published</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockContent.reduce((sum, c) => sum + c.views, 0).toLocaleString()}</p>
+                    <p className="text-cyan-200 text-sm">Total Views</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Content', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: FileText, label: 'Blog Post', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Video, label: 'Video', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Image, label: 'Graphic', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Share2, label: 'Social Post', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Eye, label: 'Preview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Content Calendar</h3>
               <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
@@ -1149,6 +1337,53 @@ export default function MarketingClient() {
 
           {/* Automation Tab */}
           <TabsContent value="automation" className="space-y-4">
+            {/* Automation Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Marketing Automation</h2>
+                  <p className="text-orange-100">Zapier-level workflow automation with visual builder</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
+                    <p className="text-orange-200 text-sm">Workflows</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.status === 'active').length}</p>
+                    <p className="text-orange-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.reduce((sum, w) => sum + w.conversions, 0).toLocaleString()}</p>
+                    <p className="text-orange-200 text-sm">Conversions</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Automation Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Workflow', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Zap, label: 'Triggers', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: GitBranch, label: 'Branches', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Play, label: 'Run Now', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Pause, label: 'Pause All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Marketing Workflows</h3>
               <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
@@ -1214,6 +1449,53 @@ export default function MarketingClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Marketing Analytics</h2>
+                  <p className="text-indigo-100">Google Analytics-level insights with real-time metrics</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${(mockAnalytics.revenue / 1000000).toFixed(2)}M</p>
+                    <p className="text-indigo-200 text-sm">Revenue</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAnalytics.roi}%</p>
+                    <p className="text-indigo-200 text-sm">ROI</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAnalytics.conversions.toLocaleString()}</p>
+                    <p className="text-indigo-200 text-sm">Conversions</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: BarChart3, label: 'Dashboards', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: PieChart, label: 'Reports', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: Users, label: 'Audiences', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Target, label: 'Goals', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Globe, label: 'Channels', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: ExternalLink, label: 'Export', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Revenue Overview */}
               <Card className="col-span-full">

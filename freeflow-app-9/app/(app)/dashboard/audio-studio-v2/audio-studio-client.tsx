@@ -10,6 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Music,
   Mic,
@@ -63,7 +65,14 @@ import {
   Grid3X3,
   Maximize2,
   Minimize2,
-  Search
+  Search,
+  Shield,
+  Terminal,
+  Webhook,
+  Bell,
+  Key,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react'
 
 // Types
@@ -553,6 +562,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null)
   const [showTrackDialog, setShowTrackDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Transport state
   const [isPlaying, setIsPlaying] = useState(false)
@@ -846,10 +856,61 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
               <Download className="w-4 h-4" />
               Export
             </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Tracks Tab - Timeline View */}
           <TabsContent value="tracks" className="space-y-4">
+            {/* Tracks Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Audio Production Studio</h2>
+                  <p className="text-purple-100">Professional multi-track recording and mixing</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{tracks.length}</p>
+                    <p className="text-purple-200 text-sm">Tracks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{bpm}</p>
+                    <p className="text-purple-200 text-sm">BPM</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{timeSignature}</p>
+                    <p className="text-purple-200 text-sm">Time Sig</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Track', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Mic, label: 'Record', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Upload, label: 'Import', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Wand2, label: 'Add Effect', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Piano, label: 'Instrument', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: TrendingUp, label: 'Automate', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Share2, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -1320,6 +1381,403 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-purple-500" />
+                      Settings
+                    </CardTitle>
+                    <CardDescription>Configure audio studio</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'audio', label: 'Audio', icon: Volume2 },
+                        { id: 'recording', label: 'Recording', icon: Mic },
+                        { id: 'plugins', label: 'Plugins', icon: Wand2 },
+                        { id: 'sync', label: 'Sync', icon: RefreshCw },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                            settingsTab === item.id
+                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 font-medium'
+                              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-purple-500" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Basic project preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-save" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Save</span>
+                            <span className="text-sm text-slate-500">Save project automatically</span>
+                          </Label>
+                          <Switch id="auto-save" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="undo-history" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Extended Undo</span>
+                            <span className="text-sm text-slate-500">Keep 1000+ undo steps</span>
+                          </Label>
+                          <Switch id="undo-history" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Auto-Save Interval (min)</Label>
+                            <Input type="number" defaultValue="5" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Undo Levels</Label>
+                            <Input type="number" defaultValue="1000" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Display Settings</CardTitle>
+                        <CardDescription>Visual preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="show-grid" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Show Grid</span>
+                            <span className="text-sm text-slate-500">Display timeline grid</span>
+                          </Label>
+                          <Switch id="show-grid" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="waveform-colors" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Colored Waveforms</span>
+                            <span className="text-sm text-slate-500">Color-code by track type</span>
+                          </Label>
+                          <Switch id="waveform-colors" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Audio Settings */}
+                {settingsTab === 'audio' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Volume2 className="w-5 h-5 text-purple-500" />
+                          Audio Interface
+                        </CardTitle>
+                        <CardDescription>Configure audio I/O settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Sample Rate</Label>
+                            <Input defaultValue="48000 Hz" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Buffer Size</Label>
+                            <Input defaultValue="256 samples" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Bit Depth</Label>
+                            <Input defaultValue="24-bit" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Latency</Label>
+                            <Input defaultValue="5.3 ms" disabled />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Processing</CardTitle>
+                        <CardDescription>Audio processing options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="hi-quality" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">High-Quality Mode</span>
+                            <span className="text-sm text-slate-500">64-bit processing</span>
+                          </Label>
+                          <Switch id="hi-quality" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="dither" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto Dither</span>
+                            <span className="text-sm text-slate-500">Apply dithering on export</span>
+                          </Label>
+                          <Switch id="dither" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Recording Settings */}
+                {settingsTab === 'recording' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mic className="w-5 h-5 text-purple-500" />
+                          Recording Settings
+                        </CardTitle>
+                        <CardDescription>Configure recording behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="count-in" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Count-In</span>
+                            <span className="text-sm text-slate-500">1 bar count-in before recording</span>
+                          </Label>
+                          <Switch id="count-in" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="punch-in" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto Punch Mode</span>
+                            <span className="text-sm text-slate-500">Record within loop region</span>
+                          </Label>
+                          <Switch id="punch-in" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="monitor" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Input Monitoring</span>
+                            <span className="text-sm text-slate-500">Hear input while recording</span>
+                          </Label>
+                          <Switch id="monitor" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Metronome</CardTitle>
+                        <CardDescription>Click track settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="metronome" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Enable Metronome</span>
+                            <span className="text-sm text-slate-500">Play click during recording</span>
+                          </Label>
+                          <Switch id="metronome" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Click Volume</Label>
+                            <Input type="number" defaultValue="-6" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Accent First Beat</Label>
+                            <Input defaultValue="Yes" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Plugins Settings */}
+                {settingsTab === 'plugins' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Wand2 className="w-5 h-5 text-purple-500" />
+                          Plugin Settings
+                        </CardTitle>
+                        <CardDescription>Manage audio plugins</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="vst3" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">VST3 Support</span>
+                            <span className="text-sm text-slate-500">Enable VST3 plugins</span>
+                          </Label>
+                          <Switch id="vst3" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="au" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Audio Units</span>
+                            <span className="text-sm text-slate-500">Enable AU plugins (macOS)</span>
+                          </Label>
+                          <Switch id="au" defaultChecked />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Rescan Plugins
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Plugin Paths</CardTitle>
+                        <CardDescription>Plugin search directories</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>VST3 Path</Label>
+                          <Input defaultValue="/Library/Audio/Plug-Ins/VST3" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>AU Path</Label>
+                          <Input defaultValue="/Library/Audio/Plug-Ins/Components" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Sync Settings */}
+                {settingsTab === 'sync' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-purple-500" />
+                          Sync Settings
+                        </CardTitle>
+                        <CardDescription>External sync and MIDI</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="ext-sync" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">External Sync</span>
+                            <span className="text-sm text-slate-500">Sync to external clock</span>
+                          </Label>
+                          <Switch id="ext-sync" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="mtc" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Send MTC</span>
+                            <span className="text-sm text-slate-500">Transmit MIDI Time Code</span>
+                          </Label>
+                          <Switch id="mtc" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="midi-clock" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Send MIDI Clock</span>
+                            <span className="text-sm text-slate-500">Sync external devices</span>
+                          </Label>
+                          <Switch id="midi-clock" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-purple-500" />
+                          Advanced Options
+                        </CardTitle>
+                        <CardDescription>Expert configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="multi-thread" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Multi-Threading</span>
+                            <span className="text-sm text-slate-500">Use all CPU cores</span>
+                          </Label>
+                          <Switch id="multi-thread" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="gpu-accel" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">GPU Acceleration</span>
+                            <span className="text-sm text-slate-500">Use GPU for visuals</span>
+                          </Label>
+                          <Switch id="gpu-accel" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Process Priority</Label>
+                            <Input defaultValue="High" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Plugin Instances</Label>
+                            <Input type="number" defaultValue="64" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertCircle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Clear Plugin Cache</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Rescan all plugins</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Preferences</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Restore default settings</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

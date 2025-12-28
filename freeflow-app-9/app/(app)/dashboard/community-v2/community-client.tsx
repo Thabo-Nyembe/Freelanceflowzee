@@ -759,6 +759,26 @@ export default function CommunityClient() {
 
           {/* Members Tab */}
           <TabsContent value="members" className="flex-1 p-4 m-0 overflow-auto">
+            {/* Members Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Community Members</h2>
+                  <p className="text-indigo-100">Discord-level member management</p>
+                  <p className="text-indigo-200 text-xs mt-1">Roles • Permissions • Activity tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockMembers.length}</p>
+                    <p className="text-indigo-200 text-sm">Members</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockMembers.filter(m => m.status === 'online').length}</p>
+                    <p className="text-indigo-200 text-sm">Online</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between mb-6">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

@@ -95,7 +95,10 @@ import {
   Target,
   Workflow,
   Moon,
-  Sun
+  Sun,
+  FolderPlus,
+  Archive,
+  BookmarkPlus
 } from 'lucide-react'
 
 // Types
@@ -576,6 +579,49 @@ export default function ApiClient() {
 
           {/* Endpoints Tab */}
           <TabsContent value="endpoints" className="space-y-6">
+            {/* Endpoints Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Endpoints</h2>
+                  <p className="text-blue-100">Postman-level API management and testing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{endpoints.length}</p>
+                    <p className="text-blue-200 text-sm">Endpoints</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{endpoints.filter(e => e.status === 'active').length}</p>
+                    <p className="text-blue-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Endpoints Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-3 flex-wrap">
               <Button
                 variant={methodFilter === 'all' ? 'default' : 'outline'}
@@ -712,6 +758,49 @@ export default function ApiClient() {
 
           {/* API Keys Tab */}
           <TabsContent value="keys" className="space-y-6">
+            {/* Keys Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Key Management</h2>
+                  <p className="text-amber-100">Secure access tokens for your applications</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{apiKeys.length}</p>
+                    <p className="text-amber-200 text-sm">Keys</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{apiKeys.filter(k => k.status === 'active').length}</p>
+                    <p className="text-amber-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Keys Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">API Keys</h3>
               <Button>
@@ -792,6 +881,53 @@ export default function ApiClient() {
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
+            {/* Collections Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Collections</h2>
+                  <p className="text-purple-100">Postman-level request organization and team collaboration</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.length}</p>
+                    <p className="text-purple-200 text-sm">Collections</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.reduce((sum, c) => sum + c.requests, 0)}</p>
+                    <p className="text-purple-200 text-sm">Total Requests</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{collections.filter(c => c.isShared).length}</p>
+                    <p className="text-purple-200 text-sm">Shared</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Collections Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: FolderPlus, label: 'New Collection', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Upload, label: 'Import', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {collections.map(collection => (
                 <Card key={collection.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -844,6 +980,53 @@ export default function ApiClient() {
 
           {/* History Tab */}
           <TabsContent value="history" className="space-y-6">
+            {/* History Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Request History</h2>
+                  <p className="text-amber-100">Chrome DevTools-level request inspection and debugging</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{history.length}</p>
+                    <p className="text-amber-200 text-sm">Requests</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{history.filter(h => h.status >= 200 && h.status < 300).length}</p>
+                    <p className="text-amber-200 text-sm">Successful</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{history.filter(h => h.status >= 400).length}</p>
+                    <p className="text-amber-200 text-sm">Errors</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* History Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Download, label: 'Export HAR', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Copy, label: 'Copy cURL', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Request History</CardTitle>
@@ -871,6 +1054,53 @@ export default function ApiClient() {
 
           {/* Monitors Tab */}
           <TabsContent value="monitors" className="space-y-6">
+            {/* Monitors Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Monitors</h2>
+                  <p className="text-cyan-100">Datadog-level uptime monitoring and alerting</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{monitors.length}</p>
+                    <p className="text-cyan-200 text-sm">Monitors</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{monitors.filter(m => m.status === 'healthy').length}</p>
+                    <p className="text-cyan-200 text-sm">Healthy</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(monitors.reduce((sum, m) => sum + m.uptime, 0) / monitors.length).toFixed(1)}%</p>
+                    <p className="text-cyan-200 text-sm">Avg Uptime</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Monitors Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Monitor', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Activity, label: 'Status Page', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Bell, label: 'Alerts', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Globe, label: 'Regions', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Clock, label: 'Intervals', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Shield, label: 'SSL Check', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {monitors.map(monitor => (
                 <Card key={monitor.id} className="border-0 shadow-sm">
@@ -919,6 +1149,53 @@ export default function ApiClient() {
 
           {/* Webhooks Tab */}
           <TabsContent value="webhooks" className="space-y-6">
+            {/* Webhooks Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Webhooks</h2>
+                  <p className="text-indigo-100">Stripe-level webhook management and delivery tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{webhooks.length}</p>
+                    <p className="text-indigo-200 text-sm">Webhooks</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{webhooks.filter(w => w.isActive).length}</p>
+                    <p className="text-indigo-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(webhooks.reduce((sum, w) => sum + w.successRate, 0) / webhooks.length).toFixed(0)}%</p>
+                    <p className="text-indigo-200 text-sm">Success Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Webhooks Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Webhook', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Eye, label: 'View Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Key, label: 'Secrets', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Shield, label: 'Signatures', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Webhooks</h3>
               <Button>
@@ -974,6 +1251,53 @@ export default function ApiClient() {
 
           {/* Tests Tab */}
           <TabsContent value="tests" className="space-y-6">
+            {/* Tests Banner */}
+            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Test Suites</h2>
+                  <p className="text-green-100">Jest-level automated testing and CI/CD integration</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{testSuites.length}</p>
+                    <p className="text-green-200 text-sm">Suites</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{testSuites.reduce((sum, s) => sum + s.tests, 0)}</p>
+                    <p className="text-green-200 text-sm">Tests</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(testSuites.reduce((sum, s) => sum + s.passRate, 0) / testSuites.length).toFixed(0)}%</p>
+                    <p className="text-green-200 text-sm">Pass Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tests Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: PlayCircle, label: 'Run All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: FileCode, label: 'Coverage', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: GitBranch, label: 'CI/CD', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Clock, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Test Suites</h3>
               <div className="flex items-center gap-3">

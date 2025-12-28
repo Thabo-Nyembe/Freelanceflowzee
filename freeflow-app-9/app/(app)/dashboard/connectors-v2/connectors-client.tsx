@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -19,7 +20,8 @@ import {
   MoreHorizontal, Edit, Trash2, Copy, Eye, History, Star, TrendingUp,
   Webhook, Code, Terminal, Lock, Unlock, Key, Shield, AlertCircle, Download,
   Upload, ExternalLink, ChevronDown, Workflow, CircleDot, Timer, Cpu,
-  LayoutGrid, List, Sparkles, Rocket, Target, Gauge, PieChart, Network
+  LayoutGrid, List, Sparkles, Rocket, Target, Gauge, PieChart, Network,
+  Sliders, Archive, HardDrive, Server
 } from 'lucide-react'
 
 // ============================================================================
@@ -622,6 +624,7 @@ export default function ConnectorsClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [categoryFilter, setCategoryFilter] = useState<AppCategory | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<ZapStatus | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Dashboard stats
   const stats = useMemo(() => ({
@@ -723,6 +726,49 @@ export default function ConnectorsClient() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6 mt-6">
+            {/* Dashboard Overview Banner */}
+            <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Integration Dashboard</h2>
+                  <p className="text-orange-100">Monitor all your automated workflows and connected apps</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.activeZaps}</p>
+                    <p className="text-orange-200 text-sm">Active Zaps</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.connectedApps}</p>
+                    <p className="text-orange-200 text-sm">Connected Apps</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Link2, label: 'Connect App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: RefreshCw, label: 'Sync All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Activity */}
               <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-gray-800">
@@ -1151,91 +1197,450 @@ export default function ConnectorsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* General Settings */}
-              <Card className="border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-orange-600" />
-                    General Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Auto-retry failed tasks</p>
-                      <p className="text-sm text-gray-500">Automatically retry tasks that fail</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Email notifications</p>
-                      <p className="text-sm text-gray-500">Get notified about errors and important events</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">Detailed logging</p>
-                      <p className="text-sm text-gray-500">Store detailed logs for debugging</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-orange-500" />
+                      Settings
+                    </CardTitle>
+                    <CardDescription>Configure your integration platform</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'workflows', label: 'Workflows', icon: Workflow },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                            settingsTab === item.id
+                              ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Webhooks */}
-              <Card className="border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Webhook className="w-5 h-5 text-orange-600" />
-                    Webhooks
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center py-8 text-gray-500">
-                    <Webhook className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No webhooks configured</p>
-                    <Button variant="outline" className="mt-4">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Webhook
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-orange-500" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Basic platform preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div className="flex items-center gap-3">
+                            <Label htmlFor="auto-retry" className="flex flex-col gap-1 cursor-pointer">
+                              <span className="font-medium">Auto-retry Failed Tasks</span>
+                              <span className="text-sm text-slate-500">Automatically retry tasks that fail</span>
+                            </Label>
+                          </div>
+                          <Switch id="auto-retry" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div className="flex items-center gap-3">
+                            <Label htmlFor="instant-trigger" className="flex flex-col gap-1 cursor-pointer">
+                              <span className="font-medium">Instant Triggers</span>
+                              <span className="text-sm text-slate-500">Enable real-time webhook triggers</span>
+                            </Label>
+                          </div>
+                          <Switch id="instant-trigger" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div className="flex items-center gap-3">
+                            <Label htmlFor="dedup" className="flex flex-col gap-1 cursor-pointer">
+                              <span className="font-medium">Deduplication</span>
+                              <span className="text-sm text-slate-500">Prevent duplicate task execution</span>
+                            </Label>
+                          </div>
+                          <Switch id="dedup" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Retry Limit</Label>
+                            <Input type="number" defaultValue="3" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Retry Delay (seconds)</Label>
+                            <Input type="number" defaultValue="60" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* API Keys */}
-              <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Key className="w-5 h-5 text-orange-600" />
-                    API Keys
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 mb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Production API Key</p>
-                        <code className="text-sm text-gray-500">zap_live_••••••••••••••••</code>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Copy className="w-4 h-4" />
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Data Retention</CardTitle>
+                        <CardDescription>Manage task history storage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">Task History</p>
+                            <p className="text-sm text-slate-500">How long to keep task logs</p>
+                          </div>
+                          <Badge variant="outline">30 days</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">Detailed Logs</p>
+                            <p className="text-sm text-slate-500">Full request/response data</p>
+                          </div>
+                          <Badge variant="outline">7 days</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Workflows Settings */}
+                {settingsTab === 'workflows' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Workflow className="w-5 h-5 text-orange-500" />
+                          Workflow Defaults
+                        </CardTitle>
+                        <CardDescription>Default settings for new zaps</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-enable" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-enable New Zaps</span>
+                            <span className="text-sm text-slate-500">Start zaps automatically after creation</span>
+                          </Label>
+                          <Switch id="auto-enable" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="error-pause" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Pause on Error</span>
+                            <span className="text-sm text-slate-500">Pause zap after multiple consecutive failures</span>
+                          </Label>
+                          <Switch id="error-pause" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Polling Interval</Label>
+                            <Input type="number" defaultValue="15" placeholder="Minutes" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Error Threshold</Label>
+                            <Input type="number" defaultValue="5" placeholder="Failures before pause" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Concurrency Settings</CardTitle>
+                        <CardDescription>Control parallel execution</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Max Concurrent Tasks</Label>
+                            <Input type="number" defaultValue="10" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Queue Timeout (seconds)</Label>
+                            <Input type="number" defaultValue="300" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-500" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="error-email" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Error Notifications</span>
+                            <span className="text-sm text-slate-500">Get notified when tasks fail</span>
+                          </Label>
+                          <Switch id="error-email" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="weekly-email" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Weekly Summary</span>
+                            <span className="text-sm text-slate-500">Receive weekly task summary</span>
+                          </Label>
+                          <Switch id="weekly-email" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="paused-email" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Paused Zap Alerts</span>
+                            <span className="text-sm text-slate-500">Notify when zaps are paused</span>
+                          </Label>
+                          <Switch id="paused-email" defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Notification Email</Label>
+                          <Input type="email" placeholder="alerts@company.com" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Slack Notifications</CardTitle>
+                        <CardDescription>Send alerts to Slack</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="slack-enabled" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Enable Slack</span>
+                            <span className="text-sm text-slate-500">Send notifications to Slack</span>
+                          </Label>
+                          <Switch id="slack-enabled" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://hooks.slack.com/services/..." />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-orange-500" />
+                          API Keys
+                        </CardTitle>
+                        <CardDescription>Manage your API credentials</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Production API Key</p>
+                              <code className="text-sm text-slate-500">zap_live_••••••••••••••••</code>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm">
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <RefreshCw className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Development API Key</p>
+                              <code className="text-sm text-slate-500">zap_dev_••••••••••••••••</code>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm">
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <RefreshCw className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="outline">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Key
                         </Button>
-                        <Button variant="outline" size="sm">
-                          <RefreshCw className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  <Button variant="outline">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create New Key
-                  </Button>
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-orange-500" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Configure outgoing webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="text-center py-8 text-slate-500">
+                          <Webhook className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                          <p>No webhooks configured</p>
+                          <Button variant="outline" className="mt-4">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Webhook
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-orange-500" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Protect your integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="ip-restrict" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">IP Restrictions</span>
+                            <span className="text-sm text-slate-500">Limit API access by IP</span>
+                          </Label>
+                          <Switch id="ip-restrict" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="audit-log" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Audit Logging</span>
+                            <span className="text-sm text-slate-500">Track all API activity</span>
+                          </Label>
+                          <Switch id="audit-log" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="encrypt-data" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Data Encryption</span>
+                            <span className="text-sm text-slate-500">Encrypt sensitive data at rest</span>
+                          </Label>
+                          <Switch id="encrypt-data" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage team permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">Two-Factor Authentication</p>
+                            <p className="text-sm text-slate-500">Require 2FA for all users</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Enabled</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">SSO Integration</p>
+                            <p className="text-sm text-slate-500">SAML/OAuth integration</p>
+                          </div>
+                          <Badge variant="outline">Not Configured</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-orange-500" />
+                          Advanced Settings
+                        </CardTitle>
+                        <CardDescription>Developer and debugging options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="debug-mode" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Debug Mode</span>
+                            <span className="text-sm text-slate-500">Enable verbose logging</span>
+                          </Label>
+                          <Switch id="debug-mode" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="sandbox" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Sandbox Mode</span>
+                            <span className="text-sm text-slate-500">Test zaps without affecting live data</span>
+                          </Label>
+                          <Switch id="sandbox" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="custom-code" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Custom Code Actions</span>
+                            <span className="text-sm text-slate-500">Enable JavaScript/Python code steps</span>
+                          </Label>
+                          <Switch id="custom-code" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Clear Task History</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Delete all task logs permanently</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Archive className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Zaps</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Permanently delete all zaps</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

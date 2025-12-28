@@ -874,6 +874,53 @@ export default function BuildsClient() {
 
           {/* Builds Tab */}
           <TabsContent value="builds" className="mt-6">
+            {/* Builds Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Build Pipeline</h2>
+                  <p className="text-emerald-100">GitHub Actions-level CI/CD with real-time monitoring</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBuilds.length}</p>
+                    <p className="text-emerald-200 text-sm">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockBuilds.filter(b => b.status === 'success').length}</p>
+                    <p className="text-emerald-200 text-sm">Passed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.successRate}%</p>
+                    <p className="text-emerald-200 text-sm">Success Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Builds Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Play, label: 'Run Build', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: RefreshCw, label: 'Rebuild', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
@@ -996,6 +1043,49 @@ export default function BuildsClient() {
 
           {/* Workflows Tab */}
           <TabsContent value="workflows" className="mt-6">
+            {/* Workflows Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Automation</h2>
+                  <p className="text-purple-100">Define, customize, and orchestrate your CI/CD pipelines</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
+                    <p className="text-purple-200 text-sm">Workflows</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.is_active).length}</p>
+                    <p className="text-purple-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Workflows Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Lock, label: 'Secrets', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockWorkflows.map(workflow => (
                 <Card
@@ -1060,6 +1150,49 @@ export default function BuildsClient() {
 
           {/* Environments Tab */}
           <TabsContent value="environments" className="mt-6">
+            {/* Environments Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Deployment Environments</h2>
+                  <p className="text-amber-100">Vercel-level environment management with protection rules</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEnvironments.length}</p>
+                    <p className="text-amber-200 text-sm">Environments</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEnvironments.filter(e => e.protection_rules).length}</p>
+                    <p className="text-amber-200 text-sm">Protected</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Environments Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {mockEnvironments.map(env => (
                 <Card key={env.id}>
@@ -1143,6 +1276,49 @@ export default function BuildsClient() {
 
           {/* Artifacts Tab */}
           <TabsContent value="artifacts" className="mt-6">
+            {/* Artifacts Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Build Artifacts</h2>
+                  <p className="text-blue-100">Manage build outputs, binaries, and deployment packages</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockArtifacts.length}</p>
+                    <p className="text-blue-200 text-sm">Artifacts</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockArtifacts.reduce((sum, a) => sum + a.download_count, 0)}</p>
+                    <p className="text-blue-200 text-sm">Downloads</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Artifacts Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Trash2, label: 'Cleanup', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
@@ -1202,6 +1378,31 @@ export default function BuildsClient() {
 
           {/* Runners Tab */}
           <TabsContent value="runners" className="mt-6">
+            {/* Runners Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Build Runners</h2>
+                  <p className="text-rose-100">Manage hosted and self-hosted runners for CI/CD</p>
+                  <p className="text-rose-200 text-xs mt-1">Total minutes used: {mockRunners.reduce((sum, r) => sum + r.total_minutes, 0).toLocaleString()}</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRunners.length}</p>
+                    <p className="text-rose-200 text-sm">Runners</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRunners.filter(r => r.status === 'online').length}</p>
+                    <p className="text-rose-200 text-sm">Online</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRunners.filter(r => r.status === 'busy').length}</p>
+                    <p className="text-rose-200 text-sm">Busy</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockRunners.map(runner => (
                 <Card key={runner.id}>

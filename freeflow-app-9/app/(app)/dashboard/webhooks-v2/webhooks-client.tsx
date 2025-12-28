@@ -535,6 +535,26 @@ export default function WebhooksClient({
 
           {/* Endpoints Tab */}
           <TabsContent value="endpoints" className="space-y-4">
+            {/* Endpoints Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Webhook Endpoints</h2>
+                  <p className="text-emerald-100">Stripe-level webhook management</p>
+                  <p className="text-emerald-200 text-xs mt-1">Real-time events • Retry logic • Signature verification</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredWebhooks.length}</p>
+                    <p className="text-emerald-200 text-sm">Endpoints</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredWebhooks.filter(w => w.enabled).length}</p>
+                    <p className="text-emerald-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Filters */}
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
@@ -670,6 +690,22 @@ export default function WebhooksClient({
 
           {/* Event Types Tab */}
           <TabsContent value="events" className="space-y-4">
+            {/* Events Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Event Types</h2>
+                  <p className="text-blue-100">GitHub Webhooks-level event catalog</p>
+                  <p className="text-blue-200 text-xs mt-1">Categorized • Documented • Filterable</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockEventTypes.length}</p>
+                    <p className="text-blue-200 text-sm">Event Types</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Available Event Types</h2>
               <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -729,6 +765,22 @@ export default function WebhooksClient({
 
           {/* Delivery Logs Tab */}
           <TabsContent value="logs" className="space-y-4">
+            {/* Logs Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Delivery Logs</h2>
+                  <p className="text-amber-100">Datadog-level delivery monitoring</p>
+                  <p className="text-amber-200 text-xs mt-1">Request/response • Retry history • Error analysis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockLogs.length}</p>
+                    <p className="text-amber-200 text-sm">Log Entries</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Delivery Logs</h2>
               <button className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">

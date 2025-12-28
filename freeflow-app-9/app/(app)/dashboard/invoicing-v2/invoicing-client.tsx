@@ -57,8 +57,18 @@ import {
   FileX,
   Star,
   ExternalLink,
-  Wallet
+  Wallet,
+  Sliders,
+  Terminal,
+  Webhook,
+  Key,
+  Network,
+  Shield,
+  Bell
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { CardDescription } from '@/components/ui/card'
 
 // ============================================================================
 // TYPE DEFINITIONS - QuickBooks Level Invoicing
@@ -585,6 +595,7 @@ const getDaysOverdue = (dueDate: string) => {
 
 export default function InvoicingClient() {
   const [activeTab, setActiveTab] = useState('invoices')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [invoices] = useState<Invoice[]>(mockInvoices)
   const [clients] = useState<Client[]>(mockClients)
   const [expenses] = useState<Expense[]>(mockExpenses)
@@ -761,6 +772,10 @@ export default function InvoicingClient() {
                 <BarChart3 className="w-4 h-4" />
                 Reports
               </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -794,6 +809,53 @@ export default function InvoicingClient() {
 
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-6">
+            {/* Invoices Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Invoice Management</h2>
+                  <p className="text-blue-100">QuickBooks-level professional invoicing system</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredInvoices.length}</p>
+                    <p className="text-blue-200 text-sm">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredInvoices.filter(i => i.status === 'paid').length}</p>
+                    <p className="text-blue-200 text-sm">Paid</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredInvoices.filter(i => i.status === 'overdue').length}</p>
+                    <p className="text-blue-200 text-sm">Overdue</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Invoices Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Invoice', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Send, label: 'Send All', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Receipt, label: 'Estimates', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: CreditCard, label: 'Payments', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: AlertTriangle, label: 'Overdue', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Filters */}
             <Card className="dark:bg-gray-800/50">
               <CardContent className="p-4">
@@ -914,6 +976,49 @@ export default function InvoicingClient() {
 
           {/* Clients Tab */}
           <TabsContent value="clients" className="space-y-6">
+            {/* Clients Overview Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Client Directory</h2>
+                  <p className="text-green-100">Manage your client relationships and billing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{clients.length}</p>
+                    <p className="text-green-200 text-sm">Clients</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{clients.filter(c => c.balance > 0).length}</p>
+                    <p className="text-green-200 text-sm">With Balance</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Clients Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Client', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Building2, label: 'Companies', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Mail, label: 'Email All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: FileText, label: 'Statements', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Tag, label: 'Categories', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Globe, label: 'Import', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {clients.map((client) => (
                 <Card
@@ -985,6 +1090,45 @@ export default function InvoicingClient() {
 
           {/* Payments Tab */}
           <TabsContent value="payments" className="space-y-6">
+            {/* Payments Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Payment Tracking</h2>
+                  <p className="text-amber-100">Monitor and manage all incoming payments</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{invoices.flatMap(inv => inv.payments).length}</p>
+                    <p className="text-amber-200 text-sm">Payments</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payments Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Record', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: CreditCard, label: 'Methods', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: RefreshCw, label: 'Refunds', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Banknote, label: 'Bank', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Receipt, label: 'Receipts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card className="dark:bg-gray-800/50">
@@ -1065,6 +1209,49 @@ export default function InvoicingClient() {
 
           {/* Expenses Tab */}
           <TabsContent value="expenses" className="space-y-6">
+            {/* Expenses Overview Banner */}
+            <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Expense Tracking</h2>
+                  <p className="text-rose-100">Track billable and non-billable expenses</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{expenses.length}</p>
+                    <p className="text-rose-200 text-sm">Expenses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{expenses.filter(e => e.billable).length}</p>
+                    <p className="text-rose-200 text-sm">Billable</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Expenses Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Receipt, label: 'Receipts', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Tag, label: 'Categories', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Users, label: 'Vendors', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: FileCheck, label: 'Approve', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Repeat, label: 'Recurring', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="dark:bg-gray-800/50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Expenses</CardTitle>
@@ -1111,6 +1298,49 @@ export default function InvoicingClient() {
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="space-y-6">
+            {/* Reports Overview Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Financial Reports</h2>
+                  <p className="text-violet-100">Comprehensive analytics and insights</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{report.invoiceCount}</p>
+                    <p className="text-violet-200 text-sm">Invoices</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{report.clientCount}</p>
+                    <p className="text-violet-200 text-sm">Clients</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reports Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: PieChart, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Receipt, label: 'Expenses', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: DollarSign, label: 'Profit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Printer, label: 'Print', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="dark:bg-gray-800/50">
                 <CardContent className="p-6">
@@ -1229,6 +1459,327 @@ export default function InvoicingClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Invoicing Settings</h2>
+                  <p className="text-slate-200">Configure your invoicing preferences and defaults</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Config
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'templates', label: 'Templates', icon: FileText },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-blue-600" />
+                          Business Information
+                        </CardTitle>
+                        <CardDescription>Your business details for invoices</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Business Name</Label>
+                            <Input defaultValue="My Company LLC" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Tax ID / VAT</Label>
+                            <Input defaultValue="US-123456789" className="mt-1" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Business Address</Label>
+                          <Input defaultValue="123 Main St, City, State 12345" className="mt-1" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Email</Label>
+                            <Input defaultValue="billing@company.com" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Phone</Label>
+                            <Input defaultValue="+1 (555) 123-4567" className="mt-1" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          Currency & Tax
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Currency</Label>
+                            <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                              <option value="USD">USD - US Dollar</option>
+                              <option value="EUR">EUR - Euro</option>
+                              <option value="GBP">GBP - British Pound</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label>Default Tax Rate</Label>
+                            <Input defaultValue="10" type="number" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Include Tax in Prices</Label>
+                            <p className="text-sm text-gray-500">Display prices with tax included</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Templates Settings */}
+                {settingsTab === 'templates' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-purple-600" />
+                          Invoice Templates
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          {['Professional', 'Modern', 'Classic'].map((template) => (
+                            <div key={template} className="border-2 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors">
+                              <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-700 rounded mb-3" />
+                              <p className="font-medium text-center">{template}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <Label>Invoice Prefix</Label>
+                          <Input defaultValue="INV-" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Default Payment Terms</Label>
+                          <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                            <option value="15">Net 15</option>
+                            <option value="30">Net 30</option>
+                            <option value="45">Net 45</option>
+                            <option value="60">Net 60</option>
+                          </select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-amber-600" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Invoice Created', desc: 'When new invoice is generated' },
+                          { label: 'Payment Received', desc: 'When payment is recorded' },
+                          { label: 'Invoice Overdue', desc: 'When invoice passes due date' },
+                          { label: 'Payment Reminders', desc: 'Automatic payment reminders' },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>{item.label}</Label>
+                              <p className="text-sm text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={idx < 2} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5 text-indigo-600" />
+                          Payment Gateways
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Stripe', status: 'Connected', icon: CreditCard },
+                          { name: 'PayPal', status: 'Not Connected', icon: Wallet },
+                          { name: 'Bank Transfer', status: 'Configured', icon: Building2 },
+                        ].map((gateway, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <gateway.icon className="h-6 w-6 text-gray-600" />
+                              <div>
+                                <p className="font-medium">{gateway.name}</p>
+                                <p className="text-sm text-gray-500">{gateway.status}</p>
+                              </div>
+                            </div>
+                            <Button variant={gateway.status === 'Connected' ? 'outline' : 'default'} size="sm">
+                              {gateway.status === 'Connected' ? 'Manage' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5 text-red-600" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input type="password" defaultValue="STRIPE_KEY_PLACEHOLDER" className="flex-1" />
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500">Require 2FA for sensitive operations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="h-5 w-5 text-gray-600" />
+                          Advanced Options
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-Send Invoices</Label>
+                            <p className="text-sm text-gray-500">Automatically send when created</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Late Fee Auto-Apply</Label>
+                            <p className="text-sm text-gray-500">Apply late fees automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Archive Old Invoices</Label>
+                            <p className="text-sm text-gray-500">Auto-archive after 2 years</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Delete All Draft Invoices</Label>
+                            <p className="text-sm text-red-600">Permanently remove draft invoices</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Reset Settings</Label>
+                            <p className="text-sm text-red-600">Reset to default configuration</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

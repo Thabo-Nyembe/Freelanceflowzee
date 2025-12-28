@@ -19,6 +19,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Sliders, Webhook, Key, Mail, Lock, Terminal, Globe, Archive, Workflow } from 'lucide-react'
 
 // Types
 type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold' | 'overdue'
@@ -495,6 +497,7 @@ export default function MaintenanceClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null)
   const [statusFilter, setStatusFilter] = useState<MaintenanceStatus | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Computed stats
   const stats = useMemo(() => {
@@ -622,6 +625,44 @@ export default function MaintenanceClient() {
 
             {/* Dashboard Tab */}
             <TabsContent value="dashboard" className="space-y-6">
+              {/* Dashboard Banner */}
+              <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">Maintenance Dashboard</h3>
+                    <p className="text-orange-100">Real-time overview of all maintenance operations</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-3xl font-bold">{stats.uptime}%</p>
+                      <p className="text-orange-200 text-sm">System Uptime</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dashboard Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { icon: Plus, label: 'New Order', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                  { icon: Activity, label: 'In Progress', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                  { icon: Calendar, label: 'Schedule', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                  { icon: AlertTriangle, label: 'Critical', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                  { icon: Server, label: 'Assets', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                  { icon: Users, label: 'Team', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
+                  { icon: BarChart3, label: 'Reports', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                  { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                ].map((action, i) => (
+                  <button
+                    key={i}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                  >
+                    <action.icon className="h-5 w-5" />
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </button>
+                ))}
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Active Work Orders */}
                 <Card className="lg:col-span-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
@@ -722,6 +763,44 @@ export default function MaintenanceClient() {
 
             {/* Work Orders Tab */}
             <TabsContent value="work-orders" className="space-y-6">
+              {/* Work Orders Banner */}
+              <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">Work Order Management</h3>
+                    <p className="text-blue-100">Track and manage all maintenance work orders</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-3xl font-bold">{stats.total}</p>
+                      <p className="text-blue-200 text-sm">Total Orders</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Work Orders Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { icon: Plus, label: 'New Order', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
+                  { icon: Activity, label: 'In Progress', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
+                  { icon: CheckCircle, label: 'Completed', color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' },
+                  { icon: Pause, label: 'On Hold', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
+                  { icon: AlertTriangle, label: 'Overdue', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
+                  { icon: Download, label: 'Export', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                  { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                  { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
+                ].map((action, i) => (
+                  <button
+                    key={i}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                  >
+                    <action.icon className="h-5 w-5" />
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </button>
+                ))}
+              </div>
+
               {/* Search and Filter */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
@@ -1327,71 +1406,398 @@ export default function MaintenanceClient() {
             </TabsContent>
 
             {/* Settings Tab */}
-            <TabsContent value="settings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
-                      Work Order Settings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Auto-assign work orders</p>
-                        <p className="text-sm text-gray-500">Automatically assign based on team availability</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Require approval for emergency</p>
-                        <p className="text-sm text-gray-500">Emergency work orders need manager approval</p>
-                      </div>
-                      <Switch />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Track labor hours</p>
-                        <p className="text-sm text-gray-500">Enable time tracking for work orders</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </CardContent>
-                </Card>
+            <TabsContent value="settings" className="mt-0">
+              <div className="grid grid-cols-12 gap-6">
+                {/* Settings Sidebar */}
+                <div className="col-span-3">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Settings className="h-5 w-5 text-orange-600" />
+                        Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-2">
+                      <nav className="space-y-1">
+                        {[
+                          { id: 'general', label: 'General', icon: Sliders },
+                          { id: 'work-orders', label: 'Work Orders', icon: ClipboardList },
+                          { id: 'notifications', label: 'Notifications', icon: Bell },
+                          { id: 'integrations', label: 'Integrations', icon: Webhook },
+                          { id: 'security', label: 'Security', icon: Lock },
+                          { id: 'advanced', label: 'Advanced', icon: Terminal },
+                        ].map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => setSettingsTab(item.id)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                              settingsTab === item.id
+                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span className="font-medium">{item.label}</span>
+                          </button>
+                        ))}
+                      </nav>
+                    </CardContent>
+                  </Card>
+                </div>
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Bell className="w-5 h-5" />
-                      Notification Settings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">SLA breach alerts</p>
-                        <p className="text-sm text-gray-500">Alert when SLA is about to be breached</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Scheduled maintenance reminders</p>
-                        <p className="text-sm text-gray-500">Notify team before scheduled maintenance</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Asset health alerts</p>
-                        <p className="text-sm text-gray-500">Alert when asset health degrades</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Settings Content */}
+                <div className="col-span-9 space-y-6">
+                  {/* General Settings */}
+                  {settingsTab === 'general' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>General Settings</CardTitle>
+                          <CardDescription>Configure maintenance management preferences</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label>Default Priority</Label>
+                              <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                              </select>
+                            </div>
+                            <div>
+                              <Label>Default Type</Label>
+                              <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                                <option value="preventive">Preventive</option>
+                                <option value="corrective">Corrective</option>
+                                <option value="inspection">Inspection</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Auto-number work orders</p>
+                              <p className="text-sm text-gray-500">Automatically generate work order numbers</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Track labor hours</p>
+                              <p className="text-sm text-gray-500">Enable time tracking for work orders</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>Display Settings</CardTitle>
+                          <CardDescription>Customize the dashboard appearance</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Show asset health</p>
+                              <p className="text-sm text-gray-500">Display asset health indicators</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Show SLA timers</p>
+                              <p className="text-sm text-gray-500">Display countdown to SLA breach</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Work Orders Settings */}
+                  {settingsTab === 'work-orders' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>Work Order Settings</CardTitle>
+                          <CardDescription>Configure work order behavior</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Auto-assign work orders</p>
+                              <p className="text-sm text-gray-500">Automatically assign based on team availability</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Require approval for emergency</p>
+                              <p className="text-sm text-gray-500">Emergency work orders need manager approval</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Require checklist completion</p>
+                              <p className="text-sm text-gray-500">Work orders can't be closed without completing checklist</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Allow technician reassignment</p>
+                              <p className="text-sm text-gray-500">Technicians can reassign their work orders</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>SLA Configuration</CardTitle>
+                          <CardDescription>Set response and resolution time targets</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label>Critical Response (hours)</Label>
+                              <Input type="number" defaultValue="1" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                            </div>
+                            <div>
+                              <Label>Critical Resolution (hours)</Label>
+                              <Input type="number" defaultValue="4" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                            </div>
+                            <div>
+                              <Label>High Response (hours)</Label>
+                              <Input type="number" defaultValue="4" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                            </div>
+                            <div>
+                              <Label>High Resolution (hours)</Label>
+                              <Input type="number" defaultValue="24" className="mt-1.5 dark:bg-gray-900 dark:border-gray-700" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Notifications Settings */}
+                  {settingsTab === 'notifications' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader>
+                        <CardTitle>Notification Settings</CardTitle>
+                        <CardDescription>Configure alerts and notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { icon: Bell, name: 'SLA breach alerts', desc: 'Alert when SLA is about to be breached' },
+                          { icon: Calendar, name: 'Scheduled maintenance reminders', desc: 'Notify team before scheduled maintenance' },
+                          { icon: AlertTriangle, name: 'Asset health alerts', desc: 'Alert when asset health degrades' },
+                          { icon: Mail, name: 'Email notifications', desc: 'Send notifications via email' },
+                          { icon: Database, name: 'Low inventory alerts', desc: 'Alert when spare parts are low' },
+                        ].map((item, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <item.icon className="h-4 w-4 text-orange-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                                <p className="text-sm text-gray-500">{item.desc}</p>
+                              </div>
+                            </div>
+                            <Switch defaultChecked={i < 3} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Integrations Settings */}
+                  {settingsTab === 'integrations' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>CMMS Integrations</CardTitle>
+                          <CardDescription>Connect with external maintenance systems</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {[
+                            { name: 'SAP Plant Maintenance', desc: 'Sync with SAP PM module', connected: false },
+                            { name: 'IBM Maximo', desc: 'Connect to IBM Maximo', connected: false },
+                            { name: 'ServiceNow', desc: 'Integrate with ServiceNow CMMS', connected: true },
+                            { name: 'UpKeep', desc: 'Sync with UpKeep mobile CMMS', connected: false },
+                          ].map((service, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
+                                <p className="text-sm text-gray-500">{service.desc}</p>
+                              </div>
+                              <Button variant={service.connected ? "outline" : "default"} size="sm">
+                                {service.connected ? 'Disconnect' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>IoT & Sensors</CardTitle>
+                          <CardDescription>Connect monitoring devices</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Enable IoT monitoring</p>
+                              <p className="text-sm text-gray-500">Receive data from connected sensors</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Auto-create work orders</p>
+                              <p className="text-sm text-gray-500">Automatically create work orders from sensor alerts</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+
+                  {/* Security Settings */}
+                  {settingsTab === 'security' && (
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Manage access and permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require work order signatures</p>
+                            <p className="text-sm text-gray-500">Technicians must sign off on completed work</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit trail logging</p>
+                            <p className="text-sm text-gray-500">Log all changes to work orders</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Role-based access</p>
+                            <p className="text-sm text-gray-500">Restrict features based on user role</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-factor authentication</p>
+                            <p className="text-sm text-gray-500">Require 2FA for sensitive operations</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Advanced Settings */}
+                  {settingsTab === 'advanced' && (
+                    <>
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>Advanced Options</CardTitle>
+                          <CardDescription>Configure advanced maintenance settings</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Predictive maintenance</p>
+                              <p className="text-sm text-gray-500">Use AI to predict equipment failures</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Condition monitoring</p>
+                              <p className="text-sm text-gray-500">Enable real-time condition monitoring</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">MTBF/MTTR tracking</p>
+                              <p className="text-sm text-gray-500">Track reliability metrics</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                        <CardHeader>
+                          <CardTitle>Data Management</CardTitle>
+                          <CardDescription>Manage maintenance data</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <Database className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">Work Order Archive</p>
+                                <p className="text-sm text-gray-500">2,456 archived orders (145 MB)</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Export</Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <HardDrive className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">Attachments Storage</p>
+                                <p className="text-sm text-gray-500">3.2 GB used of 10 GB</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">Manage</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-red-200 dark:border-red-800 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg">
+                        <CardHeader>
+                          <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                          <CardDescription>Irreversible actions</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Reset All Settings</p>
+                              <p className="text-sm text-gray-500">Reset to factory defaults</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Reset</Button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
+                              <p className="text-sm text-gray-500">Permanently delete all maintenance data</p>
+                            </div>
+                            <Button variant="destructive" size="sm">Delete</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                </div>
               </div>
             </TabsContent>
           </Tabs>

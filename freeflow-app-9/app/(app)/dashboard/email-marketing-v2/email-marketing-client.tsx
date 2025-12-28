@@ -833,6 +833,27 @@ export default function EmailMarketingClient({
 
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-6">
+            {/* Campaigns Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Email Campaigns</h2>
+                  <p className="text-purple-100">Mailchimp-level campaign management and delivery</p>
+                  <p className="text-purple-200 text-xs mt-1">A/B testing • Scheduling • Performance tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredCampaigns.length}</p>
+                    <p className="text-purple-200 text-sm">Campaigns</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{campaigns.filter(c => c.status === 'sent').length}</p>
+                    <p className="text-purple-200 text-sm">Sent</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -938,6 +959,27 @@ export default function EmailMarketingClient({
 
           {/* Subscribers Tab */}
           <TabsContent value="subscribers" className="space-y-6">
+            {/* Subscribers Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Subscriber Management</h2>
+                  <p className="text-blue-100">ConvertKit-level list management and segmentation</p>
+                  <p className="text-blue-200 text-xs mt-1">Smart segments • Tags • Growth tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{subscribers.length}</p>
+                    <p className="text-blue-200 text-sm">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{subscribers.filter(s => s.status === 'active').length}</p>
+                    <p className="text-blue-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card className="border-0 shadow-sm">
@@ -1085,6 +1127,27 @@ export default function EmailMarketingClient({
 
           {/* Automations Tab */}
           <TabsContent value="automations" className="space-y-6">
+            {/* Automations Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Email Automations</h2>
+                  <p className="text-emerald-100">ActiveCampaign-level workflow automation</p>
+                  <p className="text-emerald-200 text-xs mt-1">Drip campaigns • Triggers • Personalization</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{automations.length}</p>
+                    <p className="text-emerald-200 text-sm">Automations</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{automations.filter(a => a.status === 'active').length}</p>
+                    <p className="text-emerald-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">Email Automations</h2>
@@ -1204,6 +1267,27 @@ export default function EmailMarketingClient({
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Email Analytics</h2>
+                  <p className="text-orange-100">SendGrid-level analytics and deliverability insights</p>
+                  <p className="text-orange-200 text-xs mt-1">Open rates • Click tracking • Bounce analysis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{((stats.totalOpens / stats.totalSent) * 100).toFixed(1)}%</p>
+                    <p className="text-orange-200 text-sm">Open Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{((stats.totalClicks / stats.totalSent) * 100).toFixed(1)}%</p>
+                    <p className="text-orange-200 text-sm">Click Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 border-0 shadow-sm">
                 <CardHeader>
@@ -1338,6 +1422,36 @@ export default function EmailMarketingClient({
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Email Settings</h2>
+                  <p className="text-slate-100">Enterprise-level email configuration and compliance</p>
+                  <p className="text-slate-200 text-xs mt-1">DKIM/SPF • Sender profiles • Compliance settings</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: <Settings className="w-4 h-4" />, label: 'General', color: 'text-slate-600' },
+                { icon: <Mail className="w-4 h-4" />, label: 'Sender', color: 'text-blue-600' },
+                { icon: <Shield className="w-4 h-4" />, label: 'Auth', color: 'text-green-600' },
+                { icon: <Link className="w-4 h-4" />, label: 'Tracking', color: 'text-purple-600' },
+                { icon: <Bell className="w-4 h-4" />, label: 'Notify', color: 'text-orange-600' },
+                { icon: <Zap className="w-4 h-4" />, label: 'API', color: 'text-amber-600' },
+                { icon: <Users className="w-4 h-4" />, label: 'Team', color: 'text-pink-600' },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-cyan-600' }
+              ].map((action, index) => (
+                <button key={index} className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:scale-105 transition-all duration-200">
+                  <span className={action.color}>{action.icon}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="border-0 shadow-sm">
                 <CardHeader>

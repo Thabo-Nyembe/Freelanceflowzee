@@ -565,6 +565,27 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Overview Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">System Overview</h2>
+                  <p className="text-slate-100">Retool-level administration and monitoring</p>
+                  <p className="text-slate-200 text-xs mt-1">Real-time metrics • Resource health • Activity feed</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{overallHealth.toFixed(0)}%</p>
+                    <p className="text-slate-200 text-sm">Health</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockResources.length}</p>
+                    <p className="text-slate-200 text-sm">Resources</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* System Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {mockMetrics.map((metric) => (
@@ -666,6 +687,27 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-6">
+            {/* Users Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">User Management</h2>
+                  <p className="text-purple-100">Enterprise-level RBAC and access control</p>
+                  <p className="text-purple-200 text-xs mt-1">Role management • MFA • Audit trails</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{activeUsers}</p>
+                    <p className="text-purple-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAdminUsers.filter(u => u.mfaEnabled).length}</p>
+                    <p className="text-purple-200 text-sm">MFA On</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -987,6 +1029,27 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
           {/* Database Tab */}
           <TabsContent value="database" className="space-y-6">
+            {/* Database Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Database Explorer</h2>
+                  <p className="text-emerald-100">PlanetScale-level database management</p>
+                  <p className="text-emerald-200 text-xs mt-1">Table browser • SQL console • Query analysis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDatabaseTables.length}</p>
+                    <p className="text-emerald-200 text-sm">Tables</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(mockDatabaseTables.reduce((sum, t) => sum + t.rows, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-emerald-200 text-sm">Rows</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Tables List */}
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -1083,6 +1146,27 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
           {/* Jobs Tab */}
           <TabsContent value="jobs" className="space-y-6">
+            {/* Jobs Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Scheduled Jobs</h2>
+                  <p className="text-amber-100">Inngest-level job scheduling and orchestration</p>
+                  <p className="text-amber-200 text-xs mt-1">Cron jobs • Webhooks • Background tasks</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockJobs.length}</p>
+                    <p className="text-amber-200 text-sm">Total Jobs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{runningJobs}</p>
+                    <p className="text-amber-200 text-sm">Running</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1160,6 +1244,27 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
           {/* Feature Flags Tab */}
           <TabsContent value="flags" className="space-y-6">
+            {/* Feature Flags Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Feature Flags</h2>
+                  <p className="text-pink-100">LaunchDarkly-level feature management</p>
+                  <p className="text-pink-200 text-xs mt-1">Progressive rollouts • Environment targeting • Kill switches</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{featureFlags.length}</p>
+                    <p className="text-pink-200 text-sm">Total Flags</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{enabledFlags}</p>
+                    <p className="text-pink-200 text-sm">Enabled</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1237,6 +1342,31 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
           {/* Deployments Tab */}
           <TabsContent value="deploys" className="space-y-6">
+            {/* Deploys Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Deployments</h2>
+                  <p className="text-cyan-100">Vercel-level deployment management and rollbacks</p>
+                  <p className="text-cyan-200 text-xs mt-1">CI/CD pipelines • Rollback history • Environment sync</p>
+                  <div className="flex gap-2 mt-3">
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Auto-Deploy</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Zero-Downtime</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockDeployments.length}</p>
+                    <p className="text-cyan-200 text-sm">Deployments</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{successfulDeploys}</p>
+                    <p className="text-cyan-200 text-sm">Successful</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

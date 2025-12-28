@@ -571,6 +571,27 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
           {/* Logs Tab */}
           <TabsContent value="logs" className="space-y-4">
+            {/* Logs Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Activity Logs</h2>
+                  <p className="text-slate-100">Datadog-level log aggregation and search</p>
+                  <p className="text-slate-200 text-xs mt-1">Full-text search • Real-time streaming • Log correlation</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredLogs.length}</p>
+                    <p className="text-slate-200 text-sm">Logs Found</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{logs.filter(l => l.level === 'error').length}</p>
+                    <p className="text-slate-200 text-sm">Errors</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Search and Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
               <div className="flex items-center gap-4">
@@ -748,6 +769,23 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
           {/* Patterns Tab */}
           <TabsContent value="patterns" className="space-y-4">
+            {/* Patterns Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Log Patterns</h2>
+                  <p className="text-purple-100">Splunk-level pattern detection and anomaly analysis</p>
+                  <p className="text-purple-200 text-xs mt-1">ML-powered grouping • Error clustering • Trend detection</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPatterns.length}</p>
+                    <p className="text-purple-200 text-sm">Patterns</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Log Patterns</h2>
               <span className="text-sm text-gray-500 dark:text-gray-400">Auto-detected patterns from your logs</span>
@@ -794,6 +832,23 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Log Analytics</h2>
+                  <p className="text-emerald-100">Elastic-level log analytics and visualization</p>
+                  <p className="text-emerald-200 text-xs mt-1">Time-series charts • Distribution analysis • Custom dashboards</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{logs.length}</p>
+                    <p className="text-emerald-200 text-sm">Total Logs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* By Level */}
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
@@ -881,6 +936,23 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
           {/* Saved Views Tab */}
           <TabsContent value="saved" className="space-y-4">
+            {/* Saved Queries Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Saved Queries</h2>
+                  <p className="text-amber-100">Papertrail-level query management and sharing</p>
+                  <p className="text-amber-200 text-xs mt-1">Reusable queries • Team sharing • Alert triggers</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockSavedQueries.length}</p>
+                    <p className="text-amber-200 text-sm">Saved</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Saved Queries</h2>
               <button
@@ -926,6 +998,41 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
           {/* Settings Tab - Datadog-level configuration */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Log Settings</h2>
+                  <p className="text-blue-100">Enterprise-level log configuration and retention</p>
+                  <p className="text-blue-200 text-xs mt-1">Retention policies • Alert rules • Export configs</p>
+                  <div className="flex gap-2 mt-3">
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">30-Day Retention</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Auto-Archive</span>
+                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">SIEM Ready</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: <Settings className="w-4 h-4" />, label: 'General', color: 'text-slate-600' },
+                { icon: <Bell className="w-4 h-4" />, label: 'Alerts', color: 'text-blue-600' },
+                { icon: <Archive className="w-4 h-4" />, label: 'Retention', color: 'text-green-600' },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-purple-600' },
+                { icon: <Shield className="w-4 h-4" />, label: 'Access', color: 'text-orange-600' },
+                { icon: <Zap className="w-4 h-4" />, label: 'Webhooks', color: 'text-amber-600' },
+                { icon: <Link className="w-4 h-4" />, label: 'Integrations', color: 'text-pink-600' },
+                { icon: <Key className="w-4 h-4" />, label: 'API Keys', color: 'text-cyan-600' }
+              ].map((action, index) => (
+                <button key={index} className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:scale-105 transition-all duration-200">
+                  <span className={action.color}>{action.icon}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{action.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
               {/* Settings Sidebar */}
               <div className="col-span-3">

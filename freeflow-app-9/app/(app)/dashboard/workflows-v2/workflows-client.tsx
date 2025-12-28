@@ -522,6 +522,26 @@ export default function WorkflowsClient() {
 
           {/* Workflows Tab */}
           <TabsContent value="workflows" className="space-y-6">
+            {/* Workflows Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Automation</h2>
+                  <p className="text-violet-100">n8n-level workflow orchestration</p>
+                  <p className="text-violet-200 text-xs mt-1">Visual builder • Triggers • 500+ integrations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
+                    <p className="text-violet-200 text-sm">Workflows</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.isActive).length}</p>
+                    <p className="text-violet-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
@@ -649,6 +669,22 @@ export default function WorkflowsClient() {
 
           {/* Run History Tab */}
           <TabsContent value="runs" className="space-y-6">
+            {/* Runs Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Run History</h2>
+                  <p className="text-blue-100">Temporal-level execution monitoring</p>
+                  <p className="text-blue-200 text-xs mt-1">Real-time logs • Error tracking • Performance metrics</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockRuns.length}</p>
+                    <p className="text-blue-200 text-sm">Recent Runs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -685,6 +721,22 @@ export default function WorkflowsClient() {
 
           {/* Connected Apps Tab */}
           <TabsContent value="apps" className="space-y-6">
+            {/* Apps Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Connected Apps</h2>
+                  <p className="text-emerald-100">Zapier-level app marketplace</p>
+                  <p className="text-emerald-200 text-xs mt-1">OAuth • API keys • Webhooks</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApps.length}</p>
+                    <p className="text-emerald-200 text-sm">Integrations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold">Connected Apps</h2>
@@ -742,6 +794,22 @@ export default function WorkflowsClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Templates</h2>
+                  <p className="text-amber-100">Make-level template library</p>
+                  <p className="text-amber-200 text-xs mt-1">1000+ templates • One-click deploy • Customizable</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-amber-200 text-sm">Templates</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold">Workflow Templates</h2>
@@ -785,6 +853,22 @@ export default function WorkflowsClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Analytics</h2>
+                  <p className="text-pink-100">Datadog-level automation insights</p>
+                  <p className="text-pink-200 text-xs mt-1">Performance metrics • Error analysis • Cost tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">98%</p>
+                    <p className="text-pink-200 text-sm">Success Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -852,6 +936,16 @@ export default function WorkflowsClient() {
 
           {/* Settings Tab - Zapier-level configuration */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Workflow Settings</h2>
+                  <p className="text-slate-100">Enterprise-level configuration options</p>
+                  <p className="text-slate-200 text-xs mt-1">Permissions • Notifications • Quotas</p>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-12 gap-6">
               {/* Settings Sidebar */}
               <div className="col-span-3">

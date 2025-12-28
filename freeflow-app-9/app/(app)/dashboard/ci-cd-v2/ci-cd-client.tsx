@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -72,7 +74,16 @@ import {
   Info,
   CheckSquare,
   Circle,
-  CircleDot
+  CircleDot,
+  Sliders,
+  Webhook,
+  Bell,
+  Mail,
+  Archive,
+  FileCode,
+  Folder,
+  History,
+  GitMerge
 } from 'lucide-react'
 
 // Types
@@ -526,6 +537,7 @@ export default function CiCdClient() {
   const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all')
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats: CiCdStats = useMemo(() => ({
@@ -694,6 +706,56 @@ export default function CiCdClient() {
 
           {/* Workflows Tab */}
           <TabsContent value="workflows" className="space-y-6">
+            {/* Workflows Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">CI/CD Workflows</h3>
+                  <p className="text-blue-100 mb-4">Automate your build, test, and deployment pipelines</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-blue-100">Total Workflows</p>
+                      <p className="text-xl font-bold">{stats.totalWorkflows}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-blue-100">Success Rate</p>
+                      <p className="text-xl font-bold">{stats.successRate.toFixed(1)}%</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-blue-100">Running Now</p>
+                      <p className="text-xl font-bold">{stats.runningNow}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Workflow className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Workflow', color: 'text-blue-500' },
+                { icon: Play, label: 'Run All', color: 'text-green-500' },
+                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500' },
+                { icon: Copy, label: 'Duplicate', color: 'text-amber-500' },
+                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500' },
+                { icon: History, label: 'Run History', color: 'text-indigo-500' },
+                { icon: Download, label: 'Export', color: 'text-cyan-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -769,6 +831,56 @@ export default function CiCdClient() {
 
           {/* Runs Tab */}
           <TabsContent value="runs" className="space-y-6">
+            {/* Runs Overview Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Workflow Runs</h3>
+                  <p className="text-green-100 mb-4">Monitor all workflow executions and their status</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-green-100">Total Runs</p>
+                      <p className="text-xl font-bold">{mockWorkflows.reduce((sum, w) => sum + w.runs, 0)}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-green-100">Successful</p>
+                      <p className="text-xl font-bold">{stats.successfulRuns}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-green-100">Failed</p>
+                      <p className="text-xl font-bold">{stats.failedRuns}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Activity className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Play, label: 'Run New', color: 'text-green-500' },
+                { icon: RotateCcw, label: 'Re-run All', color: 'text-blue-500' },
+                { icon: StopCircle, label: 'Cancel All', color: 'text-red-500' },
+                { icon: Filter, label: 'Filter', color: 'text-purple-500' },
+                { icon: Terminal, label: 'View Logs', color: 'text-amber-500' },
+                { icon: BarChart3, label: 'Analytics', color: 'text-pink-500' },
+                { icon: Download, label: 'Export', color: 'text-indigo-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4 mb-6">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -839,6 +951,56 @@ export default function CiCdClient() {
 
           {/* Artifacts Tab */}
           <TabsContent value="artifacts" className="space-y-6">
+            {/* Artifacts Overview Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Build Artifacts</h3>
+                  <p className="text-amber-100 mb-4">Manage build outputs, reports, and deployables</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-amber-100">Total Artifacts</p>
+                      <p className="text-xl font-bold">{mockArtifacts.length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-amber-100">Storage Used</p>
+                      <p className="text-xl font-bold">{mockUsage.storageUsed}GB</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-amber-100">Storage Limit</p>
+                      <p className="text-xl font-bold">{mockUsage.storageLimit}GB</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Package className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Upload, label: 'Upload', color: 'text-amber-500' },
+                { icon: Download, label: 'Download All', color: 'text-blue-500' },
+                { icon: Archive, label: 'Archive', color: 'text-purple-500' },
+                { icon: Trash2, label: 'Clean Up', color: 'text-red-500' },
+                { icon: Filter, label: 'Filter', color: 'text-green-500' },
+                { icon: Eye, label: 'Preview', color: 'text-pink-500' },
+                { icon: Copy, label: 'Copy Link', color: 'text-indigo-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -901,6 +1063,56 @@ export default function CiCdClient() {
 
           {/* Environments Tab */}
           <TabsContent value="environments" className="space-y-6">
+            {/* Environments Overview Banner */}
+            <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Deployment Environments</h3>
+                  <p className="text-cyan-100 mb-4">Configure and manage your deployment targets</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-cyan-100">Total Environments</p>
+                      <p className="text-xl font-bold">{mockEnvironments.length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-cyan-100">Active</p>
+                      <p className="text-xl font-bold">{mockEnvironments.filter(e => e.status === 'active').length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-cyan-100">Secrets</p>
+                      <p className="text-xl font-bold">{mockSecrets.length}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Globe className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Env', color: 'text-cyan-500' },
+                { icon: Key, label: 'Add Secret', color: 'text-amber-500' },
+                { icon: Code, label: 'Variables', color: 'text-purple-500' },
+                { icon: Shield, label: 'Protection', color: 'text-green-500' },
+                { icon: Users, label: 'Reviewers', color: 'text-pink-500' },
+                { icon: Rocket, label: 'Deploy', color: 'text-blue-500' },
+                { icon: Download, label: 'Export', color: 'text-indigo-500' },
+                { icon: RefreshCw, label: 'Sync', color: 'text-rose-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Deployment Environments</h3>
               <Button className="gap-2">
@@ -1032,6 +1244,56 @@ export default function CiCdClient() {
 
           {/* Runners Tab */}
           <TabsContent value="runners" className="space-y-6">
+            {/* Runners Overview Banner */}
+            <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">CI/CD Runners</h3>
+                  <p className="text-purple-100 mb-4">Manage self-hosted and cloud runners</p>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-purple-100">Total Runners</p>
+                      <p className="text-xl font-bold">{mockRunners.length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-purple-100">Online</p>
+                      <p className="text-xl font-bold">{mockRunners.filter(r => r.status !== 'offline').length}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
+                      <p className="text-sm text-purple-100">Busy</p>
+                      <p className="text-xl font-bold">{mockRunners.filter(r => r.status === 'busy').length}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Server className="w-24 h-24 text-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'Add Runner', color: 'text-purple-500' },
+                { icon: Cpu, label: 'Configure', color: 'text-blue-500' },
+                { icon: Tag, label: 'Labels', color: 'text-amber-500' },
+                { icon: RefreshCw, label: 'Restart All', color: 'text-green-500' },
+                { icon: Pause, label: 'Pause All', color: 'text-pink-500' },
+                { icon: Terminal, label: 'View Logs', color: 'text-indigo-500' },
+                { icon: Download, label: 'Export', color: 'text-cyan-500' },
+                { icon: Trash2, label: 'Clean Up', color: 'text-red-500' },
+              ].map((action, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                >
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Self-Hosted Runners</h3>
               <Button className="gap-2">
@@ -1122,135 +1384,437 @@ export default function CiCdClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* General Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    General Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Workflow Permissions</p>
-                      <p className="text-xs text-gray-500">Allow workflows to modify repository</p>
-                    </div>
-                    <select className="px-3 py-1 border rounded text-sm">
-                      <option>Read and write</option>
-                      <option>Read only</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Fork PR Workflows</p>
-                      <p className="text-xs text-gray-500">Run workflows from fork pull requests</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Required Approval</p>
-                      <p className="text-xs text-gray-500">First-time contributors need approval</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'workflows', label: 'Workflows', icon: Workflow },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Failed Workflow Alerts</p>
-                      <p className="text-xs text-gray-500">Email on workflow failure</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Slack Integration</p>
-                      <p className="text-xs text-gray-500">Send status to Slack</p>
-                    </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Deployment Notifications</p>
-                      <p className="text-xs text-gray-500">Notify on production deployments</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Configure your CI/CD preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Branch</Label>
+                            <Input defaultValue="main" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Workflow Timeout</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>30 minutes</option>
+                              <option>1 hour</option>
+                              <option>2 hours</option>
+                              <option>6 hours</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Auto-retry Failed Jobs</p>
+                              <p className="text-sm text-muted-foreground">Automatically retry jobs that fail</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Concurrent Jobs Limit</p>
+                              <p className="text-sm text-muted-foreground">Maximum parallel jobs allowed</p>
+                            </div>
+                            <Input type="number" defaultValue="20" className="w-20" />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Enable Debug Logging</p>
+                              <p className="text-sm text-muted-foreground">Verbose logging for troubleshooting</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Cache Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Database className="w-5 h-5" />
-                    Cache Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-gray-500 mb-2">Cache Storage Used</p>
-                    <div className="flex items-center gap-2">
-                      <Progress value={42} className="flex-1" />
-                      <span className="text-sm font-medium">4.2GB / 10GB</span>
-                    </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Cache Settings</CardTitle>
+                        <CardDescription>Manage build cache configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-2">Cache Storage Used</p>
+                          <div className="flex items-center gap-2">
+                            <Progress value={42} className="flex-1" />
+                            <span className="text-sm font-medium">4.2GB / 10GB</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border">
+                          <div>
+                            <p className="font-medium">Cache Retention (days)</p>
+                            <p className="text-sm text-muted-foreground">Days before cache expires</p>
+                          </div>
+                          <Input type="number" defaultValue={7} className="w-20" />
+                        </div>
+                        <Button variant="outline" className="w-full gap-2">
+                          <Trash2 className="w-4 h-4" />
+                          Clear All Caches
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Cache Retention</p>
-                      <p className="text-xs text-gray-500">Days before cache expires</p>
-                    </div>
-                    <Input type="number" defaultValue={7} className="w-20 text-center" />
-                  </div>
-                  <Button variant="outline" className="w-full gap-2">
-                    <Trash2 className="w-4 h-4" />
-                    Clear All Caches
-                  </Button>
-                </CardContent>
-              </Card>
+                )}
 
-              {/* Danger Zone */}
-              <Card className="border-red-200">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2 text-red-600">
-                    <AlertTriangle className="w-5 h-5" />
-                    Danger Zone
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-red-200">
-                    <div>
-                      <p className="font-medium">Disable All Workflows</p>
-                      <p className="text-xs text-gray-500">Temporarily disable all workflows</p>
-                    </div>
-                    <Button variant="outline" className="text-red-600 border-red-200">
-                      Disable
-                    </Button>
+                {settingsTab === 'workflows' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Workflow Configuration</CardTitle>
+                        <CardDescription>Configure workflow permissions and behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Workflow Permissions</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>Read and write</option>
+                              <option>Read only</option>
+                              <option>Write only</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Runner</Label>
+                            <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                              <option>ubuntu-latest</option>
+                              <option>windows-latest</option>
+                              <option>macos-latest</option>
+                              <option>self-hosted</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Fork PR Workflows</p>
+                              <p className="text-sm text-muted-foreground">Run workflows from fork PRs</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Required Approval</p>
+                              <p className="text-sm text-muted-foreground">First-time contributors need approval</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Allow Manual Dispatch</p>
+                              <p className="text-sm text-muted-foreground">Enable manual workflow triggering</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">Reusable Workflows</p>
+                              <p className="text-sm text-muted-foreground">Allow workflows to call other workflows</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-red-200">
-                    <div>
-                      <p className="font-medium">Delete All Artifacts</p>
-                      <p className="text-xs text-gray-500">Remove all stored artifacts</p>
-                    </div>
-                    <Button variant="outline" className="text-red-600 border-red-200">
-                      Delete
-                    </Button>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Preferences</CardTitle>
+                        <CardDescription>Configure how you receive CI/CD notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'Failed Workflow Alerts', description: 'Email when workflows fail', enabled: true },
+                          { title: 'Successful Deployments', description: 'Notify on production deployments', enabled: true },
+                          { title: 'PR Check Status', description: 'Update on PR checks', enabled: false },
+                          { title: 'Runner Status Changes', description: 'Alert when runners go offline', enabled: true },
+                          { title: 'Usage Alerts', description: 'Warn when approaching limits', enabled: true },
+                          { title: 'Security Alerts', description: 'Notify on security issues', enabled: true },
+                        ].map((notification, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{notification.title}</p>
+                              <p className="text-sm text-muted-foreground">{notification.description}</p>
+                            </div>
+                            <Switch defaultChecked={notification.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Channels</CardTitle>
+                        <CardDescription>Configure notification integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { icon: Mail, label: 'Email', active: true },
+                            { icon: Globe, label: 'Slack', active: true },
+                            { icon: Webhook, label: 'Webhook', active: false },
+                            { icon: Bell, label: 'In-App', active: true },
+                          ].map((channel, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                  <channel.icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <span className="font-medium">{channel.label}</span>
+                              </div>
+                              <Switch defaultChecked={channel.active} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Integrations</CardTitle>
+                        <CardDescription>Manage third-party CI/CD integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'GitHub', description: 'Source code repository', connected: true },
+                            { name: 'Docker Hub', description: 'Container registry', connected: true },
+                            { name: 'AWS', description: 'Cloud deployment', connected: false },
+                            { name: 'Kubernetes', description: 'Container orchestration', connected: true },
+                            { name: 'Slack', description: 'Team notifications', connected: true },
+                          ].map((integration, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                  <Cloud className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{integration.name}</p>
+                                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                                </div>
+                              </div>
+                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                                {integration.connected ? 'Connected' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <CardDescription>Configure CI/CD webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-app.com/webhook/ci-cd" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook Secret</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="whsec_xxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Security Settings</CardTitle>
+                        <CardDescription>Configure CI/CD security options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'Secret Scanning', description: 'Scan for exposed secrets', enabled: true },
+                          { title: 'Dependency Scanning', description: 'Check for vulnerable dependencies', enabled: true },
+                          { title: 'Code Signing', description: 'Require signed commits', enabled: false },
+                          { title: 'Branch Protection', description: 'Enforce protected branches', enabled: true },
+                        ].map((setting, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{setting.title}</p>
+                              <p className="text-sm text-muted-foreground">{setting.description}</p>
+                            </div>
+                            <Switch defaultChecked={setting.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage who can access CI/CD settings</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { role: 'Admin', access: 'Full Access', users: 3 },
+                            { role: 'Developer', access: 'Run Workflows', users: 12 },
+                            { role: 'Viewer', access: 'View Only', users: 8 },
+                          ].map((role, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                  <Lock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{role.role}</p>
+                                  <p className="text-sm text-muted-foreground">{role.access}</p>
+                                </div>
+                              </div>
+                              <Badge variant="secondary">{role.users} users</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Advanced Settings</CardTitle>
+                        <CardDescription>Configure advanced CI/CD options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { title: 'Parallel Execution', description: 'Enable parallel job execution', enabled: true },
+                          { title: 'Matrix Builds', description: 'Allow matrix job strategies', enabled: true },
+                          { title: 'Job Dependencies', description: 'Enable job dependency graphs', enabled: true },
+                          { title: 'Debug Mode', description: 'Enable detailed debug logging', enabled: false },
+                        ].map((setting, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                            <div>
+                              <p className="font-medium">{setting.title}</p>
+                              <p className="text-sm text-muted-foreground">{setting.description}</p>
+                            </div>
+                            <Switch defaultChecked={setting.enabled} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Manage your CI/CD data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Export Logs</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <Archive className="w-5 h-5" />
+                            <span>Archive Old Runs</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                            <RefreshCw className="w-5 h-5" />
+                            <span>Reset Statistics</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600">
+                            <Trash2 className="w-5 h-5" />
+                            <span>Purge Artifacts</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription className="text-amber-600 dark:text-amber-500">
+                          Irreversible actions
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Disable All Workflows</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Temporarily pause all workflows</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Disable</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Artifacts</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all stored artifacts</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

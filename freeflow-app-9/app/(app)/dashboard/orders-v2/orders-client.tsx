@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -67,7 +69,13 @@ import {
   Banknote,
   ArrowLeftRight,
   History,
-  Send
+  Send,
+  Bell,
+  Sliders,
+  Terminal,
+  Webhook,
+  Shield,
+  Key
 } from 'lucide-react'
 
 // ============================================================================
@@ -592,6 +600,7 @@ export default function OrdersClient() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
@@ -720,6 +729,49 @@ export default function OrdersClient() {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="mt-6">
+            {/* Orders Overview Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Order Management</h2>
+                  <p className="text-blue-100">Shopify-level order processing and fulfillment</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockOrders.length}</p>
+                    <p className="text-blue-200 text-sm">Total Orders</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockOrders.filter(o => o.status === 'pending').length}</p>
+                    <p className="text-blue-200 text-sm">Pending</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: RotateCcw, label: 'Returns', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
@@ -823,6 +875,49 @@ export default function OrdersClient() {
 
           {/* Fulfillment Tab */}
           <TabsContent value="fulfillment" className="mt-6">
+            {/* Fulfillment Banner */}
+            <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Order Fulfillment</h2>
+                  <p className="text-green-100">Process, pack, and ship orders efficiently</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').length}</p>
+                    <p className="text-green-200 text-sm">Unfulfilled</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockOrders.filter(o => o.status === 'shipped').length}</p>
+                    <p className="text-green-200 text-sm">Shipped</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fulfillment Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card>
@@ -918,6 +1013,26 @@ export default function OrdersClient() {
 
           {/* Returns Tab */}
           <TabsContent value="returns" className="mt-6">
+            {/* Returns Banner */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Returns & Refunds</h2>
+                  <p className="text-amber-100">Process returns and issue refunds quickly</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockReturns.length}</p>
+                    <p className="text-amber-200 text-sm">Pending</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">98%</p>
+                    <p className="text-amber-200 text-sm">Resolved</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -994,6 +1109,22 @@ export default function OrdersClient() {
 
           {/* Customers Tab */}
           <TabsContent value="customers" className="mt-6">
+            {/* Customers Banner */}
+            <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Customer Directory</h2>
+                  <p className="text-violet-100">View customer profiles and order history</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCustomers.length}</p>
+                    <p className="text-violet-200 text-sm">Customers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockCustomers.map(customer => (
                 <Card
@@ -1159,127 +1290,353 @@ export default function OrdersClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="w-5 h-5" />
-                    Shipping Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Free Shipping Threshold</p>
-                        <p className="text-sm text-gray-500">Minimum order for free shipping</p>
-                      </div>
-                      <Input type="text" defaultValue="$50.00" className="w-24 text-right" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Default Carrier</p>
-                        <p className="text-sm text-gray-500">Preferred shipping carrier</p>
-                      </div>
-                      <Badge variant="outline">UPS</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Auto-Print Labels</p>
-                        <p className="text-sm text-gray-500">Print labels on fulfillment</p>
-                      </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-blue-500" />
+                      Settings
+                    </CardTitle>
+                    <CardDescription>Configure order management</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'shipping', label: 'Shipping', icon: Truck },
+                        { id: 'payments', label: 'Payments', icon: CreditCard },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                            settingsTab === item.id
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-medium'
+                              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Payment Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Payment Capture</p>
-                        <p className="text-sm text-gray-500">When to capture payment</p>
-                      </div>
-                      <Badge variant="outline">On Order</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Auto-Refund</p>
-                        <p className="text-sm text-gray-500">Auto-refund cancelled orders</p>
-                      </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Currency</p>
-                        <p className="text-sm text-gray-500">Store currency</p>
-                      </div>
-                      <Badge variant="outline">USD</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-blue-500" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Basic order preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-confirm" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Confirm Orders</span>
+                            <span className="text-sm text-slate-500">Confirm orders automatically</span>
+                          </Label>
+                          <Switch id="auto-confirm" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="low-stock" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Low Stock Alerts</span>
+                            <span className="text-sm text-slate-500">Alert when stock is low</span>
+                          </Label>
+                          <Switch id="low-stock" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Order Number Prefix</Label>
+                            <Input defaultValue="ORD-" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Currency</Label>
+                            <Input defaultValue="USD" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { label: 'New Order', enabled: true },
-                      { label: 'Order Shipped', enabled: true },
-                      { label: 'Return Request', enabled: true },
-                      { label: 'Low Stock', enabled: false }
-                    ].map(item => (
-                      <div key={item.label} className="flex items-center justify-between">
-                        <span className="font-medium">{item.label}</span>
-                        <Button variant="outline" size="sm">
-                          {item.enabled ? 'On' : 'Off'}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Tax Settings</CardTitle>
+                        <CardDescription>Configure tax calculations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-tax" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Automatic Tax</span>
+                            <span className="text-sm text-slate-500">Calculate tax automatically</span>
+                          </Label>
+                          <Switch id="auto-tax" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="tax-inclusive" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Tax-Inclusive Prices</span>
+                            <span className="text-sm text-slate-500">Include tax in displayed prices</span>
+                          </Label>
+                          <Switch id="tax-inclusive" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Receipt className="w-5 h-5" />
-                    Tax Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Tax Calculation</p>
-                        <p className="text-sm text-gray-500">How tax is calculated</p>
-                      </div>
-                      <Badge variant="outline">Automatic</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Include Tax in Prices</p>
-                        <p className="text-sm text-gray-500">Display prices with tax</p>
-                      </div>
-                      <Button variant="outline" size="sm">Disabled</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Shipping Settings */}
+                {settingsTab === 'shipping' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Truck className="w-5 h-5 text-blue-500" />
+                          Shipping Settings
+                        </CardTitle>
+                        <CardDescription>Configure shipping options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-label" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Print Labels</span>
+                            <span className="text-sm text-slate-500">Print labels on fulfillment</span>
+                          </Label>
+                          <Switch id="auto-label" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="tracking-email" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Send Tracking Email</span>
+                            <span className="text-sm text-slate-500">Email customers tracking info</span>
+                          </Label>
+                          <Switch id="tracking-email" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Free Shipping Threshold</Label>
+                            <Input defaultValue="$50.00" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Carrier</Label>
+                            <Input defaultValue="UPS" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Fulfillment Settings</CardTitle>
+                        <CardDescription>Order fulfillment options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-fulfill" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Fulfill Digital</span>
+                            <span className="text-sm text-slate-500">Auto-fulfill digital products</span>
+                          </Label>
+                          <Switch id="auto-fulfill" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Payment Settings */}
+                {settingsTab === 'payments' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-blue-500" />
+                          Payment Settings
+                        </CardTitle>
+                        <CardDescription>Configure payment processing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-capture" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Capture Payments</span>
+                            <span className="text-sm text-slate-500">Capture on order placement</span>
+                          </Label>
+                          <Switch id="auto-capture" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-refund" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Refund Cancellations</span>
+                            <span className="text-sm text-slate-500">Refund cancelled orders</span>
+                          </Label>
+                          <Switch id="auto-refund" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="partial-pay" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Allow Partial Payments</span>
+                            <span className="text-sm text-slate-500">Enable payment plans</span>
+                          </Label>
+                          <Switch id="partial-pay" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Payment Methods</CardTitle>
+                        <CardDescription>Enable payment options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Credit Card', 'PayPal', 'Apple Pay', 'Google Pay'].map(method => (
+                          <div key={method} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                            <span className="font-medium">{method}</span>
+                            <Switch defaultChecked />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-blue-500" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {[
+                          { id: 'new-order', label: 'New Order', desc: 'Notify on new orders' },
+                          { id: 'order-shipped', label: 'Order Shipped', desc: 'Notify when orders ship' },
+                          { id: 'return-req', label: 'Return Request', desc: 'Notify on return requests' },
+                          { id: 'low-stock-notif', label: 'Low Stock', desc: 'Alert on low inventory' },
+                        ].map(item => (
+                          <div key={item.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                            <Label htmlFor={item.id} className="flex flex-col gap-1 cursor-pointer">
+                              <span className="font-medium">{item.label}</span>
+                              <span className="text-sm text-slate-500">{item.desc}</span>
+                            </Label>
+                            <Switch id={item.id} defaultChecked />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-blue-500" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Order security options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="fraud-detect" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Fraud Detection</span>
+                            <span className="text-sm text-slate-500">Enable fraud screening</span>
+                          </Label>
+                          <Switch id="fraud-detect" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="order-verify" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Order Verification</span>
+                            <span className="text-sm text-slate-500">Require email verification</span>
+                          </Label>
+                          <Switch id="order-verify" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="pci-comply" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">PCI Compliance</span>
+                            <span className="text-sm text-slate-500">PCI-DSS compliant processing</span>
+                          </Label>
+                          <Switch id="pci-comply" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-blue-500" />
+                          Advanced Options
+                        </CardTitle>
+                        <CardDescription>Expert configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="api-access" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">API Access</span>
+                            <span className="text-sm text-slate-500">Enable order API</span>
+                          </Label>
+                          <Switch id="api-access" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="webhook" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Webhooks</span>
+                            <span className="text-sm text-slate-500">Send order events</span>
+                          </Label>
+                          <Switch id="webhook" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Archive Old Orders</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Archive orders older than 1 year</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <History className="w-4 h-4 mr-2" />
+                            Archive
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Test Orders</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Remove all test/sandbox orders</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

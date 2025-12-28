@@ -523,6 +523,26 @@ export default function SprintsClient() {
 
           {/* Sprints Tab */}
           <TabsContent value="sprints" className="space-y-6">
+            {/* Sprints Banner */}
+            <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Sprint Management</h2>
+                  <p className="text-teal-100">Jira-level agile sprint planning</p>
+                  <p className="text-teal-200 text-xs mt-1">Sprint cycles • Story points • Team velocity</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredSprints.length}</p>
+                    <p className="text-teal-200 text-sm">Sprints</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredSprints.filter(s => s.status === 'active').length}</p>
+                    <p className="text-teal-200 text-sm">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="space-y-4">
               {filteredSprints.map((sprint) => (
                 <Card
@@ -635,6 +655,16 @@ export default function SprintsClient() {
 
           {/* Board Tab */}
           <TabsContent value="board" className="space-y-6">
+            {/* Board Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Sprint Board</h2>
+                  <p className="text-purple-100">Trello-level kanban visualization</p>
+                  <p className="text-purple-200 text-xs mt-1">Drag & drop • Swimlanes • WIP limits</p>
+                </div>
+              </div>
+            </div>
             {activeSprint ? (
               <div className="grid grid-cols-6 gap-4">
                 {(['todo', 'in_progress', 'review', 'done', 'blocked'] as TaskStatus[]).map((status) => (

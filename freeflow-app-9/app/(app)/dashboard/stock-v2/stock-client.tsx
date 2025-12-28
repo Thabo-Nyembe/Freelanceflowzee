@@ -62,7 +62,9 @@ import {
   Receipt,
   Send,
   PackageCheck,
-  PackageX
+  PackageX,
+  Bell,
+  Mail
 } from 'lucide-react'
 
 // ============================================================================
@@ -868,6 +870,53 @@ export default function StockClient() {
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
+            {/* Inventory Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Inventory Management</h2>
+                  <p className="text-emerald-100">Fishbowl-level inventory tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProducts.length}</p>
+                    <p className="text-emerald-200 text-sm">Products</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.status === 'in_stock').length}</p>
+                    <p className="text-emerald-200 text-sm">In Stock</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.status === 'low_stock').length}</p>
+                    <p className="text-emerald-200 text-sm">Low Stock</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Inventory Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Product', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Package, label: 'Receive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: ClipboardCheck, label: 'Count', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Filters */}
             <Card className="dark:bg-gray-800/50">
               <CardContent className="p-4">
@@ -987,6 +1036,53 @@ export default function StockClient() {
 
           {/* Movements Tab */}
           <TabsContent value="movements" className="space-y-6">
+            {/* Movements Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Stock Movements</h2>
+                  <p className="text-blue-100">TradeGecko-level movement tracking</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockMovements.length}</p>
+                    <p className="text-blue-200 text-sm">Movements</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockMovements.filter(m => m.type === 'in').length}</p>
+                    <p className="text-blue-200 text-sm">Inbound</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockMovements.filter(m => m.type === 'out').length}</p>
+                    <p className="text-blue-200 text-sm">Outbound</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Movements Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: ArrowDownToLine, label: 'Receive', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Search, label: 'Search', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             {/* Movement Type Filters */}
             <Card className="dark:bg-gray-800/50">
               <CardContent className="p-4">
@@ -1063,6 +1159,53 @@ export default function StockClient() {
 
           {/* Warehouses Tab */}
           <TabsContent value="warehouses" className="space-y-6">
+            {/* Warehouses Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Warehouse Management</h2>
+                  <p className="text-amber-100">SAP-level warehouse operations</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{warehouses.length}</p>
+                    <p className="text-amber-200 text-sm">Warehouses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{warehouses.reduce((sum, w) => sum + w.zones, 0)}</p>
+                    <p className="text-amber-200 text-sm">Zones</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(warehouses.reduce((sum, w) => sum + w.utilization, 0) / warehouses.length).toFixed(0)}%</p>
+                    <p className="text-amber-200 text-sm">Utilization</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Warehouses Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Location', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Warehouse, label: 'Zones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: MapPin, label: 'Locations', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Truck, label: 'Shipping', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: BarChart3, label: 'Capacity', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Users, label: 'Staff', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {warehouses.map((warehouse) => (
                 <Card key={warehouse.id} className="hover:shadow-lg transition-shadow dark:bg-gray-800/50">
@@ -1130,6 +1273,53 @@ export default function StockClient() {
 
           {/* Stock Counts Tab */}
           <TabsContent value="counts" className="space-y-6">
+            {/* Counts Banner */}
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Stock Count Management</h2>
+                  <p className="text-violet-100">SAP-level cycle counting with variance tracking and reconciliation</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stockCounts.length}</p>
+                    <p className="text-violet-200 text-sm">Total Counts</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stockCounts.filter(c => c.status === 'in_progress').length}</p>
+                    <p className="text-violet-200 text-sm">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stockCounts.filter(c => c.status === 'completed').length}</p>
+                    <p className="text-violet-200 text-sm">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Counts Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Count', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Users, label: 'Assign Team', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: ClipboardCheck, label: 'Start Count', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: CheckCircle2, label: 'Verify', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Stock Counts</h2>
               <Button>
@@ -1193,6 +1383,53 @@ export default function StockClient() {
 
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6">
+            {/* Alerts Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Inventory Alerts Center</h2>
+                  <p className="text-red-100">Real-time monitoring with smart thresholds and automated notifications</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{alerts.filter(a => a.severity === 'critical').length}</p>
+                    <p className="text-red-200 text-sm">Critical</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{alerts.filter(a => a.severity === 'warning').length}</p>
+                    <p className="text-red-200 text-sm">Warnings</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{alerts.filter(a => !a.acknowledged).length}</p>
+                    <p className="text-red-200 text-sm">Unread</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Alerts Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: AlertTriangle, label: 'View Critical', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Bell, label: 'Notifications', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: CheckCircle2, label: 'Acknowledge', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Settings, label: 'Thresholds', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Mail, label: 'Email Rules', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Clock, label: 'Schedules', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Zap, label: 'Automations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <Card className="dark:bg-gray-800/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1251,6 +1488,53 @@ export default function StockClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Inventory Analytics</h2>
+                  <p className="text-cyan-100">Tableau-level insights with predictive forecasting and trend analysis</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{formatCurrency(analytics.totalValue)}</p>
+                    <p className="text-cyan-200 text-sm">Total Value</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{analytics.avgTurnoverRate}x</p>
+                    <p className="text-cyan-200 text-sm">Turnover</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{analytics.stockAccuracy}%</p>
+                    <p className="text-cyan-200 text-sm">Accuracy</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: PieChart, label: 'Breakdown', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Target, label: 'Forecasts', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Settings, label: 'Configure', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="dark:bg-gray-800/50">
                 <CardContent className="p-6">

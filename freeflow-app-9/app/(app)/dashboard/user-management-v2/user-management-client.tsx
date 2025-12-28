@@ -329,6 +329,22 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
           {/* Users View */}
           {activeView === 'users' && (
             <div className="p-6">
+              {/* Users Banner */}
+              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">User Management</h2>
+                    <p className="text-blue-100">Auth0-level identity management</p>
+                    <p className="text-blue-200 text-xs mt-1">SSO • RBAC • MFA • Audit logs</p>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{filteredUsers.length}</p>
+                      <p className="text-blue-200 text-sm">Users</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               {/* Search and Filters */}
               <div className="flex flex-wrap gap-4 mb-6">
                 <div className="flex-1 min-w-[300px] relative">

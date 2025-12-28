@@ -550,6 +550,26 @@ export default function DocsClient() {
           </TabsList>
 
           <TabsContent value="browse" className="space-y-6">
+            {/* Browse Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Documentation</h2>
+                  <p className="text-blue-100">GitBook-level developer documentation</p>
+                  <p className="text-blue-200 text-xs mt-1">Search • Categories • Version control</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredDocs.length}</p>
+                    <p className="text-blue-200 text-sm">Documents</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockSpaces.length}</p>
+                    <p className="text-blue-200 text-sm">Spaces</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Category Filter */}
             <div className="flex items-center gap-2 flex-wrap">
               {(['all', 'guides', 'api', 'sdk', 'tutorials', 'reference', 'examples'] as const).map(cat => (
@@ -717,6 +737,22 @@ export default function DocsClient() {
           </TabsContent>
 
           <TabsContent value="spaces" className="space-y-6">
+            {/* Spaces Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Documentation Spaces</h2>
+                  <p className="text-emerald-100">Confluence-level team spaces</p>
+                  <p className="text-emerald-200 text-xs mt-1">Team access • Collections • Permissions</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{spaces.length}</p>
+                    <p className="text-emerald-200 text-sm">Spaces</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {spaces.map(space => (
                 <Card key={space.id} className="cursor-pointer hover:shadow-lg transition-shadow">
@@ -740,6 +776,22 @@ export default function DocsClient() {
           </TabsContent>
 
           <TabsContent value="api" className="space-y-6">
+            {/* API Banner */}
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">API Reference</h2>
+                  <p className="text-orange-100">Stripe-level API documentation</p>
+                  <p className="text-orange-200 text-xs mt-1">Interactive • Code samples • Try it live</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockApiEndpoints.length}</p>
+                    <p className="text-orange-200 text-sm">Endpoints</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">API Endpoints</h2>
               <div className="flex items-center gap-2">
@@ -781,6 +833,16 @@ export default function DocsClient() {
           </TabsContent>
 
           <TabsContent value="changelog" className="space-y-6">
+            {/* Changelog Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Version History</h2>
+                  <p className="text-purple-100">GitHub Releases-level changelog</p>
+                  <p className="text-purple-200 text-xs mt-1">Version tracking • Release notes • Diffs</p>
+                </div>
+              </div>
+            </div>
             <Card>
               <CardHeader>
                 <CardTitle>Documentation Changelog</CardTitle>
@@ -817,6 +879,16 @@ export default function DocsClient() {
 
           {/* Settings Tab - Confluence Level with 6 Sub-tabs */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Documentation Settings</h2>
+                  <p className="text-slate-100">ReadMe-level configuration options</p>
+                  <p className="text-slate-200 text-xs mt-1">Appearance • Permissions • Integrations</p>
+                </div>
+              </div>
+            </div>
             <div className="flex gap-6">
               {/* Settings Sidebar */}
               <div className="w-64 shrink-0">

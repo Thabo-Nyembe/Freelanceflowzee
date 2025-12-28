@@ -604,6 +604,26 @@ export default function GalleryClient() {
 
           {/* Browse Tab */}
           <TabsContent value="browse" className="mt-6">
+            {/* Browse Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Photo Gallery</h2>
+                  <p className="text-rose-100">Unsplash-level media browsing experience</p>
+                  <p className="text-rose-200 text-xs mt-1">Masonry layout • Collections • Advanced search</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredPhotos.length}</p>
+                    <p className="text-rose-200 text-sm">Photos</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCollections.length}</p>
+                    <p className="text-rose-200 text-sm">Collections</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {viewMode === 'masonry' ? (
               <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                 {filteredPhotos.map((photo, index) => (
@@ -706,6 +726,22 @@ export default function GalleryClient() {
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="mt-6">
+            {/* Collections Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Collections</h2>
+                  <p className="text-amber-100">Pinterest-level collection management</p>
+                  <p className="text-amber-200 text-xs mt-1">Smart albums • Auto-organize • Sharing</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockCollections.length}</p>
+                    <p className="text-amber-200 text-sm">Collections</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Collections</h2>
               <button
@@ -750,6 +786,22 @@ export default function GalleryClient() {
 
           {/* Contributors Tab */}
           <TabsContent value="contributors" className="mt-6">
+            {/* Contributors Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Contributors</h2>
+                  <p className="text-indigo-100">500px-level photographer showcase</p>
+                  <p className="text-indigo-200 text-xs mt-1">Portfolio view • Stats • Following</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockPhotographers.length}</p>
+                    <p className="text-indigo-200 text-sm">Photographers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockPhotographers.map(photographer => (
                 <div
@@ -790,6 +842,22 @@ export default function GalleryClient() {
 
           {/* Topics Tab */}
           <TabsContent value="topics" className="mt-6">
+            {/* Topics Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Browse Topics</h2>
+                  <p className="text-emerald-100">Getty Images-level categorization</p>
+                  <p className="text-emerald-200 text-xs mt-1">Curated topics • Trending • Seasonal</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockTopics.length}</p>
+                    <p className="text-emerald-200 text-sm">Topics</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {mockTopics.map(topic => (
                 <div
@@ -817,6 +885,16 @@ export default function GalleryClient() {
 
           {/* Settings Tab - Unsplash Level Photo Platform */}
           <TabsContent value="settings" className="mt-6">
+            {/* Settings Banner */}
+            <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Gallery Settings</h2>
+                  <p className="text-slate-100">Lightroom-level configuration options</p>
+                  <p className="text-slate-200 text-xs mt-1">Display options • Privacy • Integrations</p>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-12 gap-6">
               {/* Settings Sidebar */}
               <div className="col-span-12 lg:col-span-3">

@@ -1047,6 +1047,29 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
           </div>
         </div>
 
+        {/* Quick Actions Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          {[
+            { icon: Plus, label: 'New Booking', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+            { icon: Calendar, label: 'Calendar', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+            { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+            { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+            { icon: Bell, label: 'Reminders', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+            { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+            { icon: Settings, label: 'Settings', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+          ].map((action, idx) => (
+            <Button
+              key={idx}
+              variant="ghost"
+              className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+            >
+              <action.icon className="w-5 h-5" />
+              <span className="text-xs font-medium">{action.label}</span>
+            </Button>
+          ))}
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border">
@@ -1090,6 +1113,60 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               <span className="text-sm text-gray-500">Avg Duration</span>
             </div>
             <div className="text-2xl font-bold text-indigo-600">{stats.avgDuration}m</div>
+          </div>
+        </div>
+
+        {/* Booking Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                <Calendar className="h-5 w-5 text-sky-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">This Week</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.total} Bookings</p>
+              </div>
+            </div>
+            <div className="h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-sky-500 rounded-full" style={{ width: `${(stats.confirmed / Math.max(stats.total, 1)) * 100}%` }}></div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                <DollarSign className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Revenue</p>
+                <p className="text-xl font-bold text-emerald-600">${stats.paidRevenue.toLocaleString()}</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">Pending: ${stats.pendingPayments.toLocaleString()}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <UserCheck className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Conversion</p>
+                <p className="text-xl font-bold text-purple-600">{stats.conversionRate}%</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">No-show rate: {stats.noShowRate}%</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                <Clock className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Avg Duration</p>
+                <p className="text-xl font-bold text-amber-600">{stats.avgDuration} min</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">Across all booking types</p>
           </div>
         </div>
 
@@ -1138,6 +1215,54 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
         {/* Calendar View */}
         {view === 'calendar' && (
+          <>
+            {/* Calendar Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Calendar View</h2>
+                  <p className="text-emerald-100">Visual scheduling with drag-and-drop booking management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.total}</p>
+                    <p className="text-emerald-200 text-sm">This Week</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.confirmed}</p>
+                    <p className="text-emerald-200 text-sm">Confirmed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.pending}</p>
+                    <p className="text-emerald-200 text-sm">Pending</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Calendar Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Event', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Calendar, label: 'Day View', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: CalendarClock, label: 'Week View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Globe, label: 'Month View', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Repeat, label: 'Recurring', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Filter, label: 'Filter', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border overflow-hidden">
             {/* Calendar Header */}
             <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
@@ -1274,10 +1399,59 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             )}
           </div>
+          </>
         )}
 
         {/* List View */}
         {view === 'list' && (
+          <>
+            {/* List Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Booking List</h2>
+                  <p className="text-amber-100">Detailed view with advanced filtering and bulk actions</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredBookings.length}</p>
+                    <p className="text-amber-200 text-sm">Showing</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
+                    <p className="text-amber-200 text-sm">Total Value</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.conversionRate}%</p>
+                    <p className="text-amber-200 text-sm">Show Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* List Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Booking', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Search, label: 'Search', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Check, label: 'Confirm All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Mail, label: 'Email All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
           <div className="space-y-4">
             {loading && (
               <div className="text-center py-8">
@@ -1362,10 +1536,59 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             ))}
           </div>
+          </>
         )}
 
         {/* Agenda View */}
         {view === 'agenda' && (
+          <>
+            {/* Agenda Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Agenda View</h2>
+                  <p className="text-indigo-100">Timeline view organized by day with smart grouping</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredBookings.slice(0, 3).length}</p>
+                    <p className="text-indigo-200 text-sm">Today</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredBookings.slice(3, 5).length}</p>
+                    <p className="text-indigo-200 text-sm">Tomorrow</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{filteredBookings.slice(5).length}</p>
+                    <p className="text-indigo-200 text-sm">Upcoming</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Agenda Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Event', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Calendar, label: 'Today', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Clock, label: 'This Week', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: CalendarClock, label: 'This Month', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Filter, label: 'Filter', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Repeat, label: 'Recurring', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Download, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
           <div className="space-y-6">
             {/* Today */}
             <div>
@@ -1456,6 +1679,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             </div>
           </div>
+          </>
         )}
 
         {/* Booking Detail Modal */}

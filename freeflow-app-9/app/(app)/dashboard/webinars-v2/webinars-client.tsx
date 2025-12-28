@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -84,7 +86,17 @@ import {
   Gift,
   Award,
   Target,
-  Sparkles
+  Sparkles,
+  Shield,
+  Sliders,
+  Webhook,
+  Key,
+  Database,
+  HardDrive,
+  Terminal,
+  History,
+  Copy,
+  AlertTriangle
 } from 'lucide-react'
 
 // Types
@@ -429,6 +441,7 @@ export default function WebinarsClient() {
   const [statusFilter, setStatusFilter] = useState<WebinarStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<WebinarType | 'all'>('all')
   const [selectedWebinar, setSelectedWebinar] = useState<Webinar | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Calculate stats
   const stats: WebinarStats = useMemo(() => ({
@@ -598,6 +611,62 @@ export default function WebinarsClient() {
 
           {/* Webinars Tab */}
           <TabsContent value="webinars" className="space-y-6">
+            {/* Webinars Banner */}
+            <Card className="border-0 bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Video className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Webinar Management</h3>
+                      <p className="text-white/80">Schedule and manage your virtual events</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{stats.totalWebinars}</p>
+                      <p className="text-sm text-white/80">Total</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats.liveNow}</p>
+                      <p className="text-sm text-white/80">Live Now</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats.scheduledWebinars}</p>
+                      <p className="text-sm text-white/80">Scheduled</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Webinars Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Webinar', color: 'bg-purple-500' },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500' },
+                { icon: Play, label: 'Go Live', color: 'bg-red-500' },
+                { icon: Users, label: 'Attendees', color: 'bg-green-500' },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500' },
+                { icon: Mail, label: 'Invites', color: 'bg-pink-500' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -737,6 +806,62 @@ export default function WebinarsClient() {
 
           {/* Registrations Tab */}
           <TabsContent value="registrations" className="space-y-6">
+            {/* Registrations Banner */}
+            <Card className="border-0 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Users className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Registration Management</h3>
+                      <p className="text-white/80">Manage attendee registrations and approvals</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{stats.totalRegistrations.toLocaleString()}</p>
+                      <p className="text-sm text-white/80">Total</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats.totalAttendees}</p>
+                      <p className="text-sm text-white/80">Attended</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats.avgAttendanceRate.toFixed(0)}%</p>
+                      <p className="text-sm text-white/80">Rate</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Registrations Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500' },
+                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500' },
+                { icon: Download, label: 'Export', color: 'bg-purple-500' },
+                { icon: Mail, label: 'Email All', color: 'bg-orange-500' },
+                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500' },
+                { icon: UserX, label: 'Decline', color: 'bg-red-500' },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-500' },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4 mb-6">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -825,6 +950,62 @@ export default function WebinarsClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Banner */}
+            <Card className="border-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <BarChart3 className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Webinar Analytics</h3>
+                      <p className="text-white/80">Track performance and engagement metrics</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{stats.avgAttendanceRate.toFixed(0)}%</p>
+                      <p className="text-sm text-white/80">Attendance Rate</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">4.5</p>
+                      <p className="text-sm text-white/80">Avg Rating</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">67%</p>
+                      <p className="text-sm text-white/80">Engagement</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Analytics Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500' },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500' },
+                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500' },
+                { icon: Users, label: 'Attendees', color: 'bg-orange-500' },
+                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500' },
+                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500' },
+                { icon: Download, label: 'Export', color: 'bg-teal-500' },
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Attendance Trends */}
               <Card>
@@ -951,6 +1132,62 @@ export default function WebinarsClient() {
 
           {/* Recordings Tab */}
           <TabsContent value="recordings" className="space-y-6">
+            {/* Recordings Banner */}
+            <Card className="border-0 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <PlayCircle className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Recording Library</h3>
+                      <p className="text-white/80">Access and share webinar recordings</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockRecordings.length}</p>
+                      <p className="text-sm text-white/80">Recordings</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockRecordings.reduce((sum, r) => sum + r.views, 0)}</p>
+                      <p className="text-sm text-white/80">Views</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockRecordings.reduce((sum, r) => sum + r.downloadCount, 0)}</p>
+                      <p className="text-sm text-white/80">Downloads</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recordings Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Play, label: 'Play All', color: 'bg-red-500' },
+                { icon: Download, label: 'Download', color: 'bg-blue-500' },
+                { icon: Share2, label: 'Share', color: 'bg-purple-500' },
+                { icon: Upload, label: 'Upload', color: 'bg-green-500' },
+                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500' },
+                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500' },
+                { icon: Trash2, label: 'Delete', color: 'bg-gray-500' },
+                { icon: Settings, label: 'Settings', color: 'bg-indigo-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1031,6 +1268,62 @@ export default function WebinarsClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
+            {/* Templates Banner */}
+            <Card className="border-0 bg-gradient-to-r from-cyan-500 via-teal-500 to-green-500 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Mail className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Email Templates</h3>
+                      <p className="text-white/80">Manage automated email communications</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <p className="text-2xl font-bold">{mockTemplates.length}</p>
+                      <p className="text-sm text-white/80">Templates</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{mockTemplates.filter(t => t.enabled).length}</p>
+                      <p className="text-sm text-white/80">Enabled</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">4</p>
+                      <p className="text-sm text-white/80">Types</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Templates Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+              {[
+                { icon: Plus, label: 'New Template', color: 'bg-green-500' },
+                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500' },
+                { icon: Bell, label: 'Reminder', color: 'bg-purple-500' },
+                { icon: Send, label: 'Follow Up', color: 'bg-orange-500' },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500' },
+                { icon: Eye, label: 'Preview', color: 'bg-indigo-500' },
+                { icon: Edit, label: 'Edit', color: 'bg-teal-500' },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                >
+                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Email Templates</h3>
               <Button className="gap-2">
@@ -1086,156 +1379,488 @@ export default function WebinarsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Default Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    Default Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Registration Required</p>
-                      <p className="text-xs text-gray-500">Require registration for new webinars</p>
+            <Card className="border-0 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Settings className="w-7 h-7" />
                     </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Enable Recording</p>
-                      <p className="text-xs text-gray-500">Automatically record all webinars</p>
+                      <h3 className="text-xl font-bold">Webinar Settings</h3>
+                      <p className="text-white/80">Configure your webinar platform preferences</p>
                     </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Enable Q&A</p>
-                      <p className="text-xs text-gray-500">Allow attendees to ask questions</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Enable Chat</p>
-                      <p className="text-xs text-gray-500">Allow attendee chat</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Waiting Room</p>
-                      <p className="text-xs text-gray-500">Hold attendees before start</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Branding */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    Branding
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Logo</label>
-                    <div className="flex items-center gap-3">
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Upload className="w-6 h-6 text-gray-400" />
-                      </div>
-                      <Button variant="outline">Upload Logo</Button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Brand Color</label>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-600 border-2 border-gray-200" />
-                      <Input defaultValue="#9333ea" className="max-w-[150px]" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Custom Domain</label>
-                    <Input placeholder="webinars.yourdomain.com" />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardContent className="p-4">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'branding', label: 'Branding', icon: Sparkles },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Integrations */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Integrations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { name: 'Zoom', description: 'Video conferencing', connected: true, icon: '📹' },
-                    { name: 'HubSpot', description: 'Sync registrations to CRM', connected: true, icon: '🔶' },
-                    { name: 'Mailchimp', description: 'Email marketing', connected: false, icon: '📧' },
-                    { name: 'Slack', description: 'Notifications', connected: true, icon: '💬' }
-                  ].map((integration) => (
-                    <div key={integration.name} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{integration.icon}</span>
-                        <div>
-                          <p className="font-medium text-sm">{integration.name}</p>
-                          <p className="text-xs text-gray-500">{integration.description}</p>
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-purple-500" />
+                          Default Webinar Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Registration Required</p>
+                            <p className="text-sm text-gray-500">Require registration for new webinars</p>
+                          </div>
+                          <Switch defaultChecked />
                         </div>
-                      </div>
-                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
-                        {integration.connected ? 'Connected' : 'Connect'}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Recording</p>
+                            <p className="text-sm text-gray-500">Automatically record all webinars</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Q&A</p>
+                            <p className="text-sm text-gray-500">Allow attendees to ask questions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Chat</p>
+                            <p className="text-sm text-gray-500">Allow attendee chat during webinars</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Polls</p>
+                            <p className="text-sm text-gray-500">Allow polls during webinars</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Waiting Room</p>
+                            <p className="text-sm text-gray-500">Hold attendees before webinar starts</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">New Registration</p>
-                      <p className="text-xs text-gray-500">Notify when someone registers</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Webinar Starting</p>
-                      <p className="text-xs text-gray-500">Reminder before webinar starts</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Recording Ready</p>
-                      <p className="text-xs text-gray-500">Notify when recording is processed</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Weekly Summary</p>
-                      <p className="text-xs text-gray-500">Weekly analytics report</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </div>
-                </CardContent>
-              </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-blue-500" />
+                          Time & Duration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Timezone</Label>
+                            <Input defaultValue="America/New_York" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Default Duration (minutes)</Label>
+                            <Input type="number" defaultValue="60" className="mt-1" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Max Participants</Label>
+                            <Input type="number" defaultValue="500" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Buffer Time (minutes)</Label>
+                            <Input type="number" defaultValue="15" className="mt-1" />
+                          </div>
+                        </div>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+                          Save Settings
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Branding Settings */}
+                {settingsTab === 'branding' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sparkles className="w-5 h-5 text-pink-500" />
+                          Branding
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Company Logo</Label>
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                              <Upload className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <Button variant="outline">Upload Logo</Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Brand Color</Label>
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="w-10 h-10 rounded-lg bg-purple-600 border-2 border-gray-200" />
+                            <Input defaultValue="#9333ea" className="max-w-[150px]" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Custom Domain</Label>
+                          <Input placeholder="webinars.yourdomain.com" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Registration Page Header</Label>
+                          <Input placeholder="Welcome to our webinar" className="mt-1" />
+                        </div>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+                          Save Branding
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-500" />
+                          Host Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'New Registration', desc: 'Notify when someone registers' },
+                          { label: 'Webinar Starting', desc: 'Reminder before webinar starts' },
+                          { label: 'Recording Ready', desc: 'Notify when recording is processed' },
+                          { label: 'High Attendance', desc: 'Notify when capacity reaches 80%' },
+                          { label: 'Weekly Summary', desc: 'Weekly analytics report' }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked={idx < 3} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          Attendee Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { label: 'Registration Confirmation', desc: 'Send confirmation after registration' },
+                          { label: '24 Hour Reminder', desc: 'Send reminder 24 hours before' },
+                          { label: '1 Hour Reminder', desc: 'Send reminder 1 hour before' },
+                          { label: 'Follow-up Email', desc: 'Send follow-up after webinar ends' }
+                        ].map((notif, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-500" />
+                          Platform Integrations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Zoom', desc: 'Video conferencing', status: 'connected' },
+                          { name: 'HubSpot', desc: 'CRM sync', status: 'connected' },
+                          { name: 'Mailchimp', desc: 'Email marketing', status: 'disconnected' },
+                          { name: 'Slack', desc: 'Notifications', status: 'connected' },
+                          { name: 'Salesforce', desc: 'CRM sync', status: 'disconnected' }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                {integration.name[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-sm text-gray-500">{integration.desc}</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-green-500" />
+                          API Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>API Key</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Input type="password" value="sk_webinar_****************************" readOnly className="font-mono" />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Webhook URL</Label>
+                          <Input defaultValue="https://api.yoursite.com/webhooks/webinar" className="mt-1 font-mono" />
+                        </div>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-500" />
+                          Access Security
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Password Protection</p>
+                            <p className="text-sm text-gray-500">Require password to join webinars</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Email Verification</p>
+                            <p className="text-sm text-gray-500">Verify attendee email addresses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Block Anonymous Join</p>
+                            <p className="text-sm text-gray-500">Prevent unregistered attendees</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Lock Meeting After Start</p>
+                            <p className="text-sm text-gray-500">Prevent late joins after 15 minutes</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-yellow-500" />
+                          Recording Security
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Password Protect Recordings</p>
+                            <p className="text-sm text-gray-500">Require password to view recordings</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Disable Download</p>
+                            <p className="text-sm text-gray-500">Prevent recording downloads</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-Delete After</p>
+                            <p className="text-sm text-gray-500">Automatically delete old recordings</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-cyan-500" />
+                          Advanced Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                            <p className="text-sm text-gray-500">Enable verbose logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-Start Recording</p>
+                            <p className="text-sm text-gray-500">Start recording when host joins</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">HD Video</p>
+                            <p className="text-sm text-gray-500">Enable high-definition video quality</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Recording Quality</Label>
+                          <Input defaultValue="1080p" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label>Max Recording Storage (GB)</Label>
+                          <Input type="number" defaultValue="100" className="mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-blue-500" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Data Retention (days)</Label>
+                          <Input type="number" defaultValue="365" className="mt-1" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
+                            <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
+                            <p className="text-sm text-red-600/70">Permanently delete all webinar data</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

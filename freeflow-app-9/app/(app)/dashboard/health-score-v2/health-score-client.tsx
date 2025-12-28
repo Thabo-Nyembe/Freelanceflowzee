@@ -44,8 +44,22 @@ import {
   Share2,
   Layers,
   GitBranch,
-  Box
+  Box,
+  Plus,
+  FileText,
+  Users,
+  Network,
+  Gauge,
+  Sparkles,
+  Rocket,
+  History,
+  Timer,
+  Workflow,
+  Cog,
+  Link,
+  Wrench
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -729,6 +743,53 @@ export default function HealthScoreClient() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Overview Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">System Health Overview</h2>
+                  <p className="text-emerald-100">Datadog-level observability and monitoring</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{overallScore}%</p>
+                    <p className="text-emerald-200 text-sm">Health Score</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockServices.filter(s => s.status === 'healthy').length}</p>
+                    <p className="text-emerald-200 text-sm">Healthy</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{openIncidents}</p>
+                    <p className="text-emerald-200 text-sm">Incidents</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Overview Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Activity, label: 'Dashboard', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Bell, label: 'Alerts', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: BarChart3, label: 'Metrics', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: FileText, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Shield, label: 'Security', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Service Status Grid */}
               <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -836,6 +897,53 @@ export default function HealthScoreClient() {
 
           {/* Services Tab */}
           <TabsContent value="services" className="space-y-6 mt-6">
+            {/* Services Banner */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Service Monitoring</h2>
+                  <p className="text-blue-100">New Relic-level APM and service health</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockServices.length}</p>
+                    <p className="text-blue-200 text-sm">Services</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockServices.filter(s => s.status === 'healthy').length}</p>
+                    <p className="text-blue-200 text-sm">Healthy</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockServices.filter(s => s.status === 'degraded' || s.status === 'critical').length}</p>
+                    <p className="text-blue-200 text-sm">Issues</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Services Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Add Service', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Activity, label: 'APM', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Zap, label: 'Traces', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: BarChart3, label: 'Metrics', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Eye, label: 'Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
+                { icon: GitBranch, label: 'Dependencies', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4 mb-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -944,6 +1052,53 @@ export default function HealthScoreClient() {
 
           {/* Infrastructure Tab */}
           <TabsContent value="infrastructure" className="space-y-6 mt-6">
+            {/* Infrastructure Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Infrastructure</h2>
+                  <p className="text-amber-100">AWS CloudWatch-level infrastructure monitoring</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockInfrastructure.length}</p>
+                    <p className="text-amber-200 text-sm">Resources</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockInfrastructure.filter(i => i.status === 'healthy').length}</p>
+                    <p className="text-amber-200 text-sm">Healthy</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{(mockInfrastructure.reduce((sum, i) => sum + i.cpu, 0) / mockInfrastructure.length).toFixed(0)}%</p>
+                    <p className="text-amber-200 text-sm">Avg CPU</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Infrastructure Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Server, label: 'Servers', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Database, label: 'Databases', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Cloud, label: 'Cloud', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Container, label: 'Containers', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Network, label: 'Network', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: HardDrive, label: 'Storage', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Cpu, label: 'Compute', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center gap-3 mb-2">
@@ -1080,6 +1235,53 @@ export default function HealthScoreClient() {
 
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6 mt-6">
+            {/* Alerts Banner */}
+            <div className="bg-gradient-to-r from-rose-600 via-red-600 to-orange-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Alerting & Notifications</h2>
+                  <p className="text-rose-100">PagerDuty-level incident management</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAlertRules.length}</p>
+                    <p className="text-rose-200 text-sm">Rules</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockAlertRules.filter(a => a.isActive).length}</p>
+                    <p className="text-rose-200 text-sm">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{openIncidents}</p>
+                    <p className="text-rose-200 text-sm">Open</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Alerts Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'New Rule', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Bell, label: 'Active', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: AlertTriangle, label: 'Critical', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: CheckCircle, label: 'Resolve', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Users, label: 'On-Call', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Clock, label: 'History', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Alert Rules */}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -1189,6 +1391,53 @@ export default function HealthScoreClient() {
 
           {/* SLOs Tab */}
           <TabsContent value="slos" className="space-y-6 mt-6">
+            {/* SLOs Banner */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Service Level Objectives</h2>
+                  <p className="text-purple-100">Google SRE-level SLO tracking and error budgets</p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockSLOs.length}</p>
+                    <p className="text-purple-200 text-sm">SLOs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockSLOs.filter(s => s.current >= s.target).length}</p>
+                    <p className="text-purple-200 text-sm">On Track</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{mockSLOs.filter(s => s.current < s.target).length}</p>
+                    <p className="text-purple-200 text-sm">At Risk</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SLOs Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Plus, label: 'Create SLO', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Target, label: 'Objectives', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: TrendingUp, label: 'Error Budget', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Gauge, label: 'SLIs', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Calendar, label: 'History', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Service Level Objectives</h2>
               <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">

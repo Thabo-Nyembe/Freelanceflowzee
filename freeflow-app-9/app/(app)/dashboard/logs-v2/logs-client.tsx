@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +24,8 @@ import {
   Plus, Trash2, Calendar, LineChart, Archive, Shield, Lock, Key, GitBranch,
   GitMerge, Box, Package, Workflow, Route, Split, Combine, Funnel, Target,
   PieChart, Gauge, Bell, BellRing, MailWarning, MessageSquare, Link2, Send,
-  CloudUpload, CloudDownload, FolderArchive, Sparkles, Wand2, Bug, Microscope
+  CloudUpload, CloudDownload, FolderArchive, Sparkles, Wand2, Bug, Microscope,
+  Sliders, Webhook, Mail, Server as ServerIcon
 } from 'lucide-react'
 
 // ============== COMPREHENSIVE DATADOG-LEVEL INTERFACES ==============
@@ -493,6 +494,7 @@ export default function LogsClient() {
   const [showAlertDialog, setShowAlertDialog] = useState(false)
   const [showForwarderDialog, setShowForwarderDialog] = useState(false)
   const [showSensitiveDialog, setShowSensitiveDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const toggleLogExpand = (logId: string) => {
     setExpandedLogs(prev =>
@@ -724,10 +726,57 @@ export default function LogsClient() {
               <Shield className="w-4 h-4" />
               Sensitive Data
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Explorer Tab */}
           <TabsContent value="explorer">
+            {/* Explorer Overview Banner */}
+            <div className="bg-gradient-to-r from-teal-500 via-cyan-500 to-sky-500 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Log Explorer</h2>
+                  <p className="text-teal-100">Search, filter, and analyze logs in real-time</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.logsPerSecond.toLocaleString()}</p>
+                    <p className="text-teal-200 text-sm">Logs/sec</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{stats.activeServices}</p>
+                    <p className="text-teal-200 text-sm">Services</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {[
+                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: Activity, label: 'Live Tail', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Layers, label: 'Patterns', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Bookmark, label: 'Save View', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Bell, label: 'Create Alert', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Share2, label: 'Share', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+              ].map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-5 gap-6">
               {/* Left Sidebar - Facets */}
               <div className="space-y-4">
@@ -1396,6 +1445,426 @@ export default function LogsClient() {
                   ))}
                 </div>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-teal-500" />
+                      Settings
+                    </CardTitle>
+                    <CardDescription>Configure logging platform</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Sliders },
+                        { id: 'ingestion', label: 'Ingestion', icon: CloudDownload },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'advanced', label: 'Advanced', icon: Terminal },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                            settingsTab === item.id
+                              ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 font-medium'
+                              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-teal-500" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Basic log management preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="live-tail" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Live Tail Mode</span>
+                            <span className="text-sm text-slate-500">Stream logs in real-time</span>
+                          </Label>
+                          <Switch id="live-tail" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="syntax-highlight" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Syntax Highlighting</span>
+                            <span className="text-sm text-slate-500">Colorize log messages</span>
+                          </Label>
+                          <Switch id="syntax-highlight" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="pattern-detect" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Pattern Detection</span>
+                            <span className="text-sm text-slate-500">Auto-detect log patterns</span>
+                          </Label>
+                          <Switch id="pattern-detect" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Time Range</Label>
+                            <Input defaultValue="15 minutes" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Results</Label>
+                            <Input type="number" defaultValue="1000" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Retention Settings</CardTitle>
+                        <CardDescription>Configure log retention policies</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">Hot Storage</p>
+                            <p className="text-sm text-slate-500">Fast searchable logs</p>
+                          </div>
+                          <Badge variant="outline">15 days</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">Cold Storage</p>
+                            <p className="text-sm text-slate-500">Archived logs</p>
+                          </div>
+                          <Badge variant="outline">90 days</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Ingestion Settings */}
+                {settingsTab === 'ingestion' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CloudDownload className="w-5 h-5 text-teal-500" />
+                          Log Ingestion
+                        </CardTitle>
+                        <CardDescription>Configure log sources and ingestion</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="auto-parse" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Auto-Parse JSON</span>
+                            <span className="text-sm text-slate-500">Automatically parse JSON logs</span>
+                          </Label>
+                          <Switch id="auto-parse" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="compress" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Compression</span>
+                            <span className="text-sm text-slate-500">Compress logs during transit</span>
+                          </Label>
+                          <Switch id="compress" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Batch Size</Label>
+                            <Input type="number" defaultValue="1000" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Flush Interval (ms)</Label>
+                            <Input type="number" defaultValue="5000" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Exclusion Filters</CardTitle>
+                        <CardDescription>Filter out unwanted logs before indexing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="exclude-health" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Health Checks</span>
+                            <span className="text-sm text-slate-500">Exclude health check logs</span>
+                          </Label>
+                          <Switch id="exclude-health" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="exclude-debug" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Debug Logs</span>
+                            <span className="text-sm text-slate-500">Exclude debug level logs</span>
+                          </Label>
+                          <Switch id="exclude-debug" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-teal-500" />
+                          Alert Notifications
+                        </CardTitle>
+                        <CardDescription>Configure alert channels</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="email-alerts" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Email Alerts</span>
+                            <span className="text-sm text-slate-500">Send alerts via email</span>
+                          </Label>
+                          <Switch id="email-alerts" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="slack-alerts" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Slack Alerts</span>
+                            <span className="text-sm text-slate-500">Send alerts to Slack</span>
+                          </Label>
+                          <Switch id="slack-alerts" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="pagerduty" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">PagerDuty Integration</span>
+                            <span className="text-sm text-slate-500">Trigger PagerDuty incidents</span>
+                          </Label>
+                          <Switch id="pagerduty" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Alert Email Recipients</Label>
+                          <Input placeholder="team@company.com" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Digest Settings</CardTitle>
+                        <CardDescription>Configure alert digest frequency</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="daily-digest" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Daily Digest</span>
+                            <span className="text-sm text-slate-500">Receive daily log summary</span>
+                          </Label>
+                          <Switch id="daily-digest" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-teal-500" />
+                          API Configuration
+                        </CardTitle>
+                        <CardDescription>Manage API access</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Log Ingestion API Key</p>
+                              <code className="text-sm text-slate-500">log_api_••••••••••••••••</code>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm">
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <RefreshCw className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="outline">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-teal-500" />
+                          Log Forwarding
+                        </CardTitle>
+                        <CardDescription>Forward logs to external systems</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="text-center py-8 text-slate-500">
+                          <Send className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                          <p>No forwarders configured</p>
+                          <Button variant="outline" className="mt-4">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Forwarder
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-teal-500" />
+                          Data Security
+                        </CardTitle>
+                        <CardDescription>Protect sensitive log data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="pii-scan" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">PII Scanning</span>
+                            <span className="text-sm text-slate-500">Detect and redact PII</span>
+                          </Label>
+                          <Switch id="pii-scan" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="encrypt-transit" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Encryption in Transit</span>
+                            <span className="text-sm text-slate-500">TLS 1.3 encryption</span>
+                          </Label>
+                          <Switch id="encrypt-transit" defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="audit-access" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Access Audit</span>
+                            <span className="text-sm text-slate-500">Log all access events</span>
+                          </Label>
+                          <Switch id="audit-access" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle>Access Control</CardTitle>
+                        <CardDescription>Manage log access permissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <div>
+                            <p className="font-medium">Role-Based Access</p>
+                            <p className="text-sm text-slate-500">Control access by role</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Enabled</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-teal-500" />
+                          Advanced Options
+                        </CardTitle>
+                        <CardDescription>Expert configuration options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="raw-mode" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Raw Log Mode</span>
+                            <span className="text-sm text-slate-500">Display unprocessed logs</span>
+                          </Label>
+                          <Switch id="raw-mode" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="debug-queries" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Debug Queries</span>
+                            <span className="text-sm text-slate-500">Show query execution details</span>
+                          </Label>
+                          <Switch id="debug-queries" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                          <Label htmlFor="trace-context" className="flex flex-col gap-1 cursor-pointer">
+                            <span className="font-medium">Trace Context</span>
+                            <span className="text-sm text-slate-500">Include distributed trace info</span>
+                          </Label>
+                          <Switch id="trace-context" defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertCircle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Clear All Logs</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Permanently delete all indexed logs</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Pipelines</p>
+                            <p className="text-sm text-red-600 dark:text-red-400/80">Delete all processing pipelines</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
