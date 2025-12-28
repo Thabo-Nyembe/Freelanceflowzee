@@ -673,15 +673,15 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{workflows.length}</p>
+                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
                     <p className="text-violet-200 text-sm">Workflows</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{workflows.filter(w => w.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.status === 'active').length}</p>
                     <p className="text-violet-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{executions.length}</p>
+                    <p className="text-3xl font-bold">{stats.totalExecutions}</p>
                     <p className="text-violet-200 text-sm">Executions</p>
                   </div>
                 </div>

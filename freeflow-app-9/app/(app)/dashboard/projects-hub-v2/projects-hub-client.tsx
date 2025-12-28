@@ -433,7 +433,7 @@ export default function ProjectsHubClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{projects.length}</p>
+                    <p className="text-3xl font-bold">{mockProjects.length}</p>
                     <p className="text-violet-200 text-sm">Projects</p>
                   </div>
                 </div>
