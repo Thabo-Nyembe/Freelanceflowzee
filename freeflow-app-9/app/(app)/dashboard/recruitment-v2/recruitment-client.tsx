@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -827,6 +828,15 @@ export default function RecruitmentClient() {
     { stage: 'offer', label: 'Offer', color: 'border-yellow-300' }
   ]
 
+  const handlePostJob = () => {
+    toast.info('Opening job posting form...')
+    // In production, this would open a job creation dialog or navigate to posting page
+  }
+
+  const handleExportReport = () => {
+    toast.success('Exporting recruitment report...')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
       <div className="p-8">
@@ -843,11 +853,11 @@ export default function RecruitmentClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportReport}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white" onClick={handlePostJob}>
                 <Plus className="w-4 h-4 mr-2" />
                 Post Job
               </Button>

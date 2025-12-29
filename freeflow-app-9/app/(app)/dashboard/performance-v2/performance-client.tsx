@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import {
   Gauge,
   Zap,
@@ -493,10 +494,16 @@ export default function PerformanceClient() {
 
   // Run test simulation
   const handleRunTest = () => {
+    if (!testUrl.trim()) {
+      toast.error('Please enter a URL to audit')
+      return
+    }
     setIsRunning(true)
+    toast.info('Running performance audit...')
     setTimeout(() => {
       setIsRunning(false)
       setShowRunDialog(false)
+      toast.success('Performance audit completed!')
     }, 3000)
   }
 
@@ -504,6 +511,7 @@ export default function PerformanceClient() {
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(testUrl)
     setCopiedUrl(true)
+    toast.success('URL copied to clipboard!')
     setTimeout(() => setCopiedUrl(false), 2000)
   }
 

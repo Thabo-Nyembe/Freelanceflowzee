@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -479,6 +480,15 @@ export default function OnboardingClient() {
 
   const maxViews = Math.max(...mockAnalytics.map(a => a.views))
 
+  const handleCreateFlow = () => {
+    toast.info('Opening flow builder...')
+    // In production, this would open a flow creation dialog or builder
+  }
+
+  const handleExportReport = () => {
+    toast.success('Exporting onboarding report...')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -498,11 +508,11 @@ export default function OnboardingClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportReport}>
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+            <Button className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700" onClick={handleCreateFlow}>
               <Plus className="w-4 h-4" />
               Create Flow
             </Button>
