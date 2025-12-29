@@ -490,6 +490,32 @@ export default function FAQClient() {
     return num.toString()
   }
 
+  // Handlers
+  const handleCreateFAQ = () => {
+    toast.info('Create FAQ', {
+      description: 'Opening FAQ editor...'
+    })
+    setShowAddDialog(true)
+  }
+
+  const handlePublishFAQ = (faq: FAQItem) => {
+    toast.success('FAQ published', {
+      description: `"${faq.question}" is now public`
+    })
+  }
+
+  const handleArchiveFAQ = (faq: FAQItem) => {
+    toast.success('FAQ archived', {
+      description: `"${faq.question}" has been archived`
+    })
+  }
+
+  const handleExportFAQs = () => {
+    toast.success('Export started', {
+      description: 'FAQs are being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

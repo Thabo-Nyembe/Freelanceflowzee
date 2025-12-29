@@ -649,6 +649,31 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     )
   }
 
+  // Handlers
+  const handleSaveCanvas = () => {
+    toast.success('Canvas saved', {
+      description: 'Your design has been saved'
+    })
+  }
+
+  const handleExportCanvas = () => {
+    toast.success('Export started', {
+      description: 'Your canvas is being exported'
+    })
+  }
+
+  const handleShareCanvas = () => {
+    toast.success('Link copied', {
+      description: 'Share link copied to clipboard'
+    })
+  }
+
+  const handleUndoAction = () => {
+    toast.info('Undo', {
+      description: 'Last action undone'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

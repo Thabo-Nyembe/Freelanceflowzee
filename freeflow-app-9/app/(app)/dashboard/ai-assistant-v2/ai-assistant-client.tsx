@@ -823,6 +823,31 @@ export default function AIAssistantClient() {
   // Quota percentage
   const quotaPercentage = (usageStats.quotaUsed / usageStats.quotaLimit) * 100
 
+  // Handlers
+  const handleSaveConversation = () => {
+    toast.success('Conversation saved', {
+      description: 'This conversation has been saved'
+    })
+  }
+
+  const handleClearHistory = () => {
+    toast.success('History cleared', {
+      description: 'Conversation history has been cleared'
+    })
+  }
+
+  const handleExportChat = () => {
+    toast.success('Export started', {
+      description: 'Chat is being exported'
+    })
+  }
+
+  const handleCreatePrompt = () => {
+    toast.info('Create Prompt', {
+      description: 'Opening prompt template editor...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

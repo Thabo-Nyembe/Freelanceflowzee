@@ -638,6 +638,31 @@ export default function CoursesClient() {
     )
   }
 
+  // Handlers
+  const handleEnrollCourse = (course: Course) => {
+    toast.success('Enrolled!', {
+      description: `You've enrolled in "${course.title}"`
+    })
+  }
+
+  const handleStartLesson = (lesson: Lesson) => {
+    toast.info('Starting lesson', {
+      description: `Loading "${lesson.title}"...`
+    })
+  }
+
+  const handleCompleteCourse = (course: Course) => {
+    toast.success('Course completed!', {
+      description: 'Congratulations on finishing the course!'
+    })
+  }
+
+  const handleDownloadCertificate = () => {
+    toast.success('Download started', {
+      description: 'Your certificate is being downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

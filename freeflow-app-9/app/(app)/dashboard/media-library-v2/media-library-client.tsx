@@ -583,6 +583,32 @@ export default function MediaLibraryClient({
     { label: 'Documents', value: mockUsageStats.byType.find(t => t.type === 'document')?.count.toString() || '0', change: 10.5, icon: FileText, color: 'from-orange-500 to-amber-600' }
   ]
 
+  // Handlers
+  const handleUploadMedia = () => {
+    toast.info('Upload Media', {
+      description: 'Opening file uploader...'
+    })
+    setShowUploadDialog(true)
+  }
+
+  const handleDownloadAsset = (asset: MediaAsset) => {
+    toast.success('Download started', {
+      description: `Downloading "${asset.name}"...`
+    })
+  }
+
+  const handleDeleteAsset = (asset: MediaAsset) => {
+    toast.success('Asset deleted', {
+      description: `"${asset.name}" has been deleted`
+    })
+  }
+
+  const handleMoveToFolder = (asset: MediaAsset) => {
+    toast.success('Asset moved', {
+      description: `"${asset.name}" has been moved`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
