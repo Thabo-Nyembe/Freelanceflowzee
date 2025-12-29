@@ -16,6 +16,7 @@ import { EnhancedCommandPalette } from '@/components/ui/enhanced-command-palette
 import { EnhancedNotifications } from '@/components/ui/enhanced-dashboard-widgets'
 import { MockDataProvider } from '@/lib/mock-data/provider'
 import { NOTIFICATIONS } from '@/lib/mock-data/activities'
+import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
@@ -36,6 +37,7 @@ export default function DashboardLayoutClient({
   children, user: _user
 }: DashboardLayoutClientProps) {
   return (
+    <OnboardingProvider>
     <MockDataProvider>
     <SessionTimeoutProvider
       config={{
@@ -94,6 +96,7 @@ export default function DashboardLayoutClient({
       </div>
     </SessionTimeoutProvider>
     </MockDataProvider>
+    </OnboardingProvider>
   )
 }
 

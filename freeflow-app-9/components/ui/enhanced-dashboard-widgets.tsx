@@ -332,13 +332,13 @@ export function EnhancedQuickActions({
   )
 }
 
-// Enhanced Notifications Component
+// Enhanced Notifications Component with Cascade/Collapse functionality
 interface Notification {
   id: string
   title: string
   message: string
   type: 'info' | 'success' | 'warning' | 'error'
-  timestamp: Date
+  timestamp: Date | string
   read?: boolean
   actions?: Array<{
     label: string
@@ -351,21 +351,45 @@ interface EnhancedNotificationsProps {
   notifications: Notification[]
   title?: string
   maxItems?: number
+  maxVisible?: number  // How many to show in cascade view
   onMarkAsRead?: (id: string) => void
   onClearAll?: () => void
+  onDismiss?: (id: string) => void
   className?: string
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
 }
 
 export function EnhancedNotifications({
   notifications,
   title = 'Notifications',
   maxItems = 5,
+  maxVisible = 3,
   onMarkAsRead,
   onClearAll,
-  className
+  onDismiss,
+  className,
+  position = 'bottom-right'
 }: EnhancedNotificationsProps) {
-  const unreadCount = notifications.filter(n => !n.read).length
-  const displayNotifications = notifications.slice(0, maxItems)
+  const [isExpanded, setIsExpanded] = React.useState(false)
+  const [dismissedIds, setDismissedIds] = React.useState<Set<string>>(new Set())
+  const [isCollapsed, setIsCollapsed] = React.useState(false)
+
+  // Filter out dismissed notifications
+  const visibleNotifications = notifications.filter(n => !dismissedIds.has(n.id))
+  const unreadCount = visibleNotifications.filter(n => !n.read).length
+  const displayNotifications = isExpanded
+    ? visibleNotifications.slice(0, maxItems)
+    : visibleNotifications.slice(0, maxVisible)
+
+  const handleDismiss = (id: string) => {
+    setDismissedIds(prev => new Set([...prev, id]))
+    onDismiss?.(id)
+  }
+
+  const handleClearAll = () => {
+    setDismissedIds(new Set(notifications.map(n => n.id)))
+    onClearAll?.()
+  }
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -376,123 +400,229 @@ export function EnhancedNotifications({
     }
   }
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'success': return 'border-l-green-500 bg-green-50/90 dark:bg-green-950/50'
+      case 'warning': return 'border-l-amber-500 bg-amber-50/90 dark:bg-amber-950/50'
+      case 'error': return 'border-l-red-500 bg-red-50/90 dark:bg-red-950/50'
+      default: return 'border-l-blue-500 bg-blue-50/90 dark:bg-blue-950/50'
+    }
+  }
+
   const formatTimestamp = (timestamp: Date | string) => {
     const now = new Date()
     const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-    
+
     if (diffInMinutes < 1) return 'Just now'
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
     return `${Math.floor(diffInMinutes / 1440)}d ago`
   }
 
+  // If collapsed, show only the bell icon with count
+  if (isCollapsed) {
+    return (
+      <Button
+        variant="default"
+        size="icon"
+        onClick={() => setIsCollapsed(false)}
+        className={cn(
+          'relative h-12 w-12 rounded-full shadow-lg',
+          'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700',
+          'border border-gray-200 dark:border-gray-700',
+          className
+        )}
+      >
+        <Bell className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </Button>
+    )
+  }
+
+  // If no notifications, show minimized state
+  if (visibleNotifications.length === 0) {
+    return (
+      <div className={cn('w-80', className)}>
+        <Card className="shadow-lg border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+          <CardHeader className="pb-2 pt-3 px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{title}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCollapsed(true)}
+                className="h-6 w-6 p-0"
+              >
+                <Minimize2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="py-4 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No new notifications</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
-    <Card className={cn('', className)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {title}
-            </CardTitle>
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="text-xs h-5 px-1.5">
-                {unreadCount}
-              </Badge>
-            )}
+    <div className={cn('w-80 space-y-2', className)}>
+      {/* Header Card */}
+      <Card className="shadow-lg border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+        <CardHeader className="pb-2 pt-3 px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{title}</span>
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="text-xs h-5 px-1.5">
+                  {unreadCount}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {visibleNotifications.length > maxVisible && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="h-6 px-2 text-xs"
+                >
+                  {isExpanded ? 'Less' : `+${visibleNotifications.length - maxVisible} more`}
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearAll}
+                className="h-6 w-6 p-0"
+                title="Clear all"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCollapsed(true)}
+                className="h-6 w-6 p-0"
+                title="Minimize"
+              >
+                <Minimize2 className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
-          
-          {onClearAll && notifications.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClearAll}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Clear All
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-3">
-        {displayNotifications.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            No notifications
-          </div>
-        ) : (
-          displayNotifications.map((notification) => (
+        </CardHeader>
+      </Card>
+
+      {/* Stacked Notification Cards with Cascade Effect */}
+      <div className="relative">
+        {displayNotifications.map((notification, index) => {
+          // Calculate cascade offset for stacked appearance
+          const stackOffset = isExpanded ? 0 : index * 4
+          const stackScale = isExpanded ? 1 : 1 - (index * 0.02)
+          const stackOpacity = isExpanded ? 1 : 1 - (index * 0.1)
+
+          return (
             <div
               key={notification.id}
               className={cn(
-                'flex gap-3 p-3 rounded-lg border transition-colors hover:bg-muted/50',
-                !notification.read && 'bg-muted/30 border-primary/20'
+                'transition-all duration-300 ease-out',
+                !isExpanded && index > 0 && 'absolute left-0 right-0'
               )}
+              style={{
+                top: isExpanded ? 'auto' : `${stackOffset}px`,
+                transform: `scale(${stackScale})`,
+                opacity: stackOpacity,
+                zIndex: maxVisible - index,
+                marginBottom: isExpanded ? '8px' : '0'
+              }}
             >
-              <div className="flex-shrink-0 mt-0.5">
-                {getNotificationIcon(notification.type)}
-              </div>
-              
-              <div className="flex-1 space-y-1">
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className={cn(
-                    'text-sm font-medium',
-                    !notification.read && 'text-foreground',
-                    notification.read && 'text-muted-foreground'
-                  )}>
-                    {notification.title}
-                  </h4>
-                  <span className="text-xs text-muted-foreground flex-shrink-0">
-                    {formatTimestamp(notification.timestamp)}
-                  </span>
-                </div>
-                
-                <p className="text-xs text-muted-foreground">
-                  {notification.message}
-                </p>
-                
-                {/* Notification Actions */}
-                {notification.actions && notification.actions.length > 0 && (
-                  <div className="flex gap-2 pt-2">
-                    {notification.actions.map((action, index) => (
-                      <Button
-                        key={index}
-                        variant={action.variant || 'outline'}
-                        size="sm"
-                        onClick={action.onClick}
-                        className="h-6 px-2 text-xs"
-                      >
-                        {action.label}
-                      </Button>
-                    ))}
+              <Card
+                className={cn(
+                  'shadow-md border-l-4 overflow-hidden',
+                  'hover:shadow-lg transition-shadow duration-200',
+                  getTypeColor(notification.type)
+                )}
+              >
+                <div className="p-3">
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {getNotificationIcon(notification.type)}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className={cn(
+                          'text-sm font-medium truncate',
+                          !notification.read ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'
+                        )}>
+                          {notification.title}
+                        </h4>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {formatTimestamp(notification.timestamp)}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDismiss(notification.id)}
+                            className="h-5 w-5 p-0 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                        {notification.message}
+                      </p>
+
+                      {/* Actions Row */}
+                      <div className="flex items-center gap-2 mt-2">
+                        {notification.actions?.map((action, actionIndex) => (
+                          <Button
+                            key={actionIndex}
+                            variant="outline"
+                            size="sm"
+                            onClick={action.onClick}
+                            className="h-6 px-2 text-xs"
+                          >
+                            {action.label}
+                          </Button>
+                        ))}
+                        {!notification.read && onMarkAsRead && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onMarkAsRead(notification.id)}
+                            className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 ml-auto"
+                          >
+                            Mark read
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
-                
-                {/* Mark as Read */}
-                {!notification.read && onMarkAsRead && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onMarkAsRead(notification.id)}
-                    className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    Mark as read
-                  </Button>
-                )}
-              </div>
+                </div>
+              </Card>
             </div>
-          ))
-        )}
-        
-        {notifications.length > maxItems && (
-          <div className="text-center pt-2">
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
-              View all {notifications.length} notifications
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )
+        })}
+      </div>
+
+      {/* Spacer for stacked cards when not expanded */}
+      {!isExpanded && displayNotifications.length > 1 && (
+        <div style={{ height: `${(displayNotifications.length - 1) * 4}px` }} />
+      )}
+    </div>
   )
 }
 
