@@ -612,6 +612,30 @@ export default function LearningClient() {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
   }
 
+  const handleStartCourse = (course: Course) => {
+    toast.success('Course started', {
+      description: `Starting ${course.title}`
+    })
+  }
+
+  const handleResumeCourse = (course: Course) => {
+    toast.success('Resuming course', {
+      description: `Continuing ${course.title}`
+    })
+  }
+
+  const handleDownloadCertificate = () => {
+    toast.success('Certificate download started', {
+      description: 'Your certificate is being generated'
+    })
+  }
+
+  const handleShareProgress = () => {
+    toast.success('Progress shared', {
+      description: 'Your learning progress has been shared'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

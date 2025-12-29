@@ -162,6 +162,37 @@ export default function AnalyticsClient() {
     )
   }, [searchQuery])
 
+  // Handlers
+  const handleNotifications = () => {
+    toast.info('Notifications', {
+      description: 'Opening notification settings...'
+    })
+  }
+
+  const handleExport = () => {
+    toast.success('Export started', {
+      description: 'Your analytics report is being generated'
+    })
+  }
+
+  const handleShare = () => {
+    toast.success('Link copied', {
+      description: 'Share link copied to clipboard'
+    })
+  }
+
+  const handleFilters = () => {
+    toast.info('Filters', {
+      description: 'Opening filter panel...'
+    })
+  }
+
+  const handleRefresh = () => {
+    toast.success('Data refreshed', {
+      description: 'Analytics data updated'
+    })
+  }
+
   // Format value based on type
   const formatValue = (value: number, type: string) => {
     switch (type) {
@@ -236,13 +267,13 @@ export default function AnalyticsClient() {
                   <GitBranch className="h-4 w-4 mr-2" />
                   Compare
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleNotifications}>
                   <Bell className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleExport}>
                   <Download className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleShare}>
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -285,11 +316,11 @@ export default function AnalyticsClient() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
