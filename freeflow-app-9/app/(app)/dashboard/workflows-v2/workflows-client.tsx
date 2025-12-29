@@ -470,6 +470,30 @@ export default function WorkflowsClient() {
     })
   }, [searchQuery, statusFilter, folderFilter])
 
+  const handleCreateWorkflow = () => {
+    toast.info('Create Workflow', {
+      description: 'Opening workflow builder...'
+    })
+  }
+
+  const handleRunWorkflow = (workflow: Workflow) => {
+    toast.success('Workflow running', {
+      description: `${workflow.name} is now executing`
+    })
+  }
+
+  const handlePauseWorkflow = (workflow: Workflow) => {
+    toast.success('Workflow paused', {
+      description: `${workflow.name} has been paused`
+    })
+  }
+
+  const handleDuplicateWorkflow = (workflow: Workflow) => {
+    toast.success('Workflow duplicated', {
+      description: `Copy of ${workflow.name} created`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}

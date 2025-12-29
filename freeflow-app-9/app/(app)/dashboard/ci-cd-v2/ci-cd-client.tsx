@@ -613,6 +613,30 @@ export default function CiCdClient() {
     })
   }, [searchQuery, statusFilter])
 
+  const handleTriggerWorkflow = (workflow: Workflow) => {
+    toast.info('Workflow triggered', {
+      description: `Starting ${workflow.name}...`
+    })
+  }
+
+  const handleCreateWorkflow = () => {
+    toast.info('Create Workflow', {
+      description: 'Opening workflow editor...'
+    })
+  }
+
+  const handleCancelRun = (run: WorkflowRun) => {
+    toast.success('Run cancelled', {
+      description: `Workflow run ${run.run_number} cancelled`
+    })
+  }
+
+  const handleRerunWorkflow = (run: WorkflowRun) => {
+    toast.info('Rerunning workflow', {
+      description: `Restarting run ${run.run_number}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

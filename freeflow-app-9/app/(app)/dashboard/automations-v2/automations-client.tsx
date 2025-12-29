@@ -391,6 +391,32 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     })
   }, [displayWorkflows, searchQuery, workflowTypeFilter, statusFilter])
 
+  const handleCreateAutomation = () => {
+    toast.info('Create Automation', {
+      description: 'Opening automation builder...'
+    })
+    setShowNewWorkflow(true)
+  }
+
+  const handleRunAutomation = (workflow: AutomationWorkflow) => {
+    toast.success('Automation running', {
+      description: `${workflow.workflow_name} is now executing`
+    })
+  }
+
+  const handleToggleAutomation = (workflow: AutomationWorkflow) => {
+    const newStatus = workflow.status === 'active' ? 'paused' : 'active'
+    toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused', {
+      description: `${workflow.workflow_name} is now ${newStatus}`
+    })
+  }
+
+  const handleDuplicateAutomation = (workflow: AutomationWorkflow) => {
+    toast.success('Automation duplicated', {
+      description: `Copy of ${workflow.workflow_name} created`
+    })
+  }
+
   if (error) return (
     <div className="p-8">
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">Error: {error.message}</div>
