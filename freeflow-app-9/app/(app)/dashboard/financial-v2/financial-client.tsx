@@ -142,7 +142,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
   // Calculations
   const totalRevenue = Object.values(profitLossData.revenue).reduce((a, b) => a + b, 0)
-  const totalCostOfSales = Object.values(profitLossData.costOfSales).reduce((a, b) => a + b, 0)
+  const totalCostOfSales = Object.values(profitLossData.costOfRevenue || {}).reduce((a, b) => a + b, 0)
   const grossProfit = totalRevenue - totalCostOfSales
   const totalOperatingExpenses = Object.values(profitLossData.operatingExpenses).reduce((a, b) => a + b, 0)
   const netIncome = grossProfit - totalOperatingExpenses
@@ -546,7 +546,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cost of Sales</h4>
                   <div className="space-y-2">
-                    {Object.entries(profitLossData.costOfSales).map(([name, amount]) => (
+                    {Object.entries(profitLossData.costOfRevenue || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
                         <span className="font-medium text-red-600">({formatCurrency(amount)})</span>

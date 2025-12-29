@@ -284,7 +284,7 @@ export const financialCashFlow = CASH_FLOW
 
 export const financialAIInsights = AI_INSIGHTS.financial
 
-export const financialCollaborators = COLLABORATORS.filter(c => ['Jennifer Walsh', 'Michael Chen'].includes(c.name))
+export const financialCollaborators = COLLABORATORS.slice(0, 4)
 
 export const financialPredictions = [
   { id: '1', label: 'Q1 Revenue', currentValue: PROFIT_LOSS.revenue.total, predictedValue: 1150000, confidence: 84, trend: 'up' as const, timeframe: 'End of Q1', factors: [{ name: 'New contracts', impact: 'positive' as const, weight: 0.4 }, { name: 'Recurring revenue', impact: 'positive' as const, weight: 0.35 }, { name: 'Seasonal boost', impact: 'positive' as const, weight: 0.25 }] },

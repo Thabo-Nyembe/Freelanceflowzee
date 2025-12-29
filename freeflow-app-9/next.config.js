@@ -87,6 +87,10 @@ const nextConfig = {
     externalDir: true,
     // Optimize build performance
     cpus: Math.max(1, require('os').cpus().length - 1),
+    // Faster builds
+    parallelServerCompiles: true,
+    parallelServerBuildTraces: true,
+    webpackBuildWorker: true,
   },
   
   // A+++ Build optimization
