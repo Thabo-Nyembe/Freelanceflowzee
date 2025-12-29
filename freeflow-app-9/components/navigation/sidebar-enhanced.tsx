@@ -44,7 +44,6 @@ import {
   Music,
   ChevronDown,
   ChevronRight,
-  LucideIcon,
   Briefcase,
   Film,
   Box,
@@ -64,6 +63,7 @@ import {
   Star,
   CheckCircle2
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
