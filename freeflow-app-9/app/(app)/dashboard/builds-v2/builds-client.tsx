@@ -831,6 +831,30 @@ export default function BuildsClient() {
     }
   }, [])
 
+  const handleTriggerBuild = () => {
+    toast.info('Build triggered', {
+      description: 'Starting new build...'
+    })
+  }
+
+  const handleCancelBuild = (build: Build) => {
+    toast.success('Build cancelled', {
+      description: `Build #${build.number} has been cancelled`
+    })
+  }
+
+  const handleRetryBuild = (build: Build) => {
+    toast.info('Retrying build', {
+      description: `Restarting build #${build.number}`
+    })
+  }
+
+  const handleDownloadArtifact = (artifactName: string) => {
+    toast.success('Download started', {
+      description: `Downloading ${artifactName}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

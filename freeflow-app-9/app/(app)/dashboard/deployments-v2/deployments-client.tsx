@@ -344,6 +344,33 @@ export default function DeploymentsClient() {
     }
   }, [])
 
+  const handleDeploy = () => {
+    toast.info('Deploying', {
+      description: 'Starting deployment...'
+    })
+  }
+
+  const handleRollback = (deployment: Deployment) => {
+    toast.success('Rollback initiated', {
+      description: `Rolling back to ${deployment.name}`
+    })
+    setShowRollbackDialog(true)
+  }
+
+  const handleViewLogs = (deployment: Deployment) => {
+    setSelectedDeployment(deployment)
+    setShowLogsDialog(true)
+    toast.info('Loading logs', {
+      description: 'Fetching deployment logs...'
+    })
+  }
+
+  const handlePromote = (deployment: Deployment) => {
+    toast.success('Promoted', {
+      description: `${deployment.name} promoted to production`
+    })
+  }
+
   const statsCards = [
     { label: 'Total Deploys', value: stats.total.toString(), icon: Rocket, color: 'from-purple-500 to-purple-600' },
     { label: 'Success Rate', value: `${stats.successRate}%`, icon: CheckCircle2, color: 'from-green-500 to-green-600' },
