@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { useChangelog, type Changelog, type ChangeType, type ReleaseStatus } from '@/lib/hooks/use-changelog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
