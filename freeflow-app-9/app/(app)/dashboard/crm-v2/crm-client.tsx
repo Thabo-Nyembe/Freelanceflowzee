@@ -23,6 +23,35 @@ import {
   List, Kanban, FolderOpen, Archive, Heart, ThumbsUp, Share2, ExternalLink
 } from 'lucide-react'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Centralized Mock Data - Investor-Ready
+import {
+  crmContacts,
+  crmCompanies,
+  crmDeals,
+  crmActivities,
+  crmReports,
+  crmAutomations,
+  crmAIInsights,
+  crmCollaborators,
+  crmPredictions,
+  crmQuickActions,
+  crmPipelineStages,
+  companyInfo,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor'
 type ContactStatus = 'active' | 'vip' | 'new' | 'qualified' | 'inactive' | 'churned'
@@ -120,66 +149,19 @@ interface Automation {
   lastRun: string
 }
 
-// Mock Data
-const mockContacts: Contact[] = [
-  { id: '1', name: 'John Smith', email: 'john@acme.com', phone: '+1 (555) 123-4567', company: 'Acme Corp', title: 'VP of Sales', type: 'customer', status: 'vip', dealValue: 125000, dealStage: 'negotiation', leadScore: 92, probability: 75, owner: 'Sarah Johnson', source: 'Referral', lastContact: '2024-01-15T10:30:00Z', nextFollowUp: '2024-01-18T14:00:00Z', tags: ['enterprise', 'priority'], emailCount: 24, callCount: 8, meetingCount: 5, createdAt: '2023-06-15T09:00:00Z', avatar: 'JS' },
-  { id: '2', name: 'Emily Davis', email: 'emily@techstart.io', phone: '+1 (555) 234-5678', company: 'TechStart', title: 'CTO', type: 'prospect', status: 'qualified', dealValue: 45000, dealStage: 'proposal', leadScore: 78, probability: 60, owner: 'Mike Chen', source: 'LinkedIn', lastContact: '2024-01-14T15:00:00Z', nextFollowUp: '2024-01-17T10:00:00Z', tags: ['startup', 'tech'], emailCount: 12, callCount: 4, meetingCount: 2, createdAt: '2023-10-20T11:00:00Z', avatar: 'ED' },
-  { id: '3', name: 'Michael Brown', email: 'michael@global.co', phone: '+1 (555) 345-6789', company: 'Global Services', title: 'Director', type: 'lead', status: 'new', dealValue: 85000, dealStage: 'prospecting', leadScore: 65, probability: 25, owner: 'Sarah Johnson', source: 'Website', lastContact: '2024-01-13T09:00:00Z', nextFollowUp: null, tags: ['consulting'], emailCount: 3, callCount: 1, meetingCount: 0, createdAt: '2024-01-10T08:00:00Z', avatar: 'MB' },
-  { id: '4', name: 'Sarah Wilson', email: 'sarah@enterprise.com', phone: '+1 (555) 456-7890', company: 'Enterprise Inc', title: 'CEO', type: 'customer', status: 'active', dealValue: 250000, dealStage: 'closed_won', leadScore: 98, probability: 100, owner: 'James Lee', source: 'Event', lastContact: '2024-01-12T11:00:00Z', nextFollowUp: '2024-02-01T09:00:00Z', tags: ['enterprise', 'renewal'], emailCount: 45, callCount: 15, meetingCount: 8, createdAt: '2022-03-01T10:00:00Z', avatar: 'SW' },
-  { id: '5', name: 'David Lee', email: 'david@innovate.co', phone: '+1 (555) 567-8901', company: 'Innovate Labs', title: 'Product Manager', type: 'prospect', status: 'active', dealValue: 35000, dealStage: 'qualification', leadScore: 72, probability: 40, owner: 'Mike Chen', source: 'Cold Outreach', lastContact: '2024-01-15T14:00:00Z', nextFollowUp: '2024-01-19T11:00:00Z', tags: ['product'], emailCount: 8, callCount: 3, meetingCount: 1, createdAt: '2023-12-01T09:00:00Z', avatar: 'DL' },
-  { id: '6', name: 'Lisa Anderson', email: 'lisa@growth.io', phone: '+1 (555) 678-9012', company: 'Growth Partners', title: 'CMO', type: 'lead', status: 'qualified', dealValue: 65000, dealStage: 'proposal', leadScore: 81, probability: 55, owner: 'Sarah Johnson', source: 'Webinar', lastContact: '2024-01-14T16:00:00Z', nextFollowUp: '2024-01-20T15:00:00Z', tags: ['marketing'], emailCount: 15, callCount: 5, meetingCount: 3, createdAt: '2023-11-15T10:00:00Z', avatar: 'LA' }
-]
-
-const mockCompanies: Company[] = [
-  { id: '1', name: 'Acme Corporation', industry: 'Technology', size: 'Enterprise', revenue: 50000000, employees: 500, contacts: 12, deals: 3, dealValue: 425000, website: 'acme.com', location: 'San Francisco, CA', status: 'active' },
-  { id: '2', name: 'TechStart Inc', industry: 'Software', size: 'Startup', revenue: 2000000, employees: 25, contacts: 4, deals: 1, dealValue: 45000, website: 'techstart.io', location: 'Austin, TX', status: 'prospect' },
-  { id: '3', name: 'Global Services Ltd', industry: 'Consulting', size: 'Mid-Market', revenue: 15000000, employees: 150, contacts: 8, deals: 2, dealValue: 210000, website: 'globalservices.co', location: 'New York, NY', status: 'active' },
-  { id: '4', name: 'Enterprise Inc', industry: 'Finance', size: 'Enterprise', revenue: 100000000, employees: 1200, contacts: 18, deals: 5, dealValue: 850000, website: 'enterprise.com', location: 'Chicago, IL', status: 'active' },
-  { id: '5', name: 'Innovate Labs', industry: 'Technology', size: 'Startup', revenue: 5000000, employees: 45, contacts: 6, deals: 2, dealValue: 75000, website: 'innovatelabs.co', location: 'Boston, MA', status: 'prospect' }
-]
-
-const mockDeals: Deal[] = [
-  { id: '1', name: 'Enterprise License Deal', company: 'Acme Corporation', contact: 'John Smith', value: 125000, stage: 'negotiation', probability: 75, expectedClose: '2024-02-15', owner: 'Sarah Johnson', createdAt: '2023-11-01', lastActivity: '2024-01-15', products: ['Enterprise Plan', 'Support Package'] },
-  { id: '2', name: 'Startup Growth Package', company: 'TechStart Inc', contact: 'Emily Davis', value: 45000, stage: 'proposal', probability: 60, expectedClose: '2024-01-30', owner: 'Mike Chen', createdAt: '2023-12-15', lastActivity: '2024-01-14', products: ['Growth Plan'] },
-  { id: '3', name: 'Consulting Partnership', company: 'Global Services Ltd', contact: 'Michael Brown', value: 85000, stage: 'prospecting', probability: 25, expectedClose: '2024-03-31', owner: 'Sarah Johnson', createdAt: '2024-01-10', lastActivity: '2024-01-13', products: ['Professional Plan', 'Training'] },
-  { id: '4', name: 'Annual Renewal', company: 'Enterprise Inc', contact: 'Sarah Wilson', value: 250000, stage: 'closed_won', probability: 100, expectedClose: '2024-01-01', owner: 'James Lee', createdAt: '2023-10-01', lastActivity: '2024-01-12', products: ['Enterprise Plan', 'Premium Support', 'Custom Integration'] },
-  { id: '5', name: 'New Product Launch', company: 'Innovate Labs', contact: 'David Lee', value: 35000, stage: 'qualification', probability: 40, expectedClose: '2024-02-28', owner: 'Mike Chen', createdAt: '2023-12-01', lastActivity: '2024-01-15', products: ['Professional Plan'] },
-  { id: '6', name: 'Marketing Suite', company: 'Growth Partners', contact: 'Lisa Anderson', value: 65000, stage: 'proposal', probability: 55, expectedClose: '2024-02-15', owner: 'Sarah Johnson', createdAt: '2023-11-15', lastActivity: '2024-01-14', products: ['Marketing Add-on', 'Analytics'] }
-]
-
-const mockActivities: CrmActivity[] = [
-  { id: '1', type: 'email', title: 'Sent proposal', description: 'Q1 2024 project proposal with pricing details', contactId: '1', contactName: 'John Smith', timestamp: '2024-01-15T10:30:00Z', completed: true, outcome: 'positive', duration: null },
-  { id: '2', type: 'call', title: 'Discovery call', description: 'Initial needs assessment and product demo', contactId: '2', contactName: 'Emily Davis', timestamp: '2024-01-14T15:00:00Z', completed: true, outcome: 'positive', duration: 45 },
-  { id: '3', type: 'meeting', title: 'Quarterly review', description: 'Q4 performance review and Q1 planning', contactId: '4', contactName: 'Sarah Wilson', timestamp: '2024-01-12T11:00:00Z', completed: true, outcome: 'positive', duration: 60 },
-  { id: '4', type: 'task', title: 'Send follow-up', description: 'Follow up on proposal sent last week', contactId: '6', contactName: 'Lisa Anderson', timestamp: '2024-01-17T10:00:00Z', completed: false, outcome: null, duration: null },
-  { id: '5', type: 'email', title: 'Introduction email', description: 'Initial outreach with company overview', contactId: '3', contactName: 'Michael Brown', timestamp: '2024-01-13T09:00:00Z', completed: true, outcome: 'neutral', duration: null },
-  { id: '6', type: 'call', title: 'Qualification call', description: 'Budget and timeline discussion', contactId: '5', contactName: 'David Lee', timestamp: '2024-01-15T14:00:00Z', completed: true, outcome: 'positive', duration: 30 }
-]
-
-const mockReports: Report[] = [
-  { id: '1', name: 'Pipeline Overview', type: 'pipeline', lastRun: '2024-01-15T08:00:00Z', frequency: 'daily', recipients: 5, status: 'active' },
-  { id: '2', name: 'Weekly Activity Summary', type: 'activity', lastRun: '2024-01-15T00:00:00Z', frequency: 'weekly', recipients: 12, status: 'active' },
-  { id: '3', name: 'Revenue Forecast', type: 'forecast', lastRun: '2024-01-01T00:00:00Z', frequency: 'monthly', recipients: 3, status: 'active' },
-  { id: '4', name: 'Conversion Analytics', type: 'conversion', lastRun: '2024-01-15T06:00:00Z', frequency: 'daily', recipients: 8, status: 'active' },
-  { id: '5', name: 'Revenue by Source', type: 'revenue', lastRun: '2024-01-01T00:00:00Z', frequency: 'monthly', recipients: 4, status: 'paused' }
-]
-
-const mockAutomations: Automation[] = [
-  { id: '1', name: 'Lead Nurture Sequence', type: 'sequence', trigger: 'New lead created', actions: 8, executions: 245, successRate: 78, status: 'active', lastRun: '2024-01-15T12:00:00Z' },
-  { id: '2', name: 'Deal Stage Notification', type: 'trigger', trigger: 'Deal stage changed', actions: 3, executions: 89, successRate: 100, status: 'active', lastRun: '2024-01-15T10:30:00Z' },
-  { id: '3', name: 'Follow-up Reminder', type: 'workflow', trigger: 'No activity for 7 days', actions: 2, executions: 156, successRate: 92, status: 'active', lastRun: '2024-01-14T09:00:00Z' },
-  { id: '4', name: 'Welcome Email', type: 'action', trigger: 'Contact added', actions: 1, executions: 432, successRate: 99, status: 'active', lastRun: '2024-01-15T11:45:00Z' },
-  { id: '5', name: 'Win/Loss Analysis', type: 'workflow', trigger: 'Deal closed', actions: 5, executions: 67, successRate: 85, status: 'paused', lastRun: '2024-01-10T16:00:00Z' }
-]
-
-const PIPELINE_STAGES: { id: DealStage; label: string; color: string }[] = [
-  { id: 'prospecting', label: 'Prospecting', color: 'sky' },
-  { id: 'qualification', label: 'Qualification', color: 'indigo' },
-  { id: 'proposal', label: 'Proposal', color: 'amber' },
-  { id: 'negotiation', label: 'Negotiation', color: 'orange' },
-  { id: 'closed_won', label: 'Closed Won', color: 'emerald' },
-  { id: 'closed_lost', label: 'Closed Lost', color: 'red' }
-]
+// Use centralized mock data - mapped to local variable names for compatibility
+const mockContacts = crmContacts as Contact[]
+const mockCompanies = crmCompanies as Company[]
+const mockDeals = crmDeals as Deal[]
+const mockActivities = crmActivities as CrmActivity[]
+const mockReports = crmReports as Report[]
+const mockAutomations = crmAutomations as Automation[]
+const PIPELINE_STAGES = crmPipelineStages as { id: DealStage; label: string; color: string }[]
+const mockAIInsights = crmAIInsights
+const mockCrmCollaborators = crmCollaborators
+const mockCrmPredictions = crmPredictions
+const mockCrmActivitiesFeed = crmActivities
+const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
   const [contacts] = useState<Contact[]>(mockContacts)
@@ -340,6 +322,11 @@ export default function CrmClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Collaboration Indicator */}
+            <CollaborationIndicator
+              collaborators={mockCrmCollaborators}
+              maxVisible={3}
+            />
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
@@ -1799,6 +1786,27 @@ export default function CrmClient() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* AI-Powered CRM Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <AIInsightsPanel
+            insights={mockAIInsights}
+            onAskQuestion={(q) => console.log('CRM Question:', q)}
+          />
+          <PredictiveAnalytics predictions={mockCrmPredictions} />
+        </div>
+
+        {/* Activity Feed */}
+        <div className="mt-6">
+          <ActivityFeed
+            activities={mockCrmActivitiesFeed}
+            maxItems={5}
+            showFilters={true}
+          />
+        </div>
+
+        {/* Quick Actions Toolbar */}
+        <QuickActionsToolbar actions={mockCrmQuickActions} />
       </div>
     </div>
   )

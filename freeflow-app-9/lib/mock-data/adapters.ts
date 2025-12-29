@@ -213,17 +213,15 @@ export const crmCompanies = TOP_COMPANIES
 
 export const crmDeals = DEALS
 
+export const crmCollaborators = COLLABORATORS.slice(0, 4)
+
 export const crmActivities = RECENT_ACTIVITIES.slice(0, 6).map(a => ({
   id: a.id,
-  type: a.type === 'payment' ? 'email' : a.type === 'milestone' ? 'meeting' : 'call',
+  type: a.type,
   title: a.title,
   description: a.description,
-  contactId: a.target?.id || '',
-  contactName: a.user.name,
-  timestamp: a.timestamp,
-  completed: true,
-  outcome: 'positive',
-  duration: 30
+  user: { id: a.user.id || a.id, name: a.user.name, avatar: a.user.avatar },
+  timestamp: a.timestamp
 }))
 
 export const crmReports = [
@@ -240,12 +238,10 @@ export const crmAutomations = [
 
 export const crmAIInsights = AI_INSIGHTS.crm
 
-export const crmCollaborators = COLLABORATORS
-
 export const crmPredictions = [
-  { id: '1', metric: 'Q1 Revenue', currentValue: 250000, predictedValue: 425000, confidence: 0.82, trend: 'up' as const, timeframe: 'End of Q1', factors: ['Strong pipeline', 'Enterprise deals', 'Renewals'] },
-  { id: '2', metric: 'Win Rate', currentValue: 42, predictedValue: 50, confidence: 0.75, trend: 'up' as const, timeframe: 'Next 60 days', factors: ['Better qualification', 'New demo flow'] },
-  { id: '3', metric: 'Avg Deal Size', currentValue: 24500, predictedValue: 30000, confidence: 0.79, trend: 'up' as const, timeframe: 'Next quarter', factors: ['Upselling', 'Enterprise focus'] },
+  { id: '1', label: 'Q1 Revenue', currentValue: 250000, predictedValue: 425000, confidence: 82, trend: 'up' as const, timeframe: 'End of Q1', factors: [{ name: 'Strong pipeline', impact: 'positive' as const, weight: 0.4 }, { name: 'Enterprise deals', impact: 'positive' as const, weight: 0.35 }, { name: 'Renewals', impact: 'positive' as const, weight: 0.25 }] },
+  { id: '2', label: 'Win Rate', currentValue: 42, predictedValue: 50, confidence: 75, trend: 'up' as const, timeframe: 'Next 60 days', factors: [{ name: 'Better qualification', impact: 'positive' as const, weight: 0.5 }, { name: 'New demo flow', impact: 'positive' as const, weight: 0.5 }] },
+  { id: '3', label: 'Avg Deal Size', currentValue: 24500, predictedValue: 30000, confidence: 79, trend: 'up' as const, timeframe: 'Next quarter', factors: [{ name: 'Upselling', impact: 'positive' as const, weight: 0.6 }, { name: 'Enterprise focus', impact: 'positive' as const, weight: 0.4 }] },
 ]
 
 export const crmQuickActions = QUICK_ACTIONS.crm.map(qa => ({
