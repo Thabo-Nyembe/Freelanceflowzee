@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { useWebhooks, useWebhookEventTypes, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
 import {
   Webhook as WebhookIcon,

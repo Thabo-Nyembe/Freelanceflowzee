@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import {
   Layout, Square, Circle, Triangle, Minus, Type, Image, StickyNote,
