@@ -23,6 +23,27 @@ import {
   StopCircle, CheckCircle, Package, Shield, Rocket, Target, Lightbulb
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  automationsAIInsights,
+  automationsCollaborators,
+  automationsPredictions,
+  automationsActivities,
+  automationsQuickActions
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Zapier/Make Level Automation Platform
 // ============================================================================
@@ -278,6 +299,39 @@ const formatDuration = (seconds: number): string => {
   const secs = seconds % 60
   return `${mins}m ${secs.toFixed(0)}s`
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// ============================================================================
+
+const mockAutomationsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Automation Health', description: 'All 24 active workflows running smoothly. 99.8% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'Optimization Opportunity', description: '3 workflows can be combined for 40% faster execution.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '3', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Gmail API approaching daily limit. Consider scheduling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Limits' },
+]
+
+const mockAutomationsCollaborators = [
+  { id: '1', name: 'Automation Engineer', avatar: '/avatars/auto.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Integration Specialist', avatar: '/avatars/int.jpg', status: 'away' as const, role: 'Specialist' },
+]
+
+const mockAutomationsPredictions = [
+  { id: '1', title: 'Execution Forecast', prediction: 'Peak automation usage expected Tuesday 9-11 AM', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cost Savings', prediction: 'Current automations saving 120 hours/month', confidence: 95, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAutomationsActivities = [
+  { id: '1', user: 'System', action: 'Executed', target: 'Email sync workflow 150 times', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'DevOps', action: 'Created', target: 'new Slack notification workflow', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Engineer', action: 'Updated', target: 'CRM data sync schedule', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockAutomationsQuickActions = [
+  { id: '1', label: 'New Workflow', icon: 'plus', action: () => console.log('New workflow'), variant: 'default' as const },
+  { id: '2', label: 'Run All', icon: 'play', action: () => console.log('Run all'), variant: 'default' as const },
+  { id: '3', label: 'Export Logs', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1868,6 +1922,39 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAutomationsAIInsights}
+              title="Automation Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAutomationsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAutomationsPredictions}
+              title="Automation Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAutomationsActivities}
+            title="Automation Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAutomationsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Workflow Detail Modal */}
         {selectedWorkflow && (

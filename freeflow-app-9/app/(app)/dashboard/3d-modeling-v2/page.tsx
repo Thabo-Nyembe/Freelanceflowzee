@@ -1,6 +1,6 @@
-import ThreeDModelingClient from './3d-modeling-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import ThreeDModelingClient from './3d-modeling-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

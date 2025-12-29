@@ -20,6 +20,27 @@ import {
   Webhook, Key, History, RefreshCw, UserCog, ShieldCheck, FileKey,
   Trash2, HardDrive, AlertTriangle
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  profileAIInsights,
+  profileCollaborators,
+  profilePredictions,
+  profileActivities,
+  profileQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -559,6 +580,36 @@ const formatTimeAgo = (date: string) => {
   if (diffDays < 7) return `${diffDays}d ago`
   return formatDate(date)
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockProfileAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Profile Strength', description: 'Profile 95% complete. Top 10% in your industry.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Profile' },
+  { id: '2', type: 'info' as const, title: 'Skill Suggestion', description: 'Adding React.js would increase profile visibility 25%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Skills' },
+  { id: '3', type: 'warning' as const, title: 'Update Needed', description: 'Work experience not updated in 6 months.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+]
+
+const mockProfileCollaborators = [
+  { id: '1', name: 'HR Manager', avatar: '/avatars/hr.jpg', status: 'online' as const, role: 'HR' },
+  { id: '2', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Mentor', avatar: '/avatars/mentor.jpg', status: 'away' as const, role: 'Mentor' },
+]
+
+const mockProfilePredictions = [
+  { id: '1', title: 'Career Growth', prediction: 'On track for senior role within 6 months', confidence: 78, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Skill Demand', prediction: 'Your top skills growing 30% in job market', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockProfileActivities = [
+  { id: '1', user: 'You', action: 'Updated', target: 'profile headline', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'System', action: 'Verified', target: 'email address', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'HR', action: 'Viewed', target: 'your profile', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockProfileQuickActions = [
+  { id: '1', label: 'Edit Profile', icon: 'edit', action: () => console.log('Edit'), variant: 'default' as const },
+  { id: '2', label: 'Add Skill', icon: 'plus', action: () => console.log('Add skill'), variant: 'default' as const },
+  { id: '3', label: 'Download CV', icon: 'download', action: () => console.log('Download'), variant: 'outline' as const },
+]
 
 export default function ProfileClient() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -2120,6 +2171,39 @@ export default function ProfileClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockProfileAIInsights}
+                title="Profile Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockProfileCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockProfilePredictions}
+                title="Career Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockProfileActivities}
+              title="Profile Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockProfileQuickActions}
+              variant="grid"
+            />
+          </div>
 
           {/* Analytics Dialog */}
           <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>

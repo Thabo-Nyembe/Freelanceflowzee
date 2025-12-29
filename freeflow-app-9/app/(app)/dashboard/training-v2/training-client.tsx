@@ -96,6 +96,26 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  trainingAIInsights,
+  trainingCollaborators,
+  trainingPredictions,
+  trainingActivities,
+  trainingQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type CourseStatus = 'draft' | 'published' | 'archived'
 type EnrollmentStatus = 'not_started' | 'in_progress' | 'completed' | 'overdue'
@@ -1872,6 +1892,39 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={trainingAIInsights}
+              title="Training Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={trainingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={trainingPredictions}
+              title="Learning Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={trainingActivities}
+            title="Training Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={trainingQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Course Detail Dialog */}
         <Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>

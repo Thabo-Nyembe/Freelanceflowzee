@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import GalleryClient from './gallery-client'
 
 export default function Page() {

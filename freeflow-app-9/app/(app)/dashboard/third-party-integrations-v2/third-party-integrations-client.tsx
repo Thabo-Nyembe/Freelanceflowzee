@@ -77,6 +77,18 @@ import {
   Info,
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type IntegrationStatus = 'connected' | 'disconnected' | 'error' | 'pending' | 'rate_limited'
 type IntegrationCategory = 'crm' | 'marketing' | 'payment' | 'storage' | 'communication' | 'analytics' | 'ecommerce' | 'productivity'
@@ -313,6 +325,36 @@ const mockLogs: ExecutionLog[] = [
 ]
 
 const categories = ['All', 'CRM', 'Marketing', 'Payment', 'Storage', 'Communication', 'Analytics', 'E-commerce', 'Productivity']
+
+// Enhanced Competitive Upgrade Mock Data
+const mockIntegrationsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'All Systems Operational', description: '12 of 12 integrations running with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Rate Limit Warning', description: 'Salesforce API approaching 80% of daily quota.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'API' },
+  { id: '3', type: 'info' as const, title: 'New Integration Available', description: 'HubSpot v3 API now supported with enhanced features.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+]
+
+const mockIntegrationsCollaborators = [
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/int.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'API Developer', avatar: '/avatars/api.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'Support Engineer', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockIntegrationsPredictions = [
+  { id: '1', title: 'API Usage Trend', prediction: 'Stripe API calls expected to increase 25% next week', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'Sync Performance', prediction: 'Data sync times will improve with new batching', confidence: 88, trend: 'down' as const, impact: 'low' as const },
+]
+
+const mockIntegrationsActivities = [
+  { id: '1', user: 'Integration Lead', action: 'Connected', target: 'new Stripe webhook endpoint', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'API Developer', action: 'Updated', target: 'Salesforce OAuth credentials', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Synced', target: '2,450 records from HubSpot', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockIntegrationsQuickActions = [
+  { id: '1', label: 'Add Integration', icon: 'plus', action: () => console.log('Add integration'), variant: 'default' as const },
+  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => console.log('Test connection'), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
+]
 
 export default function ThirdPartyIntegrationsClient() {
   const [apps] = useState<IntegrationApp[]>(mockApps)
@@ -1603,6 +1645,39 @@ export default function ThirdPartyIntegrationsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockIntegrationsAIInsights}
+              title="Integration Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockIntegrationsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockIntegrationsPredictions}
+              title="Integration Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockIntegrationsActivities}
+            title="Integration Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockIntegrationsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Zap Detail Dialog */}

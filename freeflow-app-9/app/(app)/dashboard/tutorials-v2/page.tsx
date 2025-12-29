@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import TutorialsClient from './tutorials-client'
 
 export default function Page() {

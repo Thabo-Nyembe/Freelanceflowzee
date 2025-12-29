@@ -32,6 +32,19 @@ import {
   Network, Shuffle, SlidersHorizontal, Gauge, Target, Crosshair,
   Bell, Shield, HardDrive, Server, Sliders, AlertOctagon, CreditCard, Archive
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // ============== N8N-LEVEL WORKFLOW INTERFACES ==============
@@ -466,6 +479,36 @@ const getDifficultyColor = (difficulty: string): string => {
 }
 
 // ============== MAIN COMPONENT ==============
+
+// Competitive Upgrade Mock Data - n8n/Zapier Level Workflow Intelligence
+const mockWorkflowAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Automation Savings', description: 'Workflows saved 124 hours of manual work this month—$6,200 value!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'ROI' },
+  { id: '2', type: 'warning' as const, title: 'Error Rate Spike', description: 'Salesforce → Slack workflow failing 15% of executions. Check API limits.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Merging 4 similar email workflows could reduce complexity by 60%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockWorkflowCollaborators = [
+  { id: '1', name: 'Automation Lead', avatar: '/avatars/automation.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Integration Eng', avatar: '/avatars/engineer.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '3', name: 'Ops Manager', avatar: '/avatars/ops.jpg', status: 'away' as const, role: 'Operations' },
+]
+
+const mockWorkflowPredictions = [
+  { id: '1', title: 'Execution Volume', prediction: 'Monthly workflow executions projected to hit 50K (+35% MoM)', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Error Reduction', prediction: 'New retry logic expected to reduce failures by 40%', confidence: 81, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockWorkflowActivities = [
+  { id: '1', user: 'Automation Lead', action: 'Deployed', target: 'Customer onboarding automation', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Integration Eng', action: 'Fixed', target: 'HubSpot webhook connection', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Executed', target: '2,340 workflow runs today', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockWorkflowQuickActions = [
+  { id: '1', label: 'New Flow', icon: 'plus', action: () => console.log('New Workflow'), variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', action: () => console.log('Test'), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: () => console.log('Logs'), variant: 'outline' as const },
+]
 
 export default function WorkflowBuilderClient() {
   const [activeTab, setActiveTab] = useState('workflows')
@@ -1779,6 +1822,39 @@ export default function WorkflowBuilderClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockWorkflowAIInsights}
+              title="Workflow Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockWorkflowCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockWorkflowPredictions}
+              title="Workflow Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockWorkflowActivities}
+            title="Workflow Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockWorkflowQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* New Workflow Dialog */}

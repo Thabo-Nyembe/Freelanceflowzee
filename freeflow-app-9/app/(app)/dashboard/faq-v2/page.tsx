@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import FAQClient from './faq-client'
 
 export default function Page() {

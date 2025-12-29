@@ -72,6 +72,26 @@ import {
   Unlock
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  videoStudioAIInsights,
+  videoStudioCollaborators,
+  videoStudioPredictions,
+  videoStudioActivities,
+  videoStudioQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type ProjectStatus = 'draft' | 'editing' | 'rendering' | 'ready' | 'published' | 'archived'
 type AssetType = 'video' | 'audio' | 'image' | 'graphic' | 'title' | 'transition'
@@ -305,6 +325,36 @@ const mockEffects: Effect[] = [
   { id: '4', name: 'Lens Distortion', category: 'distort', intensity: 25, enabled: false, parameters: { curvature: 10 } },
   { id: '5', name: 'Cross Dissolve', category: 'transition', intensity: 100, enabled: true, parameters: { duration: 1 } },
   { id: '6', name: 'Audio Fade', category: 'audio', intensity: 80, enabled: true, parameters: { fadeIn: 0.5, fadeOut: 1 } }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockVideoStudioAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Render Complete', description: '4K export finished in record time. GPU optimization working well.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Rendering' },
+  { id: '2', type: 'info' as const, title: 'AI Enhancement', description: 'Auto color grading improved viewer retention by 18%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI' },
+  { id: '3', type: 'warning' as const, title: 'Storage Alert', description: 'Project storage at 85%. Archive old projects recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+]
+
+const mockVideoStudioCollaborators = [
+  { id: '1', name: 'Video Editor', avatar: '/avatars/editor.jpg', status: 'online' as const, role: 'Editor' },
+  { id: '2', name: 'Colorist', avatar: '/avatars/colorist.jpg', status: 'online' as const, role: 'Colorist' },
+  { id: '3', name: 'Sound Designer', avatar: '/avatars/sound.jpg', status: 'busy' as const, role: 'Audio' },
+]
+
+const mockVideoStudioPredictions = [
+  { id: '1', title: 'Render Queue', prediction: 'All renders complete by 3 PM', confidence: 92, trend: 'stable' as const, impact: 'high' as const },
+  { id: '2', title: 'Project Deadline', prediction: 'Current project on track for Friday', confidence: 85, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockVideoStudioActivities = [
+  { id: '1', user: 'Render Engine', action: 'Completed render', target: 'Brand Video Final Cut', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'AI Assistant', action: 'Auto-enhanced', target: 'Audio levels in Scene 3', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Editor', action: 'Saved version', target: 'v4.2 with new intro', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockVideoStudioQuickActions = [
+  { id: '1', label: 'New Project', icon: 'plus', action: () => console.log('New project'), variant: 'default' as const },
+  { id: '2', label: 'Export Video', icon: 'download', action: () => console.log('Export'), variant: 'default' as const },
+  { id: '3', label: 'Templates', icon: 'layout', action: () => console.log('Templates'), variant: 'outline' as const },
 ]
 
 export default function VideoStudioClient() {
@@ -1681,6 +1731,39 @@ export default function VideoStudioClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockVideoStudioAIInsights}
+              title="Studio Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockVideoStudioCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockVideoStudioPredictions}
+              title="Production Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockVideoStudioActivities}
+            title="Studio Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockVideoStudioQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Project Detail Dialog */}
         <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>

@@ -69,6 +69,27 @@ import {
   GraduationCap,
   BookOpen,
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  customerSuccessAIInsights,
+  customerSuccessCollaborators,
+  customerSuccessPredictions,
+  customerSuccessActivities,
+  customerSuccessQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
 
@@ -410,6 +431,36 @@ const mockPlaybooks: Playbook[] = [
     successRate: 45,
     activeAccounts: 15
   }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockCSAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Customer Health', description: '87% of accounts in healthy status. NPS score: 72.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Churn Risk', description: '3 enterprise accounts showing declining engagement.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Churn' },
+  { id: '3', type: 'info' as const, title: 'Expansion Opportunity', description: '8 accounts ready for upsell conversation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Growth' },
+]
+
+const mockCSCollaborators = [
+  { id: '1', name: 'CS Manager', avatar: '/avatars/csm.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Account Exec', avatar: '/avatars/ae.jpg', status: 'online' as const, role: 'AE' },
+  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockCSPredictions = [
+  { id: '1', title: 'Renewal Forecast', prediction: '95% renewal rate expected this quarter', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Support Volume', prediction: 'Ticket volume expected to decrease 15% with new onboarding', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockCSActivities = [
+  { id: '1', user: 'CS Manager', action: 'Completed', target: 'QBR with Acme Corp', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Account Exec', action: 'Scheduled', target: 'expansion call with TechStart', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Detected', target: 'usage spike at GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockCSQuickActions = [
+  { id: '1', label: 'New Playbook', icon: 'plus', action: () => console.log('New playbook'), variant: 'default' as const },
+  { id: '2', label: 'Health Report', icon: 'activity', action: () => console.log('Health'), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
 export default function CustomerSuccessClient() {
@@ -1528,6 +1579,39 @@ export default function CustomerSuccessClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCSAIInsights}
+              title="Customer Success Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCSCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCSPredictions}
+              title="Success Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCSActivities}
+            title="Customer Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCSQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Customer Detail Dialog */}

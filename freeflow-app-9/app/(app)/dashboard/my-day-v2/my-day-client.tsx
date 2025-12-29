@@ -64,6 +64,18 @@ import {
   Layers
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type TaskPriority = 'p1' | 'p2' | 'p3' | 'p4'
 type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
@@ -531,6 +543,36 @@ interface MyDayClientProps {
   initialTasks?: Task[]
   initialSessions?: FocusSession[]
 }
+
+// Competitive Upgrade Mock Data - Sunsama/Todoist-level Daily Planning Intelligence
+const mockMyDayAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Productivity Score', description: 'Task completion rate at 92% today - excellent!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
+  { id: '2', type: 'warning' as const, title: 'Overcommitted', description: 'Today has 12 hours of tasks - consider delegating.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Planning' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Schedule deep work tasks in your 9-11am peak focus window.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockMyDayCollaborators = [
+  { id: '1', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
+  { id: '3', name: 'Designer', avatar: '/avatars/designer.jpg', status: 'away' as const, role: 'Designer' },
+]
+
+const mockMyDayPredictions = [
+  { id: '1', title: 'Daily Completion', prediction: 'You will complete 8 of 10 tasks by 6pm', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Focus Time', prediction: 'Blocking 2 hours will increase productivity by 40%', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockMyDayActivities = [
+  { id: '1', user: 'You', action: 'Completed', target: 'Q4 planning doc', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Team Lead', action: 'Assigned', target: 'design review task', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'You', action: 'Started', target: 'focus session (2 hrs)', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockMyDayQuickActions = [
+  { id: '1', label: 'Add Task', icon: 'plus', action: () => console.log('Add task'), variant: 'default' as const },
+  { id: '2', label: 'Focus', icon: 'target', action: () => console.log('Focus'), variant: 'default' as const },
+  { id: '3', label: 'Review', icon: 'check', action: () => console.log('Review'), variant: 'outline' as const },
+]
 
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {
   const [activeTab, setActiveTab] = useState('today')
@@ -1654,6 +1696,39 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMyDayAIInsights}
+              title="Daily Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMyDayCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMyDayPredictions}
+              title="Productivity Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMyDayActivities}
+            title="Today's Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMyDayQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Task Detail Dialog */}
         <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>

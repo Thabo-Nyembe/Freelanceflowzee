@@ -1,6 +1,6 @@
-import SupportClient from './support-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import SupportClient from './support-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

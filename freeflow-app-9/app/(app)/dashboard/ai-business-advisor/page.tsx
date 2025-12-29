@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, AlertCircle } from 'lucide-react'

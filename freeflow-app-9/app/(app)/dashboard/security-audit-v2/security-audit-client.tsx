@@ -69,6 +69,18 @@ import {
   Copy
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type AuditStatus = 'passed' | 'failed' | 'warning' | 'in-progress' | 'scheduled' | 'cancelled'
 type AuditType = 'vulnerability-scan' | 'compliance' | 'penetration-test' | 'web-app-scan' | 'cloud-security' | 'container-scan'
@@ -366,6 +378,38 @@ const complianceFrameworks = [
   { id: 'HIPAA', name: 'HIPAA', score: 78, controls: 54, passed: 42, icon: FileCheck },
   { id: 'PCI-DSS', name: 'PCI-DSS', score: 85, controls: 78, passed: 66, icon: CreditCard },
   { id: 'NIST', name: 'NIST CSF', score: 81, controls: 98, passed: 79, icon: Building2 }
+]
+
+// Enhanced Competitive Upgrade Mock Data - Security Audit Context
+const mockSecurityAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Critical Vulnerabilities', description: '3 critical CVEs detected in production. Immediate patching recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Vulnerabilities' },
+  { id: '2', type: 'success' as const, title: 'Compliance Improved', description: 'SOC 2 compliance score increased to 94%. Great progress!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '3', type: 'info' as const, title: 'Scan Scheduled', description: 'Weekly vulnerability scan scheduled for Sunday 2 AM UTC.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Scans' },
+]
+
+const mockSecurityCollaborators = [
+  { id: '1', name: 'Alex Security', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Security Lead', lastActive: 'Now' },
+  { id: '2', name: 'Jordan Dev', avatar: '/avatars/jordan.jpg', status: 'online' as const, role: 'DevSecOps', lastActive: '5m ago' },
+  { id: '3', name: 'Sam Analyst', avatar: '/avatars/sam.jpg', status: 'away' as const, role: 'SOC Analyst', lastActive: '20m ago' },
+]
+
+const mockSecurityPredictions = [
+  { id: '1', label: 'Security Score', current: 87, target: 95, predicted: 91, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Vulnerabilities', current: 12, target: 5, predicted: 8, confidence: 75, trend: 'down' as const },
+  { id: '3', label: 'Compliance Rate', current: 89, target: 98, predicted: 94, confidence: 80, trend: 'up' as const },
+]
+
+const mockSecurityActivities = [
+  { id: '1', user: 'Alex Security', action: 'completed', target: 'penetration test', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'Jordan Dev', action: 'patched', target: 'CVE-2024-1234', timestamp: '30m ago', type: 'success' as const },
+  { id: '3', user: 'Sam Analyst', action: 'flagged', target: 'suspicious login attempt', timestamp: '1h ago', type: 'warning' as const },
+]
+
+const mockSecurityQuickActions = [
+  { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S', action: () => console.log('Run scan') },
+  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A', action: () => console.log('View alerts') },
+  { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R', action: () => console.log('Compliance report') },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => console.log('Settings') },
 ]
 
 export default function SecurityAuditClient() {
@@ -1662,6 +1706,39 @@ export default function SecurityAuditClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSecurityAIInsights}
+              title="Security Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSecurityCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSecurityPredictions}
+              title="Security Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSecurityActivities}
+            title="Security Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSecurityQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Vulnerability Detail Dialog */}
         <Dialog open={!!selectedVulnerability} onOpenChange={() => setSelectedVulnerability(null)}>

@@ -32,6 +32,29 @@ import {
   Webhook, Key, Shield, HardDrive, AlertOctagon, Bell, CreditCard
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  salesAIInsights,
+  salesCollaborators,
+  salesPredictions,
+  salesActivities,
+  salesQuickActions,
+} from '@/lib/mock-data/adapters'
+
+import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
+import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
 // Salesforce Sales Cloud level types
 type DealStage = 'prospecting' | 'qualification' | 'needs_analysis' | 'value_proposition' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
 type DealType = 'new_business' | 'existing_business' | 'renewal' | 'upsell' | 'cross_sell'
@@ -327,6 +350,40 @@ const getLeadScoreColor = (score: number): string => {
   if (score >= 60) return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400'
   return 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400'
 }
+
+// Enhanced Competitive Upgrade Mock Data - Sales Context
+const mockSalesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High-Value Deal Alert', description: 'Enterprise Corp deal is 90% likely to close this week. Recommended: Schedule final call.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deals' },
+  { id: '2', type: 'warning' as const, title: 'Follow-up Required', description: '5 opportunities have no activity in 7+ days. Consider re-engaging.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pipeline' },
+  { id: '3', type: 'info' as const, title: 'Best Performing Rep', description: 'Sarah J. has 40% higher conversion rate this quarter. Review her techniques.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+]
+
+const mockSalesCollaborators = [
+  { id: '1', name: 'Sarah Johnson', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Sales Manager', lastActive: 'Now' },
+  { id: '2', name: 'Mike Chen', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Account Executive', lastActive: '2m ago' },
+  { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', status: 'away' as const, role: 'SDR', lastActive: '15m ago' },
+  { id: '4', name: 'James Wilson', avatar: '/avatars/james.jpg', status: 'offline' as const, role: 'Sales Rep', lastActive: '1h ago' },
+]
+
+const mockSalesPredictions = [
+  { id: '1', label: 'Q1 Revenue Target', current: 850000, target: 1000000, predicted: 920000, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Deal Conversion Rate', current: 28, target: 35, predicted: 32, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Pipeline Growth', current: 2400000, target: 3000000, predicted: 2750000, confidence: 72, trend: 'up' as const },
+]
+
+const mockSalesActivities = [
+  { id: '1', user: 'Sarah Johnson', action: 'closed', target: 'Enterprise Corp deal', timestamp: '5m ago', type: 'success' as const },
+  { id: '2', user: 'Mike Chen', action: 'moved', target: 'TechStart Inc to negotiation', timestamp: '15m ago', type: 'info' as const },
+  { id: '3', user: 'Emily Davis', action: 'scheduled', target: 'demo with GlobalTech', timestamp: '30m ago', type: 'info' as const },
+  { id: '4', user: 'James Wilson', action: 'added', target: '3 new leads from event', timestamp: '1h ago', type: 'success' as const },
+]
+
+const mockSalesQuickActions = [
+  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => console.log('Log call') },
+  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => console.log('Send email') },
+  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => console.log('Schedule meeting') },
+  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => console.log('Create task') },
+]
 
 export default function SalesClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1661,6 +1718,43 @@ export default function SalesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          {/* AI Insights Panel */}
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSalesAIInsights}
+              title="Sales Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+
+          {/* Team Collaboration & Activity */}
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSalesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSalesPredictions}
+              title="Sales Forecasts"
+            />
+          </div>
+        </div>
+
+        {/* Activity Feed & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSalesActivities}
+            title="Sales Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSalesQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Opportunity Detail Dialog */}

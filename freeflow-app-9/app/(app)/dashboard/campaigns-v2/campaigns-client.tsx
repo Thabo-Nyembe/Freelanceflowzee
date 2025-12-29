@@ -32,6 +32,19 @@ import {
   Trash2 as TrashIcon, Bell, Server, Code, Folder, FileCode
 } from 'lucide-react'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============== MAILCHIMP-LEVEL INTERFACES ==============
 
 type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'running' | 'paused' | 'completed' | 'archived'
@@ -561,6 +574,39 @@ const formatNumber = (num: number): string => {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
   return num.toString()
 }
+
+// ============== COMPETITIVE UPGRADE MOCK DATA ==============
+
+const mockCampaignAIInsights = [
+  { id: '1', query: "Which campaign is performing best?", insight: "Summer Sale campaign has 34% open rate - 12% above average. Subject line A/B test winner: urgency-based messaging.", confidence: 0.93, category: 'engagement' as const, timestamp: new Date().toISOString() },
+  { id: '2', query: "When should I send the next campaign?", insight: "Your audience is most active Tuesdays 10-11am EST. Avoid Mondays - 23% lower open rates.", confidence: 0.88, category: 'conversion' as const, timestamp: new Date().toISOString() },
+  { id: '3', query: "How to reduce unsubscribes?", insight: "Segment 'Inactive 90 days' has 5x higher unsubscribe rate. Consider a re-engagement campaign first.", confidence: 0.85, category: 'revenue' as const, timestamp: new Date().toISOString() },
+]
+
+const mockCampaignCollaborators = [
+  { id: '1', name: 'Marketing Team', avatar: '/avatars/marketing.jpg', status: 'active' as const, lastActive: 'Just now', role: 'Marketing' },
+  { id: '2', name: 'Content Writer', avatar: '/avatars/content.jpg', status: 'active' as const, lastActive: '5m ago', role: 'Content' },
+  { id: '3', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'idle' as const, lastActive: '15m ago', role: 'Design' },
+]
+
+const mockCampaignPredictions = [
+  { id: '1', metric: 'Open Rate', currentValue: 24.5, predictedValue: 28, confidence: 0.81, trend: 'up' as const, timeframe: 'Next campaign', factors: ['Subject line optimization', 'Send time optimization'] },
+  { id: '2', metric: 'Click Rate', currentValue: 3.2, predictedValue: 4.1, confidence: 0.77, trend: 'up' as const, timeframe: 'Next campaign', factors: ['Better CTAs', 'Personalization'] },
+  { id: '3', metric: 'Revenue per Email', currentValue: 0.42, predictedValue: 0.58, confidence: 0.74, trend: 'up' as const, timeframe: 'Q1', factors: ['Product recommendations', 'Cart abandonment flows'] },
+]
+
+const mockCampaignActivities = [
+  { id: '1', type: 'create' as const, title: 'Campaign scheduled', description: 'Spring Newsletter set for March 1st 10am', user: { name: 'Marketing Team', avatar: '/avatars/marketing.jpg' }, timestamp: new Date().toISOString(), metadata: {} },
+  { id: '2', type: 'update' as const, title: 'A/B test completed', description: 'Subject line B won with 28% open rate', user: { name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
+  { id: '3', type: 'milestone' as const, title: 'Subscriber milestone', description: 'Email list reached 50,000 subscribers', user: { name: 'Marketing Team', avatar: '/avatars/marketing.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
+]
+
+const mockCampaignQuickActions = [
+  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => console.log('New campaign') },
+  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => console.log('Send test') },
+  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => console.log('Analytics') },
+  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => console.log('Audience') },
+]
 
 // ============== MAIN COMPONENT ==============
 
@@ -2073,6 +2119,27 @@ export default function CampaignsClient() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* AI-Powered Campaign Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <AIInsightsPanel
+          insights={mockCampaignAIInsights}
+          onAskQuestion={(q) => console.log('Campaign Question:', q)}
+        />
+        <PredictiveAnalytics predictions={mockCampaignPredictions} />
+      </div>
+
+      {/* Activity Feed */}
+      <div className="mt-6">
+        <ActivityFeed
+          activities={mockCampaignActivities}
+          maxItems={5}
+          showFilters={true}
+        />
+      </div>
+
+      {/* Quick Actions Toolbar */}
+      <QuickActionsToolbar actions={mockCampaignQuickActions} />
     </div>
   )
 }

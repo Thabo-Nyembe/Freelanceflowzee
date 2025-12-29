@@ -22,6 +22,18 @@ import {
   Upload, AlertOctagon
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Type definitions
 interface ComponentDoc {
   id: string
@@ -322,6 +334,38 @@ const mockChangelog: ChangelogEntry[] = [
     { type: 'changed', description: 'New design token system' },
     { type: 'changed', description: 'Updated prop APIs (breaking)' }
   ]}
+]
+
+// Enhanced Component Library Mock Data
+const mockComponentLibAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Component Usage', description: 'Button and Card components used in 89% of pages. Well-designed system!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '2', type: 'info' as const, title: 'New Components', description: '5 new components added this month. Documentation 100% complete.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+  { id: '3', type: 'warning' as const, title: 'Deprecated', description: '3 components marked deprecated. Migration guide available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
+]
+
+const mockComponentLibCollaborators = [
+  { id: '1', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Design System', lastActive: 'Now' },
+  { id: '2', name: 'Frontend Dev', avatar: '/avatars/frontend.jpg', status: 'online' as const, role: 'Development', lastActive: '3m ago' },
+  { id: '3', name: 'UX Writer', avatar: '/avatars/ux.jpg', status: 'away' as const, role: 'Documentation', lastActive: '20m ago' },
+]
+
+const mockComponentLibPredictions = [
+  { id: '1', label: 'Components', current: 87, target: 100, predicted: 95, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Coverage', current: 94, target: 100, predicted: 98, confidence: 82, trend: 'up' as const },
+  { id: '3', label: 'Adoption', current: 78, target: 90, predicted: 85, confidence: 78, trend: 'up' as const },
+]
+
+const mockComponentLibActivities = [
+  { id: '1', user: 'Design Lead', action: 'published', target: 'new DatePicker component', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'Frontend Dev', action: 'updated', target: 'Button accessibility', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'UX Writer', action: 'added', target: 'usage guidelines for Modal', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockComponentLibQuickActions = [
+  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => console.log('New component') },
+  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => console.log('Browse') },
+  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => console.log('Playground') },
+  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => console.log('Docs') },
 ]
 
 export default function ComponentLibraryClient() {
@@ -1705,6 +1749,39 @@ export default function App() {
             </Tabs>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockComponentLibAIInsights}
+              title="Component Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockComponentLibCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockComponentLibPredictions}
+              title="Library Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockComponentLibActivities}
+            title="Library Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockComponentLibQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Component Detail Dialog */}
         {selectedComponent && (

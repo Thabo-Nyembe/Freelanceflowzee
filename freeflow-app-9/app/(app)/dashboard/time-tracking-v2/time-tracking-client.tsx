@@ -21,6 +21,19 @@ import {
   Key, Webhook, AlertOctagon, Sliders, Network, HardDrive, Cpu, Globe, CreditCard, Archive, Trash2 as TrashIcon,
   Printer, Copy, Repeat, RefreshCcw
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { CardDescription } from '@/components/ui/card'
 
 // Types
@@ -258,6 +271,36 @@ const mockIntegrations: Integration[] = [
 const mockWorkspaces: Workspace[] = [
   { id: '1', name: 'Main Workspace', slug: 'main', members: 12, projects: 8, totalHours: 4560, plan: 'premium', createdAt: '2023-01-01' },
   { id: '2', name: 'Design Team', slug: 'design', members: 4, projects: 3, totalHours: 1200, plan: 'starter', createdAt: '2023-03-15' }
+]
+
+// Competitive Upgrade Mock Data - Toggl/Harvest Level Time Tracking Intelligence
+const mockTimeTrackingAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Productivity Peak', description: 'Team logged 156 billable hours this week—highest this quarter!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
+  { id: '2', type: 'warning' as const, title: 'Overtime Alert', description: '3 team members approaching 45+ hour threshold this week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Auto-categorization could save 2.5 hours/week in time entry admin.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockTimeTrackingCollaborators = [
+  { id: '1', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Senior Dev', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'Designer', avatar: '/avatars/design.jpg', status: 'away' as const, role: 'Designer' },
+]
+
+const mockTimeTrackingPredictions = [
+  { id: '1', title: 'Billable Utilization', prediction: 'Team utilization rate on track for 85% this month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Project Hours', prediction: 'Client X project will exceed budget by 12 hours at current pace', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockTimeTrackingActivities = [
+  { id: '1', user: 'Project Manager', action: 'Approved', target: 'Weekly timesheet for Design Team', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Senior Dev', action: 'Logged', target: '6.5 hours on API Development', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Designer', action: 'Started', target: 'Timer for UI mockups task', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockTimeTrackingQuickActions = [
+  { id: '1', label: 'Start Timer', icon: 'play', action: () => console.log('Start Timer'), variant: 'default' as const },
+  { id: '2', label: 'Manual Entry', icon: 'plus', action: () => console.log('Manual Entry'), variant: 'default' as const },
+  { id: '3', label: 'Reports', icon: 'barChart', action: () => console.log('Reports'), variant: 'outline' as const },
 ]
 
 export default function TimeTrackingClient() {
@@ -1725,6 +1768,39 @@ export default function TimeTrackingClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockTimeTrackingAIInsights}
+              title="Time Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockTimeTrackingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockTimeTrackingPredictions}
+              title="Time Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockTimeTrackingActivities}
+            title="Time Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockTimeTrackingQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Entry Dialog */}
         <Dialog open={showEntryDialog} onOpenChange={setShowEntryDialog}>

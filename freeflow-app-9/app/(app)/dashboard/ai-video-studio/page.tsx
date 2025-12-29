@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { AIVideoStudio } from '@/components/ai/ai-video-studio'
 
 export const metadata = {

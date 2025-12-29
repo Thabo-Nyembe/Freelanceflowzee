@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import GrowthHubClient from './growth-hub-client'
 
 export default function Page() {

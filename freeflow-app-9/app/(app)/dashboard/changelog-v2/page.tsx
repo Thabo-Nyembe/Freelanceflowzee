@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import ChangelogClient from './changelog-client'
 
 export default function Page() {

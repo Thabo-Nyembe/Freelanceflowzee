@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import HelpDocsClient from './help-docs-client'
 
 export default function Page() {

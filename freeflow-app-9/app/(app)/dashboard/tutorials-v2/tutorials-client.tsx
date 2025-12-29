@@ -20,6 +20,18 @@ import { DialogFooter } from '@/components/ui/dialog'
 import { CardDescription } from '@/components/ui/card'
 import { Webhook, HardDrive, AlertOctagon, Key, Sliders } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Pluralsight/Udemy Level Types
 interface Course {
   id: string
@@ -396,6 +408,36 @@ const categories: { id: CourseCategory; name: string; icon: React.ReactNode; cou
   { id: 'data-science', name: 'Data Science', icon: <BarChart3 className="w-4 h-4" />, count: 78 },
   { id: 'marketing', name: 'Marketing', icon: <Target className="w-4 h-4" />, count: 67 },
   { id: 'it-security', name: 'IT & Security', icon: <Zap className="w-4 h-4" />, count: 45 },
+]
+
+// Competitive Upgrade Mock Data - Pluralsight/Udemy Level Learning Intelligence
+const mockTutorialsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Course Completion', description: 'React Masterclass has 92% completion rate—top performing course!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '2', type: 'warning' as const, title: 'Drop-off Alert', description: 'Module 4 of TypeScript course has 40% abandonment rate.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Retention' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Adding quizzes to video tutorials increases retention by 35%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockTutorialsCollaborators = [
+  { id: '1', name: 'Lead Instructor', avatar: '/avatars/instructor.jpg', status: 'online' as const, role: 'Instructor' },
+  { id: '2', name: 'Content Creator', avatar: '/avatars/creator.jpg', status: 'online' as const, role: 'Creator' },
+  { id: '3', name: 'Learning Designer', avatar: '/avatars/designer.jpg', status: 'away' as const, role: 'Designer' },
+]
+
+const mockTutorialsPredictions = [
+  { id: '1', title: 'Enrollment Forecast', prediction: 'AI/ML courses expected to see 60% enrollment increase Q1', confidence: 86, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Revenue Projection', prediction: 'Premium subscriptions on track for $45K this month', confidence: 83, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockTutorialsActivities = [
+  { id: '1', user: 'Lead Instructor', action: 'Published', target: 'Next.js 15 Advanced Course', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Student', action: 'Completed', target: 'React Fundamentals certification', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Content Creator', action: 'Uploaded', target: '12 new tutorial videos', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockTutorialsQuickActions = [
+  { id: '1', label: 'New Course', icon: 'plus', action: () => console.log('New Course'), variant: 'default' as const },
+  { id: '2', label: 'Upload', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => console.log('Analytics'), variant: 'outline' as const },
 ]
 
 export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {
@@ -1639,6 +1681,39 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockTutorialsAIInsights}
+              title="Learning Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockTutorialsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockTutorialsPredictions}
+              title="Learning Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockTutorialsActivities}
+            title="Learning Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockTutorialsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Course Detail Dialog */}

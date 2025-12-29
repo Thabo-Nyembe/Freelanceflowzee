@@ -75,6 +75,27 @@ import {
   Archive
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  auditAIInsights,
+  auditCollaborators,
+  auditPredictions,
+  auditActivities,
+  auditQuickActions
+} from '@/lib/mock-data/adapters'
+
 // Splunk-level types
 type EventSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical'
 type EventStatus = 'success' | 'failure' | 'warning' | 'pending'
@@ -449,6 +470,36 @@ const mockFieldStats: FieldStats[] = [
       { value: 'mobile_app', count: 1523, percent: 10.0 }
     ]
   }
+]
+
+// Competitive Upgrade Mock Data - Splunk-level Audit Intelligence
+const mockAuditAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Compliance Score', description: 'All systems passing SOC2 audit requirements!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '2', type: 'warning' as const, title: 'Anomaly Detected', description: 'Unusual login pattern from IP 192.168.1.x - review recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'AI Pattern', description: 'Similar audit events clustered - possible automation opportunity.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockAuditCollaborators = [
+  { id: '1', name: 'Audit Lead', avatar: '/avatars/audit.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Officer' },
+  { id: '3', name: 'Security Analyst', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Analyst' },
+]
+
+const mockAuditPredictions = [
+  { id: '1', title: 'Audit Completion', prediction: 'Q1 audit will complete 2 days ahead of schedule', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Risk Reduction', prediction: 'Implementing recommendations will reduce risk score by 25%', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAuditActivities = [
+  { id: '1', user: 'Audit Lead', action: 'Completed', target: 'access control review', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Compliance Officer', action: 'Flagged', target: 'policy exception', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Security Analyst', action: 'Investigated', target: 'failed login attempts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockAuditQuickActions = [
+  { id: '1', label: 'New Audit', icon: 'plus', action: () => console.log('New audit'), variant: 'default' as const },
+  { id: '2', label: 'Run Check', icon: 'play', action: () => console.log('Run check'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
@@ -1996,6 +2047,39 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAuditAIInsights}
+              title="Audit Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAuditCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAuditPredictions}
+              title="Audit Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAuditActivities}
+            title="Audit Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAuditQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Event Detail Dialog */}
         <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>

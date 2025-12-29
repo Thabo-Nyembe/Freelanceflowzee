@@ -1,6 +1,6 @@
-import BudgetsClient from './budgets-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import BudgetsClient from './budgets-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

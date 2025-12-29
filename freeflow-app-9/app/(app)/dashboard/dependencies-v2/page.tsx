@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import DependenciesClient from './dependencies-client'
 
 export default function Page() {

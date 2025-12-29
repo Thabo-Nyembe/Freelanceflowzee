@@ -13,6 +13,26 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Settings, Bell, Calendar, Users, Clock, Briefcase, Globe, Zap, Download, Upload, RefreshCw, Plus, Link2, BarChart3, Shield, Palette, AlertTriangle, UserPlus, Shuffle, Mail, Target, TrendingUp } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  capacityAIInsights,
+  capacityCollaborators,
+  capacityPredictions,
+  capacityActivities,
+  capacityQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Resource Guru / Float level interfaces
 interface TeamMember {
   id: string
@@ -292,6 +312,36 @@ const mockForecast: CapacityForecast[] = [
   { week: 'Jan 6-10', totalCapacity: 200, allocated: 185, available: 15, utilizationRate: 93, overbooked: 2 },
   { week: 'Jan 13-17', totalCapacity: 200, allocated: 195, available: 5, utilizationRate: 98, overbooked: 3 },
   { week: 'Jan 20-24', totalCapacity: 200, allocated: 160, available: 40, utilizationRate: 80, overbooked: 0 }
+]
+
+// Competitive Upgrade Mock Data - Resource Guru/Float-level Capacity Intelligence
+const mockCapacityAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Utilization Optimal', description: 'Team capacity at 85% - healthy workload balance!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Utilization' },
+  { id: '2', type: 'warning' as const, title: 'Overallocation', description: '3 team members booked at 120%+ next week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Planning' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Skill-based assignment can improve project efficiency by 20%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockCapacityCollaborators = [
+  { id: '1', name: 'Resource Manager', avatar: '/avatars/resource.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Project Lead', avatar: '/avatars/project.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'HR Partner', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR' },
+]
+
+const mockCapacityPredictions = [
+  { id: '1', title: 'Team Availability', prediction: 'Q2 will have 15% more available capacity after hiring', confidence: 86, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Project Demand', prediction: 'Development resources will be at 95% by month end', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockCapacityActivities = [
+  { id: '1', user: 'Resource Manager', action: 'Allocated', target: '5 developers to Project Alpha', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Project Lead', action: 'Requested', target: 'additional QA resources', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'HR Partner', action: 'Onboarded', target: '2 new contractors', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockCapacityQuickActions = [
+  { id: '1', label: 'Allocate', icon: 'plus', action: () => console.log('Allocate'), variant: 'default' as const },
+  { id: '2', label: 'Balance', icon: 'shuffle', action: () => console.log('Balance'), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'bar-chart', action: () => console.log('Report'), variant: 'outline' as const },
 ]
 
 export default function CapacityClient({ initialCapacity }: { initialCapacity: Capacity[] }) {
@@ -1789,6 +1839,39 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCapacityAIInsights}
+              title="Capacity Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCapacityCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCapacityPredictions}
+              title="Capacity Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCapacityActivities}
+            title="Capacity Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCapacityQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {loading && (
           <div className="text-center py-8">

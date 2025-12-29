@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import ReleaseNotesClient from './release-notes-client'
 
 export default function Page() {

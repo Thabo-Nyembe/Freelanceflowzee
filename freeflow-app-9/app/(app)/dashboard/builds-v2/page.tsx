@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import BuildsClient from './builds-client'
 
 export default function Page() {

@@ -27,6 +27,27 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CardDescription } from '@/components/ui/card'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  overviewAIInsights,
+  overviewCollaborators,
+  overviewPredictions,
+  overviewActivities,
+  overviewQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Datadog Level Monitoring
 // ============================================================================
@@ -314,6 +335,41 @@ const formatDate = (dateString: string): string => {
 }
 
 // ============================================================================
+// COMPETITIVE UPGRADE MOCK DATA
+// ============================================================================
+
+const mockAIInsights = [
+  { id: '1', query: "What's causing the API latency spike?", insight: "Database connection pool exhaustion on db-primary-01. Consider increasing max_connections from 100 to 200.", confidence: 0.94, category: 'engagement' as const, timestamp: new Date().toISOString() },
+  { id: '2', query: "Which services need attention?", insight: "Payment Gateway showing 2.3% error rate, above 1% threshold. Related to upstream provider issues.", confidence: 0.89, category: 'conversion' as const, timestamp: new Date().toISOString() },
+  { id: '3', query: "How's our infrastructure health?", insight: "Overall system health at 98.7%. Recommended: Scale api-gateway replicas from 3 to 5 before peak hours.", confidence: 0.91, category: 'revenue' as const, timestamp: new Date().toISOString() },
+]
+
+const mockOverviewCollaborators = [
+  { id: '1', name: 'DevOps Team', avatar: '/avatars/devops.jpg', status: 'active' as const, lastActive: 'Just now', role: 'On-call' },
+  { id: '2', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'active' as const, lastActive: '1m ago', role: 'SRE Lead' },
+  { id: '3', name: 'Lisa Park', avatar: '/avatars/lisa.jpg', status: 'idle' as const, lastActive: '20m ago', role: 'Platform Engineer' },
+]
+
+const mockOverviewPredictions = [
+  { id: '1', metric: 'Uptime SLA', currentValue: 99.95, predictedValue: 99.98, confidence: 0.88, trend: 'up' as const, timeframe: 'End of month', factors: ['Infrastructure upgrades', 'Auto-scaling improvements'] },
+  { id: '2', metric: 'Avg Response Time', currentValue: 145, predictedValue: 120, confidence: 0.82, trend: 'down' as const, timeframe: 'Next 7 days', factors: ['CDN optimization', 'Database indexing'] },
+  { id: '3', metric: 'Error Rate', currentValue: 0.8, predictedValue: 0.5, confidence: 0.76, trend: 'down' as const, timeframe: 'Next 14 days', factors: ['Bug fixes deployed', 'Better error handling'] },
+]
+
+const mockOverviewActivities = [
+  { id: '1', type: 'status_change' as const, title: 'Service recovered', description: 'Payment Gateway back to operational', user: { name: 'System', avatar: '' }, timestamp: new Date().toISOString(), metadata: {} },
+  { id: '2', type: 'update' as const, title: 'Deployment completed', description: 'api-gateway v2.4.1 rolled out to production', user: { name: 'Alex Kumar', avatar: '/avatars/alex.jpg' }, timestamp: new Date(Date.now() - 1800000).toISOString(), metadata: {} },
+  { id: '3', type: 'create' as const, title: 'Alert created', description: 'New monitor for Redis memory usage', user: { name: 'Lisa Park', avatar: '/avatars/lisa.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
+]
+
+const mockOverviewQuickActions = [
+  { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => console.log('Create alert') },
+  { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => console.log('View logs') },
+  { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => console.log('Health check') },
+  { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => console.log('Deploy') },
+]
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -386,6 +442,11 @@ export default function OverviewClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Collaboration Indicator */}
+              <CollaborationIndicator
+                collaborators={mockOverviewCollaborators}
+                maxVisible={3}
+              />
               <div className="flex items-center bg-white/10 rounded-lg p-1">
                 {timeRanges.map(range => (
                   <Button
@@ -1847,6 +1908,27 @@ export default function OverviewClient() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* AI-Powered Infrastructure Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <AIInsightsPanel
+            insights={mockAIInsights}
+            onAskQuestion={(q) => console.log('Infrastructure Question:', q)}
+          />
+          <PredictiveAnalytics predictions={mockOverviewPredictions} />
+        </div>
+
+        {/* Activity Feed */}
+        <div className="mt-6">
+          <ActivityFeed
+            activities={mockOverviewActivities}
+            maxItems={5}
+            showFilters={true}
+          />
+        </div>
+
+        {/* Quick Actions Toolbar */}
+        <QuickActionsToolbar actions={mockOverviewQuickActions} />
       </div>
     </div>
   )

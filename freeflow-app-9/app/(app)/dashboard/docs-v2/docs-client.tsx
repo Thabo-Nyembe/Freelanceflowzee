@@ -79,6 +79,18 @@ import {
   Archive,
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type DocCategory = 'guides' | 'api' | 'sdk' | 'tutorials' | 'reference' | 'examples' | 'changelog'
 type DocStatus = 'published' | 'draft' | 'review' | 'archived' | 'deprecated'
@@ -373,6 +385,36 @@ const mockDocs: Doc[] = [
 ]
 
 const languages = ['All', 'JavaScript', 'Python', 'Ruby', 'Go', 'cURL']
+
+// Mock data for AI-powered competitive upgrade components
+const mockDocsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Popular Content', description: 'Quick Start guide has 10K views this month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '2', type: 'warning' as const, title: 'Broken Links', description: '5 external links returning 404 errors.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '3', type: 'info' as const, title: 'Search Insights', description: '"webhooks" is trending - consider expanding coverage.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Search' },
+]
+
+const mockDocsCollaborators = [
+  { id: '1', name: 'Docs Lead', avatar: '/avatars/docs.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'API Writer', avatar: '/avatars/api-writer.jpg', status: 'online' as const, role: 'Writer' },
+  { id: '3', name: 'Developer Advocate', avatar: '/avatars/devrel.jpg', status: 'away' as const, role: 'DevRel' },
+]
+
+const mockDocsPredictions = [
+  { id: '1', title: 'Traffic Growth', prediction: 'Docs traffic will double after v3 API launch', confidence: 86, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Content Needs', prediction: 'SDK pages need 30% more examples based on feedback', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockDocsActivities = [
+  { id: '1', user: 'API Writer', action: 'Published', target: 'v3 API migration guide', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Docs Lead', action: 'Reviewed', target: 'SDK documentation updates', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Developer Advocate', action: 'Added', target: 'video tutorial embed', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockDocsQuickActions = [
+  { id: '1', label: 'New Doc', icon: 'plus', action: () => console.log('New doc'), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
+  { id: '3', label: 'Publish', icon: 'send', action: () => console.log('Publish'), variant: 'outline' as const },
+]
 
 export default function DocsClient() {
   const [docs] = useState<Doc[]>(mockDocs)
@@ -1566,6 +1608,39 @@ export default function DocsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockDocsAIInsights}
+              title="Documentation Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockDocsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockDocsPredictions}
+              title="Content Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockDocsActivities}
+            title="Docs Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockDocsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Doc Detail Dialog */}

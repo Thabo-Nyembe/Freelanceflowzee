@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import RolesClient from './roles-client'
 
 export default function Page() {

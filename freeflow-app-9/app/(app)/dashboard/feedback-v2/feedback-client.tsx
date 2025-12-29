@@ -66,6 +66,26 @@ import {
   RefreshCw
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  feedbackAIInsights,
+  feedbackCollaborators,
+  feedbackPredictions,
+  feedbackActivities,
+  feedbackQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type IdeaStatus = 'new' | 'under_review' | 'planned' | 'in_progress' | 'shipped' | 'declined' | 'duplicate'
 type IdeaCategory = 'feature' | 'improvement' | 'bug' | 'integration' | 'ux' | 'performance' | 'other'
@@ -414,6 +434,38 @@ const formatRelativeTime = (dateString: string) => {
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
   return `${Math.floor(diffDays / 30)} months ago`
 }
+
+// Enhanced Feedback Mock Data
+const mockFeedbackAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Positive Trend', description: 'NPS score up 12 points this quarter. Users love new features!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sentiment' },
+  { id: '2', type: 'info' as const, title: 'Top Request', description: 'Dark mode is most requested feature with 234 votes.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Ideas' },
+  { id: '3', type: 'warning' as const, title: 'Response Needed', description: '15 feedback items awaiting team response for 7+ days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Action' },
+]
+
+const mockFeedbackCollaborators = [
+  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Product', lastActive: 'Now' },
+  { id: '2', name: 'UX Researcher', avatar: '/avatars/ux.jpg', status: 'online' as const, role: 'Research', lastActive: '10m ago' },
+  { id: '3', name: 'Customer Success', avatar: '/avatars/cs.jpg', status: 'away' as const, role: 'Support', lastActive: '1h ago' },
+]
+
+const mockFeedbackPredictions = [
+  { id: '1', label: 'NPS Score', current: 72, target: 80, predicted: 76, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Response Rate', current: 85, target: 95, predicted: 90, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Ideas Shipped', current: 12, target: 20, predicted: 16, confidence: 75, trend: 'up' as const },
+]
+
+const mockFeedbackActivities = [
+  { id: '1', user: 'Product Manager', action: 'approved', target: 'dark mode feature request', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'UX Researcher', action: 'analyzed', target: '50 user interviews', timestamp: '2h ago', type: 'info' as const },
+  { id: '3', user: 'Customer Success', action: 'responded', target: '12 feedback items', timestamp: '3h ago', type: 'info' as const },
+]
+
+const mockFeedbackQuickActions = [
+  { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => console.log('New idea') },
+  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => console.log('Respond') },
+  { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => console.log('Merge') },
+  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+]
 
 interface FeedbackClientProps {
   initialFeedback?: any[]
@@ -1775,6 +1827,39 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockFeedbackAIInsights}
+              title="Feedback Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockFeedbackCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockFeedbackPredictions}
+              title="Feedback Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockFeedbackActivities}
+            title="Feedback Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockFeedbackQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Idea Detail Dialog */}
         <Dialog open={!!selectedIdea} onOpenChange={() => setSelectedIdea(null)}>

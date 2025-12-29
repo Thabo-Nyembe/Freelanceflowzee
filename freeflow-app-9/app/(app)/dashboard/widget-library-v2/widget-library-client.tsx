@@ -66,6 +66,19 @@ import {
   HardDrive,
   Trash2 as TrashIcon
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -390,6 +403,38 @@ const mockContributors: Contributor[] = [
   { id: '3', name: 'FormCraft', avatar: '', widgets_count: 8, total_installs: 89000, verified: true },
   { id: '4', name: 'EditorLabs', avatar: '', widgets_count: 5, total_installs: 67800, verified: false },
   { id: '5', name: 'NotifyPro', avatar: '', widgets_count: 4, total_installs: 54300, verified: true }
+]
+
+// Enhanced Widget Library Mock Data
+const mockWidgetLibAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Popular Widget', description: 'Charts Pro has 50K+ installs. Consider featuring it prominently.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
+  { id: '2', type: 'info' as const, title: 'New Submissions', description: '8 new widgets pending review. Average review time 2 days.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Queue' },
+  { id: '3', type: 'warning' as const, title: 'Compatibility', description: '3 widgets have compatibility issues with v2.0. Update needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
+]
+
+const mockWidgetLibCollaborators = [
+  { id: '1', name: 'Widget Curator', avatar: '/avatars/curator.jpg', status: 'online' as const, role: 'Curation', lastActive: 'Now' },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Development', lastActive: '10m ago' },
+  { id: '3', name: 'QA Tester', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'Testing', lastActive: '45m ago' },
+]
+
+const mockWidgetLibPredictions = [
+  { id: '1', label: 'Total Widgets', current: 156, target: 200, predicted: 180, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Installs/Day', current: 2450, target: 3000, predicted: 2800, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Avg Rating', current: 4.5, target: 4.8, predicted: 4.6, confidence: 85, trend: 'up' as const },
+]
+
+const mockWidgetLibActivities = [
+  { id: '1', user: 'Widget Curator', action: 'approved', target: 'DataGrid Pro widget', timestamp: '20m ago', type: 'success' as const },
+  { id: '2', user: 'Developer', action: 'submitted', target: 'Calendar Plus v2', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'QA Tester', action: 'tested', target: '5 widgets for v2.0', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockWidgetLibQuickActions = [
+  { id: '1', label: 'Submit', icon: 'Upload', shortcut: 'S', action: () => console.log('Submit') },
+  { id: '2', label: 'Browse', icon: 'Search', shortcut: 'B', action: () => console.log('Browse') },
+  { id: '3', label: 'My Widgets', icon: 'Package', shortcut: 'M', action: () => console.log('My widgets') },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'G', action: () => console.log('Settings') },
 ]
 
 export default function WidgetLibraryClient() {
@@ -1790,6 +1835,39 @@ export default function WidgetLibraryClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockWidgetLibraryAIInsights}
+              title="Widget Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockWidgetLibraryCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockWidgetLibraryPredictions}
+              title="Widget Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockWidgetLibraryActivities}
+            title="Widget Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockWidgetLibraryQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Widget Detail Dialog */}

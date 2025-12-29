@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect, useReducer, useMemo } from 'react'
 import {
   Cloud,

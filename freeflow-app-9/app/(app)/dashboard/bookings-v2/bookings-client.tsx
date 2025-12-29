@@ -19,6 +19,27 @@ import {
   Trash2, BarChart3, FileText
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  bookingsAIInsights,
+  bookingsCollaborators,
+  bookingsPredictions,
+  bookingsActivities,
+  bookingsQuickActions
+} from '@/lib/mock-data/adapters'
+
 // View types
 type ViewType = 'calendar' | 'list' | 'agenda'
 type CalendarView = 'month' | 'week' | 'day'
@@ -51,6 +72,36 @@ interface TeamMember {
   availability: string[]
   bookingsToday: number
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockBookingsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Demand', description: 'Consultation bookings up 45% this week. Consider adding more slots.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
+  { id: '2', type: 'warning' as const, title: 'No-Show Alert', description: '3 no-shows yesterday. Send reminder SMS 2 hours before appointments.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Attendance' },
+  { id: '3', type: 'info' as const, title: 'Popular Time', description: '10-11 AM slots are most booked. 87% utilization rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockBookingsCollaborators = [
+  { id: '1', name: 'Scheduler', avatar: '/avatars/scheduler.jpg', status: 'online' as const, role: 'Scheduling' },
+  { id: '2', name: 'Consultant', avatar: '/avatars/consultant.jpg', status: 'online' as const, role: 'Consultant' },
+  { id: '3', name: 'Support', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockBookingsPredictions = [
+  { id: '1', title: 'Weekly Forecast', prediction: 'Expect 35% more bookings next week based on seasonal trends', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cancellation Risk', prediction: '5 bookings have high cancellation probability', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockBookingsActivities = [
+  { id: '1', user: 'Client', action: 'Booked', target: 'Strategy Consultation for tomorrow', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Scheduler', action: 'Rescheduled', target: 'Weekly sync meeting', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Sent', target: 'reminder to 12 clients', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockBookingsQuickActions = [
+  { id: '1', label: 'New Booking', icon: 'plus', action: () => console.log('New booking'), variant: 'default' as const },
+  { id: '2', label: 'Block Time', icon: 'clock', action: () => console.log('Block time'), variant: 'default' as const },
+  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => console.log('Calendar'), variant: 'outline' as const },
+]
 
 export default function BookingsClient({ initialBookings }: { initialBookings: Booking[] }) {
   const [bookingTypeFilter, setBookingTypeFilter] = useState<BookingType | 'all'>('all')
@@ -1784,6 +1835,39 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockBookingsAIInsights}
+              title="Booking Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockBookingsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockBookingsPredictions}
+              title="Booking Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockBookingsActivities}
+            title="Booking Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockBookingsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Quick Stats Footer */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">

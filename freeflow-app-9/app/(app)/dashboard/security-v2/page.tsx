@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import SecurityClient from './security-client'
 
 export default function Page() {

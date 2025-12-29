@@ -59,6 +59,19 @@ import {
   CreditCard,
   Sliders
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -344,6 +357,38 @@ interface WebhooksClientProps {
     avgResponseTime: number
   }
 }
+
+// Enhanced Competitive Upgrade Mock Data - Webhooks Context
+const mockWebhooksAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Delivery Failures', description: '5 webhooks showing increased failure rate. Check endpoint availability.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deliveries' },
+  { id: '2', type: 'success' as const, title: 'Performance Optimal', description: 'Average response time improved to 145ms. Excellent performance!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '3', type: 'info' as const, title: 'New Events Available', description: '3 new event types available for subscription. Review and enable.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Features' },
+]
+
+const mockWebhooksCollaborators = [
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/int.jpg', status: 'online' as const, role: 'API Developer', lastActive: 'Now' },
+  { id: '2', name: 'Partner Dev', avatar: '/avatars/partner.jpg', status: 'online' as const, role: 'Partner Integration', lastActive: '8m ago' },
+  { id: '3', name: 'Support Eng', avatar: '/avatars/supeng.jpg', status: 'away' as const, role: 'Technical Support', lastActive: '25m ago' },
+]
+
+const mockWebhooksPredictions = [
+  { id: '1', label: 'Success Rate', current: 96.5, target: 99, predicted: 98, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Avg Response Time', current: 145, target: 100, predicted: 120, confidence: 75, trend: 'down' as const },
+  { id: '3', label: 'Monthly Events', current: 125000, target: 150000, predicted: 140000, confidence: 88, trend: 'up' as const },
+]
+
+const mockWebhooksActivities = [
+  { id: '1', user: 'Integration Lead', action: 'created', target: 'new webhook endpoint', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'System', action: 'retried', target: '23 failed deliveries', timestamp: '20m ago', type: 'info' as const },
+  { id: '3', user: 'Partner Dev', action: 'tested', target: 'order.created webhook', timestamp: '45m ago', type: 'info' as const },
+]
+
+const mockWebhooksQuickActions = [
+  { id: '1', label: 'New Webhook', icon: 'Plus', shortcut: 'N', action: () => console.log('New webhook') },
+  { id: '2', label: 'Test Delivery', icon: 'Send', shortcut: 'T', action: () => console.log('Test delivery') },
+  { id: '3', label: 'View Logs', icon: 'FileJson', shortcut: 'L', action: () => console.log('View logs') },
+  { id: '4', label: 'Retry Failed', icon: 'RefreshCw', shortcut: 'R', action: () => console.log('Retry failed') },
+]
 
 export default function WebhooksClient({
   initialWebhooks,
@@ -1587,6 +1632,39 @@ export default function WebhooksClient({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockWebhooksAIInsights}
+              title="Webhooks Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockWebhooksCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockWebhooksPredictions}
+              title="Delivery Metrics Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockWebhooksActivities}
+            title="Webhook Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockWebhooksQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Create/Edit Endpoint Dialog */}

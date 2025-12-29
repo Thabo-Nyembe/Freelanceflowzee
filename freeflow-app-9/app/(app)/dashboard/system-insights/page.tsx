@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * System Insights Dashboard
  * Showcase of structured logging and enhanced toast notifications

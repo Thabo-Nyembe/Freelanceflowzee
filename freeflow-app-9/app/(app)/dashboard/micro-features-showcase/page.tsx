@@ -109,8 +109,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('MicroFeaturesShowcase')
 
-
-
 export default function MicroFeaturesShowcase() {
   // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()

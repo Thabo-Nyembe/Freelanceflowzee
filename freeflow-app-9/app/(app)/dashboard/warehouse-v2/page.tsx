@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import WarehouseClient from './warehouse-client'
 
 export default function Page() {

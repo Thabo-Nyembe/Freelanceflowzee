@@ -1,6 +1,6 @@
-import EmailMarketingClient from './email-marketing-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import EmailMarketingClient from './email-marketing-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

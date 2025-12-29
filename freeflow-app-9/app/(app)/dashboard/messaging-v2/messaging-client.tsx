@@ -75,6 +75,27 @@ import {
   ExternalLink,
   PlayCircle
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  messagingAIInsights,
+  messagingCollaborators,
+  messagingPredictions,
+  messagingActivities,
+  messagingQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -1746,6 +1767,39 @@ export default function MessagingClient() {
           </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Competitive Upgrade Components */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 px-4">
+        <div className="lg:col-span-2">
+          <AIInsightsPanel
+            insights={messagingAIInsights}
+            title="Messaging Intelligence"
+            onInsightAction={(insight) => console.log('Insight action:', insight)}
+          />
+        </div>
+        <div className="space-y-6">
+          <CollaborationIndicator
+            collaborators={messagingCollaborators}
+            maxVisible={4}
+          />
+          <PredictiveAnalytics
+            predictions={messagingPredictions}
+            title="Communication Forecasts"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-4">
+        <ActivityFeed
+          activities={messagingActivities}
+          title="Team Activity"
+          maxItems={5}
+        />
+        <QuickActionsToolbar
+          actions={messagingQuickActions}
+          variant="grid"
+        />
+      </div>
 
       {/* New Channel Dialog */}
       <Dialog open={showNewChannel} onOpenChange={setShowNewChannel}>

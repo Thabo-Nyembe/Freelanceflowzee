@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CustomerSuccessClient from './customer-success-client'
 
 export default function Page() {

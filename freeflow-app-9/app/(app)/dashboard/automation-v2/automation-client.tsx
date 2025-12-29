@@ -75,6 +75,28 @@ import {
   Upload,
   Gauge
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  automationAIInsights,
+  automationCollaborators,
+  automationPredictions,
+  automationActivities,
+  automationQuickActions
+} from '@/lib/mock-data/adapters'
+
 import { useAutomation, type Automation, type AutomationType, type AutomationStatus } from '@/lib/hooks/use-automation'
 
 // ============================================================================
@@ -182,6 +204,38 @@ const RUN_LOGS: RunLog[] = [
   { id: 'run3', automationId: 'auto2', status: 'failed', startedAt: '2024-01-28T10:20:00Z', completedAt: '2024-01-28T10:20:05Z', duration: 5000, stepsExecuted: 2, totalSteps: 4, error: 'API rate limit exceeded', dataProcessed: 0, triggerData: { webhook: 'data_sync' } },
   { id: 'run4', automationId: 'auto3', status: 'running', startedAt: '2024-01-28T10:35:00Z', stepsExecuted: 1, totalSteps: 5, dataProcessed: 15, triggerData: { scheduled: true } },
   { id: 'run5', automationId: 'auto1', status: 'success', startedAt: '2024-01-28T10:15:00Z', completedAt: '2024-01-28T10:15:03Z', duration: 3000, stepsExecuted: 3, totalSteps: 3, dataProcessed: 2, triggerData: { email: 'mike@example.com' } },
+]
+
+// Enhanced Automation Mock Data
+const mockAutomationAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Automation Efficiency', description: 'Automations saved 124 hours this month. ROI at 340%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '2', type: 'info' as const, title: 'Popular Trigger', description: 'Form submission triggers used most. Consider adding templates.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Insights' },
+  { id: '3', type: 'warning' as const, title: 'Failed Runs', description: '5 automations failed in last 24h. Check API connections.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
+]
+
+const mockAutomationCollaborators = [
+  { id: '1', name: 'Automation Lead', avatar: '/avatars/auto.jpg', status: 'online' as const, role: 'Workflows', lastActive: 'Now' },
+  { id: '2', name: 'Integration Dev', avatar: '/avatars/int.jpg', status: 'online' as const, role: 'Integrations', lastActive: '5m ago' },
+  { id: '3', name: 'Ops Manager', avatar: '/avatars/ops.jpg', status: 'away' as const, role: 'Operations', lastActive: '20m ago' },
+]
+
+const mockAutomationPredictions = [
+  { id: '1', label: 'Tasks Automated', current: 8450, target: 10000, predicted: 9200, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Success Rate', current: 96, target: 99, predicted: 98, confidence: 82, trend: 'up' as const },
+  { id: '3', label: 'Time Saved (hrs)', current: 124, target: 150, predicted: 140, confidence: 78, trend: 'up' as const },
+]
+
+const mockAutomationActivities = [
+  { id: '1', user: 'Automation Lead', action: 'created', target: 'lead nurturing workflow', timestamp: '30m ago', type: 'success' as const },
+  { id: '2', user: 'Integration Dev', action: 'connected', target: 'Salesforce integration', timestamp: '2h ago', type: 'info' as const },
+  { id: '3', user: 'Ops Manager', action: 'optimized', target: 'invoice processing flow', timestamp: '1d ago', type: 'info' as const },
+]
+
+const mockAutomationQuickActions = [
+  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => console.log('New workflow') },
+  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => console.log('Templates') },
+  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => console.log('History') },
+  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => console.log('Connections') },
 ]
 
 // ============================================================================
@@ -1887,6 +1941,39 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAutomationAIInsights}
+              title="Automation Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAutomationCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAutomationPredictions}
+              title="Workflow Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAutomationActivities}
+            title="Automation Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAutomationQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Create Automation Dialog */}
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

@@ -64,6 +64,18 @@ import {
   Sparkles
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type ZapStatus = 'active' | 'paused' | 'error' | 'draft'
 type TaskStatus = 'success' | 'failed' | 'running' | 'waiting'
@@ -450,6 +462,38 @@ const formatDuration = (seconds: number) => {
   if (seconds < 1) return `${Math.round(seconds * 1000)}ms`
   return `${seconds.toFixed(1)}s`
 }
+
+// Enhanced Competitive Upgrade Data
+const mockIntegrationsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Sync Status', description: 'All 24 integrations syncing successfully.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Status' },
+  { id: '2', type: 'info' as const, title: 'API Usage', description: '85% of monthly API quota used. 5 days remaining.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+  { id: '3', type: 'warning' as const, title: 'Auth Expiring', description: '3 OAuth tokens expire in 7 days. Re-auth required.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Authentication' },
+]
+
+const mockIntegrationsCollaborators = [
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/integ.jpg', status: 'online' as const, role: 'Engineering', lastActive: 'Now' },
+  { id: '2', name: 'API Developer', avatar: '/avatars/api.jpg', status: 'online' as const, role: 'Development', lastActive: '15m ago' },
+  { id: '3', name: 'Solutions Arch', avatar: '/avatars/arch.jpg', status: 'away' as const, role: 'Architecture', lastActive: '1h ago' },
+]
+
+const mockIntegrationsPredictions = [
+  { id: '1', label: 'Active Zaps', current: 48, target: 60, predicted: 55, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Success Rate', current: 97, target: 99, predicted: 98, confidence: 88, trend: 'up' as const },
+  { id: '3', label: 'Latency (ms)', current: 250, target: 200, predicted: 220, confidence: 75, trend: 'down' as const },
+]
+
+const mockIntegrationsActivities = [
+  { id: '1', user: 'Integration Lead', action: 'connected', target: 'Salesforce CRM', timestamp: '20m ago', type: 'success' as const },
+  { id: '2', user: 'API Developer', action: 'debugged', target: 'Slack webhook failure', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'System', action: 'triggered', target: '150 automation tasks', timestamp: '3h ago', type: 'success' as const },
+]
+
+const mockIntegrationsQuickActions = [
+  { id: '1', label: 'New Zap', icon: 'Zap', shortcut: 'N', action: () => console.log('New zap') },
+  { id: '2', label: 'Apps', icon: 'Grid', shortcut: 'A', action: () => console.log('Apps') },
+  { id: '3', label: 'Webhooks', icon: 'Webhook', shortcut: 'W', action: () => console.log('Webhooks') },
+  { id: '4', label: 'Logs', icon: 'FileText', shortcut: 'L', action: () => console.log('Logs') },
+]
 
 export default function IntegrationsClient() {
   const [activeTab, setActiveTab] = useState('zaps')
@@ -1480,6 +1524,39 @@ export default function IntegrationsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockIntegrationsAIInsights}
+              title="Integrations Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockIntegrationsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockIntegrationsPredictions}
+              title="Integration Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockIntegrationsActivities}
+            title="Integration Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockIntegrationsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Zap Detail Dialog */}
         <Dialog open={!!selectedZap} onOpenChange={() => setSelectedZap(null)}>

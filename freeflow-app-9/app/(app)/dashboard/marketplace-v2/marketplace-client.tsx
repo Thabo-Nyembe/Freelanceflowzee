@@ -25,6 +25,18 @@ import {
   Flag, ThumbsDown, Reply, Edit, Trash2, Copy, Link, Image, Video, Code, Hash, History
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type ProductStatus = 'active' | 'draft' | 'archived' | 'out_of_stock' | 'pending_review'
 type VendorStatus = 'active' | 'pending' | 'suspended' | 'verified' | 'featured'
@@ -295,6 +307,39 @@ const mockWebhooks: Webhook[] = [
   { id: 'wh1', url: 'https://api.acme.com/webhooks/marketplace', events: ['order.created', 'order.completed', 'review.created'], status: 'active', lastTriggered: '2024-01-16 09:15', successRate: 99.8, createdAt: '2023-06-01' },
   { id: 'wh2', url: 'https://hooks.slack.com/services/xxx', events: ['order.created', 'review.flagged'], status: 'active', lastTriggered: '2024-01-16 09:23', successRate: 100, createdAt: '2023-08-15' },
   { id: 'wh3', url: 'https://analytics.internal.io/ingest', events: ['install', 'uninstall', 'usage'], status: 'failed', lastTriggered: '2024-01-14 23:45', successRate: 78.5, createdAt: '2024-01-01' }
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Shopify App Store Level
+// ============================================================================
+
+const mockMarketplaceAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Top Seller', description: 'Your product "Analytics Pro" has reached 10K+ installs. Featured badge earned!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Review Alert', description: '2 negative reviews received today. Response recommended within 24h.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Reviews' },
+  { id: '3', type: 'info' as const, title: 'Market Trend', description: 'AI-powered tools are trending. Consider adding AI features to boost visibility.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+]
+
+const mockMarketplaceCollaborators = [
+  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockMarketplacePredictions = [
+  { id: '1', title: 'Revenue Forecast', prediction: 'Marketplace revenue expected to grow 25% next quarter', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Install Growth', prediction: 'New products could reach 5K installs in first month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockMarketplaceActivities = [
+  { id: '1', user: 'Customer', action: 'Purchased', target: 'Pro Analytics subscription', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Product Manager', action: 'Published', target: 'New version 2.5.0', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Support', action: 'Resolved', target: 'Customer support ticket #4521', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockMarketplaceQuickActions = [
+  { id: '1', label: 'Add Product', icon: 'plus', action: () => console.log('Add product'), variant: 'default' as const },
+  { id: '2', label: 'View Analytics', icon: 'chart', action: () => console.log('View analytics'), variant: 'default' as const },
+  { id: '3', label: 'Manage Reviews', icon: 'message', action: () => console.log('Manage reviews'), variant: 'outline' as const },
 ]
 
 export default function MarketplaceClient() {
@@ -1653,6 +1698,39 @@ export default function MarketplaceClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMarketplaceAIInsights}
+              title="Marketplace Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMarketplaceCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMarketplacePredictions}
+              title="Marketplace Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMarketplaceActivities}
+            title="Marketplace Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMarketplaceQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Product Detail Dialog */}
         <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>

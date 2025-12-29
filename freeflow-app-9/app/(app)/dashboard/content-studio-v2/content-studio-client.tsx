@@ -24,6 +24,26 @@ import {
   Workflow, FileSearch, FolderOpen, Tags, BookOpen, Play
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  contentStudioAIInsights,
+  contentStudioCollaborators,
+  contentStudioPredictions,
+  contentStudioActivities,
+  contentStudioQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Contentful Level CMS
 // ============================================================================
@@ -546,6 +566,39 @@ const formatDate = (dateString: string): string => {
     year: 'numeric'
   })
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// ============================================================================
+
+const mockContentAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Content Performance', description: 'Published content engagement up 28% this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'SEO Optimization', description: '15 entries could benefit from keyword optimization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'SEO' },
+  { id: '3', type: 'warning' as const, title: 'Draft Backlog', description: '23 drafts pending review for over 7 days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Workflow' },
+]
+
+const mockContentCollaborators = [
+  { id: '1', name: 'Content Manager', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Editor', avatar: '/avatars/editor.jpg', status: 'online' as const, role: 'Editor' },
+  { id: '3', name: 'Designer', avatar: '/avatars/design.jpg', status: 'away' as const, role: 'Designer' },
+]
+
+const mockContentPredictions = [
+  { id: '1', title: 'Publishing Velocity', prediction: 'On track to publish 40 entries this month', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Content Gaps', prediction: 'Tutorial content category needs 8 more entries', confidence: 90, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockContentActivities = [
+  { id: '1', user: 'Editor', action: 'Published', target: 'Getting Started Guide v2', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Manager', action: 'Scheduled', target: '5 blog posts for next week', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Archived', target: '12 outdated entries', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockContentQuickActions = [
+  { id: '1', label: 'New Entry', icon: 'plus', action: () => console.log('New entry'), variant: 'default' as const },
+  { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => console.log('Publish'), variant: 'default' as const },
+  { id: '3', label: 'Export All', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1696,6 +1749,39 @@ export default function ContentStudioClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockContentAIInsights}
+              title="Content Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockContentCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockContentPredictions}
+              title="Content Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockContentActivities}
+            title="Content Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockContentQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Entry Detail Dialog */}
         <Dialog open={!!selectedEntry} onOpenChange={() => setSelectedEntry(null)}>

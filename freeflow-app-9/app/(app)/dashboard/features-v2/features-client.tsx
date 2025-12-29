@@ -64,6 +64,26 @@ import {
   Kanban,
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  featuresAIInsights,
+  featuresCollaborators,
+  featuresPredictions,
+  featuresActivities,
+  featuresQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type FeatureStatus = 'idea' | 'planned' | 'in_progress' | 'testing' | 'released' | 'archived'
 type Priority = 'critical' | 'high' | 'medium' | 'low'
@@ -382,6 +402,36 @@ const mockSegments: Segment[] = [
 ]
 
 const categories = ['All', 'AI & ML', 'Collaboration', 'Analytics', 'Mobile', 'Security', 'Integrations']
+
+// Enhanced Competitive Upgrade Mock Data
+const mockFeaturesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Feature Adoption', description: 'AI features showing 45% higher adoption than projected.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Adoption' },
+  { id: '2', type: 'info' as const, title: 'Rollout Progress', description: '3 features in beta with 92% positive feedback.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Rollout' },
+  { id: '3', type: 'warning' as const, title: 'Low Usage Feature', description: 'Advanced Analytics feature has <5% adoption. Consider improvements.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+]
+
+const mockFeaturesCollaborators = [
+  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
+  { id: '2', name: 'Engineering Lead', avatar: '/avatars/eng.jpg', status: 'online' as const, role: 'Engineering' },
+  { id: '3', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'away' as const, role: 'Design' },
+]
+
+const mockFeaturesPredictions = [
+  { id: '1', title: 'Feature Completion', prediction: '2 major features on track for Q1 release', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'User Requests', prediction: 'Dark mode most requested - priority recommendation', confidence: 94, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockFeaturesActivities = [
+  { id: '1', user: 'Product', action: 'Released', target: 'AI Assistant to 100% of users', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Engineering', action: 'Started', target: 'development on Real-time Collaboration', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'QA', action: 'Approved', target: 'Mobile App v2 for beta', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockFeaturesQuickActions = [
+  { id: '1', label: 'New Feature', icon: 'plus', action: () => console.log('New feature'), variant: 'default' as const },
+  { id: '2', label: 'View Roadmap', icon: 'map', action: () => console.log('Roadmap'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function FeaturesClient() {
   const [features] = useState<Feature[]>(mockFeatures)
@@ -1553,6 +1603,39 @@ export default function FeaturesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockFeaturesAIInsights}
+              title="Feature Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockFeaturesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockFeaturesPredictions}
+              title="Feature Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockFeaturesActivities}
+            title="Feature Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockFeaturesQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Feature Detail Dialog */}

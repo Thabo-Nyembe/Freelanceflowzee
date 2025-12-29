@@ -22,6 +22,18 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Sliders, Webhook, Key, Mail, Lock, Terminal, Globe, Archive, Workflow } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold' | 'overdue'
 type MaintenanceType = 'preventive' | 'corrective' | 'emergency' | 'upgrade' | 'inspection' | 'calibration'
@@ -491,6 +503,36 @@ const formatDate = (date: string) => {
 const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockMaintenanceAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Preventive Maintenance', description: 'Scheduled maintenance reduced unplanned downtime by 60%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Prevention' },
+  { id: '2', type: 'warning' as const, title: 'Overdue Work Order', description: 'HVAC inspection WO-1234 is 3 days overdue.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scheduling' },
+  { id: '3', type: 'info' as const, title: 'Asset Health', description: 'Overall equipment effectiveness improved to 87%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockMaintenanceCollaborators = [
+  { id: '1', name: 'Facilities Manager', avatar: '/avatars/facilities.jpg', status: 'online' as const, role: 'Management' },
+  { id: '2', name: 'Lead Technician', avatar: '/avatars/tech.jpg', status: 'online' as const, role: 'Technician' },
+  { id: '3', name: 'Safety Officer', avatar: '/avatars/safety.jpg', status: 'away' as const, role: 'Safety' },
+]
+
+const mockMaintenancePredictions = [
+  { id: '1', title: 'Equipment Failure', prediction: 'Compressor C-204 likely needs service within 2 weeks', confidence: 78, trend: 'down' as const, impact: 'high' as const },
+  { id: '2', title: 'Resource Need', prediction: 'Additional technician needed for Q2 scheduled work', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockMaintenanceActivities = [
+  { id: '1', user: 'Lead Technician', action: 'Completed', target: 'generator monthly service', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Facilities Manager', action: 'Approved', target: 'emergency repair request', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Safety Officer', action: 'Inspected', target: 'fire suppression system', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockMaintenanceQuickActions = [
+  { id: '1', label: 'New Work Order', icon: 'plus', action: () => console.log('New WO'), variant: 'default' as const },
+  { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => console.log('Schedule'), variant: 'default' as const },
+  { id: '3', label: 'Asset List', icon: 'list', action: () => console.log('Assets'), variant: 'outline' as const },
+]
 
 export default function MaintenanceClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1801,6 +1843,39 @@ export default function MaintenanceClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockMaintenanceAIInsights}
+                title="Maintenance Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockMaintenanceCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockMaintenancePredictions}
+                title="Equipment Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockMaintenanceActivities}
+              title="Maintenance Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockMaintenanceQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
     </div>

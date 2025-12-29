@@ -65,6 +65,26 @@ import {
   Code2,
   Scan
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+import {
+  dependenciesAIInsights,
+  dependenciesCollaborators,
+  dependenciesPredictions,
+  dependenciesActivities,
+  dependenciesQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -332,6 +352,38 @@ const mockScanResult: ScanResult = {
   outdatedPackages: 67,
   securityScore: 72
 }
+
+// Enhanced Competitive Upgrade Data
+const mockDependenciesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Security Scan', description: 'No critical vulnerabilities found in latest scan.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '2', type: 'info' as const, title: 'Updates Available', description: '23 packages have minor updates available.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+  { id: '3', type: 'warning' as const, title: 'Deprecated Package', description: 'lodash.debounce is deprecated. Consider alternatives.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deprecation' },
+]
+
+const mockDependenciesCollaborators = [
+  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Infrastructure', lastActive: 'Now' },
+  { id: '2', name: 'Security Eng', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Security', lastActive: '15m ago' },
+  { id: '3', name: 'Tech Lead', avatar: '/avatars/tech.jpg', status: 'away' as const, role: 'Architecture', lastActive: '1h ago' },
+]
+
+const mockDependenciesPredictions = [
+  { id: '1', label: 'Security Score', current: 72, target: 90, predicted: 82, confidence: 75, trend: 'up' as const },
+  { id: '2', label: 'Up-to-date', current: 65, target: 95, predicted: 78, confidence: 80, trend: 'up' as const },
+  { id: '3', label: 'Vulnerabilities', current: 12, target: 0, predicted: 5, confidence: 70, trend: 'down' as const },
+]
+
+const mockDependenciesActivities = [
+  { id: '1', user: 'DevOps Lead', action: 'updated', target: 'react to v18.2.0', timestamp: '20m ago', type: 'success' as const },
+  { id: '2', user: 'System', action: 'detected', target: 'new vulnerability CVE-2024-1234', timestamp: '2h ago', type: 'warning' as const },
+  { id: '3', user: 'Security Eng', action: 'patched', target: '3 critical packages', timestamp: '4h ago', type: 'success' as const },
+]
+
+const mockDependenciesQuickActions = [
+  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => console.log('Run scan') },
+  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => console.log('Update all') },
+  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => console.log('Lock file') },
+  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => console.log('Report') },
+]
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
   const [activeTab, setActiveTab] = useState('vulnerabilities')
@@ -1656,6 +1708,39 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockDependenciesAIInsights}
+              title="Dependencies Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockDependenciesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockDependenciesPredictions}
+              title="Security Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockDependenciesActivities}
+            title="Dependency Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockDependenciesQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Vulnerability Detail Dialog */}

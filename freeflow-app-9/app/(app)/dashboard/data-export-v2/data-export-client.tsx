@@ -18,6 +18,26 @@ import {
   Server, Cloud, Table, Key, Lock, Globe, Check, X, ChevronRight, Activity
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  dataExportAIInsights,
+  dataExportCollaborators,
+  dataExportPredictions,
+  dataExportActivities,
+  dataExportQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // AWS DataPipeline/Fivetran level interfaces
 interface DataSource {
   id: string
@@ -372,6 +392,36 @@ const getIntegrationStatusColor = (status: Integration['status']) => {
     case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
   }
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockDataExportAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Pipeline Optimization', description: 'Query caching improved sync speed by 45%. 2M fewer API calls.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Schema Drift Detected', description: 'Salesforce source has 3 new columns not in destination mapping.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Schema' },
+  { id: '3', type: 'info' as const, title: 'Cost Reduction', description: 'Incremental sync reduced BigQuery storage costs by $450/month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Cost' },
+]
+
+const mockDataExportCollaborators = [
+  { id: '1', name: 'Data Engineer', avatar: '/avatars/data-eng.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '2', name: 'Analytics Lead', avatar: '/avatars/analytics.jpg', status: 'online' as const, role: 'Analytics' },
+  { id: '3', name: 'DevOps', avatar: '/avatars/devops.jpg', status: 'away' as const, role: 'DevOps' },
+]
+
+const mockDataExportPredictions = [
+  { id: '1', title: 'Data Volume Growth', prediction: 'Monthly export volume will hit 500GB by Q2 based on growth rate', confidence: 93, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Pipeline Health', prediction: 'PostgreSQL sync may fail next week - connection pool near limit', confidence: 78, trend: 'down' as const, impact: 'high' as const },
+]
+
+const mockDataExportActivities = [
+  { id: '1', user: 'Data Engineer', action: 'Created', target: 'Snowflake → BigQuery pipeline', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Analytics Lead', action: 'Ran', target: 'full sync on customers table', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'DevOps', action: 'Fixed', target: 'MongoDB connection timeout', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockDataExportQuickActions = [
+  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => console.log('New pipeline'), variant: 'default' as const },
+  { id: '2', label: 'Run All Syncs', icon: 'play', action: () => console.log('Run syncs'), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'terminal', action: () => console.log('View logs'), variant: 'outline' as const },
+]
 
 export default function DataExportClient() {
   const [activeTab, setActiveTab] = useState('pipelines')
@@ -1796,6 +1846,39 @@ export default function DataExportClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockDataExportAIInsights}
+              title="Data Pipeline Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockDataExportCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockDataExportPredictions}
+              title="Pipeline Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockDataExportActivities}
+            title="Pipeline Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockDataExportQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

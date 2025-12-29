@@ -77,6 +77,19 @@ import {
   Mail,
   Palette
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
@@ -487,6 +500,36 @@ interface KnowledgeArticlesClientProps {
   initialArticles?: Article[]
   initialStats?: ContentStats
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockKnowledgeArticlesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Engagement', description: 'Getting Started guide has 95% completion rate!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '2', type: 'warning' as const, title: 'Content Gap', description: 'No articles covering "API rate limits" - top search term.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Content' },
+  { id: '3', type: 'info' as const, title: 'SEO Performance', description: 'Documentation driving 40% of organic traffic.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'SEO' },
+]
+
+const mockKnowledgeArticlesCollaborators = [
+  { id: '1', name: 'Documentation Lead', avatar: '/avatars/docs-lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Technical Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
+  { id: '3', name: 'Product Expert', avatar: '/avatars/expert.jpg', status: 'away' as const, role: 'SME' },
+]
+
+const mockKnowledgeArticlesPredictions = [
+  { id: '1', title: 'Search Trend', prediction: 'Integration docs will see 50% more traffic after API launch', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Update Needed', prediction: '8 articles will need updates after next release', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockKnowledgeArticlesActivities = [
+  { id: '1', user: 'Technical Writer', action: 'Published', target: 'OAuth 2.0 integration guide', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Documentation Lead', action: 'Reviewed', target: 'API reference documentation', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Product Expert', action: 'Updated', target: 'troubleshooting guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockKnowledgeArticlesQuickActions = [
+  { id: '1', label: 'New Article', icon: 'plus', action: () => console.log('New article'), variant: 'default' as const },
+  { id: '2', label: 'Templates', icon: 'layout', action: () => console.log('Templates'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+]
 
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {
   const [activeTab, setActiveTab] = useState('articles')
@@ -1696,6 +1739,39 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockKnowledgeArticlesAIInsights}
+              title="Knowledge Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockKnowledgeArticlesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockKnowledgeArticlesPredictions}
+              title="Article Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockKnowledgeArticlesActivities}
+            title="Knowledge Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockKnowledgeArticlesQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Article Detail Dialog */}
         <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>

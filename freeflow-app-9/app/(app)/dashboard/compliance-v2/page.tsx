@@ -1,6 +1,6 @@
-import ComplianceClient from './compliance-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import ComplianceClient from './compliance-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

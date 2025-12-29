@@ -1756,7 +1756,6 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <CollaborationIndicator
               collaborators={mockBudgetsCollaborators}
               maxVisible={4}
-              showStatus={true}
             />
             <PredictiveAnalytics
               predictions={mockBudgetsPredictions}

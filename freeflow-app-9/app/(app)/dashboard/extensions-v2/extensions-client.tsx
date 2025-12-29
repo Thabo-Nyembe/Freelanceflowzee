@@ -109,6 +109,18 @@ import {
   Unplug
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -433,6 +445,36 @@ const formatNumber = (num: number): string => {
   if (num >= 1000) return `${(num / 1000).toFixed(0)}K`
   return num.toString()
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockExtensionsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Popular Extension', description: 'Analytics Pro became most installed extension this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
+  { id: '2', type: 'warning' as const, title: 'Update Available', description: '3 installed extensions have security updates available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'New Category', description: 'AI & Automation category added with 12 new extensions.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
+]
+
+const mockExtensionsCollaborators = [
+  { id: '1', name: 'Extensions Lead', avatar: '/avatars/ext.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
+  { id: '3', name: 'QA Engineer', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
+]
+
+const mockExtensionsPredictions = [
+  { id: '1', title: 'Extension Adoption', prediction: 'AI extensions projected to grow 40% next quarter', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Compatibility', prediction: 'All extensions compatible with next platform version', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockExtensionsActivities = [
+  { id: '1', user: 'Admin', action: 'Installed', target: 'Advanced Reporting extension', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Developer', action: 'Updated', target: 'API Connector to v2.1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Disabled', target: 'deprecated Theme Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockExtensionsQuickActions = [
+  { id: '1', label: 'Browse All', icon: 'grid', action: () => console.log('Browse all'), variant: 'default' as const },
+  { id: '2', label: 'Check Updates', icon: 'refresh', action: () => console.log('Check updates'), variant: 'default' as const },
+  { id: '3', label: 'Manage', icon: 'settings', action: () => console.log('Manage'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1652,6 +1694,39 @@ export default function ExtensionsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockExtensionsAIInsights}
+              title="Extensions Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockExtensionsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockExtensionsPredictions}
+              title="Extension Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockExtensionsActivities}
+            title="Extension Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockExtensionsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Extension Detail Dialog */}

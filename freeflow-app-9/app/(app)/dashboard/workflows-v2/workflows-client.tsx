@@ -83,6 +83,18 @@ import {
   Download
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -377,6 +389,39 @@ const getStepIcon = (type: WorkflowStep['type']) => {
   }
   return icons[type]
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Zapier/Make Level
+// ============================================================================
+
+const mockWorkflowsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Efficiency', description: 'Workflows processed 15K+ tasks this week with 99.8% success rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Slack integration approaching API rate limit. Consider optimization.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '3', type: 'info' as const, title: 'New Templates', description: '12 new workflow templates available for CRM automation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
+]
+
+const mockWorkflowsCollaborators = [
+  { id: '1', name: 'Automation Lead', avatar: '/avatars/automation.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Integration Specialist', avatar: '/avatars/integration.jpg', status: 'online' as const, role: 'Specialist' },
+  { id: '3', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'away' as const, role: 'DevOps' },
+]
+
+const mockWorkflowsPredictions = [
+  { id: '1', title: 'Execution Forecast', prediction: 'Workflow volume expected to increase 40% during month-end', confidence: 92, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cost Savings', prediction: 'Automation saved 120 hours of manual work this month', confidence: 95, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockWorkflowsActivities = [
+  { id: '1', user: 'System', action: 'Executed', target: 'Customer Onboarding workflow 250 times', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Automation Lead', action: 'Updated', target: 'Invoice Processing workflow triggers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Failed', target: 'Data Sync workflow - API timeout', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockWorkflowsQuickActions = [
+  { id: '1', label: 'Create Workflow', icon: 'plus', action: () => console.log('Create workflow'), variant: 'default' as const },
+  { id: '2', label: 'Run Test', icon: 'play', action: () => console.log('Run test'), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1654,6 +1699,39 @@ export default function WorkflowsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockWorkflowsAIInsights}
+              title="Workflow Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockWorkflowsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockWorkflowsPredictions}
+              title="Automation Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockWorkflowsActivities}
+            title="Workflow Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockWorkflowsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Workflow Detail Dialog */}

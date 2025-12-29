@@ -70,6 +70,27 @@ import {
   BarChart3,
   TrendingUp
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  chatAIInsights,
+  chatCollaborators,
+  chatPredictions,
+  chatActivities,
+  chatQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { useChat, type ChatMessage, type RoomType, type ChatStatus } from '@/lib/hooks/use-chat'
 
 // ============================================================================
@@ -1679,6 +1700,39 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         )}
       </div>
       )}
+
+      {/* Enhanced Competitive Upgrade Components */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 px-6">
+        <div className="lg:col-span-2">
+          <AIInsightsPanel
+            insights={chatAIInsights}
+            title="Chat Intelligence"
+            onInsightAction={(insight) => console.log('Insight action:', insight)}
+          />
+        </div>
+        <div className="space-y-6">
+          <CollaborationIndicator
+            collaborators={chatCollaborators}
+            maxVisible={4}
+          />
+          <PredictiveAnalytics
+            predictions={chatPredictions}
+            title="Chat Forecasts"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-6 pb-6">
+        <ActivityFeed
+          activities={chatActivities}
+          title="Chat Activity"
+          maxItems={5}
+        />
+        <QuickActionsToolbar
+          actions={chatQuickActions}
+          variant="grid"
+        />
+      </div>
 
       {/* Saved Replies Dialog */}
       <Dialog open={showSavedReplies} onOpenChange={setShowSavedReplies}>

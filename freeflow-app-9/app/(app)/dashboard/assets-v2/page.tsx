@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import AssetsClient from './assets-client'
 
 export default function Page() {

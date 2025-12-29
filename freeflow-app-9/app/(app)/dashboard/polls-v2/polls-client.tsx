@@ -75,6 +75,27 @@ import {
   CreditCard,
   Sliders
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  pollsAIInsights,
+  pollsCollaborators,
+  pollsPredictions,
+  pollsActivities,
+  pollsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -482,6 +503,38 @@ const questionTypes = [
   { type: 'picture_choice', label: 'Picture Choice', icon: Image, description: 'Image options' },
   { type: 'ranking', label: 'Ranking', icon: ArrowUp, description: 'Drag to rank items' },
   { type: 'statement', label: 'Statement', icon: MessageSquare, description: 'Info block' }
+]
+
+// Enhanced Competitive Upgrade Mock Data - Polls Context
+const mockPollsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Response Rate', description: 'Customer Satisfaction Survey has 85% response rate. Great engagement!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'Trending Topics', description: 'Product feedback questions getting most attention this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '3', type: 'warning' as const, title: 'Low Completion', description: '3 surveys have <50% completion rate. Consider shortening them.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+]
+
+const mockPollsCollaborators = [
+  { id: '1', name: 'Research Lead', avatar: '/avatars/research.jpg', status: 'online' as const, role: 'Survey Manager', lastActive: 'Now' },
+  { id: '2', name: 'Marketing Team', avatar: '/avatars/marketing.jpg', status: 'online' as const, role: 'Contributor', lastActive: '10m ago' },
+  { id: '3', name: 'Data Analyst', avatar: '/avatars/analyst.jpg', status: 'away' as const, role: 'Analyst', lastActive: '30m ago' },
+]
+
+const mockPollsPredictions = [
+  { id: '1', label: 'Avg Response Rate', current: 72, target: 80, predicted: 78, confidence: 80, trend: 'up' as const },
+  { id: '2', label: 'Completion Rate', current: 65, target: 75, predicted: 72, confidence: 75, trend: 'up' as const },
+  { id: '3', label: 'Monthly Responses', current: 1250, target: 1500, predicted: 1400, confidence: 82, trend: 'up' as const },
+]
+
+const mockPollsActivities = [
+  { id: '1', user: 'Research Lead', action: 'created', target: 'Employee Engagement Survey', timestamp: '20m ago', type: 'success' as const },
+  { id: '2', user: 'System', action: 'collected', target: '50 new responses', timestamp: '45m ago', type: 'info' as const },
+  { id: '3', user: 'Marketing Team', action: 'shared', target: 'survey link to 500 customers', timestamp: '1h ago', type: 'info' as const },
+]
+
+const mockPollsQuickActions = [
+  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => console.log('New survey') },
+  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => console.log('View results') },
+  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => console.log('Templates') },
+  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
 ]
 
 // ============================================================================
@@ -1841,6 +1894,39 @@ export default function PollsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockPollsAIInsights}
+              title="Survey Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockPollsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockPollsPredictions}
+              title="Response Rate Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockPollsActivities}
+            title="Survey Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockPollsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Create Form Dialog */}

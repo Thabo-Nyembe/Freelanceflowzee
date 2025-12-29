@@ -22,6 +22,26 @@ import {
   UserPlus, Send, CheckSquare, AlertTriangle, Briefcase, Coffee, Home
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  calendarAIInsights,
+  calendarCollaborators,
+  calendarPredictions,
+  calendarActivities,
+  calendarQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Google Calendar Level Platform
 // ============================================================================
@@ -1739,6 +1759,39 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={calendarAIInsights}
+              title="Calendar Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={calendarCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={calendarPredictions}
+              title="Schedule Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={calendarActivities}
+            title="Calendar Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={calendarQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Event Detail Modal */}
         {selectedEvent && (

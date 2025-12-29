@@ -1,6 +1,6 @@
-import QAClient from './qa-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import QAClient from './qa-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

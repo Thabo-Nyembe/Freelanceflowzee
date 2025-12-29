@@ -23,6 +23,18 @@ import {
   Copy, Trash2, Share2, Grid3x3, Gift, Save, Archive
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type ThemeStatus = 'active' | 'available' | 'installed' | 'preview' | 'deprecated'
 type ThemeCategory = 'minimal' | 'professional' | 'creative' | 'dark' | 'light' | 'colorful' | 'modern' | 'classic' | 'e-commerce' | 'portfolio' | 'blog' | 'dashboard'
@@ -196,6 +208,36 @@ const mockCollections: Collection[] = [
   { id: 'c1', name: 'Staff Picks', description: 'Hand-picked themes by our design team', themes: ['t1', 't3'], featured: true, curator: 'FreeFlow Team' },
   { id: 'c2', name: 'Best for Startups', description: 'Launch your MVP with these proven themes', themes: ['t1', 't2'], featured: true, curator: 'Sarah Chen' },
   { id: 'c3', name: 'Dark Mode Excellence', description: 'Themes with exceptional dark mode implementation', themes: ['t1'], featured: false, curator: 'Alex Rivera' },
+]
+
+// Competitive Upgrade Mock Data - Envato/ThemeForest Level Theme Marketplace Intelligence
+const mockThemeStoreAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Top Seller', description: 'Aurora Pro theme reached 10K downloads—trending in dashboard category!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sales' },
+  { id: '2', type: 'warning' as const, title: 'Compatibility Alert', description: 'React 19 released—3 themes need compatibility updates.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Dark mode themes have 40% higher conversion—consider theme variant.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockThemeStoreCollaborators = [
+  { id: '1', name: 'Theme Author', avatar: '/avatars/designer.jpg', status: 'online' as const, role: 'Author' },
+  { id: '2', name: 'UI Reviewer', avatar: '/avatars/reviewer.jpg', status: 'online' as const, role: 'Reviewer' },
+  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockThemeStorePredictions = [
+  { id: '1', title: 'Monthly Revenue', prediction: 'Theme sales projected to exceed $12K this month (+18%)', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Download Trend', prediction: 'SaaS templates expected to dominate Q1 2025 demand', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockThemeStoreActivities = [
+  { id: '1', user: 'Theme Author', action: 'Published', target: 'Velocity Dashboard Pro v2.0', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Buyer', action: 'Purchased', target: 'Aurora Pro Extended License', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'UI Reviewer', action: 'Approved', target: 'Minimal Blog Theme submission', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockThemeStoreQuickActions = [
+  { id: '1', label: 'Upload', icon: 'upload', action: () => console.log('Upload Theme'), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => console.log('Analytics'), variant: 'outline' as const },
 ]
 
 export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeStoreClientProps) {
@@ -1642,6 +1684,39 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockThemeStoreAIInsights}
+              title="Theme Store Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockThemeStoreCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockThemeStorePredictions}
+              title="Marketplace Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockThemeStoreActivities}
+            title="Marketplace Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockThemeStoreQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Theme Detail Dialog */}

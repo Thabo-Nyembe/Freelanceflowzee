@@ -25,6 +25,26 @@ import {
   Timer, Gauge, ThumbsUp, ThumbsDown, Sliders, ListChecks, FileUp, Save
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  formsAIInsights,
+  formsCollaborators,
+  formsPredictions,
+  formsActivities,
+  formsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Typeform Level Form Builder
 // ============================================================================
@@ -227,6 +247,36 @@ const formatDuration = (seconds: number): string => {
   const secs = seconds % 60
   return `${mins}m ${secs}s`
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockFormsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Completion Rate', description: 'Contact form achieving 87% completion rate. Above benchmark.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Drop-off Detected', description: 'Survey form losing 40% of respondents at question 5.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '3', type: 'info' as const, title: 'New Template Available', description: 'AI-powered lead capture template ready for use.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Templates' },
+]
+
+const mockFormsCollaborators = [
+  { id: '1', name: 'Forms Admin', avatar: '/avatars/forms.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'Content Designer', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Designer' },
+  { id: '3', name: 'Marketing Lead', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
+]
+
+const mockFormsPredictions = [
+  { id: '1', title: 'Response Forecast', prediction: 'Expecting 500+ responses from product survey this week', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Completion Trend', prediction: 'Overall completion rate trending toward 82%', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockFormsActivities = [
+  { id: '1', user: 'Admin', action: 'Published', target: 'Customer Feedback Survey', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Designer', action: 'Updated', target: 'Contact Form styling', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Received', target: '45 new responses', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockFormsQuickActions = [
+  { id: '1', label: 'Create Form', icon: 'plus', action: () => console.log('Create form'), variant: 'default' as const },
+  { id: '2', label: 'Use Template', icon: 'copy', action: () => console.log('Use template'), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1720,6 +1770,39 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockFormsAIInsights}
+              title="Forms Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockFormsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockFormsPredictions}
+              title="Forms Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockFormsActivities}
+            title="Forms Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockFormsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Share Dialog */}
         <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

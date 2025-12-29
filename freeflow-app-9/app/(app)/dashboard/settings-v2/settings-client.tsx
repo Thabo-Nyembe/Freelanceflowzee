@@ -90,6 +90,18 @@ import {
   BookOpen
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type ThemeMode = 'light' | 'dark' | 'system'
 type NotificationType = 'all' | 'important' | 'none'
@@ -233,6 +245,39 @@ const mockInvoices: Invoice[] = [
   { id: 'INV-001', date: '2024-01-15', amount: 199, status: 'paid', downloadUrl: '/invoices/inv-001.pdf' },
   { id: 'INV-002', date: '2023-12-15', amount: 199, status: 'paid', downloadUrl: '/invoices/inv-002.pdf' },
   { id: 'INV-003', date: '2023-11-15', amount: 199, status: 'paid', downloadUrl: '/invoices/inv-003.pdf' }
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Settings Level
+// ============================================================================
+
+const mockSettingsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Security Score', description: 'Your account security score is 95/100. All recommended protections enabled.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '2', type: 'warning' as const, title: 'Session Alert', description: 'Active session detected from new device in London. Verify if this is you.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'Plan Upgrade', description: 'You have used 85% of your storage. Consider upgrading for more space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+]
+
+const mockSettingsCollaborators = [
+  { id: '1', name: 'Account Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'IT Support', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Support' },
+  { id: '3', name: 'Billing Team', avatar: '/avatars/billing.jpg', status: 'away' as const, role: 'Billing' },
+]
+
+const mockSettingsPredictions = [
+  { id: '1', title: 'Storage Forecast', prediction: 'At current usage rate, storage will be full in 45 days', confidence: 92, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Renewal Savings', prediction: 'Annual billing could save you $50/year on current plan', confidence: 100, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockSettingsActivities = [
+  { id: '1', user: 'You', action: 'Changed', target: 'notification preferences', timestamp: new Date().toISOString(), type: 'info' as const },
+  { id: '2', user: 'You', action: 'Enabled', target: 'two-factor authentication', timestamp: new Date(Date.now() - 86400000).toISOString(), type: 'success' as const },
+  { id: '3', user: 'System', action: 'Revoked', target: 'inactive API key', timestamp: new Date(Date.now() - 172800000).toISOString(), type: 'warning' as const },
+]
+
+const mockSettingsQuickActions = [
+  { id: '1', label: 'Change Password', icon: 'lock', action: () => console.log('Change password'), variant: 'default' as const },
+  { id: '2', label: 'Export Data', icon: 'download', action: () => console.log('Export data'), variant: 'default' as const },
+  { id: '3', label: 'View Invoices', icon: 'file', action: () => console.log('View invoices'), variant: 'outline' as const },
 ]
 
 export default function SettingsClient() {
@@ -1796,6 +1841,39 @@ export default function SettingsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSettingsAIInsights}
+              title="Account Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSettingsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSettingsPredictions}
+              title="Account Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSettingsActivities}
+            title="Account Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSettingsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

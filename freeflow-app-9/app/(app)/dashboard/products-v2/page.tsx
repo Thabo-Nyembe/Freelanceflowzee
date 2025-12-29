@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import ProductsClient from './products-client'
 
 export default function Page() {

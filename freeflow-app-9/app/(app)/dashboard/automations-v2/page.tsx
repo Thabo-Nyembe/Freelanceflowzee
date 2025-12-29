@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import AutomationsClient from './automations-client'
 
 export default function Page() {

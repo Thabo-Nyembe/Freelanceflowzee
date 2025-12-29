@@ -74,6 +74,27 @@ import {
   CreditCard,
   Sliders
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  reportsAIInsights,
+  reportsCollaborators,
+  reportsPredictions,
+  reportsActivities,
+  reportsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CardDescription } from '@/components/ui/card'
@@ -304,6 +325,39 @@ const folders = [
   { name: 'Product', count: 10, icon: Layers },
   { name: 'Customer Success', count: 7, icon: Users },
   { name: 'HR', count: 5, icon: Users }
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Looker/Tableau Level
+// ============================================================================
+
+const mockReportsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Report Accuracy', description: 'All scheduled reports delivered on time with 99.9% data accuracy.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '2', type: 'warning' as const, title: 'Data Freshness', description: 'Sales data source is 6 hours stale. Refresh recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Data' },
+  { id: '3', type: 'info' as const, title: 'Usage Trend', description: 'Executive Dashboard views up 40% this month. Consider expanding.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockReportsCollaborators = [
+  { id: '1', name: 'Data Analyst', avatar: '/avatars/analyst.jpg', status: 'online' as const, role: 'Analyst' },
+  { id: '2', name: 'BI Manager', avatar: '/avatars/bi.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '3', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'away' as const, role: 'Finance' },
+]
+
+const mockReportsPredictions = [
+  { id: '1', title: 'Report Usage', prediction: 'Monthly report views expected to reach 10K by end of quarter', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cost Savings', prediction: 'Automated reports saving 20 hours/week in manual work', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockReportsActivities = [
+  { id: '1', user: 'Data Analyst', action: 'Created', target: 'New Q4 Revenue Dashboard', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'BI Manager', action: 'Scheduled', target: 'Weekly KPI report for leadership', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Completed', target: 'Monthly data refresh for all sources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockReportsQuickActions = [
+  { id: '1', label: 'New Report', icon: 'plus', action: () => console.log('New report'), variant: 'default' as const },
+  { id: '2', label: 'Schedule Export', icon: 'calendar', action: () => console.log('Schedule export'), variant: 'default' as const },
+  { id: '3', label: 'Data Sources', icon: 'database', action: () => console.log('Data sources'), variant: 'outline' as const },
 ]
 
 export default function ReportsClient() {
@@ -1648,6 +1702,39 @@ export default function ReportsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockReportsAIInsights}
+              title="Reports Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockReportsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockReportsPredictions}
+              title="Analytics Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockReportsActivities}
+            title="Reports Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockReportsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Report Detail Dialog */}
         <Dialog open={!!selectedReport} onOpenChange={() => setSelectedReport(null)}>

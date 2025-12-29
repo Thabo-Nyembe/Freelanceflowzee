@@ -75,6 +75,18 @@ import {
   AlertCircle
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type TrackType = 'audio' | 'midi' | 'aux' | 'master' | 'bus'
 type TrackStatus = 'recording' | 'playing' | 'stopped' | 'muted' | 'solo'
@@ -552,6 +564,36 @@ interface AudioStudioClientProps {
   initialTracks?: Track[]
   initialStats?: ProjectStats
 }
+
+// Competitive Upgrade Mock Data - Pro Tools/Logic Pro-level Audio Intelligence
+const mockAudioAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Mix Clarity', description: 'Frequency balance is optimal across all stems!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Mixing' },
+  { id: '2', type: 'warning' as const, title: 'Clipping Detected', description: 'Track 3 peaks at -0.1dB - add limiter to prevent distortion.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Mastering' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Adding subtle reverb to vocals can improve spatial depth.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Assist' },
+]
+
+const mockAudioCollaborators = [
+  { id: '1', name: 'Mix Engineer', avatar: '/avatars/mix.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '2', name: 'Producer', avatar: '/avatars/producer.jpg', status: 'online' as const, role: 'Producer' },
+  { id: '3', name: 'Session Musician', avatar: '/avatars/musician.jpg', status: 'away' as const, role: 'Musician' },
+]
+
+const mockAudioPredictions = [
+  { id: '1', title: 'Master Completion', prediction: 'Final master will be ready for distribution in 2 hours', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'LUFS Target', prediction: 'Current mix will hit -14 LUFS after mastering chain', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAudioActivities = [
+  { id: '1', user: 'Mix Engineer', action: 'Applied', target: 'multiband compression to master bus', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Producer', action: 'Approved', target: 'vocal take #7', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Session Musician', action: 'Recorded', target: 'guitar overdub', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockAudioQuickActions = [
+  { id: '1', label: 'New Track', icon: 'plus', action: () => console.log('New track'), variant: 'default' as const },
+  { id: '2', label: 'Record', icon: 'circle', action: () => console.log('Record'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function AudioStudioClient({ initialTracks, initialStats }: AudioStudioClientProps) {
   const [activeTab, setActiveTab] = useState('tracks')
@@ -1781,6 +1823,39 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAudioAIInsights}
+              title="Audio Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAudioCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAudioPredictions}
+              title="Mix Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAudioActivities}
+            title="Studio Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAudioQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Track Detail Dialog */}
         <Dialog open={showTrackDialog} onOpenChange={setShowTrackDialog}>

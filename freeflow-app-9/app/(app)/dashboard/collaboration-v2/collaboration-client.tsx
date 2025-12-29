@@ -112,6 +112,18 @@ import {
   Info
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type BoardType = 'whiteboard' | 'flowchart' | 'mindmap' | 'wireframe' | 'kanban' | 'brainstorm' | 'retrospective'
 type BoardStatus = 'active' | 'archived' | 'template'
@@ -367,6 +379,39 @@ const mockAutomations: Automation[] = [
   { id: 'aut4', name: 'File backup', trigger: 'When file is uploaded', actions: ['Sync to Google Drive', 'Create version history'], isActive: false },
   { id: 'aut5', name: 'Sprint completion', trigger: 'When sprint ends', actions: ['Generate sprint report', 'Create retrospective board', 'Notify stakeholders'], isActive: true, lastTriggered: '2024-01-12T18:00:00Z' },
   { id: 'aut6', name: 'Overdue task alert', trigger: 'Daily at 10:00 AM', actions: ['Check for overdue tasks', 'Send reminder to assignees', 'Update manager'], isActive: true, lastTriggered: '2024-01-15T10:00:00Z' }
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Miro/Figma Level
+// ============================================================================
+
+const mockCollabAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Active Collaboration', description: '15 team members actively editing boards. Peak collaboration time!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '2', type: 'warning' as const, title: 'Meeting Conflict', description: 'You have overlapping meetings scheduled for tomorrow at 2pm.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scheduling' },
+  { id: '3', type: 'info' as const, title: 'Board Insights', description: 'Product Roadmap board has highest engagement this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockCollabCollaborators = [
+  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
+  { id: '2', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'online' as const, role: 'Design' },
+  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'away' as const, role: 'Dev' },
+]
+
+const mockCollabPredictions = [
+  { id: '1', title: 'Meeting Efficiency', prediction: 'Standups running 15% shorter with new format', confidence: 93, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Board Usage', prediction: 'Whiteboard usage expected to double during planning week', confidence: 86, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockCollabActivities = [
+  { id: '1', user: 'Product Manager', action: 'Created', target: 'Q1 Planning whiteboard', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'UX Designer', action: 'Shared', target: 'new wireframes in Design Board', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Developer', action: 'Joined', target: 'Sprint Retro meeting', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockCollabQuickActions = [
+  { id: '1', label: 'New Board', icon: 'plus', action: () => console.log('New board'), variant: 'default' as const },
+  { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => console.log('Schedule meeting'), variant: 'default' as const },
+  { id: '3', label: 'Start Call', icon: 'video', action: () => console.log('Start call'), variant: 'outline' as const },
 ]
 
 export default function CollaborationClient() {
@@ -1645,6 +1690,39 @@ export default function CollaborationClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCollabAIInsights}
+              title="Collaboration Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCollabCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCollabPredictions}
+              title="Team Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCollabActivities}
+            title="Collaboration Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCollabQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* New Meeting Dialog */}
         <Dialog open={showNewMeeting} onOpenChange={setShowNewMeeting}>

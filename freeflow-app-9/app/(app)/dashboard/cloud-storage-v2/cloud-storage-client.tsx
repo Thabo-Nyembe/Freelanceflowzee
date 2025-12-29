@@ -69,6 +69,27 @@ import {
   Shield
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  cloudStorageAIInsights,
+  cloudStorageCollaborators,
+  cloudStoragePredictions,
+  cloudStorageActivities,
+  cloudStorageQuickActions
+} from '@/lib/mock-data/adapters'
+
 // Types
 type FileType = 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'spreadsheet' | 'presentation' | 'folder' | 'other'
 type SyncStatus = 'synced' | 'syncing' | 'pending' | 'error' | 'offline'
@@ -430,6 +451,36 @@ const mockQuota: StorageQuota = {
     { type: 'Other', size: 3.0 * 1024 * 1024 * 1024, count: 567, color: 'bg-gray-500' }
   ]
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockStorageAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Storage Health', description: 'All files synced successfully. 99.99% uptime this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sync' },
+  { id: '2', type: 'warning' as const, title: 'Storage Quota', description: 'Using 78% of storage. Consider cleanup or upgrade.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '3', type: 'info' as const, title: 'Duplicate Files', description: '23 potential duplicate files detected. Review to save space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+]
+
+const mockStorageCollaborators = [
+  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'away' as const, role: 'Dev' },
+]
+
+const mockStoragePredictions = [
+  { id: '1', title: 'Storage Forecast', prediction: 'At current rate, quota reached in 45 days', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Activity Pattern', prediction: 'Peak usage Tuesdays. Schedule backups accordingly.', confidence: 91, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockStorageActivities = [
+  { id: '1', user: 'You', action: 'Uploaded', target: '15 files to Projects folder', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Team Lead', action: 'Shared', target: 'Q4 Report with team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Completed', target: 'automatic backup', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockStorageQuickActions = [
+  { id: '1', label: 'Upload Files', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
+  { id: '2', label: 'New Folder', icon: 'folder-plus', action: () => console.log('New folder'), variant: 'default' as const },
+  { id: '3', label: 'Storage Report', icon: 'bar-chart', action: () => console.log('Report'), variant: 'outline' as const },
+]
 
 export default function CloudStorageClient() {
   const [activeTab, setActiveTab] = useState('files')
@@ -1598,6 +1649,39 @@ export default function CloudStorageClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockStorageAIInsights}
+              title="Storage Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockStorageCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockStoragePredictions}
+              title="Storage Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockStorageActivities}
+            title="Storage Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockStorageQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* File Detail Dialog */}

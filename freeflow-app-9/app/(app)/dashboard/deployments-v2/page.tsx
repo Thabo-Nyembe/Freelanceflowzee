@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import DeploymentsClient from './deployments-client'
 
 export default function Page() {

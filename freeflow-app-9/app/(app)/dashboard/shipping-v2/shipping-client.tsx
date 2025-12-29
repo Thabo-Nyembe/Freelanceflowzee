@@ -76,6 +76,26 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  shippingAIInsights,
+  shippingCollaborators,
+  shippingPredictions,
+  shippingActivities,
+  shippingQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPES & INTERFACES - ShipStation Level Shipping Platform
 // ============================================================================
@@ -2134,6 +2154,39 @@ export default function ShippingClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockShippingAIInsights}
+              title="Shipping Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockShippingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockShippingPredictions}
+              title="Shipping Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockShippingActivities}
+            title="Shipping Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockShippingQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Shipment Detail Dialog */}
         <Dialog open={!!selectedShipment} onOpenChange={() => setSelectedShipment(null)}>

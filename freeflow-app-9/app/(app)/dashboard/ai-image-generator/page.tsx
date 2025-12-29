@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import AIImageGenerator from '@/components/ai/ai-image-generator'
 
 export const metadata = {

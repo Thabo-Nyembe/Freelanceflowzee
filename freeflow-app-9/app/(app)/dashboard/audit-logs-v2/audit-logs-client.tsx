@@ -83,6 +83,27 @@ import {
   Mail
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  auditLogsAIInsights,
+  auditLogsCollaborators,
+  auditLogsPredictions,
+  auditLogsActivities,
+  auditLogsQuickActions
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Datadog/Splunk Level Audit Logging
 // ============================================================================
@@ -596,6 +617,36 @@ const formatDuration = (ms: number): string => {
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockAuditAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Unusual Activity', description: '15 failed login attempts from IP 192.168.1.50 in last hour.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '2', type: 'success' as const, title: 'Compliance Status', description: 'All audit retention policies are compliant. No issues detected.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '3', type: 'info' as const, title: 'Data Export Complete', description: 'Monthly audit report exported and archived successfully.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Reports' },
+]
+
+const mockAuditCollaborators = [
+  { id: '1', name: 'Security Lead', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Security' },
+  { id: '2', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Compliance' },
+  { id: '3', name: 'IT Admin', avatar: '/avatars/admin.jpg', status: 'away' as const, role: 'IT Admin' },
+]
+
+const mockAuditPredictions = [
+  { id: '1', title: 'Log Volume', prediction: 'Log volume expected to increase 20% during Q4 audit season', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'Anomaly Detection', prediction: 'ML model accuracy improving to 98.5%', confidence: 92, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockAuditActivities = [
+  { id: '1', user: 'Security Lead', action: 'Investigated', target: 'suspicious login pattern', timestamp: new Date().toISOString(), type: 'warning' as const },
+  { id: '2', user: 'System', action: 'Archived', target: '500K log entries to cold storage', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
+  { id: '3', user: 'Compliance', action: 'Generated', target: 'quarterly compliance report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
+]
+
+const mockAuditQuickActions = [
+  { id: '1', label: 'Search Logs', icon: 'search', action: () => console.log('Search logs'), variant: 'default' as const },
+  { id: '2', label: 'Create Alert', icon: 'bell', action: () => console.log('Create alert'), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1704,6 +1755,39 @@ export default function AuditLogsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAuditAIInsights}
+              title="Audit Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAuditCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAuditPredictions}
+              title="Audit Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAuditActivities}
+            title="Audit Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAuditQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Log Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>

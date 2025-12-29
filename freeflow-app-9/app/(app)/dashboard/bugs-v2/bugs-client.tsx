@@ -71,6 +71,25 @@ import {
   History
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+import {
+  bugsAIInsights,
+  bugsCollaborators,
+  bugsPredictions,
+  bugsActivities,
+  bugsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type BugStatus = 'open' | 'in_progress' | 'in_review' | 'resolved' | 'closed' | 'wont_fix' | 'duplicate'
 type BugSeverity = 'critical' | 'high' | 'medium' | 'low'
@@ -468,6 +487,36 @@ const formatFileSize = (bytes: number) => {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockBugsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Bug Resolution', description: 'Resolution time improved 35% vs last month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Critical Issues', description: '3 critical bugs need immediate attention.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Priority' },
+  { id: '3', type: 'info' as const, title: 'Pattern Detected', description: 'Authentication module has 40% of recent bugs.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analysis' },
+]
+
+const mockBugsCollaborators = [
+  { id: '1', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'online' as const, role: 'QA' },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
+  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'PM' },
+]
+
+const mockBugsPredictions = [
+  { id: '1', title: 'Bug Forecast', prediction: 'Sprint velocity indicates 15 bugs resolvable this week', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Quality Trend', prediction: 'Bug rate decreasing 12% with new testing strategy', confidence: 88, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockBugsActivities = [
+  { id: '1', user: 'Developer', action: 'Fixed', target: 'Authentication timeout bug', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'QA', action: 'Verified', target: 'Payment processing fix', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Auto-assigned', target: '5 bugs to available developers', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockBugsQuickActions = [
+  { id: '1', label: 'Report Bug', icon: 'plus', action: () => console.log('Report bug'), variant: 'default' as const },
+  { id: '2', label: 'Run Tests', icon: 'play', action: () => console.log('Run tests'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function BugsClient() {
   const [activeTab, setActiveTab] = useState('list')
@@ -1603,6 +1652,39 @@ export default function BugsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockBugsAIInsights}
+              title="Bug Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockBugsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockBugsPredictions}
+              title="Bug Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockBugsActivities}
+            title="Bug Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockBugsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Bug Detail Dialog */}
         <Dialog open={!!selectedBug} onOpenChange={() => setSelectedBug(null)}>

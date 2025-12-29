@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import UserManagementClient from './user-management-client'
 
 export default function Page() {

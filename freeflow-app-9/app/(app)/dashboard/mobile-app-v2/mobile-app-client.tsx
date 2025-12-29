@@ -29,6 +29,26 @@ import {
   Copy, Code, GitBranch, FileText, Image, Link2
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  mobileAppAIInsights,
+  mobileAppCollaborators,
+  mobileAppPredictions,
+  mobileAppActivities,
+  mobileAppQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type Platform = 'ios' | 'android' | 'all'
 type BuildStatus = 'processing' | 'ready' | 'submitted' | 'in-review' | 'approved' | 'rejected' | 'released'
@@ -146,6 +166,39 @@ const mockIAPs: InAppPurchase[] = [
   { id: 'iap2', productId: 'com.app.pro_yearly', name: 'Pro Yearly', type: 'subscription', price: '$79.99/yr', status: 'active', purchases: 2100, revenue: 167979 },
   { id: 'iap3', productId: 'com.app.credits_100', name: '100 Credits', type: 'consumable', price: '$4.99', status: 'active', purchases: 8900, revenue: 44411 },
   { id: 'iap4', productId: 'com.app.lifetime', name: 'Lifetime Access', type: 'non-consumable', price: '$199.99', status: 'active', purchases: 156, revenue: 31198 },
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - App Store Connect Level
+// ============================================================================
+
+const mockMobileAppAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Store Approved', description: 'iOS v3.2.1 approved and live on App Store with 4.8★ rating.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Release' },
+  { id: '2', type: 'warning' as const, title: 'Crash Rate Spike', description: 'Android crash rate increased 0.3% on Samsung devices. Investigation needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Stability' },
+  { id: '3', type: 'info' as const, title: 'Revenue Milestone', description: 'In-app purchases crossed $50K this month. 15% increase from last month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+]
+
+const mockMobileAppCollaborators = [
+  { id: '1', name: 'iOS Lead', avatar: '/avatars/ios.jpg', status: 'online' as const, role: 'iOS Developer' },
+  { id: '2', name: 'Android Lead', avatar: '/avatars/android.jpg', status: 'online' as const, role: 'Android Developer' },
+  { id: '3', name: 'QA Manager', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
+]
+
+const mockMobileAppPredictions = [
+  { id: '1', title: 'Download Forecast', prediction: 'Expected 25K new downloads next week based on ASO improvements', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Revenue Projection', prediction: 'Subscription revenue to reach $75K by end of quarter', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockMobileAppActivities = [
+  { id: '1', user: 'iOS Lead', action: 'Submitted', target: 'v3.2.2 to App Store review', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Android Lead', action: 'Released', target: 'v3.2.1 to Play Store beta', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'QA Manager', action: 'Flagged', target: '3 critical bugs for hotfix', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockMobileAppQuickActions = [
+  { id: '1', label: 'New Build', icon: 'plus', action: () => console.log('New build'), variant: 'default' as const },
+  { id: '2', label: 'Submit Review', icon: 'send', action: () => console.log('Submit review'), variant: 'default' as const },
+  { id: '3', label: 'View Analytics', icon: 'chart', action: () => console.log('View analytics'), variant: 'outline' as const },
 ]
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {
@@ -1659,6 +1712,39 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMobileAppAIInsights}
+              title="Mobile App Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMobileAppCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMobileAppPredictions}
+              title="App Store Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMobileAppActivities}
+            title="Mobile App Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMobileAppQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Build Detail Dialog */}

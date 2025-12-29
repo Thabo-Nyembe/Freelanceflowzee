@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * World-Class Custom Report Builder
  * Complete implementation of report building functionality

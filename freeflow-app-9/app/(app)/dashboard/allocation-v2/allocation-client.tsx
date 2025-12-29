@@ -67,6 +67,26 @@ import {
   Home
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  allocationAIInsights,
+  allocationCollaborators,
+  allocationPredictions,
+  allocationActivities,
+  allocationQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Resource Guru Level Resource Management
 // ============================================================================
@@ -646,6 +666,39 @@ const getUtilizationColor = (utilization: number): string => {
   if (utilization >= 50) return 'text-yellow-600'
   return 'text-gray-600'
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Resource Guru Level
+// ============================================================================
+
+const mockAllocationAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Optimal Balance', description: 'Team allocation at 85% utilization - healthy capacity buffer maintained.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
+  { id: '2', type: 'warning' as const, title: 'Overallocation Risk', description: '4 resources are allocated over 100% for next sprint.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Planning' },
+  { id: '3', type: 'info' as const, title: 'Skill Match', description: 'New project requires React expertise - 3 available resources identified.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Matching' },
+]
+
+const mockAllocationCollaborators = [
+  { id: '1', name: 'Resource Manager', avatar: '/avatars/rm.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Project Lead', avatar: '/avatars/pl.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Capacity Planner', avatar: '/avatars/cp.jpg', status: 'away' as const, role: 'Planner' },
+]
+
+const mockAllocationPredictions = [
+  { id: '1', title: 'Capacity Forecast', prediction: 'Team will need 2 additional FTEs by Q2 based on pipeline', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Utilization Trend', prediction: 'Billable hours trending 15% higher than last quarter', confidence: 92, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAllocationActivities = [
+  { id: '1', user: 'Resource Manager', action: 'Allocated', target: 'Sarah Chen to Project Phoenix', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Project Lead', action: 'Requested', target: 'Extension for Mike Johnson', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Flagged', target: 'Conflicting allocations for 2 resources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockAllocationQuickActions = [
+  { id: '1', label: 'New Allocation', icon: 'plus', action: () => console.log('New allocation'), variant: 'default' as const },
+  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => console.log('View calendar'), variant: 'default' as const },
+  { id: '3', label: 'Capacity Report', icon: 'chart', action: () => console.log('Capacity report'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1694,6 +1747,39 @@ export default function AllocationClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAllocationAIInsights}
+              title="Allocation Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAllocationCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAllocationPredictions}
+              title="Capacity Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAllocationActivities}
+            title="Allocation Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAllocationQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Allocation Detail Dialog */}
         <Dialog open={!!selectedAllocation} onOpenChange={() => setSelectedAllocation(null)}>

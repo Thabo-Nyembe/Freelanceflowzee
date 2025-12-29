@@ -59,6 +59,28 @@ import {
   Sliders,
   Mail
 } from 'lucide-react'
+
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  performanceAIInsights,
+  performanceCollaborators,
+  performancePredictions,
+  performanceActivities,
+  performanceQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -411,6 +433,38 @@ const ScoreCircle = ({ score, size = 'lg', label }: { score: number; size?: 'sm'
     </div>
   )
 }
+
+// Competitive Upgrade Mock Data
+const mockPerfAIInsights = [
+  { id: '1', query: "What's causing slow load times?", insight: "Largest Contentful Paint is 3.2s due to unoptimized hero image (2.4MB). Compress to WebP format for 70% size reduction.", confidence: 0.94, category: 'engagement' as const, timestamp: new Date().toISOString() },
+  { id: '2', query: "Which pages need optimization?", insight: "/products page has 4.8s TTI due to 23 render-blocking scripts. Code splitting could improve by 60%.", confidence: 0.89, category: 'conversion' as const, timestamp: new Date().toISOString() },
+  { id: '3', query: "Mobile vs desktop performance?", insight: "Mobile scores 12 points lower. Focus on reducing JavaScript bundle size and implementing lazy loading.", confidence: 0.86, category: 'revenue' as const, timestamp: new Date().toISOString() },
+]
+
+const mockPerfCollaborators = [
+  { id: '1', name: 'DevOps Team', avatar: '/avatars/devops.jpg', status: 'active' as const, lastActive: 'Just now', role: 'Performance' },
+  { id: '2', name: 'Frontend Lead', avatar: '/avatars/frontend.jpg', status: 'active' as const, lastActive: '5m ago', role: 'Engineering' },
+  { id: '3', name: 'SEO Analyst', avatar: '/avatars/seo.jpg', status: 'idle' as const, lastActive: '20m ago', role: 'Marketing' },
+]
+
+const mockPerfPredictions = [
+  { id: '1', metric: 'Performance Score', currentValue: 72, predictedValue: 85, confidence: 0.82, trend: 'up' as const, timeframe: 'After optimizations', factors: ['Image compression', 'Code splitting', 'CDN'] },
+  { id: '2', metric: 'LCP (seconds)', currentValue: 3.2, predictedValue: 1.8, confidence: 0.78, trend: 'down' as const, timeframe: 'Next release', factors: ['Lazy loading', 'Preloading critical assets'] },
+  { id: '3', metric: 'SEO Score', currentValue: 89, predictedValue: 95, confidence: 0.85, trend: 'up' as const, timeframe: 'Next 30 days', factors: ['Core Web Vitals improvements'] },
+]
+
+const mockPerfActivities = [
+  { id: '1', type: 'update' as const, title: 'Performance test completed', description: 'Mobile audit score improved to 72', user: { name: 'System', avatar: '' }, timestamp: new Date().toISOString(), metadata: {} },
+  { id: '2', type: 'create' as const, title: 'New optimization deployed', description: 'Image lazy loading enabled on /products', user: { name: 'Frontend Lead', avatar: '/avatars/frontend.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
+  { id: '3', type: 'milestone' as const, title: 'Core Web Vitals passed', description: 'Homepage now passes all CWV metrics', user: { name: 'DevOps Team', avatar: '/avatars/devops.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
+]
+
+const mockPerfQuickActions = [
+  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => console.log('Run audit') },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => console.log('View report') },
+  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => console.log('Compare') },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => console.log('Export') },
+]
 
 export default function PerformanceClient() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1846,6 +1900,27 @@ export default function PerformanceClient() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* AI-Powered Performance Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <AIInsightsPanel
+          insights={mockPerfAIInsights}
+          onAskQuestion={(q) => console.log('Performance Question:', q)}
+        />
+        <PredictiveAnalytics predictions={mockPerfPredictions} />
+      </div>
+
+      {/* Activity Feed */}
+      <div className="mt-6">
+        <ActivityFeed
+          activities={mockPerfActivities}
+          maxItems={5}
+          showFilters={true}
+        />
+      </div>
+
+      {/* Quick Actions Toolbar */}
+      <QuickActionsToolbar actions={mockPerfQuickActions} />
     </div>
   )
 }

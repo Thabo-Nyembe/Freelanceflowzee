@@ -1,6 +1,6 @@
-import ContractsClient from './contracts-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import ContractsClient from './contracts-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

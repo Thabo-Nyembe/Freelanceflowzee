@@ -50,6 +50,19 @@ import {
   Workflow,
   FileText
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -289,6 +302,36 @@ const severityColors: Record<string, string> = {
   high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockPerfAnalyticsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Performance Improved', description: 'P95 latency reduced 40% after database optimization.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Latency' },
+  { id: '2', type: 'warning' as const, title: 'Memory Pressure', description: 'API server memory usage at 85%. Consider scaling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
+  { id: '3', type: 'info' as const, title: 'Traffic Pattern', description: 'Peak traffic shifted to 2pm-4pm. Adjust autoscaling.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Traffic' },
+]
+
+const mockPerfAnalyticsCollaborators = [
+  { id: '1', name: 'SRE Lead', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
+  { id: '2', name: 'Performance Engineer', avatar: '/avatars/perf.jpg', status: 'online' as const, role: 'Engineering' },
+  { id: '3', name: 'Platform Lead', avatar: '/avatars/platform.jpg', status: 'away' as const, role: 'Platform' },
+]
+
+const mockPerfAnalyticsPredictions = [
+  { id: '1', title: 'Capacity Forecast', prediction: 'Current growth rate requires 50% more capacity by Q2', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Anomaly Detection', prediction: 'Error rate spike likely during next deployment window', confidence: 74, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockPerfAnalyticsActivities = [
+  { id: '1', user: 'SRE Lead', action: 'Resolved', target: 'latency alert for /api/users', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Performance Engineer', action: 'Created', target: 'new dashboard for API metrics', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Platform Lead', action: 'Scaled', target: 'web tier to 12 instances', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockPerfAnalyticsQuickActions = [
+  { id: '1', label: 'New Alert', icon: 'bell', action: () => console.log('New alert'), variant: 'default' as const },
+  { id: '2', label: 'Dashboard', icon: 'layout', action: () => console.log('Dashboard'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function PerformanceAnalyticsClient() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1704,6 +1747,39 @@ export default function PerformanceAnalyticsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockPerfAnalyticsAIInsights}
+              title="Performance Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockPerfAnalyticsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockPerfAnalyticsPredictions}
+              title="Performance Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockPerfAnalyticsActivities}
+            title="Performance Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockPerfAnalyticsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Create Dashboard Dialog */}
         <Dialog open={showCreateDashboardDialog} onOpenChange={setShowCreateDashboardDialog}>

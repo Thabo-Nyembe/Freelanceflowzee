@@ -60,6 +60,19 @@ import {
   Link,
   Image
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -382,6 +395,38 @@ const mockHelpCenterSettings: HelpCenterSettings = {
   languages: ['en', 'es', 'fr', 'de'],
   defaultLanguage: 'en'
 }
+
+// Enhanced Competitive Upgrade Mock Data - FAQ Context
+const mockFAQAIInsights = [
+  { id: '1', type: 'info' as const, title: 'Top Search Query', description: '"How to reset password" searched 500 times this week. Consider highlighting.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Search' },
+  { id: '2', type: 'warning' as const, title: 'Low Rated Articles', description: '5 articles have <60% helpfulness rating. Review and update content.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '3', type: 'success' as const, title: 'Engagement Up', description: 'Knowledge base views increased 35% this month. Great job!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockFAQCollaborators = [
+  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Content Manager', lastActive: 'Now' },
+  { id: '2', name: 'Support Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Technical Writer', lastActive: '6m ago' },
+  { id: '3', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'away' as const, role: 'UX Research', lastActive: '30m ago' },
+]
+
+const mockFAQPredictions = [
+  { id: '1', label: 'Article Views', current: 15000, target: 20000, predicted: 18000, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Helpfulness Score', current: 78, target: 90, predicted: 84, confidence: 75, trend: 'up' as const },
+  { id: '3', label: 'Search Success Rate', current: 72, target: 85, predicted: 80, confidence: 78, trend: 'up' as const },
+]
+
+const mockFAQActivities = [
+  { id: '1', user: 'Content Lead', action: 'published', target: '3 new articles', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'Support Writer', action: 'updated', target: 'Getting Started guide', timestamp: '30m ago', type: 'info' as const },
+  { id: '3', user: 'UX Designer', action: 'reviewed', target: 'article analytics dashboard', timestamp: '1h ago', type: 'info' as const },
+]
+
+const mockFAQQuickActions = [
+  { id: '1', label: 'New Article', icon: 'Plus', shortcut: 'N', action: () => console.log('New article') },
+  { id: '2', label: 'Search', icon: 'Search', shortcut: 'S', action: () => console.log('Search') },
+  { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => console.log('Analytics') },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => console.log('Settings') },
+]
 
 // ============================================================================
 // COMPONENT
@@ -1663,6 +1708,39 @@ export default function FAQClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockFAQAIInsights}
+              title="Knowledge Base Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockFAQCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockFAQPredictions}
+              title="Content Metrics Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockFAQActivities}
+            title="Content Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockFAQQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Create Article Dialog */}

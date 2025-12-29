@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import MilestonesClient from './milestones-client'
 
 export default function Page() {

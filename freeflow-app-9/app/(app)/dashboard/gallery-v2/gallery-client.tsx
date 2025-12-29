@@ -54,6 +54,27 @@ import {
   Globe,
   Mail
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  galleryAIInsights,
+  galleryCollaborators,
+  galleryPredictions,
+  galleryActivities,
+  galleryQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -390,6 +411,38 @@ const mockTopics: Topic[] = [
   { id: '4', name: 'People', slug: 'people', description: 'Portraits and human moments', coverPhoto: '/topics/people.jpg', photoCount: 38000, featured: false },
   { id: '5', name: 'Food & Drink', slug: 'food-drink', description: 'Culinary photography', coverPhoto: '/topics/food.jpg', photoCount: 21000, featured: false },
   { id: '6', name: 'Business', slug: 'business', description: 'Work and professional life', coverPhoto: '/topics/business.jpg', photoCount: 15000, featured: false }
+]
+
+// Enhanced Competitive Upgrade Mock Data - Gallery Context
+const mockGalleryAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Trending Content', description: 'Your landscape photos are getting 3x more views this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '2', type: 'info' as const, title: 'Storage Optimization', description: 'Enable smart compression to save 2.5GB of storage space.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '3', type: 'warning' as const, title: 'License Expiring', description: '12 photos have licenses expiring in 7 days. Review and renew.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Licensing' },
+]
+
+const mockGalleryCollaborators = [
+  { id: '1', name: 'Emma Watson', avatar: '/avatars/emma.jpg', status: 'online' as const, role: 'Photographer', lastActive: 'Now' },
+  { id: '2', name: 'Liam Brown', avatar: '/avatars/liam.jpg', status: 'online' as const, role: 'Editor', lastActive: '8m ago' },
+  { id: '3', name: 'Ava Williams', avatar: '/avatars/ava.jpg', status: 'away' as const, role: 'Curator', lastActive: '25m ago' },
+]
+
+const mockGalleryPredictions = [
+  { id: '1', label: 'Monthly Views', current: 12500, target: 15000, predicted: 14200, confidence: 80, trend: 'up' as const },
+  { id: '2', label: 'Download Rate', current: 8.5, target: 12, predicted: 10.2, confidence: 72, trend: 'up' as const },
+  { id: '3', label: 'Engagement Score', current: 78, target: 85, predicted: 82, confidence: 85, trend: 'up' as const },
+]
+
+const mockGalleryActivities = [
+  { id: '1', user: 'Emma Watson', action: 'uploaded', target: '24 new photos', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'Liam Brown', action: 'edited', target: 'sunset collection metadata', timestamp: '25m ago', type: 'info' as const },
+  { id: '3', user: 'Ava Williams', action: 'featured', target: '5 photos in showcase', timestamp: '1h ago', type: 'success' as const },
+]
+
+const mockGalleryQuickActions = [
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
+  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => console.log('New album') },
+  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => console.log('Bulk edit') },
+  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
 ]
 
 export default function GalleryClient() {
@@ -1533,6 +1586,39 @@ export default function GalleryClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockGalleryAIInsights}
+              title="Gallery Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockGalleryCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockGalleryPredictions}
+              title="Gallery Metrics Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockGalleryActivities}
+            title="Gallery Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockGalleryQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Photo Detail Dialog */}
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>

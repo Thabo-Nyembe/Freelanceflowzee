@@ -98,6 +98,18 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type WebinarStatus = 'scheduled' | 'live' | 'ended' | 'cancelled' | 'draft'
 type WebinarType = 'webinar' | 'meeting' | 'training' | 'demo' | 'conference'
@@ -433,6 +445,36 @@ const formatBytes = (bytes: number) => {
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }
+
+// Competitive Upgrade Mock Data - Zoom/Hopin Level Webinar Intelligence
+const mockWebinarsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Attendance Record', description: 'Product Launch webinar hit 2,500 live attendees—your highest ever!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Attendance' },
+  { id: '2', type: 'warning' as const, title: 'Engagement Drop', description: 'Q&A participation down 25% in last 3 webinars. Consider breakout rooms.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Optimal webinar length is 45-60 mins—your 90-min sessions show 30% drop-off.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockWebinarsCollaborators = [
+  { id: '1', name: 'Event Host', avatar: '/avatars/host.jpg', status: 'online' as const, role: 'Host' },
+  { id: '2', name: 'Producer', avatar: '/avatars/producer.jpg', status: 'online' as const, role: 'Producer' },
+  { id: '3', name: 'Panelist', avatar: '/avatars/speaker.jpg', status: 'away' as const, role: 'Panelist' },
+]
+
+const mockWebinarsPredictions = [
+  { id: '1', title: 'Registration Conversion', prediction: '72% of registrants expected to attend live based on email engagement', confidence: 84, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Lead Generation', prediction: 'Next webinar projected to generate 450+ qualified leads', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockWebinarsActivities = [
+  { id: '1', user: 'Event Host', action: 'Scheduled', target: 'Q1 Product Roadmap Webinar', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Producer', action: 'Uploaded', target: 'Customer Success Story recording', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Marketing', action: 'Sent', target: 'Reminder emails to 1,200 registrants', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockWebinarsQuickActions = [
+  { id: '1', label: 'New Webinar', icon: 'plus', action: () => console.log('New Webinar'), variant: 'default' as const },
+  { id: '2', label: 'Go Live', icon: 'video', action: () => console.log('Go Live'), variant: 'default' as const },
+  { id: '3', label: 'Recordings', icon: 'film', action: () => console.log('Recordings'), variant: 'outline' as const },
+]
 
 export default function WebinarsClient() {
   const [activeTab, setActiveTab] = useState('webinars')
@@ -1863,6 +1905,39 @@ export default function WebinarsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockWebinarsAIInsights}
+              title="Webinar Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockWebinarsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockWebinarsPredictions}
+              title="Webinar Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockWebinarsActivities}
+            title="Webinar Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockWebinarsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Webinar Detail Dialog */}
         <Dialog open={!!selectedWebinar} onOpenChange={() => setSelectedWebinar(null)}>

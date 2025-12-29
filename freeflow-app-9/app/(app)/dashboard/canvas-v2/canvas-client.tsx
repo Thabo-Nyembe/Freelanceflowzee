@@ -19,6 +19,27 @@ import {
   SendToBack, AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
   Crown, Wand2, Merge, Split, Slice, Scissors, Droplet
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  canvasAIInsights,
+  canvasCollaborators,
+  canvasPredictions,
+  canvasActivities,
+  canvasQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -112,6 +133,38 @@ interface TeamMember {
   last_active: string
   boards_access: number
 }
+
+// Enhanced Competitive Upgrade Data
+const mockCanvasAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Design System', description: 'Component library 95% consistent across all boards.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Consistency' },
+  { id: '2', type: 'info' as const, title: 'Collaboration', description: '8 team members actively editing across 3 boards.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Teamwork' },
+  { id: '3', type: 'warning' as const, title: 'Export Queue', description: '5 high-res exports pending. Consider batch processing.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Exports' },
+]
+
+const mockCanvasCollaborators = [
+  { id: '1', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Design', lastActive: 'Now' },
+  { id: '2', name: 'UI Designer', avatar: '/avatars/ui.jpg', status: 'online' as const, role: 'UI/UX', lastActive: '5m ago' },
+  { id: '3', name: 'Illustrator', avatar: '/avatars/illustrator.jpg', status: 'away' as const, role: 'Graphics', lastActive: '20m ago' },
+]
+
+const mockCanvasPredictions = [
+  { id: '1', label: 'Boards', current: 45, target: 60, predicted: 52, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Components', current: 320, target: 400, predicted: 360, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Team Usage', current: 85, target: 95, predicted: 90, confidence: 85, trend: 'up' as const },
+]
+
+const mockCanvasActivities = [
+  { id: '1', user: 'Design Lead', action: 'created', target: 'Dashboard redesign board', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'UI Designer', action: 'shared', target: 'Mobile app mockups', timestamp: '30m ago', type: 'info' as const },
+  { id: '3', user: 'Illustrator', action: 'exported', target: '15 icons to SVG', timestamp: '1h ago', type: 'success' as const },
+]
+
+const mockCanvasQuickActions = [
+  { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => console.log('New board') },
+  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => console.log('Templates') },
+  { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
+]
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1665,6 +1718,39 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCanvasAIInsights}
+              title="Canvas Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCanvasCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCanvasPredictions}
+              title="Design Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCanvasActivities}
+            title="Canvas Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCanvasQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* New Board Modal */}

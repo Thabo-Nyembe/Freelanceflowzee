@@ -73,6 +73,19 @@ import {
   Mail,
   History
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -420,6 +433,36 @@ const mockStats: LogStats = {
   uniqueIPs: 2567,
   bytesTransferred: 12345678901
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockLogsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Security Status', description: 'No suspicious activity detected in last 24 hours.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '2', type: 'warning' as const, title: 'Failed Logins', description: '15 failed login attempts from unknown IPs. Review needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Authentication' },
+  { id: '3', type: 'info' as const, title: 'Traffic Pattern', description: 'API usage 40% higher during business hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockLogsCollaborators = [
+  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
+  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'away' as const, role: 'Compliance' },
+]
+
+const mockLogsPredictions = [
+  { id: '1', title: 'Traffic Forecast', prediction: 'Peak traffic expected Monday 9-11 AM', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Storage Usage', prediction: 'Log storage reaching 80% in 2 weeks', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockLogsActivities = [
+  { id: '1', user: 'System', action: 'Blocked', target: '3 suspicious IP addresses', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Admin', action: 'Reviewed', target: 'authentication logs', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'DevOps', action: 'Archived', target: 'logs older than 90 days', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockLogsQuickActions = [
+  { id: '1', label: 'Export Logs', icon: 'download', action: () => console.log('Export'), variant: 'default' as const },
+  { id: '2', label: 'Run Audit', icon: 'shield', action: () => console.log('Audit'), variant: 'default' as const },
+  { id: '3', label: 'Configure Alerts', icon: 'bell', action: () => console.log('Alerts'), variant: 'outline' as const },
+]
 
 export default function AccessLogsClient() {
   const [activeTab, setActiveTab] = useState('logs')
@@ -1603,6 +1646,39 @@ export default function AccessLogsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockLogsAIInsights}
+              title="Access Log Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockLogsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockLogsPredictions}
+              title="Log Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockLogsActivities}
+            title="Access Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockLogsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Log Detail Dialog */}

@@ -23,6 +23,26 @@ import {
   Wallet, CreditCard as CreditCardIcon, Building2, UserCog
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  expensesAIInsights,
+  expensesCollaborators,
+  expensesPredictions,
+  expensesActivities,
+  expensesQuickActions,
+} from '@/lib/mock-data/adapters'
 // Types
 type ExpenseStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'reimbursed' | 'processing'
 type ExpenseCategory = 'travel' | 'meals' | 'transport' | 'lodging' | 'supplies' | 'software' | 'entertainment' | 'other'
@@ -169,6 +189,36 @@ const mockMileage: MileageEntry[] = [
 
 const mockPerDiems: PerDiem[] = [
   { id: 'pd1', location: 'New York, NY', startDate: '2024-01-15', endDate: '2024-01-18', dailyRate: 79, totalAmount: 237, meals: { breakfast: true, lunch: true, dinner: true }, status: 'pending' },
+]
+
+// Competitive Upgrade Mock Data - Expensify/SAP Concur-level Expense Intelligence
+const mockExpensesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Policy Compliance', description: 'All expense reports comply with company policy!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '2', type: 'warning' as const, title: 'Receipt Missing', description: '5 expenses over $25 need receipts attached.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Documentation' },
+  { id: '3', type: 'info' as const, title: 'AI Analysis', description: 'Travel spending 15% under budget this quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockExpensesCollaborators = [
+  { id: '1', name: 'Finance Manager', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Approver', avatar: '/avatars/approver.jpg', status: 'online' as const, role: 'Approver' },
+  { id: '3', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'away' as const, role: 'Accountant' },
+]
+
+const mockExpensesPredictions = [
+  { id: '1', title: 'Monthly Spend', prediction: 'Team expenses will reach $45K by month end', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Reimbursement', prediction: 'Average reimbursement time will drop to 3 days', confidence: 82, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockExpensesActivities = [
+  { id: '1', user: 'Finance Manager', action: 'Approved', target: '12 expense reports', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Approver', action: 'Requested', target: 'additional documentation', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Accountant', action: 'Processed', target: '$8,500 reimbursement batch', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockExpensesQuickActions = [
+  { id: '1', label: 'New Expense', icon: 'plus', action: () => console.log('New expense'), variant: 'default' as const },
+  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => console.log('Scan'), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
 ]
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
@@ -1628,6 +1678,39 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             </Tabs>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockExpensesAIInsights}
+              title="Expense Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockExpensesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockExpensesPredictions}
+              title="Spend Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockExpensesActivities}
+            title="Expense Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockExpensesQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Report Detail Dialog */}

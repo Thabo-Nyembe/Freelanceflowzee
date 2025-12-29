@@ -72,6 +72,27 @@ import {
   LayoutGrid,
   Terminal
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  eventsAIInsights,
+  eventsCollaborators,
+  eventsPredictions,
+  eventsActivities,
+  eventsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -1817,6 +1838,39 @@ export default function EventsClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={eventsAIInsights}
+                title="Event Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={eventsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={eventsPredictions}
+                title="Event Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={eventsActivities}
+              title="Event Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={eventsQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
 

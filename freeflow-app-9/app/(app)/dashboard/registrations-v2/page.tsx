@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import RegistrationsClient from './registrations-client'
 
 export default function Page() {

@@ -68,6 +68,18 @@ import {
   Archive
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'paused' | 'failed' | 'cancelled'
 type CampaignType = 'newsletter' | 'promotional' | 'automated' | 'transactional' | 'welcome' | 'reengagement' | 'announcement'
@@ -692,6 +704,39 @@ interface EmailMarketingClientProps {
   initialSubscribers?: Subscriber[]
   initialTemplates?: EmailTemplate[]
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Mailchimp Level
+// ============================================================================
+
+const mockEmailAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Open Rate', description: 'Last campaign achieved 42% open rate - 15% above industry average.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Bounce Alert', description: '150 emails bounced from last send. Clean list recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deliverability' },
+  { id: '3', type: 'info' as const, title: 'Best Send Time', description: 'Your audience engages most on Tuesdays at 10am. Schedule accordingly.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+]
+
+const mockEmailCollaborators = [
+  { id: '1', name: 'Marketing Lead', avatar: '/avatars/marketing.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Content Writer', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Content' },
+  { id: '3', name: 'Designer', avatar: '/avatars/designer.jpg', status: 'away' as const, role: 'Design' },
+]
+
+const mockEmailPredictions = [
+  { id: '1', title: 'Campaign Forecast', prediction: 'Holiday campaign expected to generate 25% more revenue than last year', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'List Growth', prediction: 'Subscriber list projected to reach 50K by end of quarter', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockEmailActivities = [
+  { id: '1', user: 'Marketing Lead', action: 'Sent', target: 'Weekly Newsletter to 25K subscribers', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Content Writer', action: 'Created', target: 'New email template for Black Friday', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Flagged', target: '50 subscribers for re-engagement', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockEmailQuickActions = [
+  { id: '1', label: 'New Campaign', icon: 'plus', action: () => console.log('New campaign'), variant: 'default' as const },
+  { id: '2', label: 'View Analytics', icon: 'chart', action: () => console.log('View analytics'), variant: 'default' as const },
+  { id: '3', label: 'Manage Lists', icon: 'users', action: () => console.log('Manage lists'), variant: 'outline' as const },
+]
 
 export default function EmailMarketingClient({
   initialCampaigns = mockCampaigns,
@@ -1560,6 +1605,39 @@ export default function EmailMarketingClient({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockEmailAIInsights}
+              title="Email Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockEmailCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockEmailPredictions}
+              title="Campaign Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockEmailActivities}
+            title="Email Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockEmailQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Campaign Detail Dialog */}
         <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>

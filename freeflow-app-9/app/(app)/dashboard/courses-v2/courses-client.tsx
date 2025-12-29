@@ -19,6 +19,18 @@ import {
   MessageSquare, CheckCircle, XCircle, Eye, Edit, Plus, Search, Filter
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // UDEMY/COURSERA-LEVEL LMS - Learning Management System
 // Features: Course builder, Curriculum, Quizzes, Analytics, Certificates
@@ -510,6 +522,38 @@ const mockReviews: Review[] = [
     instructorResponse: null,
     instructorResponseAt: null
   }
+]
+
+// Enhanced Courses Mock Data
+const mockCoursesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Course Performance', description: 'Python Masterclass completion rate up 18% this month. Students love the new exercises.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '2', type: 'info' as const, title: 'Engagement Alert', description: 'Module 4 has highest drop-off rate. Consider adding more interactive content.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Content' },
+  { id: '3', type: 'warning' as const, title: 'Q&A Backlog', description: '15 student questions unanswered for more than 48 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Support' },
+]
+
+const mockCoursesCollaborators = [
+  { id: '1', name: 'Lead Instructor', avatar: '/avatars/instructor.jpg', status: 'online' as const, role: 'Course Creator', lastActive: 'Now' },
+  { id: '2', name: 'TA Sarah', avatar: '/avatars/ta.jpg', status: 'online' as const, role: 'Teaching Assistant', lastActive: '5m ago' },
+  { id: '3', name: 'Content Editor', avatar: '/avatars/editor.jpg', status: 'away' as const, role: 'Video Production', lastActive: '1h ago' },
+]
+
+const mockCoursesPredictions = [
+  { id: '1', label: 'Enrollments', current: 2847, target: 3500, predicted: 3200, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Completion Rate', current: 68, target: 75, predicted: 72, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Revenue', current: 28450, target: 35000, predicted: 32000, confidence: 85, trend: 'up' as const },
+]
+
+const mockCoursesActivities = [
+  { id: '1', user: 'Lead Instructor', action: 'published', target: 'new lecture in Python Advanced', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'TA Sarah', action: 'answered', target: '8 student questions', timestamp: '30m ago', type: 'info' as const },
+  { id: '3', user: 'Content Editor', action: 'uploaded', target: '3 new video lessons', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockCoursesQuickActions = [
+  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => console.log('New course') },
+  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => console.log('Add lecture') },
+  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => console.log('Create quiz') },
+  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => console.log('Analytics') },
 ]
 
 export default function CoursesClient() {
@@ -1804,6 +1848,39 @@ export default function CoursesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCoursesAIInsights}
+              title="Course Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCoursesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCoursesPredictions}
+              title="Learning Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCoursesActivities}
+            title="Course Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCoursesQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import MessagingClient from './messaging-client'
 
 export default function Page() {

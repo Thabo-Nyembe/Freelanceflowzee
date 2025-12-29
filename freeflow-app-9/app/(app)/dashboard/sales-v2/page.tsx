@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import SalesClient from './sales-client'
 
 export default function Page() {

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import BackupsClient from './backups-client'
 
 export default function Page() {

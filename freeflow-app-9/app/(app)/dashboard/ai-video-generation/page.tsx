@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * 🎬 AI VIDEO GENERATION PAGE - A++++ GRADE
  * World-class AI-powered video generation and management system

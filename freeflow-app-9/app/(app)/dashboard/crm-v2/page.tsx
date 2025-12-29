@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CrmClient from './crm-client'
 
 export default function Page() {

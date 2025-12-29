@@ -17,6 +17,18 @@ import { useMarketplaceIntegrations, MarketplaceIntegration, MarketplaceStats } 
 import { createMarketplaceIntegration, deleteMarketplaceIntegration, connectIntegration, disconnectIntegration } from '@/app/actions/marketplace-integrations'
 import { Search, Star, Download, ExternalLink, Shield, Zap, Clock, Users, TrendingUp, CheckCircle, XCircle, Settings, Code, CreditCard, Package, Grid3X3, List, Filter, ChevronRight, Heart, Share2, Flag, MessageSquare, Plus, ArrowUpRight, Sparkles, Award, Verified, Globe, Lock, RefreshCw, Bell, Webhook, Key, HardDrive, AlertOctagon, Sliders, Mail, Copy } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Stripe Marketplace Level Types
 interface AppListing {
   id: string
@@ -427,6 +439,39 @@ const categories: { id: AppCategory; name: string; icon: React.ReactNode; count:
   { id: 'developer-tools', name: 'Developer Tools', icon: <Code className="w-4 h-4" />, count: 83 },
   { id: 'finance', name: 'Finance', icon: <CreditCard className="w-4 h-4" />, count: 28 },
   { id: 'hr', name: 'HR & Recruiting', icon: <Users className="w-4 h-4" />, count: 22 }
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Stripe Connect Level
+// ============================================================================
+
+const mockIntegrationsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Top Integration', description: 'Slack integration has 98% adoption rate and drives 45% of workflow automation.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+  { id: '2', type: 'warning' as const, title: 'API Rate Alert', description: 'Salesforce integration approaching API limits. Consider upgrade.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '3', type: 'info' as const, title: 'New Partners', description: '15 new integrations added this month. Review for potential value.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
+]
+
+const mockIntegrationsCollaborators = [
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/integration.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
+  { id: '3', name: 'Solutions Architect', avatar: '/avatars/architect.jpg', status: 'away' as const, role: 'Architect' },
+]
+
+const mockIntegrationsPredictions = [
+  { id: '1', title: 'Adoption Forecast', prediction: 'New Notion integration expected to reach 80% adoption in 2 weeks', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cost Optimization', prediction: 'Consolidating 3 integrations could save $2K/month', confidence: 92, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockIntegrationsActivities = [
+  { id: '1', user: 'Integration Lead', action: 'Installed', target: 'Notion integration for all teams', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'System', action: 'Synced', target: '50K records with Salesforce', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'DevOps', action: 'Flagged', target: 'Deprecated API in Stripe integration', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockIntegrationsQuickActions = [
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => console.log('Browse apps'), variant: 'default' as const },
+  { id: '2', label: 'Install App', icon: 'plus', action: () => console.log('Install app'), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
 ]
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
@@ -1730,6 +1775,39 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockIntegrationsAIInsights}
+              title="Integration Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockIntegrationsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockIntegrationsPredictions}
+              title="Integration Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockIntegrationsActivities}
+            title="Integration Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockIntegrationsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* App Detail Dialog */}

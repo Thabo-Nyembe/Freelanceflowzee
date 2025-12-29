@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * World-Class White Label System
  * Complete implementation of branding and customization features

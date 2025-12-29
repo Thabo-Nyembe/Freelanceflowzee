@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * A++++ ML INSIGHTS PAGE - WORLD-CLASS IMPLEMENTATION
  * Enterprise-grade machine learning insights with complete CRUD operations

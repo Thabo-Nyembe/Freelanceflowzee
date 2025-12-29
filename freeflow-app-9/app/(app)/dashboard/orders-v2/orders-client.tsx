@@ -78,6 +78,26 @@ import {
   Key
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  ordersAIInsights,
+  ordersCollaborators,
+  ordersPredictions,
+  ordersActivities,
+  ordersQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Shopify Level Order Management
 // ============================================================================
@@ -593,6 +613,36 @@ const formatCurrency = (amount: number, currency = 'USD'): string => {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
+
+// Mock data for AI-powered competitive upgrade components
+const mockOrdersAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Revenue Milestone', description: 'Crossed $1M in orders this month - 25% above target!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '2', type: 'warning' as const, title: 'Fulfillment Delay', description: '12 orders pending shipment over 24 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Fulfillment' },
+  { id: '3', type: 'info' as const, title: 'AOV Increasing', description: 'Average order value up 18% compared to last month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockOrdersCollaborators = [
+  { id: '1', name: 'Operations Manager', avatar: '/avatars/operations.jpg', status: 'online' as const, role: 'Operations' },
+  { id: '2', name: 'Fulfillment Lead', avatar: '/avatars/fulfillment.jpg', status: 'online' as const, role: 'Fulfillment' },
+  { id: '3', name: 'Customer Service', avatar: '/avatars/service.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockOrdersPredictions = [
+  { id: '1', title: 'Holiday Rush', prediction: 'Expect 3x order volume in next 2 weeks', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Return Rate', prediction: 'Current return rate suggests $8K in returns expected', confidence: 77, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockOrdersActivities = [
+  { id: '1', user: 'Fulfillment Lead', action: 'Shipped', target: '45 orders today', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Customer Service', action: 'Processed', target: 'refund for order #9823', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Operations Manager', action: 'Approved', target: 'expedited shipping for VIP', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockOrdersQuickActions = [
+  { id: '1', label: 'New Order', icon: 'plus', action: () => console.log('New order'), variant: 'default' as const },
+  { id: '2', label: 'Bulk Ship', icon: 'truck', action: () => console.log('Bulk ship'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function OrdersClient() {
   const [activeTab, setActiveTab] = useState('orders')
@@ -1640,6 +1690,39 @@ export default function OrdersClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockOrdersAIInsights}
+              title="Order Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockOrdersCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockOrdersPredictions}
+              title="Order Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockOrdersActivities}
+            title="Order Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockOrdersQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Order Detail Dialog */}
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>

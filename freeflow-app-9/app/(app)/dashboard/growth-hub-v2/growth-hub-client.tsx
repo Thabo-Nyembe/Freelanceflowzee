@@ -76,6 +76,26 @@ import {
   Upload
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  growthHubAIInsights,
+  growthHubCollaborators,
+  growthHubPredictions,
+  growthHubActivities,
+  growthHubQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -548,6 +568,36 @@ const getRetentionCellColor = (value: number): string => {
   if (value >= 10) return 'bg-orange-400 text-white'
   return 'bg-red-400 text-white'
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockGrowthAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Conversion Spike', description: 'Trial-to-paid conversion up 18% this week. New onboarding flow working.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Conversion' },
+  { id: '2', type: 'warning' as const, title: 'Funnel Drop-off', description: 'Signup funnel showing 45% drop at email verification step.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Funnel' },
+  { id: '3', type: 'info' as const, title: 'A/B Test Ready', description: 'Pricing page experiment reached statistical significance.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Testing' },
+]
+
+const mockGrowthCollaborators = [
+  { id: '1', name: 'Growth Lead', avatar: '/avatars/growth.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Data Analyst', avatar: '/avatars/data.jpg', status: 'online' as const, role: 'Analyst' },
+  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'PM' },
+]
+
+const mockGrowthPredictions = [
+  { id: '1', title: 'MRR Forecast', prediction: 'On track to hit $125K MRR by end of quarter', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Churn Prediction', prediction: 'Monthly churn expected to decrease to 2.1%', confidence: 78, trend: 'down' as const, impact: 'high' as const },
+]
+
+const mockGrowthActivities = [
+  { id: '1', user: 'Growth Lead', action: 'Launched', target: 'new pricing A/B test', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Data Analyst', action: 'Published', target: 'cohort retention report', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Completed', target: 'weekly growth metrics sync', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockGrowthQuickActions = [
+  { id: '1', label: 'New Experiment', icon: 'plus', action: () => console.log('New experiment'), variant: 'default' as const },
+  { id: '2', label: 'Create Funnel', icon: 'filter', action: () => console.log('Create funnel'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1591,6 +1641,39 @@ export default function GrowthHubClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockGrowthAIInsights}
+              title="Growth Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockGrowthCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockGrowthPredictions}
+              title="Growth Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockGrowthActivities}
+            title="Growth Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockGrowthQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Funnel Detail Dialog */}

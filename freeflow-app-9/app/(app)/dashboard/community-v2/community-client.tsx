@@ -32,6 +32,26 @@ import {
   CreditCard, Sliders
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  communityAIInsights,
+  communityCollaborators,
+  communityPredictions,
+  communityActivities,
+  communityQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============== DISCORD-LEVEL INTERFACES ==============
 
 type ChannelType = 'text' | 'voice' | 'video' | 'announcement' | 'stage' | 'forum' | 'rules'
@@ -1737,6 +1757,39 @@ export default function CommunityClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={communityAIInsights}
+              title="Community Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={communityCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={communityPredictions}
+              title="Community Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={communityActivities}
+            title="Community Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={communityQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Member Profile Dialog */}

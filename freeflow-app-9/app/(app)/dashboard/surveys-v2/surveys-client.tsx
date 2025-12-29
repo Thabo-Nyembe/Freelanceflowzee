@@ -76,6 +76,26 @@ import {
   RefreshCw
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  surveysAIInsights,
+  surveysCollaborators,
+  surveysPredictions,
+  surveysActivities,
+  surveysQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type SurveyStatus = 'draft' | 'active' | 'paused' | 'closed'
 type QuestionType = 'short_text' | 'long_text' | 'multiple_choice' | 'checkbox' | 'rating' | 'nps' | 'date' | 'file_upload' | 'dropdown' | 'linear_scale' | 'matrix'
@@ -414,6 +434,36 @@ const getNPSCategory = (score: number) => {
   if (score >= 7) return { label: 'Passive', color: 'text-yellow-600' }
   return { label: 'Detractor', color: 'text-red-600' }
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockSurveysAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Engagement Survey', description: 'Customer Satisfaction survey has 89% completion rate - above industry average!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '2', type: 'warning' as const, title: 'Drop-off Detected', description: 'Product feedback survey loses 45% respondents at question 7. Consider splitting.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '3', type: 'info' as const, title: 'NPS Trending Up', description: 'Overall NPS score improved from 42 to 67 over last quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+]
+
+const mockSurveysCollaborators = [
+  { id: '1', name: 'Research Lead', avatar: '/avatars/research.jpg', status: 'online' as const, role: 'Research' },
+  { id: '2', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'online' as const, role: 'UX' },
+  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'Product' },
+]
+
+const mockSurveysPredictions = [
+  { id: '1', title: 'Response Forecast', prediction: 'Employee engagement survey will reach target 500 responses by Friday', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'Sentiment Analysis', prediction: 'Q4 satisfaction scores likely to improve 15% based on recent feedback', confidence: 84, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockSurveysActivities = [
+  { id: '1', user: 'Research Lead', action: 'Launched', target: 'Q4 customer satisfaction survey', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'UX Designer', action: 'Designed', target: 'new product feedback template', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Product Manager', action: 'Analyzed', target: 'feature request survey results', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockSurveysQuickActions = [
+  { id: '1', label: 'Create Survey', icon: 'plus', action: () => console.log('Create survey'), variant: 'default' as const },
+  { id: '2', label: 'View Results', icon: 'bar-chart', action: () => console.log('View results'), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export data'), variant: 'outline' as const },
+]
 
 export default function SurveysClient() {
   const [activeTab, setActiveTab] = useState('surveys')
@@ -1601,6 +1651,39 @@ export default function SurveysClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSurveysAIInsights}
+              title="Survey Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSurveysCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSurveysPredictions}
+              title="Response Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSurveysActivities}
+            title="Survey Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSurveysQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Survey Detail Dialog */}
         <Dialog open={!!selectedSurvey} onOpenChange={() => setSelectedSurvey(null)}>

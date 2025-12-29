@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CommunityClient from './community-client'
 
 export default function Page() {

@@ -12,6 +12,19 @@ import {
   Fingerprint, Key, AlertTriangle, CheckCheck, Layers, FileUp,
   FolderOpen, Tag, UserCheck, Timer, ClipboardCheck, Briefcase
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -127,6 +140,36 @@ interface BulkSendBatch {
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
   created_at: string
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockContractsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Signing Rate', description: '89% of contracts signed within 48 hours. Industry leading performance.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'Expiring Soon', description: '5 contracts expiring in 30 days. Renewal reminders scheduled.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Renewals' },
+  { id: '3', type: 'warning' as const, title: 'Pending Approval', description: '3 contracts awaiting legal review for over 5 days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Approvals' },
+]
+
+const mockContractsCollaborators = [
+  { id: '1', name: 'Legal Counsel', avatar: '/avatars/legal.jpg', status: 'online' as const, role: 'Legal' },
+  { id: '2', name: 'Contract Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '3', name: 'Sales Rep', avatar: '/avatars/sales.jpg', status: 'away' as const, role: 'Sales' },
+]
+
+const mockContractsPredictions = [
+  { id: '1', title: 'Q1 Contracts', prediction: '45 new contracts projected', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Renewal Rate', prediction: '92% renewal rate expected', confidence: 88, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockContractsActivities = [
+  { id: '1', user: 'John Smith', action: 'Signed contract', target: 'Enterprise Agreement', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Legal Team', action: 'Approved', target: 'Vendor Contract #456', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Reminder sent for', target: 'Expiring contracts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockContractsQuickActions = [
+  { id: '1', label: 'New Contract', icon: 'file-plus', action: () => console.log('New contract'), variant: 'default' as const },
+  { id: '2', label: 'Send for Signing', icon: 'send', action: () => console.log('Send'), variant: 'default' as const },
+  { id: '3', label: 'Templates', icon: 'copy', action: () => console.log('Templates'), variant: 'outline' as const },
+]
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1558,6 +1601,39 @@ export default function ContractsClient({ initialContracts }: { initialContracts
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockContractsAIInsights}
+              title="Contract Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockContractsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockContractsPredictions}
+              title="Contract Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockContractsActivities}
+            title="Contract Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockContractsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Envelope Detail Modal */}

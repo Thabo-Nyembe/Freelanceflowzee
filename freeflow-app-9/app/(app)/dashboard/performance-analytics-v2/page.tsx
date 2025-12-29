@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import PerformanceAnalyticsClient from './performance-analytics-client'
 
 export default function Page() {

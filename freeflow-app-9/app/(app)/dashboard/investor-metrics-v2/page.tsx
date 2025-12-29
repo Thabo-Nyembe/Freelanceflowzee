@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import InvestorMetricsClient from './investor-metrics-client'
 
 export default function Page() {

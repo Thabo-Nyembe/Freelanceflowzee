@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import { useCallback, useState, useEffect } from 'react'
 import { ComingSoonSystem } from '@/components/ui/coming-soon-system'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'

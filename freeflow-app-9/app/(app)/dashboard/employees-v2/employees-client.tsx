@@ -23,6 +23,26 @@ import {
   Play, Award as Trophy, BookMarked, Monitor, FileCheck, Clipboard, Activity
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  employeesAIInsights,
+  employeesCollaborators,
+  employeesPredictions,
+  employeesActivities,
+  employeesQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type EmployeeStatus = 'active' | 'on_leave' | 'terminated' | 'onboarding'
 type TimeOffType = 'vacation' | 'sick' | 'personal' | 'parental' | 'bereavement'
@@ -1694,6 +1714,39 @@ export default function EmployeesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={employeesAIInsights}
+              title="HR Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={employeesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={employeesPredictions}
+              title="Workforce Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={employeesActivities}
+            title="HR Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={employeesQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Profile Dialog */}
         <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>

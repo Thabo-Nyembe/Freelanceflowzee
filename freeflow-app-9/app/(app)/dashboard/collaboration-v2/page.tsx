@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CollaborationClient from './collaboration-client'
 
 export default function Page() {

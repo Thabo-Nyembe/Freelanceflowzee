@@ -53,6 +53,19 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -268,6 +281,36 @@ const statusColors = {
   suspended: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockAdminAIInsights = [
+  { id: '1', type: 'success' as const, title: 'System Health Excellent', description: 'All 12 resources running optimally with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Permission Audit Due', description: 'Quarterly access review recommended for 15 admin users.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'Feature Flag Opportunity', description: '3 feature flags have 100% rollout. Consider cleanup.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+]
+
+const mockAdminCollaborators = [
+  { id: '1', name: 'System Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
+  { id: '3', name: 'Security Officer', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
+]
+
+const mockAdminPredictions = [
+  { id: '1', title: 'Resource Usage', prediction: 'Database storage will need expansion in 3 weeks', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Job Success Rate', prediction: 'Scheduled jobs maintaining 98% success rate', confidence: 92, trend: 'stable' as const, impact: 'low' as const },
+]
+
+const mockAdminActivities = [
+  { id: '1', user: 'System Admin', action: 'Deployed', target: 'v2.4.1 to production', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'DevOps Lead', action: 'Enabled', target: 'new-checkout-flow feature flag', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockAdminQuickActions = [
+  { id: '1', label: 'Add User', icon: 'plus', action: () => console.log('Add user'), variant: 'default' as const },
+  { id: '2', label: 'Run Job', icon: 'play', action: () => console.log('Run job'), variant: 'default' as const },
+  { id: '3', label: 'Export Logs', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1459,6 +1502,39 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAdminAIInsights}
+              title="Admin Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAdminCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAdminPredictions}
+              title="System Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAdminActivities}
+            title="Admin Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAdminQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* New User Dialog */}
         <Dialog open={showNewUserDialog} onOpenChange={setShowNewUserDialog}>

@@ -10,6 +10,30 @@ import {
   PieChart, Zap, Crown, Star, FileSpreadsheet, Printer, Share2,
   Webhook, Key, Shield, HardDrive, AlertOctagon, Sliders
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  invoicesAIInsights,
+  invoicesCollaborators,
+  invoicesPredictions,
+  invoicesActivities,
+  invoicesQuickActions,
+} from '@/lib/mock-data/adapters'
+
+import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
+import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -79,6 +103,40 @@ interface LineItem {
   tax: number
   amount: number
 }
+
+// Enhanced Competitive Upgrade Mock Data - Invoices Context
+const mockInvoicesAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Overdue Invoices', description: '5 invoices are past due totaling $12,450. Consider sending reminders.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Collections' },
+  { id: '2', type: 'success' as const, title: 'Payment Trend', description: 'Average payment time reduced by 3 days this month. Great improvement!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '3', type: 'info' as const, title: 'Revenue Forecast', description: 'Projected monthly revenue: $45,000 based on pending invoices.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
+]
+
+const mockInvoicesCollaborators = [
+  { id: '1', name: 'Jennifer Park', avatar: '/avatars/jennifer.jpg', status: 'online' as const, role: 'Finance Manager', lastActive: 'Now' },
+  { id: '2', name: 'Robert Taylor', avatar: '/avatars/robert.jpg', status: 'online' as const, role: 'Accountant', lastActive: '5m ago' },
+  { id: '3', name: 'Maria Santos', avatar: '/avatars/maria.jpg', status: 'away' as const, role: 'Billing Specialist', lastActive: '25m ago' },
+  { id: '4', name: 'Kevin O\'Brien', avatar: '/avatars/kevin.jpg', status: 'offline' as const, role: 'Controller', lastActive: '2h ago' },
+]
+
+const mockInvoicesPredictions = [
+  { id: '1', label: 'Collection Rate', current: 87, target: 95, predicted: 92, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Avg Payment Days', current: 18, target: 14, predicted: 15, confidence: 75, trend: 'down' as const },
+  { id: '3', label: 'Monthly Revenue', current: 38500, target: 45000, predicted: 42000, confidence: 80, trend: 'up' as const },
+]
+
+const mockInvoicesActivities = [
+  { id: '1', user: 'Jennifer Park', action: 'approved', target: 'Invoice INV-2024-089', timestamp: '5m ago', type: 'success' as const },
+  { id: '2', user: 'Robert Taylor', action: 'sent', target: 'payment reminder to 3 clients', timestamp: '15m ago', type: 'info' as const },
+  { id: '3', user: 'Maria Santos', action: 'created', target: 'Invoice INV-2024-090', timestamp: '40m ago', type: 'info' as const },
+  { id: '4', user: 'System', action: 'received', target: 'payment of $4,500 from TechCorp', timestamp: '1h ago', type: 'success' as const },
+]
+
+const mockInvoicesQuickActions = [
+  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => console.log('New invoice') },
+  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => console.log('Send reminders') },
+  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => console.log('Export report') },
+  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => console.log('Record payment') },
+]
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
@@ -1298,6 +1356,43 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          {/* AI Insights Panel */}
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockInvoicesAIInsights}
+              title="Invoice Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+
+          {/* Team Collaboration & Activity */}
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockInvoicesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockInvoicesPredictions}
+              title="Revenue Forecasts"
+            />
+          </div>
+        </div>
+
+        {/* Activity Feed & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockInvoicesActivities}
+            title="Billing Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockInvoicesQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Bulk Actions Bar */}
         {selectedInvoices.length > 0 && (

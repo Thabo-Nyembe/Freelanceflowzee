@@ -13,6 +13,26 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Bell, Key, Webhook, Mail, AlertTriangle, Sliders, Globe as GlobeIcon, HardDrive, Trash2 as TrashIcon, RefreshCw, Download, Plus, Settings, Shield, Database, Cloud, Code, Layers, FileText } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  contentAIInsights,
+  contentCollaborators,
+  contentPredictions,
+  contentActivities,
+  contentQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // CONTENTFUL/STRAPI-LEVEL CMS - Headless Content Management System
 // Features: Rich editor, Asset library, Content types, Localization, Versioning
@@ -509,6 +529,38 @@ const mockWebhooks: Webhook[] = [
     successRate: 95.3,
     totalCalls: 234
   }
+]
+
+// Enhanced Content Mock Data
+const mockContentAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Publishing Rate', description: '45 entries published this week. 30% above average!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
+  { id: '2', type: 'info' as const, title: 'Localization', description: '85% of content translated to all target locales.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'i18n' },
+  { id: '3', type: 'warning' as const, title: 'Draft Backlog', description: '12 drafts pending review for 7+ days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Workflow' },
+]
+
+const mockContentCollaborators = [
+  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Editorial', lastActive: 'Now' },
+  { id: '2', name: 'Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Content', lastActive: '5m ago' },
+  { id: '3', name: 'Translator', avatar: '/avatars/trans.jpg', status: 'away' as const, role: 'Localization', lastActive: '30m ago' },
+]
+
+const mockContentPredictions = [
+  { id: '1', label: 'Entries', current: 1247, target: 1500, predicted: 1400, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Assets', current: 3560, target: 4000, predicted: 3800, confidence: 85, trend: 'up' as const },
+  { id: '3', label: 'API Calls/Day', current: 125000, target: 150000, predicted: 140000, confidence: 78, trend: 'up' as const },
+]
+
+const mockContentActivities = [
+  { id: '1', user: 'Content Lead', action: 'published', target: '5 new blog posts', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'Writer', action: 'drafted', target: 'product announcement', timestamp: '45m ago', type: 'info' as const },
+  { id: '3', user: 'Translator', action: 'localized', target: '12 entries to Spanish', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockContentQuickActions = [
+  { id: '1', label: 'New Entry', icon: 'FileText', shortcut: 'N', action: () => console.log('New entry') },
+  { id: '2', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
+  { id: '3', label: 'Publish', icon: 'Send', shortcut: 'P', action: () => console.log('Publish') },
+  { id: '4', label: 'API Docs', icon: 'Code', shortcut: 'A', action: () => console.log('API docs') },
 ]
 
 export default function ContentClient() {
@@ -1921,6 +1973,39 @@ export default function ContentClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockContentAIInsights}
+              title="Content Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockContentCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockContentPredictions}
+              title="Content Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockContentActivities}
+            title="Content Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockContentQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

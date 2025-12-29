@@ -67,6 +67,25 @@ import {
   Beaker
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+import {
+  qaAIInsights,
+  qaCollaborators,
+  qaPredictions,
+  qaActivities,
+  qaQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // TestRail-level types
 type TestStatus = 'passed' | 'failed' | 'blocked' | 'untested' | 'retest' | 'skipped'
 type TestPriority = 'critical' | 'high' | 'medium' | 'low'
@@ -276,6 +295,38 @@ const mockDefects: Defect[] = [
   { id: 'def_1', title: 'Password reset email not sending', testCaseId: 'tc_3', severity: 'critical', status: 'open', assignedTo: 'dev@company.com', createdAt: '2024-01-22' },
   { id: 'def_2', title: 'Dashboard widget alignment issue on Safari', testCaseId: 'tc_4', severity: 'minor', status: 'in_progress', assignedTo: 'frontend@company.com', createdAt: '2024-01-21' },
   { id: 'def_3', title: 'API timeout on large dataset', testCaseId: 'tc_5', severity: 'major', status: 'resolved', assignedTo: 'backend@company.com', createdAt: '2024-01-20' }
+]
+
+// Enhanced Competitive Upgrade Data
+const mockQAAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Test Coverage', description: 'Code coverage reached 92%. Target exceeded!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Coverage' },
+  { id: '2', type: 'info' as const, title: 'Flaky Tests', description: '3 tests showing intermittent failures. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Stability' },
+  { id: '3', type: 'warning' as const, title: 'Critical Path', description: 'Payment flow tests failing. Blocking release.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Blockers' },
+]
+
+const mockQACollaborators = [
+  { id: '1', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'online' as const, role: 'Testing', lastActive: 'Now' },
+  { id: '2', name: 'SDET', avatar: '/avatars/sdet.jpg', status: 'online' as const, role: 'Automation', lastActive: '10m ago' },
+  { id: '3', name: 'Test Analyst', avatar: '/avatars/analyst.jpg', status: 'away' as const, role: 'Manual', lastActive: '45m ago' },
+]
+
+const mockQAPredictions = [
+  { id: '1', label: 'Pass Rate', current: 94, target: 98, predicted: 96, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Coverage %', current: 92, target: 95, predicted: 94, confidence: 88, trend: 'up' as const },
+  { id: '3', label: 'Bug Escape', current: 5, target: 2, predicted: 3, confidence: 75, trend: 'down' as const },
+]
+
+const mockQAActivities = [
+  { id: '1', user: 'QA Lead', action: 'completed', target: 'regression suite run', timestamp: '20m ago', type: 'success' as const },
+  { id: '2', user: 'SDET', action: 'fixed', target: 'flaky login test', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'Test Analyst', action: 'reported', target: '2 new defects', timestamp: '2h ago', type: 'warning' as const },
+]
+
+const mockQAQuickActions = [
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => console.log('Run tests') },
+  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => console.log('New case') },
+  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => console.log('Reports') },
+  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => console.log('Defects') },
 ]
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
@@ -1659,6 +1710,39 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockQAAIInsights}
+              title="QA Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockQACollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockQAPredictions}
+              title="Testing Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockQAActivities}
+            title="QA Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockQAQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Test Case Detail Dialog */}
         <Dialog open={!!selectedTestCase} onOpenChange={() => setSelectedTestCase(null)}>

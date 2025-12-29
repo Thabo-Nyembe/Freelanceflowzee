@@ -67,6 +67,27 @@ import {
   Building
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  clientsAIInsights,
+  clientsCollaborators,
+  clientsPredictions,
+  clientsActivities,
+  clientsQuickActions
+} from '@/lib/mock-data/adapters'
+
 // Types
 type ClientStatus = 'lead' | 'prospect' | 'opportunity' | 'customer' | 'churned' | 'inactive'
 type DealStage = 'qualification' | 'discovery' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
@@ -389,6 +410,36 @@ interface ClientsClientProps {
   initialClients?: any[]
   initialStats?: any
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockClientsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Client Retention', description: '96% client retention rate this quarter. Up 4% from last quarter.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Retention' },
+  { id: '2', type: 'info' as const, title: 'Revenue Opportunity', description: '12 clients ready for upsell based on usage patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '3', type: 'warning' as const, title: 'At-Risk Client', description: 'Acme Corp showing decreased engagement. Schedule check-in.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
+]
+
+const mockClientsCollaborators = [
+  { id: '1', name: 'Account Manager', avatar: '/avatars/am.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Success Lead', avatar: '/avatars/cs.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Support Rep', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockClientsPredictions = [
+  { id: '1', title: 'Q1 Revenue', prediction: '$2.4M projected from client base', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'New Clients', prediction: '8 new enterprise clients expected', confidence: 72, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockClientsActivities = [
+  { id: '1', user: 'Sarah Chen', action: 'Closed deal with', target: 'TechCorp ($50K)', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Mike Johnson', action: 'Scheduled call with', target: 'Innovate Inc', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Lisa Park', action: 'Updated status for', target: 'GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockClientsQuickActions = [
+  { id: '1', label: 'Add Client', icon: 'plus', action: () => console.log('Add client'), variant: 'default' as const },
+  { id: '2', label: 'Schedule Call', icon: 'phone', action: () => console.log('Schedule'), variant: 'default' as const },
+  { id: '3', label: 'Send Report', icon: 'mail', action: () => console.log('Send report'), variant: 'outline' as const },
+]
 
 export default function ClientsClient({ initialClients, initialStats }: ClientsClientProps) {
   const [activeTab, setActiveTab] = useState('clients')
@@ -1632,6 +1683,39 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockClientsAIInsights}
+              title="Client Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockClientsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockClientsPredictions}
+              title="Client Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockClientsActivities}
+            title="Client Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockClientsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Client Detail Dialog */}
         <Dialog open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>

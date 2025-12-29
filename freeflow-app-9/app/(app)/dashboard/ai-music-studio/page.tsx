@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import AIMusicStudio from '@/components/ai/ai-music-studio'
 
 export const metadata = {

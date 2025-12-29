@@ -1,6 +1,6 @@
-import CloudStorageClient from './cloud-storage-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import CloudStorageClient from './cloud-storage-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

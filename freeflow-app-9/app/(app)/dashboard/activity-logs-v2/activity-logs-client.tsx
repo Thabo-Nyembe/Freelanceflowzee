@@ -74,6 +74,19 @@ import {
   History,
   Gauge
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -368,6 +381,38 @@ const mockStats: LogStats = {
 interface ActivityLogsClientProps {
   initialLogs: ActivityLog[]
 }
+
+// Enhanced Competitive Upgrade Mock Data - Activity Logs Context
+const mockLogsAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Error Spike Detected', description: 'Error rate increased 150% in the last hour. Investigating root cause.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
+  { id: '2', type: 'info' as const, title: 'Pattern Detected', description: 'Unusual login activity from new geographic region. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'success' as const, title: 'System Healthy', description: 'All critical services running normally. Uptime: 99.98%', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+]
+
+const mockLogsCollaborators = [
+  { id: '1', name: 'DevOps Admin', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Platform Engineer', lastActive: 'Now' },
+  { id: '2', name: 'SRE Team', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'Site Reliability', lastActive: '3m ago' },
+  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support', lastActive: '15m ago' },
+]
+
+const mockLogsPredictions = [
+  { id: '1', label: 'Error Rate', current: 2.3, target: 1.0, predicted: 1.5, confidence: 78, trend: 'down' as const },
+  { id: '2', label: 'Log Volume', current: 45000, target: 50000, predicted: 48000, confidence: 85, trend: 'up' as const },
+  { id: '3', label: 'Anomaly Detection', current: 94, target: 99, predicted: 97, confidence: 80, trend: 'up' as const },
+]
+
+const mockLogsActivities = [
+  { id: '1', user: 'System', action: 'detected', target: 'memory spike on node-3', timestamp: '5m ago', type: 'warning' as const },
+  { id: '2', user: 'DevOps Admin', action: 'acknowledged', target: 'alert #2847', timestamp: '12m ago', type: 'info' as const },
+  { id: '3', user: 'SRE Team', action: 'resolved', target: 'database connection issue', timestamp: '30m ago', type: 'success' as const },
+]
+
+const mockLogsQuickActions = [
+  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => console.log('Search logs') },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+  { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => console.log('Set alert') },
+  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => console.log('Live tail') },
+]
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
   const [activeTab, setActiveTab] = useState('logs')
@@ -1658,6 +1703,39 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockLogsAIInsights}
+              title="Logs Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockLogsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockLogsPredictions}
+              title="System Metrics Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockLogsActivities}
+            title="System Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockLogsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Log Detail Dialog */}

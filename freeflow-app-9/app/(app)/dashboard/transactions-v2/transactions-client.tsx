@@ -50,6 +50,27 @@ import {
   PieChart,
   Target
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  transactionsAIInsights,
+  transactionsCollaborators,
+  transactionsPredictions,
+  transactionsActivities,
+  transactionsQuickActions,
+} from '@/lib/mock-data/adapters'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -326,6 +347,36 @@ const cardBrandIcons: Record<string, string> = {
   amex: '💳 Amex',
   discover: '💳 Discover',
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockTransactionsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Revenue Up', description: 'Transaction volume increased 23% compared to last month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '2', type: 'warning' as const, title: 'Failed Payments', description: '12 transactions failed due to expired cards. Send renewal reminders.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Payments' },
+  { id: '3', type: 'info' as const, title: 'Top Customer', description: 'Enterprise Corp processed $45K in transactions this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Customers' },
+]
+
+const mockTransactionsCollaborators = [
+  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Finance' },
+  { id: '2', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'online' as const, role: 'Accounting' },
+  { id: '3', name: 'Treasury', avatar: '/avatars/treasury.jpg', status: 'away' as const, role: 'Treasury' },
+]
+
+const mockTransactionsPredictions = [
+  { id: '1', title: 'Monthly Revenue', prediction: 'On track to hit $1.2M revenue target by month end', confidence: 94, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Churn Risk', prediction: '3 high-value customers showing payment decline patterns', confidence: 78, trend: 'down' as const, impact: 'high' as const },
+]
+
+const mockTransactionsActivities = [
+  { id: '1', user: 'Finance Lead', action: 'Processed', target: 'bulk refund for $2,500', timestamp: new Date().toISOString(), type: 'info' as const },
+  { id: '2', user: 'System', action: 'Flagged', target: 'unusual transaction pattern', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'warning' as const },
+  { id: '3', user: 'Accountant', action: 'Reconciled', target: 'weekly settlement report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockTransactionsQuickActions = [
+  { id: '1', label: 'New Payment', icon: 'plus', action: () => console.log('New payment'), variant: 'default' as const },
+  { id: '2', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'default' as const },
+  { id: '3', label: 'Issue Refund', icon: 'undo', action: () => console.log('Refund'), variant: 'outline' as const },
+]
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1714,6 +1765,39 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockTransactionsAIInsights}
+              title="Transaction Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockTransactionsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockTransactionsPredictions}
+              title="Revenue Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockTransactionsActivities}
+            title="Transaction Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockTransactionsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Payment Detail Dialog */}
         <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>

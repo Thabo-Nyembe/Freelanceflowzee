@@ -74,6 +74,18 @@ import {
   Key
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type PluginStatus = 'active' | 'inactive' | 'updating' | 'error' | 'needs-update'
 type PluginCategory = 'productivity' | 'security' | 'analytics' | 'integration' | 'communication' | 'automation' | 'ui-enhancement' | 'developer-tools' | 'e-commerce' | 'seo' | 'social' | 'media'
@@ -457,6 +469,36 @@ const categories = [
   { id: 'automation', name: 'Automation', icon: Bot, count: 876 },
   { id: 'media', name: 'Media', icon: Image, count: 2345 },
   { id: 'developer-tools', name: 'Developer', icon: Terminal, count: 1654 }
+]
+
+// Competitive Upgrade Mock Data - WordPress/Shopify App Store-level Plugin Intelligence
+const mockPluginsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Plugin Health', description: 'All 23 active plugins are up-to-date and compatible!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Security Alert', description: '2 plugins have critical updates available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'AI Recommendation', description: 'Install "Cache Pro" to improve page load by 40%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockPluginsCollaborators = [
+  { id: '1', name: 'Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'Security Lead', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
+]
+
+const mockPluginsPredictions = [
+  { id: '1', title: 'Performance', prediction: 'Disabling unused plugins will improve load time by 25%', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Compatibility', prediction: 'Next platform update will affect 3 plugins', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockPluginsActivities = [
+  { id: '1', user: 'Admin', action: 'Installed', target: 'Analytics Pro plugin', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Developer', action: 'Updated', target: '5 plugins to latest versions', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Security Lead', action: 'Reviewed', target: 'plugin permissions audit', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockPluginsQuickActions = [
+  { id: '1', label: 'Install', icon: 'plus', action: () => console.log('Install'), variant: 'default' as const },
+  { id: '2', label: 'Update All', icon: 'refresh-cw', action: () => console.log('Update'), variant: 'default' as const },
+  { id: '3', label: 'Settings', icon: 'settings', action: () => console.log('Settings'), variant: 'outline' as const },
 ]
 
 export default function PluginsClient() {
@@ -1559,6 +1601,39 @@ export default function PluginsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockPluginsAIInsights}
+              title="Plugin Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockPluginsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockPluginsPredictions}
+              title="Plugin Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockPluginsActivities}
+            title="Plugin Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockPluginsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Plugin Detail Dialog */}
         <Dialog open={!!selectedPlugin && !showInstallDialog} onOpenChange={() => setSelectedPlugin(null)}>

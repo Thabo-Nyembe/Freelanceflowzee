@@ -59,6 +59,27 @@ import {
   Link,
   Wrench
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  healthScoreAIInsights,
+  healthScoreCollaborators,
+  healthScorePredictions,
+  healthScoreActivities,
+  healthScoreQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -559,6 +580,38 @@ const mockSLOs: SLO[] = [
       { date: '12/23', value: 99.999 }
     ]
   }
+]
+
+// Enhanced Competitive Upgrade Data
+const mockHealthScoreAIInsights = [
+  { id: '1', type: 'success' as const, title: 'System Health', description: 'All critical services running at 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Uptime' },
+  { id: '2', type: 'info' as const, title: 'Performance Trend', description: 'API response times improved 20% after optimization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '3', type: 'warning' as const, title: 'Resource Alert', description: 'Database server CPU at 85%. Consider scaling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
+]
+
+const mockHealthScoreCollaborators = [
+  { id: '1', name: 'SRE Lead', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'Reliability', lastActive: 'Now' },
+  { id: '2', name: 'Platform Eng', avatar: '/avatars/platform.jpg', status: 'online' as const, role: 'Platform', lastActive: '5m ago' },
+  { id: '3', name: 'DBA', avatar: '/avatars/dba.jpg', status: 'away' as const, role: 'Database', lastActive: '45m ago' },
+]
+
+const mockHealthScorePredictions = [
+  { id: '1', label: 'Uptime %', current: 99.9, target: 99.99, predicted: 99.95, confidence: 88, trend: 'up' as const },
+  { id: '2', label: 'Latency (ms)', current: 120, target: 100, predicted: 105, confidence: 75, trend: 'down' as const },
+  { id: '3', label: 'Error Rate', current: 0.5, target: 0.1, predicted: 0.3, confidence: 80, trend: 'down' as const },
+]
+
+const mockHealthScoreActivities = [
+  { id: '1', user: 'SRE Lead', action: 'resolved', target: 'high latency incident', timestamp: '30m ago', type: 'success' as const },
+  { id: '2', user: 'System', action: 'detected', target: 'memory spike on web-03', timestamp: '1h ago', type: 'warning' as const },
+  { id: '3', user: 'Platform Eng', action: 'deployed', target: 'performance optimization', timestamp: '3h ago', type: 'info' as const },
+]
+
+const mockHealthScoreQuickActions = [
+  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => console.log('Run check') },
+  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => console.log('View metrics') },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => console.log('Alerts') },
+  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => console.log('Reports') },
 ]
 
 export default function HealthScoreClient() {
@@ -1516,6 +1569,39 @@ export default function HealthScoreClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockHealthScoreAIInsights}
+              title="Health Score Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockHealthScoreCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockHealthScorePredictions}
+              title="System Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockHealthScoreActivities}
+            title="Health Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockHealthScoreQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Service Detail Dialog */}
         <Dialog open={!!selectedService} onOpenChange={() => setSelectedService(null)}>

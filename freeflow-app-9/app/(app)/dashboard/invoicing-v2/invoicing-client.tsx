@@ -66,6 +66,27 @@ import {
   Shield,
   Bell
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  invoicingAIInsights,
+  invoicingCollaborators,
+  invoicingPredictions,
+  invoicingActivities,
+  invoicingQuickActions,
+} from '@/lib/mock-data/adapters'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -588,6 +609,41 @@ const getDaysOverdue = (dueDate: string) => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   return diffDays > 0 ? diffDays : 0
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE DATA
+// ============================================================================
+
+const mockInvoicingAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Revenue Optimization', description: 'Invoice collection rate improved 15% this month with automated reminders.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '2', type: 'info' as const, title: 'Cash Flow Forecast', description: 'Expected $45,000 in payments within 7 days based on due dates.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
+  { id: '3', type: 'warning' as const, title: 'Overdue Invoices', description: '8 invoices totaling $12,500 are over 30 days overdue.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Collections' },
+]
+
+const mockInvoicingCollaborators = [
+  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Accounting', lastActive: 'Now' },
+  { id: '2', name: 'AR Manager', avatar: '/avatars/ar.jpg', status: 'online' as const, role: 'Collections', lastActive: '5m ago' },
+  { id: '3', name: 'Controller', avatar: '/avatars/controller.jpg', status: 'away' as const, role: 'Finance', lastActive: '30m ago' },
+]
+
+const mockInvoicingPredictions = [
+  { id: '1', label: 'Monthly Revenue', current: 85000, target: 100000, predicted: 92000, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Collection Rate', current: 87, target: 95, predicted: 91, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Avg Days to Pay', current: 28, target: 21, predicted: 25, confidence: 72, trend: 'down' as const },
+]
+
+const mockInvoicingActivities = [
+  { id: '1', user: 'Finance Lead', action: 'created', target: 'Invoice #INV-2024-156', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'System', action: 'received payment', target: '$3,500 from ABC Corp', timestamp: '45m ago', type: 'success' as const },
+  { id: '3', user: 'AR Manager', action: 'sent reminder', target: '5 overdue invoices', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockInvoicingQuickActions = [
+  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => console.log('New invoice') },
+  { id: '2', label: 'Record Payment', icon: 'DollarSign', shortcut: 'P', action: () => console.log('Record payment') },
+  { id: '3', label: 'Send Reminders', icon: 'Send', shortcut: 'R', action: () => console.log('Send reminders') },
+  { id: '4', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => console.log('Export report') },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1782,6 +1838,39 @@ export default function InvoicingClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockInvoicingAIInsights}
+              title="Invoicing Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockInvoicingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockInvoicingPredictions}
+              title="Revenue Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockInvoicingActivities}
+            title="Invoicing Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockInvoicingQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Invoice Detail Dialog */}

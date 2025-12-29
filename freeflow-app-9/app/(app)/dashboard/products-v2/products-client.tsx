@@ -63,6 +63,27 @@ import {
   PieChart,
   Activity
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  productsAIInsights,
+  productsCollaborators,
+  productsPredictions,
+  productsActivities,
+  productsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { useProducts, useProductStats, type Product } from '@/lib/hooks/use-products'
 
 // Stripe-level types
@@ -291,6 +312,36 @@ const mockTaxRates: TaxRate[] = [
 
 const mockInventory: InventoryItem[] = [
   { productId: 'prod_4', productName: 'API Credits Pack', sku: 'SKU-API-10K', quantity: 9999, reservedQuantity: 0, reorderPoint: 0, reorderQuantity: 0, location: 'Digital', lastRestocked: '2024-01-01', status: 'in_stock' }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockProductsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Best Seller', description: 'Pro Plan revenue up 45% this quarter. Consider feature expansion.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sales' },
+  { id: '2', type: 'info' as const, title: 'Pricing Opportunity', description: 'Enterprise tier underpriced vs competitors by 15%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pricing' },
+  { id: '3', type: 'warning' as const, title: 'Low Stock', description: 'API Credits Pack approaching inventory threshold.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Inventory' },
+]
+
+const mockProductsCollaborators = [
+  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Pricing Analyst', avatar: '/avatars/pricing.jpg', status: 'online' as const, role: 'Analyst' },
+  { id: '3', name: 'Sales Lead', avatar: '/avatars/sales.jpg', status: 'busy' as const, role: 'Sales' },
+]
+
+const mockProductsPredictions = [
+  { id: '1', title: 'Q2 Revenue', prediction: '$450K product revenue projected', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'New Launches', prediction: '2 new products ready for launch', confidence: 90, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockProductsActivities = [
+  { id: '1', user: 'System', action: 'Product sold', target: 'Enterprise Plan ($999)', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Product Team', action: 'Updated pricing for', target: 'Pro Plan', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Inventory', action: 'Restocked', target: 'API Credits Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockProductsQuickActions = [
+  { id: '1', label: 'New Product', icon: 'plus', action: () => console.log('New product'), variant: 'default' as const },
+  { id: '2', label: 'Update Pricing', icon: 'dollar', action: () => console.log('Pricing'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
 ]
 
 export default function ProductsClient({ initialProducts }: ProductsClientProps) {
@@ -1643,6 +1694,39 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockProductsAIInsights}
+              title="Product Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockProductsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockProductsPredictions}
+              title="Product Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockProductsActivities}
+            title="Product Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockProductsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Product Detail Dialog */}
         <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>

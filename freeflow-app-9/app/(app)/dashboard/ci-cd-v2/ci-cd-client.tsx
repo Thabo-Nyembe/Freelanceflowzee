@@ -86,6 +86,27 @@ import {
   GitMerge
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  ciCdAIInsights,
+  ciCdCollaborators,
+  ciCdPredictions,
+  ciCdActivities,
+  ciCdQuickActions
+} from '@/lib/mock-data/adapters'
+
 // Types
 type WorkflowStatus = 'success' | 'failure' | 'running' | 'cancelled' | 'queued' | 'pending'
 type RunStatus = 'completed' | 'in_progress' | 'queued' | 'waiting' | 'failed' | 'cancelled'
@@ -530,6 +551,36 @@ const formatTimeAgo = (dateString: string) => {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
   return `${Math.floor(diff / 86400)}d ago`
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockCiCdAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Build Time Improved', description: 'Average build time reduced 35% after caching optimization.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Flaky Test Detected', description: 'test_user_auth fails intermittently. 4 failures in last 20 runs.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Testing' },
+  { id: '3', type: 'info' as const, title: 'Deploy Frequency Up', description: 'Production deployments increased 40% this sprint.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockCiCdCollaborators = [
+  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
+  { id: '2', name: 'SRE', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
+  { id: '3', name: 'Backend Dev', avatar: '/avatars/backend.jpg', status: 'away' as const, role: 'Engineering' },
+]
+
+const mockCiCdPredictions = [
+  { id: '1', title: 'Build Queue', prediction: 'Peak build queue expected in 2 hours - consider scaling runners', confidence: 87, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'Release Readiness', prediction: 'All tests passing - ready for production deploy', confidence: 96, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockCiCdActivities = [
+  { id: '1', user: 'DevOps Lead', action: 'Deployed', target: 'v2.5.0 to production', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'SRE', action: 'Scaled', target: 'build runners to 10', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Backend Dev', action: 'Fixed', target: 'flaky integration test', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockCiCdQuickActions = [
+  { id: '1', label: 'Run Pipeline', icon: 'play', action: () => console.log('Run pipeline'), variant: 'default' as const },
+  { id: '2', label: 'Deploy', icon: 'rocket', action: () => console.log('Deploy'), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'terminal', action: () => console.log('View logs'), variant: 'outline' as const },
+]
 
 export default function CiCdClient() {
   const [activeTab, setActiveTab] = useState('workflows')
@@ -1818,6 +1869,39 @@ export default function CiCdClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCiCdAIInsights}
+              title="Pipeline Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCiCdCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCiCdPredictions}
+              title="Build Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCiCdActivities}
+            title="Pipeline Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCiCdQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Workflow Detail Dialog */}
         <Dialog open={!!selectedWorkflow} onOpenChange={() => setSelectedWorkflow(null)}>

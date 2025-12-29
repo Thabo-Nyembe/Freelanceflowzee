@@ -148,7 +148,7 @@ export const analyticsActivities = RECENT_ACTIVITIES.slice(0, 5).map(a => ({
   type: a.type,
   title: a.title,
   description: a.description,
-  user: { name: a.user.name, avatar: a.user.avatar },
+  user: { id: a.user.id || a.id, name: a.user.name, avatar: a.user.avatar },
   timestamp: a.timestamp,
   metadata: a.metadata
 }))
@@ -287,9 +287,9 @@ export const financialAIInsights = AI_INSIGHTS.financial
 export const financialCollaborators = COLLABORATORS.filter(c => ['Jennifer Walsh', 'Michael Chen'].includes(c.name))
 
 export const financialPredictions = [
-  { id: '1', metric: 'Q1 Revenue', currentValue: PROFIT_LOSS.revenue.total, predictedValue: 1150000, confidence: 0.84, trend: 'up' as const, timeframe: 'End of Q1', factors: ['New contracts', 'Recurring revenue', 'Seasonal boost'] },
-  { id: '2', metric: 'Gross Margin', currentValue: PROFIT_LOSS.grossMargin, predictedValue: 86, confidence: 0.79, trend: 'up' as const, timeframe: 'Next quarter', factors: ['Cost optimization', 'Scale efficiency'] },
-  { id: '3', metric: 'Runway', currentValue: COMPANY_INFO.metrics.runway, predictedValue: 30, confidence: 0.81, trend: 'up' as const, timeframe: 'End of year', factors: ['Profitability path', 'ARR growth'] },
+  { id: '1', label: 'Q1 Revenue', currentValue: PROFIT_LOSS.revenue.total, predictedValue: 1150000, confidence: 84, trend: 'up' as const, timeframe: 'End of Q1', factors: [{ name: 'New contracts', impact: 'positive' as const, weight: 0.4 }, { name: 'Recurring revenue', impact: 'positive' as const, weight: 0.35 }, { name: 'Seasonal boost', impact: 'positive' as const, weight: 0.25 }] },
+  { id: '2', label: 'Gross Margin', currentValue: PROFIT_LOSS.grossMargin, predictedValue: 86, confidence: 79, trend: 'up' as const, timeframe: 'Next quarter', factors: [{ name: 'Cost optimization', impact: 'positive' as const, weight: 0.6 }, { name: 'Scale efficiency', impact: 'positive' as const, weight: 0.4 }] },
+  { id: '3', label: 'Runway', currentValue: COMPANY_INFO.metrics.runway, predictedValue: 30, confidence: 81, trend: 'up' as const, timeframe: 'End of year', factors: [{ name: 'Profitability path', impact: 'positive' as const, weight: 0.5 }, { name: 'ARR growth', impact: 'positive' as const, weight: 0.5 }] },
 ]
 
 export const financialQuickActions = QUICK_ACTIONS.financial.map(qa => ({
@@ -305,7 +305,7 @@ export const financialActivities = RECENT_ACTIVITIES.slice(0, 4).map(a => ({
   type: a.type === 'payment' ? 'create' as const : a.type === 'milestone' ? 'milestone' as const : 'update' as const,
   title: a.title,
   description: a.description,
-  user: { name: a.user.name, avatar: a.user.avatar },
+  user: { id: a.user.id || a.id, name: a.user.name, avatar: a.user.avatar },
   timestamp: a.timestamp,
   metadata: {}
 }))
@@ -547,7 +547,7 @@ const createPredictions = (metrics: string[]) => metrics.map((metric, i) => ({
   label: metric,
   currentValue: 65 + Math.floor(Math.random() * 20),
   predictedValue: 85 + Math.floor(Math.random() * 10),
-  confidence: 0.75 + Math.random() * 0.15,
+  confidence: 75 + Math.floor(Math.random() * 15),
   trend: 'up' as const,
   timeframe: 'Next 30 days',
   factors: [
@@ -563,7 +563,7 @@ const createActivities = (context: string) => RECENT_ACTIVITIES.slice(0, 5).map(
   type: a.type,
   title: a.title,
   description: a.description,
-  user: { name: a.user.name, avatar: a.user.avatar },
+  user: { id: a.user.id || a.id, name: a.user.name, avatar: a.user.avatar },
   timestamp: a.timestamp,
   metadata: { context }
 }))

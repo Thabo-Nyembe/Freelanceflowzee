@@ -25,6 +25,41 @@ import {
   Package, Hash, Columns, ChevronRight
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
+import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
+// Centralized Mock Data - Investor-Ready
+import {
+  projectsHubProjects,
+  projectsHubSprints,
+  projectsHubBacklog,
+  projectsHubRoadmap,
+  projectsHubAutomations,
+  projectsHubTemplates,
+  projectsHubIssues,
+  projectsHubEpics,
+  projectsHubReports,
+  projectsHubIntegrations,
+  projectsHubAIInsights,
+  projectsHubCollaborators,
+  projectsHubPredictions,
+  projectsHubActivities,
+  projectsHubQuickActions,
+  projectsStatusColumns,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type ProjectStatus = 'planning' | 'active' | 'review' | 'completed' | 'on_hold'
 type Priority = 'critical' | 'high' | 'medium' | 'low'
@@ -179,14 +214,24 @@ interface Integration {
   icon: string
 }
 
-// Mock Data
-const statusColumns = [
-  { id: 'planning', label: 'Planning', color: 'bg-purple-500', icon: '📋' },
-  { id: 'active', label: 'In Progress', color: 'bg-blue-500', icon: '🚀' },
-  { id: 'review', label: 'Review', color: 'bg-yellow-500', icon: '👀' },
-  { id: 'completed', label: 'Completed', color: 'bg-green-500', icon: '✅' },
-  { id: 'on_hold', label: 'On Hold', color: 'bg-gray-500', icon: '⏸️' }
-]
+// Use centralized mock data - mapped to local variable names for compatibility
+const statusColumns = projectsStatusColumns
+const mockProjects = projectsHubProjects as Project[]
+const mockSprints = projectsHubSprints
+const mockBacklog = projectsHubBacklog
+const mockRoadmap = projectsHubRoadmap
+const mockAutomations = projectsHubAutomations
+const mockTemplates = projectsHubTemplates
+const mockIssues = projectsHubIssues as Issue[]
+const mockEpics = projectsHubEpics as Epic[]
+const mockActivities = projectsHubActivities as Activity[]
+const mockReports = projectsHubReports as Report[]
+const mockIntegrations = projectsHubIntegrations as Integration[]
+const mockProjectsAIInsights = projectsHubAIInsights
+const mockProjectsCollaborators = projectsHubCollaborators
+const mockProjectsPredictions = projectsHubPredictions
+const mockProjectsActivities = projectsHubActivities
+const mockProjectsQuickActions = projectsHubQuickActions
 
 const priorityConfig = {
   critical: { color: 'bg-red-500', label: 'Critical' },
@@ -195,100 +240,13 @@ const priorityConfig = {
   low: { color: 'bg-gray-400', label: 'Low' }
 }
 
-const mockProjects: Project[] = [
-  { id: '1', name: 'Website Redesign', description: 'Complete overhaul of company website', projectCode: 'WEB-001', status: 'active', priority: 'high', progress: 65, budget: 50000, spent: 32500, startDate: '2024-01-01', endDate: '2024-03-31', teamMembers: ['Sarah', 'Mike', 'Emily'], tags: ['frontend', 'design'], tasksTotal: 24, tasksCompleted: 16 },
-  { id: '2', name: 'Mobile App v2', description: 'Next version of mobile application', projectCode: 'MOB-002', status: 'active', priority: 'critical', progress: 40, budget: 80000, spent: 32000, startDate: '2024-01-15', endDate: '2024-05-30', teamMembers: ['Alex', 'Jordan', 'Taylor'], tags: ['mobile', 'ios', 'android'], tasksTotal: 48, tasksCompleted: 19 },
-  { id: '3', name: 'API Integration', description: 'Third-party API integrations', projectCode: 'API-003', status: 'review', priority: 'medium', progress: 90, budget: 25000, spent: 22500, startDate: '2024-01-10', endDate: '2024-02-28', teamMembers: ['Mike', 'Alex'], tags: ['backend', 'api'], tasksTotal: 12, tasksCompleted: 11 },
-  { id: '4', name: 'Security Audit', description: 'Comprehensive security review', projectCode: 'SEC-004', status: 'planning', priority: 'high', progress: 10, budget: 15000, spent: 1500, startDate: '2024-02-01', endDate: '2024-02-29', teamMembers: ['Jordan'], tags: ['security'], tasksTotal: 8, tasksCompleted: 1 },
-  { id: '5', name: 'Documentation Update', description: 'Update all technical documentation', projectCode: 'DOC-005', status: 'completed', priority: 'low', progress: 100, budget: 5000, spent: 4800, startDate: '2023-12-01', endDate: '2024-01-15', teamMembers: ['Emily'], tags: ['docs'], tasksTotal: 15, tasksCompleted: 15 },
-  { id: '6', name: 'Performance Optimization', description: 'System performance improvements', projectCode: 'PERF-006', status: 'on_hold', priority: 'medium', progress: 25, budget: 20000, spent: 5000, startDate: '2024-01-20', endDate: '2024-04-15', teamMembers: ['Sarah', 'Alex'], tags: ['performance'], tasksTotal: 20, tasksCompleted: 5 }
-]
-
-const mockSprints: Sprint[] = [
-  { id: '1', name: 'Sprint 1 - Foundation', goal: 'Set up core infrastructure', status: 'completed', startDate: '2024-01-01', endDate: '2024-01-14', velocity: 42, tasksTotal: 15, tasksCompleted: 15 },
-  { id: '2', name: 'Sprint 2 - Features', goal: 'Implement main features', status: 'active', startDate: '2024-01-15', endDate: '2024-01-28', velocity: 38, tasksTotal: 18, tasksCompleted: 12 },
-  { id: '3', name: 'Sprint 3 - Polish', goal: 'Bug fixes and polish', status: 'upcoming', startDate: '2024-01-29', endDate: '2024-02-11', velocity: 0, tasksTotal: 10, tasksCompleted: 0 }
-]
-
-const mockBacklog: BacklogItem[] = [
-  { id: '1', title: 'User authentication flow', description: 'Implement OAuth2 authentication', priority: 'critical', points: 8, type: 'feature', assignee: 'Alex', sprint: '2' },
-  { id: '2', title: 'Dashboard widgets', description: 'Add customizable dashboard widgets', priority: 'high', points: 5, type: 'feature', sprint: '2' },
-  { id: '3', title: 'Fix login timeout', description: 'Session expires too quickly', priority: 'high', points: 3, type: 'bug', assignee: 'Mike' },
-  { id: '4', title: 'API rate limiting', description: 'Implement rate limiting for API', priority: 'medium', points: 5, type: 'improvement' },
-  { id: '5', title: 'Mobile responsive fixes', description: 'Fix layout issues on mobile', priority: 'medium', points: 3, type: 'bug', sprint: '3' },
-  { id: '6', title: 'Export to PDF', description: 'Add PDF export functionality', priority: 'low', points: 8, type: 'feature' }
-]
-
-const mockRoadmap: RoadmapItem[] = [
-  { id: '1', title: 'Q1 - Platform Launch', quarter: 'Q1 2024', status: 'in_progress', progress: 65, projectIds: ['1', '2'] },
-  { id: '2', title: 'Q2 - Enterprise Features', quarter: 'Q2 2024', status: 'planned', progress: 0, projectIds: ['4'] },
-  { id: '3', title: 'Q3 - Scale & Optimize', quarter: 'Q3 2024', status: 'planned', progress: 0, projectIds: ['6'] },
-  { id: '4', title: 'Q4 - Global Expansion', quarter: 'Q4 2024', status: 'planned', progress: 0, projectIds: [] }
-]
-
-const mockAutomations: Automation[] = [
-  { id: '1', name: 'Auto-assign reviewer', trigger: 'When task moves to Review', action: 'Assign to team lead', enabled: true, runsCount: 45 },
-  { id: '2', name: 'Notify on overdue', trigger: 'When task is overdue', action: 'Send Slack notification', enabled: true, runsCount: 12 },
-  { id: '3', name: 'Close completed sprint', trigger: 'When all tasks done', action: 'Move sprint to completed', enabled: false, runsCount: 3 },
-  { id: '4', name: 'Auto-label bugs', trigger: 'When issue contains "bug"', action: 'Add bug label', enabled: true, runsCount: 28 }
-]
-
-const mockTemplates: Template[] = [
-  { id: '1', name: 'Website Project', description: 'Standard website development template', category: 'Development', tasksCount: 25, usageCount: 15 },
-  { id: '2', name: 'Mobile App', description: 'iOS and Android app development', category: 'Development', tasksCount: 40, usageCount: 8 },
-  { id: '3', name: 'Marketing Campaign', description: 'Full marketing campaign workflow', category: 'Marketing', tasksCount: 18, usageCount: 22 },
-  { id: '4', name: 'Bug Triage', description: 'Bug investigation and fix workflow', category: 'Support', tasksCount: 8, usageCount: 45 },
-  { id: '5', name: 'Sprint Planning', description: 'Agile sprint setup template', category: 'Agile', tasksCount: 12, usageCount: 30 }
-]
-
-const mockIssues: Issue[] = [
-  { id: '1', key: 'WEB-101', title: 'Implement user authentication', description: 'Add OAuth2 authentication flow', type: 'story', status: 'in_progress', priority: 'high', assignee: 'Alex', reporter: 'Sarah', labels: ['auth', 'backend'], storyPoints: 8, timeEstimate: 16, timeSpent: 10, createdAt: '2024-01-10T09:00:00Z', updatedAt: '2024-01-15T14:30:00Z', dueDate: '2024-01-20', sprintId: '2', comments: [{ id: 'c1', author: 'Mike', content: 'Should we use Passport.js?', createdAt: '2024-01-12T10:00:00Z' }], attachments: 2, watchers: ['Sarah', 'Mike'] },
-  { id: '2', key: 'WEB-102', title: 'Fix header navigation bug', description: 'Navigation menu not closing on mobile', type: 'bug', status: 'open', priority: 'critical', reporter: 'Jordan', labels: ['bug', 'ui'], storyPoints: 3, createdAt: '2024-01-14T11:00:00Z', updatedAt: '2024-01-14T11:00:00Z', dueDate: '2024-01-16', comments: [], attachments: 1, watchers: ['Jordan'] },
-  { id: '3', key: 'WEB-103', title: 'Add dashboard analytics widgets', description: 'Create customizable widget system', type: 'story', status: 'in_review', priority: 'medium', assignee: 'Emily', reporter: 'Sarah', labels: ['frontend', 'analytics'], storyPoints: 13, timeEstimate: 24, timeSpent: 22, createdAt: '2024-01-08T09:00:00Z', updatedAt: '2024-01-15T16:00:00Z', sprintId: '2', comments: [], attachments: 0, watchers: ['Sarah', 'Emily'] },
-  { id: '4', key: 'WEB-104', title: 'Database optimization', description: 'Optimize slow queries', type: 'task', status: 'done', priority: 'high', assignee: 'Mike', reporter: 'Alex', labels: ['backend', 'performance'], storyPoints: 5, timeEstimate: 8, timeSpent: 6, createdAt: '2024-01-05T09:00:00Z', updatedAt: '2024-01-12T17:00:00Z', sprintId: '1', comments: [], attachments: 0, watchers: [] },
-  { id: '5', key: 'WEB-105', title: 'User onboarding flow', description: 'Create guided onboarding experience', type: 'epic', status: 'in_progress', priority: 'medium', reporter: 'Sarah', labels: ['ux', 'frontend'], createdAt: '2024-01-02T09:00:00Z', updatedAt: '2024-01-15T09:00:00Z', comments: [], attachments: 3, watchers: ['Sarah', 'Emily', 'Jordan'] }
-]
-
-const mockEpics: Epic[] = [
-  { id: 'e1', key: 'EPIC-1', name: 'User Authentication', summary: 'Complete authentication and authorization system', status: 'in_progress', color: '#5243AA', startDate: '2024-01-01', dueDate: '2024-02-15', progress: 65, issuesCount: 12, issuesCompleted: 8 },
-  { id: 'e2', key: 'EPIC-2', name: 'Dashboard Redesign', summary: 'Modern dashboard with analytics', status: 'in_progress', color: '#00875A', startDate: '2024-01-10', dueDate: '2024-03-01', progress: 40, issuesCount: 18, issuesCompleted: 7 },
-  { id: 'e3', key: 'EPIC-3', name: 'Mobile Optimization', summary: 'Responsive design and PWA features', status: 'to_do', color: '#0052CC', startDate: '2024-02-01', dueDate: '2024-03-15', progress: 0, issuesCount: 15, issuesCompleted: 0 },
-  { id: 'e4', key: 'EPIC-4', name: 'API v2', summary: 'New versioned API with GraphQL', status: 'to_do', color: '#FF5630', startDate: '2024-02-15', dueDate: '2024-04-01', progress: 0, issuesCount: 20, issuesCompleted: 0 }
-]
-
+// Custom fields mock data (kept local as it's specific to this component)
 const mockCustomFields: CustomField[] = [
   { id: '1', name: 'Customer Impact', type: 'select', required: false, options: ['Low', 'Medium', 'High', 'Critical'], appliesTo: ['bug', 'story'] },
   { id: '2', name: 'Technical Debt', type: 'select', required: false, options: ['Yes', 'No'], appliesTo: ['task', 'bug'] },
   { id: '3', name: 'Release Version', type: 'text', required: true, appliesTo: ['story', 'bug', 'task'] },
   { id: '4', name: 'QA Contact', type: 'user', required: false, appliesTo: ['story', 'bug'] },
   { id: '5', name: 'Documentation Link', type: 'url', required: false, appliesTo: ['story', 'epic'] }
-]
-
-const mockActivities: Activity[] = [
-  { id: 'a1', type: 'status_change', user: 'Alex', issueKey: 'WEB-101', details: 'Changed status from Open to In Progress', timestamp: '2024-01-15T14:30:00Z' },
-  { id: 'a2', type: 'comment', user: 'Mike', issueKey: 'WEB-101', details: 'Added comment: "Should we use Passport.js?"', timestamp: '2024-01-12T10:00:00Z' },
-  { id: 'a3', type: 'assignment', user: 'Sarah', issueKey: 'WEB-103', details: 'Assigned to Emily', timestamp: '2024-01-10T09:15:00Z' },
-  { id: 'a4', type: 'priority_change', user: 'Jordan', issueKey: 'WEB-102', details: 'Changed priority from High to Critical', timestamp: '2024-01-14T11:30:00Z' },
-  { id: 'a5', type: 'sprint_move', user: 'Sarah', issueKey: 'WEB-104', details: 'Moved to Sprint 2', timestamp: '2024-01-08T10:00:00Z' },
-  { id: 'a6', type: 'label_add', user: 'Alex', issueKey: 'WEB-101', details: 'Added label: auth', timestamp: '2024-01-10T09:30:00Z' }
-]
-
-const mockReports: Report[] = [
-  { id: 'r1', name: 'Sprint 2 Burndown', type: 'burndown', description: 'Track remaining work in current sprint', lastGenerated: '2024-01-15T08:00:00Z', isFavorite: true },
-  { id: 'r2', name: 'Team Velocity', type: 'velocity', description: 'Story points completed per sprint', lastGenerated: '2024-01-14T08:00:00Z', isFavorite: true },
-  { id: 'r3', name: 'Cumulative Flow', type: 'cumulative_flow', description: 'Issue status distribution over time', lastGenerated: '2024-01-15T08:00:00Z', isFavorite: false },
-  { id: 'r4', name: 'Sprint 1 Report', type: 'sprint_report', description: 'Completed sprint summary', lastGenerated: '2024-01-14T18:00:00Z', isFavorite: false },
-  { id: 'r5', name: 'Q1 Version Report', type: 'version_report', description: 'Release tracking for Q1', lastGenerated: '2024-01-13T08:00:00Z', isFavorite: true },
-  { id: 'r6', name: 'Epic Progress', type: 'epic_report', description: 'All epics completion status', lastGenerated: '2024-01-15T08:00:00Z', isFavorite: false }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: 'i1', name: 'GitHub', type: 'github', status: 'connected', lastSync: '2024-01-15T10:00:00Z', icon: '🐙' },
-  { id: 'i2', name: 'Slack', type: 'slack', status: 'connected', lastSync: '2024-01-15T10:05:00Z', icon: '💬' },
-  { id: 'i3', name: 'Confluence', type: 'confluence', status: 'connected', lastSync: '2024-01-15T09:30:00Z', icon: '📚' },
-  { id: 'i4', name: 'GitLab', type: 'gitlab', status: 'disconnected', lastSync: '2024-01-10T08:00:00Z', icon: '🦊' },
-  { id: 'i5', name: 'Microsoft Teams', type: 'teams', status: 'error', lastSync: '2024-01-14T15:00:00Z', icon: '👥' },
-  { id: 'i6', name: 'Bitbucket', type: 'bitbucket', status: 'disconnected', lastSync: '', icon: '🪣' }
 ]
 
 const getIssueTypeColor = (type: Issue['type']): string => {
@@ -1636,6 +1594,43 @@ export default function ProjectsHubClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          {/* AI Insights Panel */}
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockProjectsAIInsights}
+              title="Project Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+
+          {/* Team Collaboration & Activity */}
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockProjectsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockProjectsPredictions}
+              title="Project Forecasts"
+            />
+          </div>
+        </div>
+
+        {/* Activity Feed & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockProjectsActivities}
+            title="Project Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockProjectsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Project Detail Dialog */}
         <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>

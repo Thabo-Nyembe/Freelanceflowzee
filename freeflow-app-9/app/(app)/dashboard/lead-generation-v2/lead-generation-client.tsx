@@ -88,6 +88,18 @@ import {
   Network
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type LeadStatus = 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
 type LeadStage = 'subscriber' | 'lead' | 'mql' | 'sql' | 'opportunity' | 'customer' | 'evangelist'
@@ -545,6 +557,36 @@ interface LeadGenerationClientProps {
   initialLeads?: any[]
   initialStats?: any
 }
+
+// Competitive Upgrade Mock Data - HubSpot/Marketo-level Lead Gen Intelligence
+const mockLeadGenAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Conversion Rate', description: 'Lead-to-MQL conversion up 25% this month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Conversion' },
+  { id: '2', type: 'warning' as const, title: 'Lead Decay', description: '45 leads inactive for 14+ days - nurture recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '3', type: 'info' as const, title: 'AI Scoring', description: 'LinkedIn leads have 3x higher close rate than cold email.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockLeadGenCollaborators = [
+  { id: '1', name: 'Growth Lead', avatar: '/avatars/growth.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'SDR Manager', avatar: '/avatars/sdr.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '3', name: 'Marketing Ops', avatar: '/avatars/mops.jpg', status: 'away' as const, role: 'Ops' },
+]
+
+const mockLeadGenPredictions = [
+  { id: '1', title: 'Pipeline Value', prediction: 'Current leads will generate $450K pipeline this quarter', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'SQL Velocity', prediction: 'Lead-to-SQL time will decrease to 5 days with automation', confidence: 81, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockLeadGenActivities = [
+  { id: '1', user: 'Growth Lead', action: 'Qualified', target: '12 new MQLs', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'SDR Manager', action: 'Assigned', target: 'leads to SDR team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Marketing Ops', action: 'Launched', target: 'email nurture sequence', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockLeadGenQuickActions = [
+  { id: '1', label: 'Add Lead', icon: 'plus', action: () => console.log('Add lead'), variant: 'default' as const },
+  { id: '2', label: 'Score', icon: 'star', action: () => console.log('Score'), variant: 'default' as const },
+  { id: '3', label: 'Nurture', icon: 'mail', action: () => console.log('Nurture'), variant: 'outline' as const },
+]
 
 export default function LeadGenerationClient({ initialLeads, initialStats }: LeadGenerationClientProps) {
   const [activeTab, setActiveTab] = useState('leads')
@@ -1900,6 +1942,39 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockLeadGenAIInsights}
+              title="Lead Gen Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockLeadGenCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockLeadGenPredictions}
+              title="Pipeline Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockLeadGenActivities}
+            title="Lead Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockLeadGenQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Lead Detail Dialog */}
         <Dialog open={isLeadDialogOpen} onOpenChange={setIsLeadDialogOpen}>

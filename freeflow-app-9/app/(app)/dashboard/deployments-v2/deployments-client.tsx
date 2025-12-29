@@ -25,6 +25,18 @@ import {
   Mail, Bell, AlertOctagon, Globe2
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type DeploymentStatus = 'success' | 'in_progress' | 'failed' | 'rolled_back' | 'cancelled' | 'queued'
 type DeploymentEnvironment = 'production' | 'staging' | 'development' | 'preview'
@@ -258,6 +270,36 @@ const mockBuildPlugins: BuildPlugin[] = [
   { id: '2', name: 'Bundle Analyzer', version: '1.5.0', enabled: true, description: 'Analyze JavaScript bundle size', author: 'Vercel', installCount: 89000 },
   { id: '3', name: 'Image Optimizer', version: '3.0.2', enabled: true, description: 'Automatically optimize images during build', author: 'Vercel', installCount: 156000 },
   { id: '4', name: 'Cache Warmer', version: '1.2.0', enabled: false, description: 'Pre-populate CDN cache after deployment', author: 'Community', installCount: 34000 }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockDeploymentsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Deploy Success', description: '100% deployment success rate this week. Zero rollbacks needed.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Reliability' },
+  { id: '2', type: 'info' as const, title: 'Build Time', description: 'Average build time reduced to 45 seconds with new caching.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '3', type: 'warning' as const, title: 'Resource Usage', description: 'Production memory at 82%. Consider scaling before next deploy.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
+]
+
+const mockDeploymentsCollaborators = [
+  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'SRE', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
+  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'busy' as const, role: 'Dev' },
+]
+
+const mockDeploymentsPredictions = [
+  { id: '1', title: 'Deploy Window', prediction: 'Next safe deploy window: 2 PM', confidence: 92, trend: 'stable' as const, impact: 'high' as const },
+  { id: '2', title: 'Uptime Goal', prediction: '99.99% uptime achievable this month', confidence: 88, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockDeploymentsActivities = [
+  { id: '1', user: 'CI/CD Pipeline', action: 'Deployed to', target: 'Production v2.4.1', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Auto-Scale', action: 'Scaled up', target: 'API servers (3 → 5)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Monitor', action: 'Health check passed for', target: 'All endpoints', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockDeploymentsQuickActions = [
+  { id: '1', label: 'Deploy Now', icon: 'rocket', action: () => console.log('Deploy'), variant: 'default' as const },
+  { id: '2', label: 'Rollback', icon: 'undo', action: () => console.log('Rollback'), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file-text', action: () => console.log('Logs'), variant: 'outline' as const },
 ]
 
 export default function DeploymentsClient() {
@@ -1633,6 +1675,39 @@ export default function DeploymentsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockDeploymentsAIInsights}
+              title="Deployment Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockDeploymentsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockDeploymentsPredictions}
+              title="Deploy Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockDeploymentsActivities}
+            title="Deploy Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockDeploymentsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Build Logs Dialog */}
         <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>

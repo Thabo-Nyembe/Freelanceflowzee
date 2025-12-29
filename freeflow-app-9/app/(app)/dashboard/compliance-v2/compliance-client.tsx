@@ -30,6 +30,18 @@ import {
   GitBranch, FileCode, BookOpen, Cpu, CheckCircle, Send
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ServiceNow GRC level interfaces
 interface ComplianceFramework {
   id: string
@@ -400,6 +412,36 @@ const mockPolicies: Policy[] = [
     acknowledgements: 0,
     totalEmployees: 250
   }
+]
+
+// Competitive Upgrade Mock Data - ServiceNow GRC-level Compliance Intelligence
+const mockComplianceAIInsights = [
+  { id: '1', type: 'success' as const, title: 'SOC2 Ready', description: 'All 94 controls passing - ready for audit!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Audit' },
+  { id: '2', type: 'warning' as const, title: 'Policy Gap', description: '3 GDPR requirements need updated documentation.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Policy' },
+  { id: '3', type: 'info' as const, title: 'AI Recommendation', description: 'Automating evidence collection can reduce audit prep by 50%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockComplianceCollaborators = [
+  { id: '1', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Officer' },
+  { id: '2', name: 'Legal Counsel', avatar: '/avatars/legal.jpg', status: 'online' as const, role: 'Counsel' },
+  { id: '3', name: 'Risk Manager', avatar: '/avatars/risk.jpg', status: 'away' as const, role: 'Manager' },
+]
+
+const mockCompliancePredictions = [
+  { id: '1', title: 'Audit Readiness', prediction: 'ISO 27001 certification achievable in 6 weeks', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Risk Score', prediction: 'Implementing controls will reduce risk score by 30%', confidence: 84, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockComplianceActivities = [
+  { id: '1', user: 'Compliance Officer', action: 'Completed', target: 'annual policy review', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Legal Counsel', action: 'Approved', target: 'data processing agreement', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Risk Manager', action: 'Updated', target: 'risk register entries', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockComplianceQuickActions = [
+  { id: '1', label: 'New Control', icon: 'plus', action: () => console.log('New control'), variant: 'default' as const },
+  { id: '2', label: 'Assess', icon: 'check-circle', action: () => console.log('Assess'), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
 ]
 
 export default function ComplianceClient() {
@@ -1758,6 +1800,39 @@ export default function ComplianceClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockComplianceAIInsights}
+              title="Compliance Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockComplianceCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCompliancePredictions}
+              title="Compliance Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockComplianceActivities}
+            title="Compliance Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockComplianceQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Control Detail Dialog */}

@@ -9,6 +9,19 @@ import {
   AlertCircle, CheckCircle, Info, ArrowUpRight, Copy, ExternalLink, Bell, Palette,
   Database, Server, Zap, Languages, MessageSquare, Webhook
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -62,6 +75,38 @@ interface AuditLog {
   status: 'success' | 'failure' | 'warning'
   details?: string
 }
+
+// Enhanced Competitive Upgrade Data
+const mockUserMgmtAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Access Review', description: 'Quarterly access review completed. 100% compliance.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '2', type: 'info' as const, title: 'Inactive Users', description: '15 users inactive for 30+ days. Consider deactivation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
+  { id: '3', type: 'warning' as const, title: 'MFA Required', description: '8 admin users without MFA enabled. Security risk.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+]
+
+const mockUserMgmtCollaborators = [
+  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Administration', lastActive: 'Now' },
+  { id: '2', name: 'Security Mgr', avatar: '/avatars/secmgr.jpg', status: 'online' as const, role: 'Security', lastActive: '10m ago' },
+  { id: '3', name: 'HR Lead', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR', lastActive: '30m ago' },
+]
+
+const mockUserMgmtPredictions = [
+  { id: '1', label: 'Active Users', current: 450, target: 500, predicted: 475, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'MFA Adoption', current: 78, target: 100, predicted: 88, confidence: 80, trend: 'up' as const },
+  { id: '3', label: 'Tickets/Week', current: 25, target: 15, predicted: 20, confidence: 72, trend: 'down' as const },
+]
+
+const mockUserMgmtActivities = [
+  { id: '1', user: 'IT Admin', action: 'provisioned', target: '5 new users', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'Security Mgr', action: 'enforced', target: 'password policy update', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'System', action: 'flagged', target: 'suspicious login attempt', timestamp: '2h ago', type: 'warning' as const },
+]
+
+const mockUserMgmtQuickActions = [
+  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => console.log('Add user') },
+  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => console.log('Bulk import') },
+  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => console.log('Audit log') },
+  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => console.log('Roles') },
+]
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {
   const [activeView, setActiveView] = useState<'users' | 'roles' | 'connections' | 'security' | 'logs' | 'settings'>('users')
@@ -1590,6 +1635,39 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
               </Tabs>
             </div>
           )}
+        </div>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockUserMgmtAIInsights}
+              title="User Management Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockUserMgmtCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockUserMgmtPredictions}
+              title="User Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockUserMgmtActivities}
+            title="User Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockUserMgmtQuickActions}
+            variant="grid"
+          />
         </div>
 
         {/* User Detail Modal */}

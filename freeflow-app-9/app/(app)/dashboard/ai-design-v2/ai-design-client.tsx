@@ -76,6 +76,26 @@ import {
   HelpCircle
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  aiDesignAIInsights,
+  aiDesignCollaborators,
+  aiDesignPredictions,
+  aiDesignActivities,
+  aiDesignQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type GenerationStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'upscaling'
 type StylePreset = 'photorealistic' | 'anime' | 'digital_art' | 'oil_painting' | 'watercolor' | 'sketch' | '3d_render' | 'neon' | 'vintage' | 'minimalist'
@@ -345,6 +365,38 @@ const formatDate = (date: string) => {
     minute: '2-digit'
   })
 }
+
+// Enhanced Competitive Upgrade Mock Data - AI Design Context
+const mockAIDesignInsights = [
+  { id: '1', type: 'success' as const, title: 'Style Trending', description: 'Photorealistic style generating 40% more engagement this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+  { id: '2', type: 'info' as const, title: 'Credits Optimization', description: 'Switch to batch mode for 25% credit savings on multiple generations.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Efficiency' },
+  { id: '3', type: 'warning' as const, title: 'Queue Alert', description: 'High demand detected. Consider scheduling generations for off-peak hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'System' },
+]
+
+const mockAIDesignCollaborators = [
+  { id: '1', name: 'Maya Chen', avatar: '/avatars/maya.jpg', status: 'online' as const, role: 'Creative Director', lastActive: 'Now' },
+  { id: '2', name: 'Oliver Park', avatar: '/avatars/oliver.jpg', status: 'online' as const, role: 'AI Artist', lastActive: '5m ago' },
+  { id: '3', name: 'Sophie Miller', avatar: '/avatars/sophie.jpg', status: 'away' as const, role: 'Designer', lastActive: '20m ago' },
+]
+
+const mockAIDesignPredictions = [
+  { id: '1', label: 'Generation Success Rate', current: 94, target: 98, predicted: 96, confidence: 88, trend: 'up' as const },
+  { id: '2', label: 'Avg Generation Time', current: 12, target: 8, predicted: 10, confidence: 75, trend: 'down' as const },
+  { id: '3', label: 'Monthly Credits Used', current: 450, target: 500, predicted: 480, confidence: 82, trend: 'up' as const },
+]
+
+const mockAIDesignActivities = [
+  { id: '1', user: 'Maya Chen', action: 'generated', target: '4K landscape image', timestamp: '2m ago', type: 'success' as const },
+  { id: '2', user: 'Oliver Park', action: 'upscaled', target: 'product photo batch', timestamp: '15m ago', type: 'info' as const },
+  { id: '3', user: 'Sophie Miller', action: 'saved', target: 'style preset "Neon Dreams"', timestamp: '30m ago', type: 'info' as const },
+]
+
+const mockAIDesignQuickActions = [
+  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => console.log('New generation') },
+  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => console.log('Browse gallery') },
+  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => console.log('Upscale') },
+  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => console.log('Edit style') },
+]
 
 export default function AIDesignClient() {
   const [activeTab, setActiveTab] = useState('generate')
@@ -1710,6 +1762,39 @@ export default function AIDesignClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAIDesignInsights}
+              title="AI Design Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAIDesignCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAIDesignPredictions}
+              title="Generation Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAIDesignActivities}
+            title="Design Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAIDesignQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Generation Detail Dialog */}
         <Dialog open={showGenerationDialog} onOpenChange={setShowGenerationDialog}>

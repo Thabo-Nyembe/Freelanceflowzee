@@ -81,6 +81,27 @@ import {
   CreditCard,
   Download
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  alertsAIInsights,
+  alertsCollaborators,
+  alertsPredictions,
+  alertsActivities,
+  alertsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CardDescription } from '@/components/ui/card'
@@ -330,6 +351,38 @@ const mockIntegrations: Integration[] = [
   { id: '3', name: 'CloudWatch', type: 'cloud', icon: '☁️', status: 'active', alertsReceived: 456, lastAlert: '1 hour ago' },
   { id: '4', name: 'Slack', type: 'notification', icon: '💬', status: 'active', alertsReceived: 0, lastAlert: 'N/A' },
   { id: '5', name: 'Jira', type: 'ticketing', icon: '🎫', status: 'inactive', alertsReceived: 234, lastAlert: '2 days ago' }
+]
+
+// Enhanced Alerts Mock Data
+const mockAlertsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Alert Volume', description: 'Critical alerts down 40% this week. Great incident response!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+  { id: '2', type: 'info' as const, title: 'Common Pattern', description: 'Memory alerts peak at 3 AM. Consider auto-scaling during off-hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Patterns' },
+  { id: '3', type: 'warning' as const, title: 'Pending Action', description: '3 critical alerts require immediate attention.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Action' },
+]
+
+const mockAlertsCollaborators = [
+  { id: '1', name: 'On-Call Lead', avatar: '/avatars/oncall.jpg', status: 'online' as const, role: 'Incident Response', lastActive: 'Now' },
+  { id: '2', name: 'NOC Analyst', avatar: '/avatars/noc.jpg', status: 'online' as const, role: 'Monitoring', lastActive: '2m ago' },
+  { id: '3', name: 'Escalation Mgr', avatar: '/avatars/esc.jpg', status: 'away' as const, role: 'Escalations', lastActive: '20m ago' },
+]
+
+const mockAlertsPredictions = [
+  { id: '1', label: 'Daily Alerts', current: 45, target: 30, predicted: 38, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'MTTR (min)', current: 12, target: 8, predicted: 10, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Resolution %', current: 94, target: 98, predicted: 96, confidence: 85, trend: 'up' as const },
+]
+
+const mockAlertsActivities = [
+  { id: '1', user: 'On-Call Lead', action: 'acknowledged', target: 'CPU spike alert', timestamp: '5m ago', type: 'success' as const },
+  { id: '2', user: 'NOC Analyst', action: 'escalated', target: 'database connectivity issue', timestamp: '20m ago', type: 'info' as const },
+  { id: '3', user: 'Escalation Mgr', action: 'resolved', target: 'P1 incident #4521', timestamp: '1h ago', type: 'success' as const },
+]
+
+const mockAlertsQuickActions = [
+  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => console.log('Acknowledge') },
+  { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => console.log('Escalate') },
+  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => console.log('Silence') },
+  { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => console.log('Create rule') },
 ]
 
 export default function AlertsClient() {
@@ -1736,6 +1789,39 @@ export default function AlertsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAlertsAIInsights}
+              title="Alert Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAlertsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAlertsPredictions}
+              title="Alert Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAlertsActivities}
+            title="Alert Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAlertsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Alert Detail Dialog */}
         <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>

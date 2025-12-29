@@ -101,6 +101,18 @@ import {
   BookmarkPlus
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
 type EndpointStatus = 'active' | 'deprecated' | 'draft' | 'disabled'
@@ -304,6 +316,36 @@ const mockMockServers: MockServer[] = [
   { id: '1', name: 'User API Mock', url: 'https://mock.api.example.com/users', collection: 'User Management', isActive: true, requests: 15000, latency: 50, createdAt: '2024-01-01T00:00:00Z' },
   { id: '2', name: 'Payment Mock', url: 'https://mock.api.example.com/payments', collection: 'E-Commerce API', isActive: true, requests: 8500, latency: 75, createdAt: '2024-01-05T00:00:00Z' },
   { id: '3', name: 'Auth Mock', url: 'https://mock.api.example.com/auth', collection: 'Authentication Flow', isActive: false, requests: 2000, latency: 25, createdAt: '2024-01-10T00:00:00Z' }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockApiAIInsights = [
+  { id: '1', type: 'success' as const, title: 'API Performance', description: 'Average response time at 45ms. 20% faster than last week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Production API key approaching 80% of daily quota.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+  { id: '3', type: 'info' as const, title: 'New Endpoint', description: 'GraphQL endpoint now available in production.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+]
+
+const mockApiCollaborators = [
+  { id: '1', name: 'API Lead', avatar: '/avatars/api.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Backend Dev', avatar: '/avatars/backend.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'DevOps', avatar: '/avatars/devops.jpg', status: 'away' as const, role: 'DevOps' },
+]
+
+const mockApiPredictions = [
+  { id: '1', title: 'Traffic Forecast', prediction: 'API traffic expected to increase 30% during holiday season', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Error Rate', prediction: 'Error rate projected to stay below 0.1%', confidence: 90, trend: 'stable' as const, impact: 'low' as const },
+]
+
+const mockApiActivities = [
+  { id: '1', user: 'API Lead', action: 'Deployed', target: 'v2.3.0 to production', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Backend Dev', action: 'Created', target: 'new payment endpoint', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Regenerated', target: 'API documentation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockApiQuickActions = [
+  { id: '1', label: 'New Endpoint', icon: 'plus', action: () => console.log('New endpoint'), variant: 'default' as const },
+  { id: '2', label: 'Test API', icon: 'play', action: () => console.log('Test API'), variant: 'default' as const },
+  { id: '3', label: 'View Docs', icon: 'book', action: () => console.log('View docs'), variant: 'outline' as const },
 ]
 
 export default function ApiClient() {
@@ -1694,6 +1736,39 @@ export default function ApiClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockApiAIInsights}
+              title="API Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockApiCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockApiPredictions}
+              title="API Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockApiActivities}
+            title="API Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockApiQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Endpoint Detail Dialog */}
         <Dialog open={!!selectedEndpoint} onOpenChange={() => setSelectedEndpoint(null)}>

@@ -1,6 +1,6 @@
-import DocsClient from './docs-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import DocsClient from './docs-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

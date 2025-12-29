@@ -68,6 +68,26 @@ import {
   Sparkles
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  assetsAIInsights,
+  assetsCollaborators,
+  assetsPredictions,
+  assetsActivities,
+  assetsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type AssetType = 'image' | 'video' | 'audio' | 'document' | 'font' | 'icon' | 'template' | 'brand_asset' | '3d_model' | 'raw_file'
 type AssetStatus = 'draft' | 'pending_review' | 'approved' | 'published' | 'expired' | 'archived'
@@ -634,6 +654,39 @@ interface AssetsClientProps {
   initialAssets?: any[]
   initialCollections?: any[]
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Bynder/Brandfolder Level
+// ============================================================================
+
+const mockAssetsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Storage Optimized', description: 'Image compression saved 2.5GB this month without quality loss.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '2', type: 'warning' as const, title: 'License Expiring', description: '15 stock images have licenses expiring next week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '3', type: 'info' as const, title: 'Popular Assets', description: 'Brand logo downloaded 250 times this month. Most used asset!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockAssetsCollaborators = [
+  { id: '1', name: 'Brand Manager', avatar: '/avatars/brand.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Designer', avatar: '/avatars/designer.jpg', status: 'online' as const, role: 'Design' },
+  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
+]
+
+const mockAssetsPredictions = [
+  { id: '1', title: 'Storage Growth', prediction: 'Asset library will reach 1TB by end of quarter', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Usage Trend', prediction: 'Video assets usage increasing 40% month over month', confidence: 87, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAssetsActivities = [
+  { id: '1', user: 'Designer', action: 'Uploaded', target: '25 new product images', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Brand Manager', action: 'Updated', target: 'brand guidelines PDF', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Marketing', action: 'Downloaded', target: 'campaign assets bundle', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockAssetsQuickActions = [
+  { id: '1', label: 'Upload Assets', icon: 'upload', action: () => console.log('Upload assets'), variant: 'default' as const },
+  { id: '2', label: 'New Collection', icon: 'folder', action: () => console.log('New collection'), variant: 'default' as const },
+  { id: '3', label: 'Bulk Edit', icon: 'edit', action: () => console.log('Bulk edit'), variant: 'outline' as const },
+]
 
 export default function AssetsClient({ initialAssets, initialCollections }: AssetsClientProps) {
   const [activeTab, setActiveTab] = useState('assets')
@@ -1625,6 +1678,40 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAssetsAIInsights}
+              title="Asset Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAssetsCollaborators}
+              maxVisible={4}
+              showStatus={true}
+            />
+            <PredictiveAnalytics
+              predictions={mockAssetsPredictions}
+              title="Asset Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAssetsActivities}
+            title="Asset Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAssetsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Asset Detail Dialog */}
         <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>

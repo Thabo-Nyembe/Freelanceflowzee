@@ -108,6 +108,8 @@
 
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useRef, useEffect, useReducer } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -150,8 +152,6 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('Messages')
 
 // Messages Utilities - World-class A+++ messaging system
-
-
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS

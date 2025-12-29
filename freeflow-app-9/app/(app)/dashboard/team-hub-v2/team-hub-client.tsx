@@ -103,6 +103,27 @@ import {
   Upload
 } from 'lucide-react'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  teamHubAIInsights,
+  teamHubCollaborators,
+  teamHubPredictions,
+  teamHubActivities,
+  teamHubQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type MemberStatus = 'online' | 'away' | 'dnd' | 'offline' | 'in-meeting'
 type MemberRole = 'owner' | 'admin' | 'member' | 'guest' | 'single-channel-guest'
@@ -1881,6 +1902,27 @@ export default function TeamHubClient() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* AI-Powered Team Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <AIInsightsPanel
+            insights={teamHubAIInsights}
+            onAskQuestion={(q) => console.log('Team Question:', q)}
+          />
+          <PredictiveAnalytics predictions={teamHubPredictions} />
+        </div>
+
+        {/* Activity Feed */}
+        <div className="mt-6">
+          <ActivityFeed
+            activities={teamHubActivities}
+            maxItems={5}
+            showFilters={true}
+          />
+        </div>
+
+        {/* Quick Actions Toolbar */}
+        <QuickActionsToolbar actions={teamHubQuickActions} />
       </div>
     </div>
   )

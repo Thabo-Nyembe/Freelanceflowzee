@@ -78,6 +78,18 @@ import {
   CreditCard
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Okta-level types
 type UserStatus = 'active' | 'pending' | 'staged' | 'suspended' | 'deprovisioned' | 'locked'
 type GroupType = 'okta' | 'app' | 'built_in' | 'custom'
@@ -222,6 +234,39 @@ const mockAuditEvents: AuditEvent[] = [
   { id: 'event_3', action: 'user.mfa_challenge', actor: 'jane@company.com', target: 'AWS Console', timestamp: new Date(Date.now() - 7200000).toISOString(), result: 'success', ipAddress: '10.0.0.50' },
   { id: 'event_4', action: 'user.login_failure', actor: 'unknown@attacker.com', target: 'Google Workspace', timestamp: new Date(Date.now() - 10800000).toISOString(), result: 'failure', ipAddress: '203.0.113.45' },
   { id: 'event_5', action: 'group.member_added', actor: 'admin@company.com', target: 'Engineering', timestamp: new Date(Date.now() - 14400000).toISOString(), result: 'success', ipAddress: '192.168.1.10' }
+]
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Okta Level
+// ============================================================================
+
+const mockPermissionsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Compliance Met', description: 'All access policies comply with SOC2 and GDPR requirements.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+  { id: '2', type: 'warning' as const, title: 'Unusual Access', description: '3 login attempts from new location detected for admin accounts.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'Permission Review', description: '15 users have unused elevated permissions. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+]
+
+const mockPermissionsCollaborators = [
+  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Security' },
+  { id: '2', name: 'IT Manager', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'IT' },
+  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'away' as const, role: 'Compliance' },
+]
+
+const mockPermissionsPredictions = [
+  { id: '1', title: 'Access Growth', prediction: 'User base expected to grow 20% requiring role expansion', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Risk Reduction', prediction: 'MFA enforcement will reduce breach risk by 80%', confidence: 94, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockPermissionsActivities = [
+  { id: '1', user: 'Security Admin', action: 'Enabled', target: 'MFA for Engineering group', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'IT Manager', action: 'Created', target: 'New Developer role with limited access', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Blocked', target: 'Suspicious login attempt from unknown IP', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockPermissionsQuickActions = [
+  { id: '1', label: 'Add User', icon: 'plus', action: () => console.log('Add user'), variant: 'default' as const },
+  { id: '2', label: 'Create Role', icon: 'shield', action: () => console.log('Create role'), variant: 'default' as const },
+  { id: '3', label: 'Audit Log', icon: 'file', action: () => console.log('Audit log'), variant: 'outline' as const },
 ]
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
@@ -1649,6 +1694,39 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockPermissionsAIInsights}
+              title="Security Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockPermissionsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockPermissionsPredictions}
+              title="Access Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockPermissionsActivities}
+            title="Security Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockPermissionsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* User Detail Dialog */}
         <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import InvoicesClient from './invoices-client'
 
 export default function Page() {

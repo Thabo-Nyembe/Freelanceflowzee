@@ -105,6 +105,26 @@ import {
   Braces,
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  announcementsAIInsights,
+  announcementsCollaborators,
+  announcementsPredictions,
+  announcementsActivities,
+  announcementsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type AnnouncementStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent' | 'critical'
@@ -1818,6 +1838,39 @@ export default function AnnouncementsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={announcementsAIInsights}
+              title="Announcements Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={announcementsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={announcementsPredictions}
+              title="Engagement Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={announcementsActivities}
+            title="Announcement Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={announcementsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Announcement Detail Dialog */}

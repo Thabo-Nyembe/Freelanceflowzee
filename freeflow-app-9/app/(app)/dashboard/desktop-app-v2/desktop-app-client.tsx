@@ -60,6 +60,26 @@ import {
   Layers
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  desktopAppAIInsights,
+  desktopAppCollaborators,
+  desktopAppPredictions,
+  desktopAppActivities,
+  desktopAppQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type Platform = 'windows' | 'macos' | 'linux' | 'all'
 type BuildStatus = 'queued' | 'building' | 'signing' | 'notarizing' | 'uploading' | 'completed' | 'failed' | 'cancelled'
@@ -412,6 +432,36 @@ const mockCertificates: Certificate[] = [
     status: 'valid',
     fingerprint: 'M3:N4:O5:P6:Q7:R8...'
   }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockDesktopAppAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Build Optimization', description: 'Latest builds 23% faster with new bundler. All platforms benefiting.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'Auto-Update Stats', description: '94% of users on latest version. Update adoption excellent.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
+  { id: '3', type: 'warning' as const, title: 'macOS Notarization', description: 'Apple notarization times increasing. Consider pre-submission queue.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Platform' },
+]
+
+const mockDesktopAppCollaborators = [
+  { id: '1', name: 'Build Engineer', avatar: '/avatars/build.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '2', name: 'Release Manager', avatar: '/avatars/release.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '3', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'busy' as const, role: 'QA' },
+]
+
+const mockDesktopAppPredictions = [
+  { id: '1', title: 'Next Release', prediction: 'v2.5.0 ready for stable release', confidence: 92, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Download Growth', prediction: '+15% downloads projected next month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockDesktopAppActivities = [
+  { id: '1', user: 'Build System', action: 'Build completed', target: 'v2.4.8 Windows x64', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Auto-Updater', action: 'Update pushed', target: '45,000 users', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Release Bot', action: 'Published to', target: 'Beta Channel', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockDesktopAppQuickActions = [
+  { id: '1', label: 'New Build', icon: 'play', action: () => console.log('New build'), variant: 'default' as const },
+  { id: '2', label: 'Deploy Update', icon: 'upload', action: () => console.log('Deploy'), variant: 'default' as const },
+  { id: '3', label: 'View Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
 ]
 
 export default function DesktopAppClient() {
@@ -1904,6 +1954,39 @@ export default function DesktopAppClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockDesktopAppAIInsights}
+              title="Desktop App Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockDesktopAppCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockDesktopAppPredictions}
+              title="App Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockDesktopAppActivities}
+            title="Build Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockDesktopAppQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

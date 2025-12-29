@@ -11,6 +11,27 @@ import {
   CheckCircle2, XCircle, History, Bell, Link2, Key, Database, Palette, Languages,
   TestTube, AlertOctagon, Fingerprint, ShieldCheck, Layers, Repeat, Send
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  billingAIInsights,
+  billingCollaborators,
+  billingPredictions,
+  billingActivities,
+  billingQuickActions,
+} from '@/lib/mock-data/adapters'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -158,6 +179,36 @@ interface PricingPlan {
   trial_days: number
   subscribers: number
 }
+
+// Competitive Upgrade Mock Data - Stripe/Chargebee-level Billing Intelligence
+const mockBillingAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Revenue Growth', description: 'MRR increased 12% month-over-month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '2', type: 'warning' as const, title: 'Churn Risk', description: '15 accounts showing payment failure patterns.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Retention' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Annual billing conversion could increase by offering 20% discount.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockBillingCollaborators = [
+  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'online' as const, role: 'Ops' },
+  { id: '3', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'away' as const, role: 'Accountant' },
+]
+
+const mockBillingPredictions = [
+  { id: '1', title: 'Monthly Revenue', prediction: 'Next month revenue projected at $125K based on current pipeline', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Dunning Recovery', prediction: 'Smart retry strategy will recover 65% of failed payments', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockBillingActivities = [
+  { id: '1', user: 'Finance Lead', action: 'Processed', target: '47 subscription renewals', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Revenue Ops', action: 'Updated', target: 'enterprise pricing tiers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Accountant', action: 'Reconciled', target: 'Q4 revenue report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockBillingQuickActions = [
+  { id: '1', label: 'New Invoice', icon: 'plus', action: () => console.log('New invoice'), variant: 'default' as const },
+  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => console.log('Refund'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1767,6 +1818,39 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </Tabs>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockBillingAIInsights}
+              title="Billing Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockBillingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockBillingPredictions}
+              title="Revenue Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockBillingActivities}
+            title="Billing Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockBillingQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* New Subscription Modal */}

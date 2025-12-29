@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import TestingClient from './testing-client'
 
 export default function Page() {

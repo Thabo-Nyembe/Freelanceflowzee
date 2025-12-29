@@ -1,6 +1,6 @@
-import MarketplaceClient from './marketplace-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import MarketplaceClient from './marketplace-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

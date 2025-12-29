@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import HelpCenterClient from './help-center-client'
 
 export default function Page() {

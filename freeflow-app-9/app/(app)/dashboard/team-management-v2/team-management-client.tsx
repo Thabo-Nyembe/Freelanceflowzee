@@ -9,6 +9,19 @@ import {
   Bell, Key, Globe, Link2, Palette, Database, Server, Shield, FileText, Mail,
   Smartphone, Slack, Video, Timer, UserCog, Languages, DollarSign
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -19,6 +32,13 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
+import {
+  teamManagementAIInsights,
+  teamManagementCollaborators,
+  teamManagementPredictions,
+  teamManagementActivities,
+  teamManagementQuickActions,
+} from '@/lib/mock-data/adapters'
 
 interface TeamMember {
   id: string
@@ -1757,6 +1777,39 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
               </Tabs>
             </div>
           )}
+        </div>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={teamManagementAIInsights}
+              title="Team Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={teamManagementCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={teamManagementPredictions}
+              title="Team Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={teamManagementActivities}
+            title="Team Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={teamManagementQuickActions}
+            variant="grid"
+          />
         </div>
 
         {/* Member Detail Modal */}

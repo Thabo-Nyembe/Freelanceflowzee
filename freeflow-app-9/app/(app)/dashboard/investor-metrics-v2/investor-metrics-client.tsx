@@ -68,6 +68,26 @@ import {
   BookOpen
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  investorMetricsAIInsights,
+  investorMetricsCollaborators,
+  investorMetricsPredictions,
+  investorMetricsActivities,
+  investorMetricsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type FundingStage = 'pre-seed' | 'seed' | 'series-a' | 'series-b' | 'series-c' | 'series-d' | 'ipo'
 type InvestorType = 'angel' | 'vc' | 'corporate' | 'family-office' | 'accelerator' | 'strategic'
@@ -300,6 +320,36 @@ const mockKPIs: KPIMetric[] = [
   { id: '10', name: 'Runway (months)', category: 'efficiency', currentValue: 24, previousValue: 18, unit: 'number', period: 'monthly', target: 18 },
   { id: '11', name: 'Active Users', category: 'engagement', currentValue: 45000, previousValue: 32000, unit: 'number', period: 'monthly', target: 50000 },
   { id: '12', name: 'Churn Rate', category: 'engagement', currentValue: 2.1, previousValue: 3.2, unit: 'percent', period: 'monthly', target: 2.0 }
+]
+
+// Mock data for AI-powered competitive upgrade components
+const mockInvestorMetricsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Metrics Strong', description: 'All key metrics trending above board expectations. Great quarter!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Burn Rate Alert', description: 'Burn rate increased 15% this month. Review spending.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Finance' },
+  { id: '3', type: 'info' as const, title: 'Investor Update', description: 'Q4 investor report due in 5 days. Data ready for review.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Reporting' },
+]
+
+const mockInvestorMetricsCollaborators = [
+  { id: '1', name: 'CFO', avatar: '/avatars/cfo.jpg', status: 'online' as const, role: 'Finance' },
+  { id: '2', name: 'CEO', avatar: '/avatars/ceo.jpg', status: 'online' as const, role: 'Executive' },
+  { id: '3', name: 'Board Member', avatar: '/avatars/board.jpg', status: 'away' as const, role: 'Board' },
+]
+
+const mockInvestorMetricsPredictions = [
+  { id: '1', title: 'Runway Forecast', prediction: 'Current runway extends to 26 months with Q1 revenue projections', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Series B Timeline', prediction: 'Metrics support Series B raise by Q3 at $150M+ valuation', confidence: 75, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockInvestorMetricsActivities = [
+  { id: '1', user: 'CFO', action: 'Updated', target: 'monthly financial metrics', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'CEO', action: 'Shared', target: 'investor deck with advisors', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Generated', target: 'automated KPI report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockInvestorMetricsQuickActions = [
+  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => console.log('Update'), variant: 'default' as const },
+  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => console.log('Report'), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
 export default function InvestorMetricsClient() {
@@ -1710,6 +1760,39 @@ export default function InvestorMetricsClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockInvestorMetricsAIInsights}
+                title="Investor Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockInvestorMetricsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockInvestorMetricsPredictions}
+                title="Financial Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockInvestorMetricsActivities}
+              title="Investor Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockInvestorMetricsQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
 

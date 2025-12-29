@@ -25,6 +25,26 @@ import {
   HardDrive, AlertOctagon, CreditCard, Sliders, Mail, Globe, Download, Copy
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  sprintsAIInsights,
+  sprintsCollaborators,
+  sprintsPredictions,
+  sprintsActivities,
+  sprintsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Jira Sprints Level Sprint Management
 // ============================================================================
@@ -351,6 +371,36 @@ const formatDate = (date: string) => {
 // ============================================================================
 // COMPONENT
 // ============================================================================
+
+// Competitive Upgrade Mock Data - Jira/Linear Level Sprint Intelligence
+const mockSprintsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Sprint Velocity', description: 'Team velocity increased 23% this sprint—on track for 45 story points!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Velocity' },
+  { id: '2', type: 'warning' as const, title: 'Scope Creep Alert', description: '3 new stories added mid-sprint. Consider sprint scope lock.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scope' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Story DEV-234 has blockers—splitting into sub-tasks may help.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockSprintsCollaborators = [
+  { id: '1', name: 'Scrum Master', avatar: '/avatars/scrum.jpg', status: 'online' as const, role: 'Scrum Master' },
+  { id: '2', name: 'Tech Lead', avatar: '/avatars/tech.jpg', status: 'online' as const, role: 'Tech Lead' },
+  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', status: 'away' as const, role: 'Product Owner' },
+]
+
+const mockSprintsPredictions = [
+  { id: '1', title: 'Sprint Completion', prediction: '89% probability of completing all committed stories by Friday', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Burndown Trend', prediction: 'Current pace suggests 2-day buffer for sprint review prep', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockSprintsActivities = [
+  { id: '1', user: 'Tech Lead', action: 'Moved', target: 'AUTH-123 to In Review', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Developer', action: 'Completed', target: 'API-456 bug fix', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Scrum Master', action: 'Updated', target: 'Sprint 24 capacity', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockSprintsQuickActions = [
+  { id: '1', label: 'New Story', icon: 'plus', action: () => console.log('New Story'), variant: 'default' as const },
+  { id: '2', label: 'Start Sprint', icon: 'play', action: () => console.log('Start Sprint'), variant: 'default' as const },
+  { id: '3', label: 'Backlog', icon: 'list', action: () => console.log('Backlog'), variant: 'outline' as const },
+]
 
 export default function SprintsClient() {
   const [activeTab, setActiveTab] = useState('sprints')
@@ -1626,6 +1676,39 @@ export default function SprintsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSprintsAIInsights}
+              title="Sprint Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSprintsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSprintsPredictions}
+              title="Sprint Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSprintsActivities}
+            title="Sprint Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSprintsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Sprint Detail Dialog */}
         <Dialog open={!!selectedSprint} onOpenChange={() => setSelectedSprint(null)}>

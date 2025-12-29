@@ -22,6 +22,18 @@ import {
   Cpu, Network, CircleDot, LayoutGrid, List
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPE DEFINITIONS - Auth0 Level API Management
 // ============================================================================
@@ -791,6 +803,39 @@ const formatDate = (dateString: string): string => {
     minute: '2-digit'
   })
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Auth0/Stripe Level
+// ============================================================================
+
+const mockApiKeysAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Healthy Usage', description: 'API usage within normal parameters. 99.9% uptime this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Key Expiring', description: 'Production API key expires in 7 days. Rotation recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'Rate Limit', description: 'Mobile app approaching 80% of rate limit. Consider upgrade.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+]
+
+const mockApiKeysCollaborators = [
+  { id: '1', name: 'API Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
+  { id: '3', name: 'Security', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
+]
+
+const mockApiKeysPredictions = [
+  { id: '1', title: 'API Growth', prediction: 'API calls expected to increase 30% next month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cost Forecast', prediction: 'Current usage will cost $450/month at current tier', confidence: 92, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockApiKeysActivities = [
+  { id: '1', user: 'API Admin', action: 'Created', target: 'new production API key', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'DevOps Lead', action: 'Rotated', target: 'staging API credentials', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Revoked', target: 'expired development key', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockApiKeysQuickActions = [
+  { id: '1', label: 'Create Key', icon: 'plus', action: () => console.log('Create key'), variant: 'default' as const },
+  { id: '2', label: 'View Usage', icon: 'chart', action: () => console.log('View usage'), variant: 'default' as const },
+  { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => console.log('Rotate keys'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1654,6 +1699,39 @@ export default function ApiKeysClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockApiKeysAIInsights}
+              title="API Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockApiKeysCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockApiKeysPredictions}
+              title="API Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockApiKeysActivities}
+            title="API Key Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockApiKeysQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Key Detail Dialog */}
         <Dialog open={!!selectedKey} onOpenChange={() => setSelectedKey(null)}>

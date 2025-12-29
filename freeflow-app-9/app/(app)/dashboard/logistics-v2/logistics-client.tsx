@@ -9,6 +9,27 @@ import {
   Users, Box, FileText, Calendar, Star, Navigation, Timer,
   Scale, Thermometer, ShieldCheck, Bell, Zap
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  logisticsAIInsights,
+  logisticsCollaborators,
+  logisticsPredictions,
+  logisticsActivities,
+  logisticsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -538,6 +559,7 @@ const formatDate = (date: string) => {
 const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
+
 
 export default function LogisticsClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1800,6 +1822,39 @@ export default function LogisticsClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockLogisticsAIInsights}
+                title="Logistics Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockLogisticsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockLogisticsPredictions}
+                title="Logistics Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockLogisticsActivities}
+              title="Logistics Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockLogisticsQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
     </div>

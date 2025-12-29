@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import IntegrationsMarketplaceClient from './integrations-marketplace-client'
 
 export default function Page() {

@@ -97,6 +97,27 @@ import {
   LineChart,
   AreaChart
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  mediaLibraryAIInsights,
+  mediaLibraryCollaborators,
+  mediaLibraryPredictions,
+  mediaLibraryActivities,
+  mediaLibraryQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 
 // Types
@@ -468,6 +489,38 @@ const getAccessIcon = (level: AccessLevel) => {
   }
   return icons[level]
 }
+
+// Enhanced Media Library Mock Data
+const mockMediaAIInsights = [
+  { id: '1', type: 'info' as const, title: 'Storage Usage', description: 'Using 78% of storage. Consider archiving old assets or upgrading plan.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '2', type: 'success' as const, title: 'AI Tagging', description: '156 new assets auto-tagged this week. 98% accuracy rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Automation' },
+  { id: '3', type: 'warning' as const, title: 'License Expiring', description: '12 assets have licenses expiring in 30 days. Review and renew.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
+]
+
+const mockMediaCollaborators = [
+  { id: '1', name: 'Media Manager', avatar: '/avatars/media.jpg', status: 'online' as const, role: 'Asset Management', lastActive: 'Now' },
+  { id: '2', name: 'Photographer', avatar: '/avatars/photo.jpg', status: 'online' as const, role: 'Content Creator', lastActive: '5m ago' },
+  { id: '3', name: 'Video Editor', avatar: '/avatars/video.jpg', status: 'away' as const, role: 'Post Production', lastActive: '30m ago' },
+]
+
+const mockMediaPredictions = [
+  { id: '1', label: 'Storage Used', current: 78, target: 100, predicted: 85, confidence: 88, trend: 'up' as const },
+  { id: '2', label: 'Assets Added', current: 1247, target: 1500, predicted: 1380, confidence: 82, trend: 'up' as const },
+  { id: '3', label: 'Downloads', current: 3420, target: 4000, predicted: 3800, confidence: 85, trend: 'up' as const },
+]
+
+const mockMediaActivities = [
+  { id: '1', user: 'Media Manager', action: 'organized', target: '45 assets into collections', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'Photographer', action: 'uploaded', target: '28 new photos', timestamp: '25m ago', type: 'info' as const },
+  { id: '3', user: 'Video Editor', action: 'processed', target: '3 video files', timestamp: '1h ago', type: 'info' as const },
+]
+
+const mockMediaQuickActions = [
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
+  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => console.log('New folder') },
+  { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => console.log('Collection') },
+  { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => console.log('AI tag') },
+]
 
 interface MediaLibraryClientProps {
   initialAssets?: MediaAsset[]
@@ -1626,6 +1679,39 @@ export default function MediaLibraryClient({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMediaAIInsights}
+              title="Media Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMediaCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMediaPredictions}
+              title="Asset Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMediaActivities}
+            title="Library Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMediaQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Asset Detail Dialog */}
         <Dialog open={!!selectedAsset} onOpenChange={() => setSelectedAsset(null)}>

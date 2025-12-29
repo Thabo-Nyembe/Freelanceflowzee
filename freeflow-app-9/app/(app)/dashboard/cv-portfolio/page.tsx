@@ -1,4 +1,8 @@
-'use client';
+'use client'
+
+export const dynamic = 'force-dynamic';
+
+;
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -59,8 +63,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 // CV PORTFOLIO UTILITIES - World-Class A+++ System
-
-
 
 /**
  * CV PORTFOLIO API ENDPOINTS

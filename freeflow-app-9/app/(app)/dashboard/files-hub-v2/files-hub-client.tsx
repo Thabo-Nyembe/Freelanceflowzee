@@ -75,6 +75,26 @@ import {
   Fingerprint
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  filesHubAIInsights,
+  filesHubCollaborators,
+  filesHubPredictions,
+  filesHubActivities,
+  filesHubQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type FileType = 'folder' | 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'spreadsheet' | 'presentation' | 'other'
 type FileStatus = 'synced' | 'syncing' | 'pending' | 'error' | 'offline'
@@ -378,6 +398,38 @@ const formatTime = (date: string) => {
     minute: '2-digit'
   })
 }
+
+// Enhanced Files Hub Mock Data
+const mockFilesHubAIInsights = [
+  { id: '1', type: 'info' as const, title: 'Storage Usage', description: 'Using 67% of storage. Large video files taking up most space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '2', type: 'success' as const, title: 'Sync Complete', description: 'All 1,247 files synced across 8 devices successfully.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sync' },
+  { id: '3', type: 'warning' as const, title: 'Duplicate Files', description: '23 potential duplicate files detected. Review to save space.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
+]
+
+const mockFilesHubCollaborators = [
+  { id: '1', name: 'File Manager', avatar: '/avatars/file.jpg', status: 'online' as const, role: 'Admin', lastActive: 'Now' },
+  { id: '2', name: 'Team Member', avatar: '/avatars/team.jpg', status: 'online' as const, role: 'Editor', lastActive: '5m ago' },
+  { id: '3', name: 'Guest User', avatar: '/avatars/guest.jpg', status: 'away' as const, role: 'Viewer', lastActive: '1h ago' },
+]
+
+const mockFilesHubPredictions = [
+  { id: '1', label: 'Storage Used', current: 67, target: 100, predicted: 75, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Files Shared', current: 234, target: 300, predicted: 280, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Active Users', current: 45, target: 50, predicted: 48, confidence: 82, trend: 'up' as const },
+]
+
+const mockFilesHubActivities = [
+  { id: '1', user: 'File Manager', action: 'organized', target: '45 files into folders', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'Team Member', action: 'uploaded', target: '12 new documents', timestamp: '30m ago', type: 'info' as const },
+  { id: '3', user: 'Guest User', action: 'downloaded', target: 'Project assets.zip', timestamp: '1h ago', type: 'info' as const },
+]
+
+const mockFilesHubQuickActions = [
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
+  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => console.log('New folder') },
+  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
+  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => console.log('Search') },
+]
 
 export default function FilesHubClient() {
   const [activeTab, setActiveTab] = useState('files')
@@ -1820,6 +1872,39 @@ export default function FilesHubClient() {
             </Tabs>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockFilesHubAIInsights}
+              title="Files Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockFilesHubCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockFilesHubPredictions}
+              title="Storage Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockFilesHubActivities}
+            title="File Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockFilesHubQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* File Detail Dialog */}
         <Dialog open={showFileDialog} onOpenChange={setShowFileDialog}>

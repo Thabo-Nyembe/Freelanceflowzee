@@ -89,6 +89,26 @@ import {
   Sliders
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  notificationsAIInsights,
+  notificationsCollaborators,
+  notificationsPredictions,
+  notificationsActivities,
+  notificationsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPES - SLACK NOTIFICATIONS LEVEL
 // ============================================================================
@@ -2031,6 +2051,39 @@ export default function NotificationsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={notificationsAIInsights}
+              title="Notification Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockNotificationsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockNotificationsPredictions}
+              title="Notification Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockNotificationsActivities}
+            title="Notification Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockNotificationsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Notification Detail Dialog */}
         <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>

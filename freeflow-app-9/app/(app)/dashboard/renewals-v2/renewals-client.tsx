@@ -74,6 +74,27 @@ import {
   Key,
   Network
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  renewalsAIInsights,
+  renewalsCollaborators,
+  renewalsPredictions,
+  renewalsActivities,
+  renewalsQuickActions,
+} from '@/lib/mock-data/adapters'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -552,6 +573,36 @@ const formatDate = (date: Date): string => {
 interface RenewalsClientProps {
   initialRenewals?: any[]
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockRenewalsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Renewal Rate', description: 'Renewal rate at 92%. 15% above industry benchmark.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'At-Risk Accounts', description: '3 accounts flagged as at-risk. Executive escalation recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
+  { id: '3', type: 'info' as const, title: 'Expansion Opportunity', description: 'Identified $180K expansion potential across 5 accounts.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+]
+
+const mockRenewalsCollaborators = [
+  { id: '1', name: 'Customer Success Lead', avatar: '/avatars/cs.jpg', status: 'online' as const, role: 'CS Lead' },
+  { id: '2', name: 'Account Executive', avatar: '/avatars/ae.jpg', status: 'online' as const, role: 'AE' },
+  { id: '3', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'away' as const, role: 'RevOps' },
+]
+
+const mockRenewalsPredictions = [
+  { id: '1', title: 'Q1 Renewal Forecast', prediction: 'Expecting 94% renewal rate with $520K ARR retained', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Churn Risk Analysis', prediction: 'TechStart and 2 others may need intervention', confidence: 75, trend: 'down' as const, impact: 'high' as const },
+]
+
+const mockRenewalsActivities = [
+  { id: '1', user: 'Sarah Chen', action: 'Closed', target: 'Startup Labs renewal with 67% expansion', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Alex Rivera', action: 'Escalated', target: 'TechStart to executive team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'warning' as const },
+  { id: '3', user: 'Mike Johnson', action: 'Sent', target: 'proposal to Acme Corporation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
+]
+
+const mockRenewalsQuickActions = [
+  { id: '1', label: 'New Renewal', icon: 'plus', action: () => console.log('New renewal'), variant: 'default' as const },
+  { id: '2', label: 'Run Playbook', icon: 'play', action: () => console.log('Run playbook'), variant: 'default' as const },
+  { id: '3', label: 'Export Pipeline', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1612,6 +1663,39 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockRenewalsAIInsights}
+              title="Renewal Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockRenewalsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockRenewalsPredictions}
+              title="Renewal Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockRenewalsActivities}
+            title="Renewal Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockRenewalsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Renewal Detail Dialog */}
         <Dialog open={isRenewalDialogOpen} onOpenChange={setIsRenewalDialogOpen}>

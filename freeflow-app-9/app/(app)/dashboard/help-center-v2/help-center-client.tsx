@@ -66,6 +66,18 @@ import {
   Target
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPE DEFINITIONS - Intercom Guide Level Knowledge Base
 // ============================================================================
@@ -756,6 +768,39 @@ const getHelpfulRate = (helpful: number, notHelpful: number) => {
   if (helpful + notHelpful === 0) return 0
   return Math.round((helpful / (helpful + notHelpful)) * 100)
 }
+
+// ============================================================================
+// COMPETITIVE UPGRADE MOCK DATA - Intercom/Zendesk Guide Level Intelligence
+// ============================================================================
+
+const mockHelpCenterAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Self-Service Rate', description: '78% of users find answers without contacting support!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Metrics' },
+  { id: '2', type: 'warning' as const, title: 'Outdated Content', description: '12 articles need review - last updated 90+ days ago.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: '"API authentication" is trending - create a guide.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockHelpCenterCollaborators = [
+  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
+  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockHelpCenterPredictions = [
+  { id: '1', title: 'Ticket Deflection', prediction: 'New FAQ articles will reduce tickets by 20%', confidence: 86, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Search Success', prediction: 'Search improvements will boost find rate to 85%', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockHelpCenterActivities = [
+  { id: '1', user: 'Content Lead', action: 'Published', target: 'Getting Started guide v2', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Tech Writer', action: 'Updated', target: 'API troubleshooting article', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Support Lead', action: 'Flagged', target: '3 articles for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockHelpCenterQuickActions = [
+  { id: '1', label: 'New Article', icon: 'plus', action: () => console.log('New article'), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1686,6 +1731,39 @@ export default function HelpCenterClient() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockHelpCenterAIInsights}
+              title="Help Center Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockHelpCenterCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockHelpCenterPredictions}
+              title="Content Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockHelpCenterActivities}
+            title="Help Center Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockHelpCenterQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Article Detail Dialog */}

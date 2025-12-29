@@ -81,6 +81,26 @@ import {
   Trash2 as TrashIcon
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  pricingAIInsights,
+  pricingCollaborators,
+  pricingPredictions,
+  pricingActivities,
+  pricingQuickActions,
+} from '@/lib/mock-data/adapters'
 // Types
 type BillingPeriod = 'monthly' | 'quarterly' | 'annual' | 'lifetime'
 type PlanStatus = 'active' | 'inactive' | 'deprecated' | 'beta'
@@ -370,6 +390,36 @@ const formatCurrency = (amount: number, currency: string = 'USD'): string => {
 interface PricingClientProps {
   initialPlans?: PricingPlan[]
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockPricingAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Revenue Growth', description: 'Pro plan conversions up 28% after pricing optimization.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '2', type: 'info' as const, title: 'Pricing Insight', description: 'Annual billing adoption at 67%. Consider incentive increase.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Strategy' },
+  { id: '3', type: 'warning' as const, title: 'Competitor Alert', description: 'Main competitor reduced prices by 15%. Monitor impact.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Competition' },
+]
+
+const mockPricingCollaborators = [
+  { id: '1', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'online' as const, role: 'Ops' },
+  { id: '2', name: 'Product Lead', avatar: '/avatars/product.jpg', status: 'online' as const, role: 'Product' },
+  { id: '3', name: 'Finance', avatar: '/avatars/finance.jpg', status: 'busy' as const, role: 'Finance' },
+]
+
+const mockPricingPredictions = [
+  { id: '1', title: 'MRR Forecast', prediction: '$125K MRR by end of quarter', confidence: 84, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Upgrade Rate', prediction: '12% free-to-paid conversion', confidence: 76, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockPricingActivities = [
+  { id: '1', user: 'Billing System', action: 'Processed upgrade to', target: 'Enterprise Plan', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Coupon Engine', action: 'Applied discount for', target: '15 annual signups', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Updated pricing for', target: 'EU region', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockPricingQuickActions = [
+  { id: '1', label: 'New Plan', icon: 'plus', action: () => console.log('New plan'), variant: 'default' as const },
+  { id: '2', label: 'Create Coupon', icon: 'tag', action: () => console.log('Create coupon'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+]
 
 export default function PricingClient({
   initialPlans = mockPlans
@@ -1646,6 +1696,39 @@ export default function PricingClient({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockPricingAIInsights}
+              title="Pricing Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockPricingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockPricingPredictions}
+              title="Revenue Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockPricingActivities}
+            title="Pricing Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockPricingQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Plan Detail Dialog */}
         <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>

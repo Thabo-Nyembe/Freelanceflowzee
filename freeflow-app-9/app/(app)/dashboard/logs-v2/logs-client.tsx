@@ -28,6 +28,18 @@ import {
   Sliders, Webhook, Mail, Server as ServerIcon
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============== COMPREHENSIVE DATADOG-LEVEL INTERFACES ==============
 
 type LogLevel = 'emergency' | 'alert' | 'critical' | 'error' | 'warn' | 'notice' | 'info' | 'debug' | 'trace'
@@ -477,6 +489,36 @@ const formatBytes = (bytes: number): string => {
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockLogsAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Error Spike Detected', description: 'Error rate increased 340% in payment-service over last 15 minutes.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Anomaly' },
+  { id: '2', type: 'info' as const, title: 'Pattern Recognition', description: 'Identified recurring timeout pattern in auth-service during peak hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pattern' },
+  { id: '3', type: 'success' as const, title: 'Log Volume Optimized', description: 'Smart sampling reduced log volume by 45% without data loss.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+]
+
+const mockLogsCollaborators = [
+  { id: '1', name: 'SRE Lead', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
+  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
+  { id: '3', name: 'Security Analyst', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
+]
+
+const mockLogsPredictions = [
+  { id: '1', title: 'Storage Forecast', prediction: 'Log storage will reach 80% capacity in 12 days', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Error Trend', prediction: 'Error rate expected to normalize after deployment fix', confidence: 78, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockLogsActivities = [
+  { id: '1', user: 'SRE Lead', action: 'Created', target: 'alert for payment-service errors', timestamp: new Date().toISOString(), type: 'info' as const },
+  { id: '2', user: 'DevOps', action: 'Archived', target: '30-day old logs to cold storage', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
+  { id: '3', user: 'System', action: 'Detected', target: 'anomaly in api-gateway logs', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockLogsQuickActions = [
+  { id: '1', label: 'Live Tail', icon: 'play', action: () => console.log('Live tail'), variant: 'default' as const },
+  { id: '2', label: 'Create Alert', icon: 'bell', action: () => console.log('Create alert'), variant: 'default' as const },
+  { id: '3', label: 'Export Logs', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============== MAIN COMPONENT ==============
 
@@ -1868,6 +1910,39 @@ export default function LogsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockLogsAIInsights}
+              title="Log Analytics Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockLogsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockLogsPredictions}
+              title="Log Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockLogsActivities}
+            title="Log Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockLogsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Log Detail Dialog */}

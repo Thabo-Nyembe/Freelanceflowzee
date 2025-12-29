@@ -1,6 +1,6 @@
-import CanvasClient from './canvas-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import CanvasClient from './canvas-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

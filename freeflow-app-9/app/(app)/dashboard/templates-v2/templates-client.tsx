@@ -93,6 +93,27 @@ import {
   Megaphone,
   PenLine
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  templatesAIInsights,
+  templatesCollaborators,
+  templatesPredictions,
+  templatesActivities,
+  templatesQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
 
@@ -401,6 +422,36 @@ const getAccessColor = (access: AccessLevel) => {
 const formatDimensions = (dimensions: { width: number; height: number }) => {
   return `${dimensions.width} × ${dimensions.height}px`
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockTemplatesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Template Usage', description: 'Social media templates 3x more popular this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+  { id: '2', type: 'info' as const, title: 'Brand Consistency', description: '98% of templates follow brand guidelines.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Brand' },
+  { id: '3', type: 'warning' as const, title: 'Low Performers', description: '12 templates have <10 uses. Consider retiring.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+]
+
+const mockTemplatesCollaborators = [
+  { id: '1', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Brand Manager', avatar: '/avatars/brand.jpg', status: 'online' as const, role: 'Brand' },
+  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
+]
+
+const mockTemplatesPredictions = [
+  { id: '1', title: 'Trending Templates', prediction: 'Video templates demand increasing 40% month-over-month', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Seasonal Content', prediction: 'Holiday templates needed in 6 weeks', confidence: 100, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockTemplatesActivities = [
+  { id: '1', user: 'Design', action: 'Created', target: '5 new Instagram templates', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Marketing', action: 'Approved', target: 'Q1 campaign templates', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Updated', target: 'brand colors across 50 templates', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockTemplatesQuickActions = [
+  { id: '1', label: 'New Template', icon: 'plus', action: () => console.log('New template'), variant: 'default' as const },
+  { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => console.log('Gallery'), variant: 'default' as const },
+  { id: '3', label: 'Export Assets', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function TemplatesClient() {
   const [activeTab, setActiveTab] = useState('gallery')
@@ -1697,6 +1748,39 @@ export default function TemplatesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockTemplatesAIInsights}
+              title="Template Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockTemplatesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockTemplatesPredictions}
+              title="Template Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockTemplatesActivities}
+            title="Template Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockTemplatesQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Template Detail Dialog */}
         <Dialog open={!!selectedTemplate} onOpenChange={() => setSelectedTemplate(null)}>

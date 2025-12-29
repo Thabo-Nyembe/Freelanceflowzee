@@ -5,6 +5,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  certificationsAIInsights,
+  certificationsCollaborators,
+  certificationsPredictions,
+  certificationsActivities,
+  certificationsQuickActions
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // CREDLY-LEVEL CERTIFICATIONS - Digital Credentialing Platform
 // Features: Digital badges, Skill endorsements, Learning pathways, Blockchain verification
@@ -597,6 +618,36 @@ const mockVerifications: VerificationRecord[] = [
     location: 'Austin, TX',
     deviceType: 'Desktop - Firefox'
   }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockCertsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Credential Verification', description: 'All 156 credentials blockchain-verified and valid.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Verification' },
+  { id: '2', type: 'info' as const, title: 'Skill Trending', description: 'AI/ML certifications up 45% in demand this quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+  { id: '3', type: 'warning' as const, title: 'Expiring Soon', description: '8 certifications expire within 30 days. Renew now.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Renewals' },
+]
+
+const mockCertsCollaborators = [
+  { id: '1', name: 'Credential Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'HR Manager', avatar: '/avatars/hr.jpg', status: 'online' as const, role: 'HR' },
+  { id: '3', name: 'Training Lead', avatar: '/avatars/training.jpg', status: 'away' as const, role: 'Training' },
+]
+
+const mockCertsPredictions = [
+  { id: '1', title: 'Skill Gap Analysis', prediction: 'Cloud certifications needed for 60% of team', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Certification ROI', prediction: 'Certified employees 35% more productive', confidence: 92, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockCertsActivities = [
+  { id: '1', user: 'System', action: 'Verified', target: 'AWS Solutions Architect badge', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'HR', action: 'Approved', target: 'training budget for 5 employees', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Employee', action: 'Earned', target: 'Google Cloud Professional certificate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockCertsQuickActions = [
+  { id: '1', label: 'Add Credential', icon: 'plus', action: () => console.log('Add credential'), variant: 'default' as const },
+  { id: '2', label: 'Verify Badge', icon: 'shield', action: () => console.log('Verify'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
 export default function CertificationsClient() {
@@ -1801,6 +1852,39 @@ export default function CertificationsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCertsAIInsights}
+              title="Certification Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCertsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCertsPredictions}
+              title="Certification Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCertsActivities}
+            title="Certification Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCertsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

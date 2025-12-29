@@ -1,6 +1,6 @@
-import ExpensesClient from './expenses-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import ExpensesClient from './expenses-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

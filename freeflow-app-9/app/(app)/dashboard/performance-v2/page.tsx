@@ -1,6 +1,6 @@
-import PerformanceClient from './performance-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import PerformanceClient from './performance-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

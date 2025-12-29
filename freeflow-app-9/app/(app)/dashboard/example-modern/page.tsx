@@ -17,6 +17,9 @@ import { HeroImage, ContentImage } from '@/components/ui/optimized-image-v2'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // This is a Server Component (no 'use client')
+
+export const dynamic = 'force-dynamic';
+
 export default async function ModernDashboardPage() {
   // Example user ID - in production, get from auth
   const userId = 'demo-user-123'

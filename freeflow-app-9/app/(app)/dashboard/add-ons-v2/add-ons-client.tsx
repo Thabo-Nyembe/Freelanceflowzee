@@ -73,6 +73,18 @@ import {
   ShoppingCart
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type AddOnStatus = 'installed' | 'available' | 'disabled' | 'update_available' | 'deprecated'
 type AddOnCategory = 'productivity' | 'integration' | 'security' | 'analytics' | 'communication' | 'design' | 'developer' | 'ai' | 'storage' | 'marketing'
@@ -435,6 +447,36 @@ const formatDate = (date: string) => {
     year: 'numeric'
   })
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockAddOnsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Add-On Performance', description: 'Slack integration saving 4 hours/week in communication overhead.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
+  { id: '2', type: 'info' as const, title: 'New Releases', description: '3 new add-ons available matching your workflow patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
+  { id: '3', type: 'warning' as const, title: 'Update Required', description: 'Security update available for 2 installed add-ons.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+]
+
+const mockAddOnsCollaborators = [
+  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
+  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', status: 'away' as const, role: 'Product' },
+]
+
+const mockAddOnsPredictions = [
+  { id: '1', title: 'Cost Savings', prediction: '$500/mo savings with recommended add-ons', confidence: 76, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Adoption Rate', prediction: '85% team adoption expected', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAddOnsActivities = [
+  { id: '1', user: 'System', action: 'Installed', target: 'Slack Integration', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Auto-Update', action: 'Updated', target: 'GitHub Connector v2.1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Admin', action: 'Configured', target: 'Jira Sync settings', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockAddOnsQuickActions = [
+  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => console.log('Browse'), variant: 'default' as const },
+  { id: '2', label: 'Update All', icon: 'refresh', action: () => console.log('Update'), variant: 'default' as const },
+  { id: '3', label: 'Settings', icon: 'settings', action: () => console.log('Settings'), variant: 'outline' as const },
+]
 
 export default function AddOnsClient() {
   const [activeTab, setActiveTab] = useState('discover')
@@ -1699,6 +1741,39 @@ export default function AddOnsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAddOnsAIInsights}
+              title="Add-On Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAddOnsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAddOnsPredictions}
+              title="Add-On Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAddOnsActivities}
+            title="Add-On Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAddOnsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Add-on Detail Dialog */}
         <Dialog open={showAddOnDialog} onOpenChange={setShowAddOnDialog}>

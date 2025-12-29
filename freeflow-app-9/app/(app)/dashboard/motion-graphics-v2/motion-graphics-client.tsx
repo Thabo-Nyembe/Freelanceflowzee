@@ -101,6 +101,27 @@ import {
   PenTool,
   LayoutTemplate
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  motionGraphicsAIInsights,
+  motionGraphicsCollaborators,
+  motionGraphicsPredictions,
+  motionGraphicsActivities,
+  motionGraphicsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 
 // Types
@@ -422,6 +443,38 @@ const formatFileSize = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
+
+// Enhanced Competitive Upgrade Data
+const mockMotionGraphicsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Render Performance', description: 'GPU acceleration enabled. Render times improved by 40%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'Asset Optimization', description: '15 assets ready for optimization to reduce project size.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Assets' },
+  { id: '3', type: 'warning' as const, title: 'Render Queue', description: '3 compositions pending in render queue for 2+ hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Queue' },
+]
+
+const mockMotionGraphicsCollaborators = [
+  { id: '1', name: 'Motion Designer', avatar: '/avatars/motion.jpg', status: 'online' as const, role: 'Animation', lastActive: 'Now' },
+  { id: '2', name: 'VFX Artist', avatar: '/avatars/vfx.jpg', status: 'online' as const, role: 'Effects', lastActive: '10m ago' },
+  { id: '3', name: 'Art Director', avatar: '/avatars/art.jpg', status: 'away' as const, role: 'Creative', lastActive: '1h ago' },
+]
+
+const mockMotionGraphicsPredictions = [
+  { id: '1', label: 'Projects', current: 12, target: 15, predicted: 14, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Render Time', current: 4.5, target: 3, predicted: 3.8, confidence: 78, trend: 'down' as const },
+  { id: '3', label: 'Asset Library', current: 2500, target: 3000, predicted: 2800, confidence: 82, trend: 'up' as const },
+]
+
+const mockMotionGraphicsActivities = [
+  { id: '1', user: 'Motion Designer', action: 'completed render', target: 'Product Launch Intro', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'VFX Artist', action: 'added effect', target: 'particle system to scene 3', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'Art Director', action: 'approved', target: 'final composition', timestamp: '3h ago', type: 'success' as const },
+]
+
+const mockMotionGraphicsQuickActions = [
+  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => console.log('New project') },
+  { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => console.log('Render') },
+  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => console.log('Assets') },
+  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => console.log('Templates') },
+]
 
 interface MotionGraphicsClientProps {
   initialAnimations?: Animation[]
@@ -1700,6 +1753,39 @@ export default function MotionGraphicsClient({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMotionGraphicsAIInsights}
+              title="Motion Graphics Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMotionGraphicsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMotionGraphicsPredictions}
+              title="Production Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMotionGraphicsActivities}
+            title="Studio Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMotionGraphicsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Animation Detail Dialog */}
         <Dialog open={!!selectedAnimation} onOpenChange={() => setSelectedAnimation(null)}>

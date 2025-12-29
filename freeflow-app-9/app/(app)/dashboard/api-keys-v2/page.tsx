@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import ApiKeysClient from './api-keys-client'
 
 export default function Page() {

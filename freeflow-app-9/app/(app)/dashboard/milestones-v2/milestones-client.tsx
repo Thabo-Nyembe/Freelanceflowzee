@@ -23,6 +23,18 @@ import {
   Sliders, Webhook, Key, Lock, Mail, Globe, Database, Archive, Trash2, Terminal, Copy, Download
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPE DEFINITIONS - Monday.com Level Milestone Management
 // ============================================================================
@@ -563,6 +575,36 @@ const getDaysRemaining = (dueDate: string) => {
 // ============================================================================
 // COMPONENT
 // ============================================================================
+
+// Mock data for AI-powered competitive upgrade components
+const mockMilestonesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Ahead of Schedule', description: 'Product Launch milestone is 5 days ahead. Team velocity increased!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Progress' },
+  { id: '2', type: 'warning' as const, title: 'At Risk', description: 'Q4 Release has 3 blocked dependencies. Immediate action needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Blockers' },
+  { id: '3', type: 'info' as const, title: 'Milestone Pattern', description: 'Sprint milestones average 2 days early completion. Great trend!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockMilestonesCollaborators = [
+  { id: '1', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
+  { id: '2', name: 'Tech Lead', avatar: '/avatars/tech.jpg', status: 'online' as const, role: 'Engineering' },
+  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', status: 'away' as const, role: 'Product' },
+]
+
+const mockMilestonesPredictions = [
+  { id: '1', title: 'Delivery Forecast', prediction: 'Current velocity suggests Q1 goals will be met 1 week early', confidence: 87, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Resource Need', prediction: 'Backend milestone may need additional developer by Feb', confidence: 72, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockMilestonesActivities = [
+  { id: '1', user: 'Project Manager', action: 'Completed', target: 'Sprint 23 milestone', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Tech Lead', action: 'Updated', target: 'API v2 milestone scope', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Product Owner', action: 'Created', target: 'Q2 roadmap milestones', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockMilestonesQuickActions = [
+  { id: '1', label: 'New Milestone', icon: 'plus', action: () => console.log('New milestone'), variant: 'default' as const },
+  { id: '2', label: 'View Timeline', icon: 'calendar', action: () => console.log('Timeline'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function MilestonesClient() {
   const [activeTab, setActiveTab] = useState('milestones')
@@ -1659,6 +1701,39 @@ export default function MilestonesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMilestonesAIInsights}
+              title="Milestone Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMilestonesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMilestonesPredictions}
+              title="Delivery Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMilestonesActivities}
+            title="Milestone Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMilestonesQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Milestone Detail Dialog */}
         <Dialog open={!!selectedMilestone} onOpenChange={() => setSelectedMilestone(null)}>

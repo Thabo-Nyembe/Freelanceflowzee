@@ -68,6 +68,18 @@ import {
   Share2
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -478,6 +490,39 @@ const formatTimeAgo = (dateString: string): string => {
   if (days < 7) return `${days}d ago`
   return date.toLocaleDateString()
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// ============================================================================
+
+const mockSecurityAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Vault Security', description: 'All credentials encrypted with AES-256. Zero breaches detected.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Encryption' },
+  { id: '2', type: 'warning' as const, title: 'Password Hygiene', description: '12 passwords haven\'t been rotated in 90+ days. Consider updating.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Passwords' },
+  { id: '3', type: 'info' as const, title: 'Device Trust', description: '3 new devices authorized this week. All verified successfully.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Devices' },
+]
+
+const mockSecurityCollaborators = [
+  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'IT Manager', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'away' as const, role: 'Compliance' },
+]
+
+const mockSecurityPredictions = [
+  { id: '1', title: 'Credential Expiry', prediction: '8 API keys expiring in next 30 days', confidence: 100, trend: 'stable' as const, impact: 'high' as const },
+  { id: '2', title: 'Security Score', prediction: 'Score projected to improve to 95% after pending updates', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockSecurityActivities = [
+  { id: '1', user: 'Admin', action: 'Added', target: 'new API key for CI/CD', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'System', action: 'Detected', target: 'login from new device', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Security', action: 'Updated', target: 'master password policy', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockSecurityQuickActions = [
+  { id: '1', label: 'Add Password', icon: 'plus', action: () => console.log('Add password'), variant: 'default' as const },
+  { id: '2', label: 'Security Audit', icon: 'shield', action: () => console.log('Audit'), variant: 'default' as const },
+  { id: '3', label: 'Export Vault', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1628,6 +1673,39 @@ export default function SecurityClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSecurityAIInsights}
+              title="Security Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSecurityCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSecurityPredictions}
+              title="Security Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSecurityActivities}
+            title="Security Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSecurityQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Vault Item Detail Dialog */}

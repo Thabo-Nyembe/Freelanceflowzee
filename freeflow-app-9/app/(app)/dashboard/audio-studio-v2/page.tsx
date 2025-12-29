@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import AudioStudioClient from './audio-studio-client'
 
 export default function Page() {

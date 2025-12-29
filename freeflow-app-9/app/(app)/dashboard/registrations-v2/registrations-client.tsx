@@ -69,6 +69,27 @@ import {
   Key,
   Network
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  registrationsAIInsights,
+  registrationsCollaborators,
+  registrationsPredictions,
+  registrationsActivities,
+  registrationsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -649,6 +670,36 @@ const formatDate = (dateString: string) => {
     minute: '2-digit'
   })
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockRegistrationsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High Registration Rate', description: 'Tech Conference 2024 at 85% capacity. Trending to sell out.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Events' },
+  { id: '2', type: 'warning' as const, title: 'Pending Approvals', description: '12 VIP registrations awaiting manual approval.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Approvals' },
+  { id: '3', type: 'info' as const, title: 'Early Bird Ending', description: 'Early bird pricing ends in 3 days. Consider reminder campaign.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pricing' },
+]
+
+const mockRegistrationsCollaborators = [
+  { id: '1', name: 'Event Manager', avatar: '/avatars/events.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Registration Lead', avatar: '/avatars/reg.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
+]
+
+const mockRegistrationsPredictions = [
+  { id: '1', title: 'Attendance Forecast', prediction: 'Expecting 2,500 attendees based on current registrations', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Revenue Projection', prediction: 'Total ticket revenue projected at $125K', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockRegistrationsActivities = [
+  { id: '1', user: 'Event Manager', action: 'Approved', target: '15 speaker registrations', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'System', action: 'Sent', target: 'confirmation emails to 50 registrants', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Marketing', action: 'Created', target: 'early bird reminder campaign', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockRegistrationsQuickActions = [
+  { id: '1', label: 'New Event', icon: 'plus', action: () => console.log('New event'), variant: 'default' as const },
+  { id: '2', label: 'Import List', icon: 'upload', action: () => console.log('Import list'), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1645,6 +1696,39 @@ export default function RegistrationsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockRegistrationsAIInsights}
+              title="Registration Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockRegistrationsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockRegistrationsPredictions}
+              title="Registration Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockRegistrationsActivities}
+            title="Registration Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockRegistrationsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Registration Detail Dialog */}

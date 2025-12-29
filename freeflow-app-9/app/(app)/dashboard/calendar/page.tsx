@@ -1,4 +1,8 @@
-'use client';
+'use client'
+
+export const dynamic = 'force-dynamic';
+
+;
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -76,7 +80,6 @@ const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color
     />
   )
 }
-
 
 // ============================================================================
 // CALENDAR DATA MODEL

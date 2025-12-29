@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import MotionGraphicsClient from './motion-graphics-client'
 
 export default function Page() {

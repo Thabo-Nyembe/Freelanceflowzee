@@ -53,8 +53,28 @@ import {
   TrendingDown,
   MessageSquare,
   Heart,
-  Bookmark
+  Bookmark,
+  Brain,
+  Lightbulb,
+  AlertTriangle,
 } from 'lucide-react'
+
+// Import Competitive Upgrades - Beats HubSpot, Salesforce, Monday.com
+import {
+  AIInsightsPanel,
+  Sparkline,
+  ProgressRing,
+  TrendIndicator,
+  MetricCard,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+  DataStory,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
 
 // ============================================================================
 // TYPES & INTERFACES - HubSpot Level Marketing Platform
@@ -595,6 +615,179 @@ const mockAnalytics: MarketingAnalytics = {
 }
 
 // ============================================================================
+// COMPETITIVE UPGRADES MOCK DATA - Beats HubSpot, Salesforce, Monday.com
+// ============================================================================
+
+const mockAIInsights = [
+  {
+    id: '1',
+    type: 'recommendation' as const,
+    title: 'Optimize Email Send Times',
+    description: 'Data shows 23% higher open rates when emails are sent at 10 AM on Tuesdays',
+    impact: 'high' as const,
+    confidence: 0.92,
+  },
+  {
+    id: '2',
+    type: 'opportunity' as const,
+    title: 'Untapped Market Segment',
+    description: 'Tech startups in Southeast Asia showing 40% higher engagement with your content',
+    impact: 'high' as const,
+    confidence: 0.87,
+  },
+  {
+    id: '3',
+    type: 'alert' as const,
+    title: 'Campaign Budget Alert',
+    description: 'Summer Product Launch campaign will exhaust budget in 5 days at current spend rate',
+    impact: 'medium' as const,
+    confidence: 0.99,
+  },
+]
+
+const mockCollaborators = [
+  { id: '1', name: 'Sarah Chen', color: '#ec4899', status: 'online' as const, isTyping: false },
+  { id: '2', name: 'Mike Johnson', color: '#22c55e', status: 'online' as const, isTyping: true },
+  { id: '3', name: 'Emily Davis', color: '#f59e0b', status: 'away' as const },
+  { id: '4', name: 'Alex Kim', color: '#3b82f6', status: 'online' as const },
+]
+
+const mockPredictions = [
+  {
+    label: 'Campaign Revenue',
+    currentValue: 187200,
+    predictedValue: 245000,
+    confidence: 0.89,
+    trend: 'up' as const,
+    timeframe: 'End of Q1',
+    factors: [
+      { name: 'Summer campaign momentum', impact: 'positive' as const, weight: 0.35 },
+      { name: 'Email sequence performance', impact: 'positive' as const, weight: 0.28 },
+      { name: 'Social engagement growth', impact: 'positive' as const, weight: 0.22 },
+      { name: 'Seasonal slowdown risk', impact: 'negative' as const, weight: 0.15 },
+    ],
+  },
+  {
+    label: 'Lead Conversion Rate',
+    currentValue: 18.8,
+    predictedValue: 22.5,
+    confidence: 0.84,
+    trend: 'up' as const,
+    timeframe: 'Next 30 Days',
+    factors: [
+      { name: 'Improved lead scoring', impact: 'positive' as const, weight: 0.4 },
+      { name: 'New nurturing workflow', impact: 'positive' as const, weight: 0.3 },
+      { name: 'Market competition', impact: 'negative' as const, weight: 0.2 },
+      { name: 'Content quality', impact: 'positive' as const, weight: 0.1 },
+    ],
+  },
+]
+
+const mockStorySegments = [
+  {
+    id: '1',
+    type: 'headline' as const,
+    title: 'Marketing Performance Exceeds Targets',
+    content: 'This month delivered exceptional results with 477% ROI on the Summer Product Launch campaign, driven by strategic multi-channel approach.',
+    metric: 'Campaign ROI',
+    value: '477%',
+    change: 23,
+    data: [280, 320, 380, 420, 450, 460, 477],
+  },
+  {
+    id: '2',
+    type: 'insight' as const,
+    title: 'Email Sequences Driving Growth',
+    content: 'Welcome Series achieving 70% open rate - significantly above industry average of 21%. Recommend expanding to 7 emails.',
+    metric: 'Open Rate',
+    value: '70%',
+    change: 15,
+    data: [45, 52, 58, 62, 65, 68, 70],
+  },
+  {
+    id: '3',
+    type: 'recommendation' as const,
+    title: 'Scale Influencer Marketing',
+    content: 'Q2 Influencer Partnership delivered 610% ROI - highest performing channel. Recommend 50% budget increase for Q4.',
+    metric: 'Influencer ROI',
+    value: '610%',
+    change: 42,
+    data: [380, 420, 480, 520, 560, 590, 610],
+  },
+  {
+    id: '4',
+    type: 'warning' as const,
+    title: 'PPC Costs Rising',
+    description: 'Google Ads CPC increased 18% this month. Consider diversifying to LinkedIn and TikTok ads.',
+    metric: 'CPC Increase',
+    value: '+18%',
+    change: -18,
+    data: [2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8],
+  },
+]
+
+const mockActivities = [
+  {
+    id: '1',
+    type: 'milestone' as const,
+    title: 'reached 2,000 conversions',
+    description: 'Summer Product Launch campaign hit a major milestone!',
+    user: { id: '1', name: 'Campaign Bot' },
+    target: { type: 'Campaign', name: 'Summer Product Launch' },
+    timestamp: new Date(Date.now() - 300000),
+    isRead: false,
+  },
+  {
+    id: '2',
+    type: 'update' as const,
+    title: 'updated lead score',
+    description: 'Jennifer Martinez score increased from 78 to 85 based on recent activity',
+    user: { id: '2', name: 'AI Assistant' },
+    target: { type: 'Lead', name: 'Jennifer Martinez' },
+    timestamp: new Date(Date.now() - 1800000),
+    isRead: false,
+  },
+  {
+    id: '3',
+    type: 'status_change' as const,
+    title: 'moved to "Sending"',
+    description: 'Product Education sequence started sending',
+    user: { id: '1', name: 'Sarah Chen' },
+    target: { type: 'Email Sequence', name: 'Product Education' },
+    timestamp: new Date(Date.now() - 3600000),
+    isRead: true,
+  },
+  {
+    id: '4',
+    type: 'comment' as const,
+    title: 'commented on campaign',
+    description: 'Great ROI numbers! Let\'s discuss scaling this approach.',
+    user: { id: '3', name: 'Mike Johnson' },
+    target: { type: 'Campaign', name: 'Brand Awareness Q3' },
+    timestamp: new Date(Date.now() - 7200000),
+    isRead: true,
+  },
+]
+
+const mockQuickActions = [
+  { id: '1', label: 'New Campaign', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => {}, category: 'Create' },
+  { id: '2', label: 'Add Lead', icon: <Users className="h-5 w-5" />, shortcut: '⌘L', action: () => {}, category: 'Create' },
+  { id: '3', label: 'AI Insights', icon: <Brain className="h-5 w-5" />, shortcut: '⌘I', action: () => {}, category: 'AI' },
+  { id: '4', label: 'Send Email', icon: <Mail className="h-5 w-5" />, shortcut: '⌘E', action: () => {}, category: 'Actions' },
+  { id: '5', label: 'View Reports', icon: <BarChart3 className="h-5 w-5" />, shortcut: '⌘R', action: () => {}, category: 'Navigate' },
+  { id: '6', label: 'Schedule Post', icon: <Calendar className="h-5 w-5" />, shortcut: '⌘S', action: () => {}, category: 'Create' },
+]
+
+// Sparkline data for campaigns
+const campaignSparklineData: Record<string, number[]> = {
+  '1': [120, 145, 168, 189, 210, 225, 234], // Summer Product Launch
+  '2': [45, 58, 72, 85, 89, 88, 89], // Brand Awareness
+  '3': [0, 0, 0, 0, 0, 0, 0], // Webinar (scheduled)
+  '4': [0, 0, 0, 0, 0, 0, 0], // Holiday Sale (draft)
+  '5': [380, 420, 445, 456, 458, 457, 456], // Influencer (completed)
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -755,7 +948,10 @@ export default function MarketingClient() {
               <p className="text-gray-600 dark:text-gray-400">HubSpot-level campaign management & analytics</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {/* Real-time Collaboration Indicator - Beats Notion/Figma */}
+            <CollaborationIndicator collaborators={mockCollaborators} showTyping />
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
@@ -947,7 +1143,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-5 gap-4 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Reach</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{(campaign.reach / 1000).toFixed(0)}K</p>
@@ -965,6 +1161,20 @@ export default function MarketingClient() {
                           <p className={`font-semibold ${campaign.roi > 0 ? 'text-green-600' : 'text-gray-400'}`}>
                             {campaign.roi > 0 ? `${campaign.roi}%` : '-'}
                           </p>
+                        </div>
+                        {/* Sparkline Trend - Beats Monday.com */}
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Trend</p>
+                          {campaignSparklineData[campaign.id] && campaign.conversions > 0 ? (
+                            <Sparkline
+                              data={campaignSparklineData[campaign.id]}
+                              width={70}
+                              height={24}
+                              color={campaign.roi > 300 ? '#22c55e' : campaign.roi > 0 ? '#3b82f6' : '#9ca3af'}
+                            />
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1619,8 +1829,49 @@ export default function MarketingClient() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* ============================================================== */}
+            {/* COMPETITIVE UPGRADES - AI-POWERED ANALYTICS (Beats HubSpot/Salesforce) */}
+            {/* ============================================================== */}
+
+            {/* AI Insights & Predictive Analytics Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              {/* AI Insights Panel - Like ThoughtSpot/Salesforce Einstein */}
+              <AIInsightsPanel
+                insights={mockAIInsights}
+                className="h-full"
+              />
+
+              {/* Predictive Analytics - Like Salesforce Einstein */}
+              <PredictiveAnalytics
+                predictions={mockPredictions}
+                className="h-full"
+              />
+            </div>
+
+            {/* Data Storytelling - Like Tableau/Google Analytics Intelligence */}
+            <DataStory
+              title="Marketing Performance Story"
+              subtitle="AI-generated insights from your marketing data"
+              segments={mockStorySegments}
+              className="mt-6"
+            />
+
+            {/* Activity Feed - Like Slack + Notion Combined */}
+            <div className="mt-6">
+              <ActivityFeed
+                activities={mockActivities}
+                onMarkRead={(id) => console.log('Mark read:', id)}
+                onMarkAllRead={() => console.log('Mark all read')}
+                onPin={(id) => console.log('Pin:', id)}
+                onArchive={(id) => console.log('Archive:', id)}
+              />
+            </div>
           </TabsContent>
         </Tabs>
+
+        {/* Quick Actions Toolbar - Like Linear/Notion */}
+        <QuickActionsToolbar actions={mockQuickActions} position="bottom" />
 
         {/* Campaign Detail Dialog */}
         <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>

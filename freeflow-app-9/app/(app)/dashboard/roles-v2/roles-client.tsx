@@ -9,6 +9,19 @@ import {
   FileText, AlertTriangle, ShieldCheck, ShieldAlert, Fingerprint,
   UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -390,6 +403,36 @@ const formatDate = (date: string) => {
 const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockRolesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Access Control', description: 'Role-based security 100% compliant. All permissions properly scoped.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '2', type: 'info' as const, title: 'Role Optimization', description: '3 roles have overlapping permissions. Consider consolidation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '3', type: 'warning' as const, title: 'Unused Roles', description: '2 roles have no assigned users. Review for cleanup.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
+]
+
+const mockRolesCollaborators = [
+  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'IT Manager', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '3', name: 'HR Lead', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR' },
+]
+
+const mockRolesPredictions = [
+  { id: '1', title: 'Role Growth', prediction: '5 new roles needed for Q2 expansion', confidence: 78, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Permission Audit', prediction: 'Audit due in 30 days', confidence: 100, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockRolesActivities = [
+  { id: '1', user: 'Admin', action: 'Created role', target: 'Project Manager', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'System', action: 'Auto-assigned', target: '12 users to Developer role', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Security', action: 'Updated permissions for', target: 'Admin role', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockRolesQuickActions = [
+  { id: '1', label: 'New Role', icon: 'plus', action: () => console.log('New role'), variant: 'default' as const },
+  { id: '2', label: 'Audit Permissions', icon: 'shield', action: () => console.log('Audit'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function RolesClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1802,6 +1845,39 @@ export default function RolesClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockRolesAIInsights}
+                title="Role Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockRolesCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockRolesPredictions}
+                title="Role Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockRolesActivities}
+              title="Role Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockRolesQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * ========================================
  * CRYPTO PAYMENTS PAGE - A++++ GRADE

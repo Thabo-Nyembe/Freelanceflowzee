@@ -32,6 +32,27 @@ import {
   Lock, Unlock, Share2, Play, Pause, MoreVertical,
   Key, Webhook, Shield, AlertOctagon, Sliders, Network, Server, HardDrive, Cpu, Bell
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  customersAIInsights,
+  customersCollaborators,
+  customersPredictions,
+  customersActivities,
+  customersQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { useCustomers, type Customer, type CustomerSegment } from '@/lib/hooks/use-customers'
 
 // ============================================================================
@@ -396,6 +417,40 @@ const getAccountRatingColor = (rating: 'hot' | 'warm' | 'cold') => {
   const colors = { hot: 'bg-red-100 text-red-700', warm: 'bg-orange-100 text-orange-700', cold: 'bg-blue-100 text-blue-700' }
   return colors[rating]
 }
+
+// Enhanced Competitive Upgrade Mock Data - Customers Context
+const mockCustomersAIInsights = [
+  { id: '1', type: 'success' as const, title: 'High-Value Lead', description: 'Enterprise Corp shows strong buying signals. Lead score increased to 92.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Leads' },
+  { id: '2', type: 'warning' as const, title: 'Churn Risk Alert', description: '3 accounts showing decreased engagement. Recommend immediate outreach.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Retention' },
+  { id: '3', type: 'info' as const, title: 'Upsell Opportunity', description: '5 customers ready for premium tier based on usage patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Growth' },
+]
+
+const mockCustomersCollaborators = [
+  { id: '1', name: 'Amanda Foster', avatar: '/avatars/amanda.jpg', status: 'online' as const, role: 'Account Manager', lastActive: 'Now' },
+  { id: '2', name: 'Brandon Lee', avatar: '/avatars/brandon.jpg', status: 'online' as const, role: 'Sales Rep', lastActive: '3m ago' },
+  { id: '3', name: 'Crystal Wang', avatar: '/avatars/crystal.jpg', status: 'away' as const, role: 'Customer Success', lastActive: '15m ago' },
+  { id: '4', name: 'Derek Johnson', avatar: '/avatars/derek.jpg', status: 'offline' as const, role: 'Support Lead', lastActive: '2h ago' },
+]
+
+const mockCustomersPredictions = [
+  { id: '1', label: 'Customer Lifetime Value', current: 45000, target: 60000, predicted: 52000, confidence: 78, trend: 'up' as const },
+  { id: '2', label: 'Churn Rate', current: 5.2, target: 3.0, predicted: 4.1, confidence: 82, trend: 'down' as const },
+  { id: '3', label: 'NPS Score', current: 72, target: 80, predicted: 76, confidence: 85, trend: 'up' as const },
+]
+
+const mockCustomersActivities = [
+  { id: '1', user: 'Amanda Foster', action: 'converted', target: 'lead to opportunity', timestamp: '5m ago', type: 'success' as const },
+  { id: '2', user: 'Brandon Lee', action: 'scheduled', target: 'demo with TechCorp', timestamp: '20m ago', type: 'info' as const },
+  { id: '3', user: 'Crystal Wang', action: 'resolved', target: 'support ticket #1234', timestamp: '45m ago', type: 'success' as const },
+  { id: '4', user: 'System', action: 'flagged', target: '2 accounts for review', timestamp: '1h ago', type: 'warning' as const },
+]
+
+const mockCustomersQuickActions = [
+  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => console.log('Add contact') },
+  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => console.log('Log activity') },
+  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => console.log('Send email') },
+  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => console.log('Schedule call') },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1780,6 +1835,39 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockCustomersAIInsights}
+              title="Customer Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockCustomersCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockCustomersPredictions}
+              title="Customer Metrics Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockCustomersActivities}
+            title="Customer Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockCustomersQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Contact Detail Dialog */}
         <Dialog open={!!selectedContact} onOpenChange={() => setSelectedContact(null)}>

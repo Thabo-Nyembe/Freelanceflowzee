@@ -1,6 +1,6 @@
-import SocialMediaClient from './social-media-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import SocialMediaClient from './social-media-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

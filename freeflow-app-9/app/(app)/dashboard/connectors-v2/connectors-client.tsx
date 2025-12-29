@@ -24,6 +24,18 @@ import {
   Sliders, Archive, HardDrive, Server
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPE DEFINITIONS - Zapier Level Integration Platform
 // ============================================================================
@@ -610,6 +622,39 @@ const formatDate = (dateString: string): string => {
     minute: '2-digit'
   })
 }
+
+// ============================================================================
+// COMPETITIVE UPGRADE MOCK DATA - Zapier Level Integration Intelligence
+// ============================================================================
+
+const mockConnectorsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Integration Health', description: 'All 47 active Zaps running with 99.9% uptime!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Salesforce API approaching 80% of daily quota.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Limits' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Combining 3 similar Zaps can reduce task usage by 40%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockConnectorsCollaborators = [
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/integration.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Automation Eng', avatar: '/avatars/automation.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '3', name: 'API Specialist', avatar: '/avatars/api.jpg', status: 'away' as const, role: 'Specialist' },
+]
+
+const mockConnectorsPredictions = [
+  { id: '1', title: 'Task Usage', prediction: 'Current usage will consume 85% of monthly quota by end of week', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Error Rate', prediction: 'Webhook reliability will improve 15% after retry config update', confidence: 84, trend: 'down' as const, impact: 'medium' as const },
+]
+
+const mockConnectorsActivities = [
+  { id: '1', user: 'Integration Lead', action: 'Created', target: 'Slack → Notion sync Zap', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Automation Eng', action: 'Fixed', target: 'Gmail webhook connection', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'API Specialist', action: 'Upgraded', target: 'Salesforce API to v58', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockConnectorsQuickActions = [
+  { id: '1', label: 'New Zap', icon: 'plus', action: () => console.log('New Zap'), variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', action: () => console.log('Test'), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: () => console.log('Logs'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1644,6 +1689,39 @@ export default function ConnectorsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockConnectorsAIInsights}
+              title="Integration Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockConnectorsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockConnectorsPredictions}
+              title="Zap Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockConnectorsActivities}
+            title="Integration Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockConnectorsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Zap Detail Dialog */}
         <Dialog open={!!selectedZap} onOpenChange={() => setSelectedZap(null)}>

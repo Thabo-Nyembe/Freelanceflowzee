@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -239,7 +241,6 @@ export default function GalleryPage() {
 
     return () => clearTimeout(timeout)
   }, [userId, userLoading, announce])
-
 
   // REAL HANDLERS
 

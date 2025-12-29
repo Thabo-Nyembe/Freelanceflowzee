@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react'
 import { Plus, Heart, Star } from 'lucide-react'
 
@@ -22,7 +24,6 @@ export default function UIShowcasePage() {
       announce('UI showcase loaded', 'polite')
     }
   }, [userId, announce])
-
 
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)

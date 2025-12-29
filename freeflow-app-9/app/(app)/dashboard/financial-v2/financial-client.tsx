@@ -41,6 +41,34 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFinancial, type FinancialRecord } from '@/lib/hooks/use-financial'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Centralized Mock Data - Investor-Ready
+import {
+  financialAccounts,
+  financialBankAccounts,
+  financialTransactions,
+  financialBudgetItems,
+  financialProfitLoss,
+  financialCashFlow,
+  financialAIInsights,
+  financialCollaborators,
+  financialPredictions,
+  financialActivities,
+  financialQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 interface Account {
   id: string
@@ -86,91 +114,18 @@ interface BudgetItem {
   remaining: number
 }
 
-// Mock Data
-const mockAccounts: Account[] = [
-  { id: '1', code: '1000', name: 'Cash and Cash Equivalents', type: 'asset', subtype: 'Current Assets', balance: 125000, isActive: true },
-  { id: '2', code: '1100', name: 'Accounts Receivable', type: 'asset', subtype: 'Current Assets', balance: 45000, isActive: true },
-  { id: '3', code: '1200', name: 'Inventory', type: 'asset', subtype: 'Current Assets', balance: 32000, isActive: true },
-  { id: '4', code: '1500', name: 'Fixed Assets', type: 'asset', subtype: 'Non-Current Assets', balance: 85000, isActive: true },
-  { id: '5', code: '2000', name: 'Accounts Payable', type: 'liability', subtype: 'Current Liabilities', balance: 28000, isActive: true },
-  { id: '6', code: '2100', name: 'Credit Card Payable', type: 'liability', subtype: 'Current Liabilities', balance: 5500, isActive: true },
-  { id: '7', code: '2500', name: 'Long-term Debt', type: 'liability', subtype: 'Non-Current Liabilities', balance: 50000, isActive: true },
-  { id: '8', code: '3000', name: 'Owner\'s Equity', type: 'equity', subtype: 'Equity', balance: 150000, isActive: true },
-  { id: '9', code: '3100', name: 'Retained Earnings', type: 'equity', subtype: 'Equity', balance: 53500, isActive: true },
-  { id: '10', code: '4000', name: 'Sales Revenue', type: 'revenue', subtype: 'Operating Revenue', balance: 285000, isActive: true },
-  { id: '11', code: '4100', name: 'Service Revenue', type: 'revenue', subtype: 'Operating Revenue', balance: 125000, isActive: true },
-  { id: '12', code: '5000', name: 'Cost of Goods Sold', type: 'expense', subtype: 'Cost of Sales', balance: 142500, isActive: true },
-  { id: '13', code: '6000', name: 'Operating Expenses', type: 'expense', subtype: 'Operating Expenses', balance: 85000, isActive: true },
-  { id: '14', code: '6100', name: 'Payroll Expenses', type: 'expense', subtype: 'Operating Expenses', balance: 95000, isActive: true },
-]
-
-const mockBankAccounts: BankAccount[] = [
-  { id: '1', name: 'Business Checking', institution: 'Chase Bank', accountNumber: '****4521', type: 'checking', balance: 85420.50, lastSync: '2024-12-23T10:30:00Z', status: 'connected' },
-  { id: '2', name: 'Business Savings', institution: 'Chase Bank', accountNumber: '****7832', type: 'savings', balance: 45000.00, lastSync: '2024-12-23T10:30:00Z', status: 'connected' },
-  { id: '3', name: 'Business Credit Card', institution: 'American Express', accountNumber: '****3456', type: 'credit', balance: -5500.00, lastSync: '2024-12-22T18:00:00Z', status: 'needs_attention' },
-]
-
-const mockTransactions: Transaction[] = [
-  { id: '1', date: '2024-12-23', description: 'Client Payment - ABC Corp', category: 'Sales Revenue', account: 'Business Checking', amount: 15000, type: 'income', status: 'cleared', payee: 'ABC Corp', reference: 'INV-2024-089' },
-  { id: '2', date: '2024-12-22', description: 'Office Supplies', category: 'Operating Expenses', account: 'Business Credit Card', amount: -450, type: 'expense', status: 'pending', payee: 'Staples' },
-  { id: '3', date: '2024-12-22', description: 'Software Subscription', category: 'Operating Expenses', account: 'Business Checking', amount: -299, type: 'expense', status: 'cleared', payee: 'Adobe' },
-  { id: '4', date: '2024-12-21', description: 'Client Payment - XYZ Ltd', category: 'Service Revenue', account: 'Business Checking', amount: 8500, type: 'income', status: 'reconciled', payee: 'XYZ Ltd', reference: 'INV-2024-088' },
-  { id: '5', date: '2024-12-20', description: 'Payroll', category: 'Payroll Expenses', account: 'Business Checking', amount: -12500, type: 'expense', status: 'reconciled', payee: 'Employees' },
-  { id: '6', date: '2024-12-19', description: 'Client Retainer - DEF Inc', category: 'Service Revenue', account: 'Business Checking', amount: 5000, type: 'income', status: 'cleared', payee: 'DEF Inc', reference: 'RET-2024-012' },
-  { id: '7', date: '2024-12-18', description: 'Utility Bill', category: 'Operating Expenses', account: 'Business Checking', amount: -385, type: 'expense', status: 'cleared', payee: 'Electric Company' },
-  { id: '8', date: '2024-12-17', description: 'Marketing Expenses', category: 'Operating Expenses', account: 'Business Credit Card', amount: -1200, type: 'expense', status: 'pending', payee: 'Google Ads' },
-]
-
-const mockBudgetItems: BudgetItem[] = [
-  { category: 'Revenue', budgeted: 420000, actual: 410000, remaining: 10000 },
-  { category: 'Cost of Goods Sold', budgeted: 150000, actual: 142500, remaining: 7500 },
-  { category: 'Operating Expenses', budgeted: 100000, actual: 85000, remaining: 15000 },
-  { category: 'Payroll', budgeted: 100000, actual: 95000, remaining: 5000 },
-  { category: 'Marketing', budgeted: 25000, actual: 22000, remaining: 3000 },
-  { category: 'Technology', budgeted: 15000, actual: 12500, remaining: 2500 },
-]
-
-// P&L Data
-const profitLossData = {
-  revenue: {
-    'Sales Revenue': 285000,
-    'Service Revenue': 125000,
-    'Other Income': 5000,
-  },
-  costOfSales: {
-    'Cost of Goods Sold': 142500,
-    'Direct Labor': 35000,
-  },
-  operatingExpenses: {
-    'Payroll Expenses': 95000,
-    'Rent & Utilities': 24000,
-    'Marketing': 22000,
-    'Software & Technology': 12500,
-    'Office Supplies': 8500,
-    'Professional Services': 12000,
-    'Travel & Entertainment': 6000,
-    'Insurance': 5000,
-  },
-}
-
-// Cash Flow Data
-const cashFlowData = {
-  operating: {
-    'Net Income': 87500,
-    'Depreciation': 8500,
-    'Change in Accounts Receivable': -12000,
-    'Change in Inventory': -5000,
-    'Change in Accounts Payable': 8000,
-  },
-  investing: {
-    'Purchase of Equipment': -15000,
-    'Sale of Assets': 2000,
-  },
-  financing: {
-    'Loan Repayment': -12000,
-    'Owner Drawings': -10000,
-  },
-}
+// Use centralized mock data - mapped to local variable names for compatibility
+const mockAccounts = financialAccounts as Account[]
+const mockBankAccounts = financialBankAccounts as BankAccount[]
+const mockTransactions = financialTransactions as Transaction[]
+const mockBudgetItems = financialBudgetItems as BudgetItem[]
+const profitLossData = financialProfitLoss
+const cashFlowData = financialCashFlow
+const mockAIInsights = financialAIInsights
+const mockFinancialCollaborators = financialCollaborators
+const mockFinancialPredictions = financialPredictions
+const mockFinancialActivities = financialActivities
+const mockFinancialQuickActions = financialQuickActions
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -249,6 +204,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {/* Collaboration Indicator */}
+            <CollaborationIndicator
+              collaborators={mockFinancialCollaborators}
+              maxVisible={3}
+            />
             <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <Calendar className="w-4 h-4 text-gray-500" />
               <select
@@ -1813,6 +1773,27 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* AI-Powered Financial Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <AIInsightsPanel
+            insights={mockAIInsights}
+            onAskQuestion={(q) => console.log('Financial Question:', q)}
+          />
+          <PredictiveAnalytics predictions={mockFinancialPredictions} />
+        </div>
+
+        {/* Activity Feed */}
+        <div className="mt-6">
+          <ActivityFeed
+            activities={mockFinancialActivities}
+            maxItems={5}
+            showFilters={true}
+          />
+        </div>
+
+        {/* Quick Actions Toolbar */}
+        <QuickActionsToolbar actions={mockFinancialQuickActions} />
       </div>
     </div>
   )

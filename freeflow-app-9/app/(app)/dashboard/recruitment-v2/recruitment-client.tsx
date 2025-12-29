@@ -54,6 +54,26 @@ import {
   Zap
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  recruitmentAIInsights,
+  recruitmentCollaborators,
+  recruitmentPredictions,
+  recruitmentActivities,
+  recruitmentQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type JobStatus = 'draft' | 'open' | 'on-hold' | 'filled' | 'cancelled'
 type JobType = 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance'
@@ -1610,6 +1630,39 @@ export default function RecruitmentClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={recruitmentAIInsights}
+                title="Recruitment Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={recruitmentCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={recruitmentPredictions}
+                title="Hiring Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={recruitmentActivities}
+              title="Recruitment Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={recruitmentQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
 

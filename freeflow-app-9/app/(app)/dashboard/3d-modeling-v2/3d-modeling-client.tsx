@@ -1792,7 +1792,6 @@ export default function ThreeDModelingClient() {
             <CollaborationIndicator
               collaborators={mock3DCollaborators}
               maxVisible={4}
-              showStatus={true}
             />
             <PredictiveAnalytics
               predictions={mock3DPredictions}

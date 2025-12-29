@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CiCdClient from './ci-cd-client'
 
 export default function Page() {

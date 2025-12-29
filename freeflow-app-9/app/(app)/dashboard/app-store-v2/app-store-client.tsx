@@ -63,6 +63,19 @@ import {
   Key,
   Network
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -561,6 +574,39 @@ const formatDate = (dateString: string) => {
     year: 'numeric'
   })
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - App Store Connect Level
+// ============================================================================
+
+const mockAppStoreAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Top Performer', description: 'Analytics Pro has 98% positive reviews and 50K+ downloads this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Update Available', description: '12 installed apps have pending updates with security patches.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'info' as const, title: 'New Arrivals', description: '8 new productivity apps added to the marketplace this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
+]
+
+const mockAppStoreCollaborators = [
+  { id: '1', name: 'App Curator', avatar: '/avatars/curator.jpg', status: 'online' as const, role: 'Curator' },
+  { id: '2', name: 'Developer Lead', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'Security Team', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
+]
+
+const mockAppStorePredictions = [
+  { id: '1', title: 'Usage Forecast', prediction: 'App adoption expected to increase 35% next quarter', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cost Savings', prediction: 'Bundled apps could save $5K/month vs individual licenses', confidence: 92, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockAppStoreActivities = [
+  { id: '1', user: 'System', action: 'Auto-updated', target: 'Slack integration to v4.2', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Admin', action: 'Approved', target: 'Notion integration for all teams', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
+  { id: '3', user: 'Security', action: 'Flagged', target: 'Unknown app for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockAppStoreQuickActions = [
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => console.log('Browse apps'), variant: 'default' as const },
+  { id: '2', label: 'Install App', icon: 'plus', action: () => console.log('Install app'), variant: 'default' as const },
+  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => console.log('Manage apps'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1635,6 +1681,39 @@ export default function AppStoreClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAppStoreAIInsights}
+              title="App Store Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAppStoreCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAppStorePredictions}
+              title="App Store Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAppStoreActivities}
+            title="App Store Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAppStoreQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* App Detail Dialog */}

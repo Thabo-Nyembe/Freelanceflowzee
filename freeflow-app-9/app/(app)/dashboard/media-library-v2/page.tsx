@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import MediaLibraryClient from './media-library-client'
 
 export default function Page() {

@@ -24,6 +24,18 @@ import {
   Download, Upload, Terminal, HardDrive, History
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPE DEFINITIONS - Resource Guru Level Resource Management
 // ============================================================================
@@ -544,6 +556,39 @@ const formatDate = (date: string) => {
     year: 'numeric',
   })
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Resource Guru Level
+// ============================================================================
+
+const mockResourcesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Optimal Allocation', description: 'Team capacity utilization at 87% - well balanced across projects.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
+  { id: '2', type: 'warning' as const, title: 'Overallocation Alert', description: '3 team members have over 120% allocation next week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scheduling' },
+  { id: '3', type: 'info' as const, title: 'Skill Gap Detected', description: 'React Native expertise needed for Q2 mobile project.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Planning' },
+]
+
+const mockResourcesCollaborators = [
+  { id: '1', name: 'Resource Manager', avatar: '/avatars/manager.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Project Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'HR Coordinator', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR' },
+]
+
+const mockResourcesPredictions = [
+  { id: '1', title: 'Capacity Forecast', prediction: 'Team will reach 95% capacity by end of month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Hiring Need', prediction: 'Need 2 senior developers by Q2 for planned projects', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockResourcesActivities = [
+  { id: '1', user: 'Resource Manager', action: 'Assigned', target: 'Sarah to Project Alpha', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Project Lead', action: 'Requested', target: '2 additional developers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Flagged', target: 'Mike as overallocated', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+]
+
+const mockResourcesQuickActions = [
+  { id: '1', label: 'Add Resource', icon: 'plus', action: () => console.log('Add resource'), variant: 'default' as const },
+  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => console.log('View calendar'), variant: 'default' as const },
+  { id: '3', label: 'Run Report', icon: 'file', action: () => console.log('Run report'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // COMPONENT
@@ -1672,6 +1717,39 @@ export default function ResourcesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockResourcesAIInsights}
+              title="Resource Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockResourcesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockResourcesPredictions}
+              title="Resource Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockResourcesActivities}
+            title="Resource Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockResourcesQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Resource Detail Dialog */}
         <Dialog open={!!selectedResource} onOpenChange={() => setSelectedResource(null)}>

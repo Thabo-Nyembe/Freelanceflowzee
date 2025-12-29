@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CapacityClient from './capacity-client'
 
 export default function Page() {

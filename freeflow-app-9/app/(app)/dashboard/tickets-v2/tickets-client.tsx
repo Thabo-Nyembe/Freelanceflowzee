@@ -66,6 +66,26 @@ import {
   ChevronDown
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  ticketsAIInsights,
+  ticketsCollaborators,
+  ticketsPredictions,
+  ticketsActivities,
+  ticketsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type TicketStatus = 'new' | 'open' | 'pending' | 'on-hold' | 'solved' | 'closed'
 type TicketPriority = 'low' | 'normal' | 'high' | 'urgent'
@@ -401,6 +421,36 @@ const mockAgents: Agent[] = [
   { id: 'a3', name: 'Alex Thompson', email: 'alex@company.com', team: 'Technical Support', status: 'away', openTickets: 3, resolvedToday: 15, avgResponseTime: '12m', satisfaction: 98 },
   { id: 'a4', name: 'Emma Wilson', email: 'emma@company.com', team: 'Billing Support', status: 'online', openTickets: 6, resolvedToday: 10, avgResponseTime: '18m', satisfaction: 94 },
   { id: 'a5', name: 'James Lee', email: 'james@company.com', team: 'Product Support', status: 'offline', openTickets: 2, resolvedToday: 7, avgResponseTime: '25m', satisfaction: 89 }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockTicketsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Resolution Time', description: 'Average resolution down to 4.2 hours. 25% faster than last month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'info' as const, title: 'Ticket Patterns', description: 'Login issues spiking - consider knowledge base article.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Patterns' },
+  { id: '3', type: 'warning' as const, title: 'SLA Risk', description: '3 tickets approaching SLA breach in next 2 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'SLA' },
+]
+
+const mockTicketsCollaborators = [
+  { id: '1', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Senior Agent', avatar: '/avatars/agent.jpg', status: 'online' as const, role: 'Agent' },
+  { id: '3', name: 'Escalation Mgr', avatar: '/avatars/escalation.jpg', status: 'busy' as const, role: 'Manager' },
+]
+
+const mockTicketsPredictions = [
+  { id: '1', title: 'Volume Forecast', prediction: '120 tickets expected today', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'CSAT Score', prediction: '94% satisfaction projected', confidence: 88, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockTicketsActivities = [
+  { id: '1', user: 'Sarah Chen', action: 'Resolved ticket', target: '#TKT-1234', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Auto-Router', action: 'Assigned ticket to', target: 'Technical Team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Mike Johnson', action: 'Escalated', target: '#TKT-1235 to Tier 2', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockTicketsQuickActions = [
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => console.log('New ticket'), variant: 'default' as const },
+  { id: '2', label: 'View Queue', icon: 'list', action: () => console.log('View queue'), variant: 'default' as const },
+  { id: '3', label: 'Reports', icon: 'chart', action: () => console.log('Reports'), variant: 'outline' as const },
 ]
 
 export default function TicketsClient() {
@@ -1794,6 +1844,39 @@ export default function TicketsClient() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Enhanced Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockTicketsAIInsights}
+                title="Ticket Intelligence"
+                onInsightAction={(insight) => console.log('Insight action:', insight)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockTicketsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockTicketsPredictions}
+                title="Support Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockTicketsActivities}
+              title="Ticket Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockTicketsQuickActions}
+              variant="grid"
+            />
+          </div>
         </div>
       </div>
     </div>

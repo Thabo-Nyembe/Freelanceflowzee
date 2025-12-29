@@ -1,6 +1,6 @@
-import PayrollClient from './payroll-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import PayrollClient from './payroll-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

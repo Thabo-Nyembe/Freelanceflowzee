@@ -21,6 +21,26 @@ import {
   Key, Sliders, Archive, AlertOctagon, Users, CreditCard
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  systemInsightsAIInsights,
+  systemInsightsCollaborators,
+  systemInsightsPredictions,
+  systemInsightsActivities,
+  systemInsightsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Type definitions
 interface Metric {
   id: string
@@ -202,6 +222,38 @@ const mockAPMServices: APMService[] = [
   { id: 'apm4', name: 'payment-service', language: 'Java', requestCount: 23000, errorRate: 0.15, avgLatency: 230, p99Latency: 890, apdex: 0.91, status: 'healthy' },
   { id: 'apm5', name: 'notification-service', language: 'Node.js', requestCount: 45000, errorRate: 0.05, avgLatency: 89, p99Latency: 250, apdex: 0.94, status: 'healthy' },
   { id: 'apm6', name: 'order-service', language: 'Go', requestCount: 34000, errorRate: 0.08, avgLatency: 78, p99Latency: 320, apdex: 0.93, status: 'healthy' }
+]
+
+// Enhanced System Insights Mock Data
+const mockSystemInsightsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'System Health', description: 'All 12 services running optimally. 99.97% uptime this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'info' as const, title: 'Performance Trend', description: 'API latency improved 15% after recent optimization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '3', type: 'warning' as const, title: 'Resource Alert', description: 'Database CPU at 78%. Consider scaling before peak hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
+]
+
+const mockSystemInsightsCollaborators = [
+  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Infrastructure', lastActive: 'Now' },
+  { id: '2', name: 'SRE Engineer', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'Reliability', lastActive: '5m ago' },
+  { id: '3', name: 'Platform Eng', avatar: '/avatars/platform.jpg', status: 'away' as const, role: 'Platform', lastActive: '15m ago' },
+]
+
+const mockSystemInsightsPredictions = [
+  { id: '1', label: 'Uptime', current: 99.97, target: 99.99, predicted: 99.98, confidence: 92, trend: 'up' as const },
+  { id: '2', label: 'Avg Latency', current: 145, target: 100, predicted: 125, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Error Rate', current: 0.12, target: 0.05, predicted: 0.08, confidence: 85, trend: 'up' as const },
+]
+
+const mockSystemInsightsActivities = [
+  { id: '1', user: 'DevOps Lead', action: 'deployed', target: 'v2.4.1 to production', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'SRE Engineer', action: 'resolved', target: 'memory leak in auth-service', timestamp: '45m ago', type: 'info' as const },
+  { id: '3', user: 'Platform Eng', action: 'scaled', target: 'API cluster to 8 nodes', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockSystemInsightsQuickActions = [
+  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => console.log('Deploy') },
+  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => console.log('Restart') },
+  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => console.log('Logs') },
+  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => console.log('Metrics') },
 ]
 
 export default function SystemInsightsClient() {
@@ -1938,6 +1990,39 @@ docker run -d --name kazi-agent \\
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSystemInsightsAIInsights}
+              title="System Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSystemInsightsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSystemInsightsPredictions}
+              title="System Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSystemInsightsActivities}
+            title="System Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSystemInsightsQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
     </div>
   )

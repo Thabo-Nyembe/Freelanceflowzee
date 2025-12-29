@@ -69,6 +69,18 @@ import {
   Database
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // ============================================================================
 // TYPE DEFINITIONS - GitHub Actions Level CI/CD
 // ============================================================================
@@ -735,6 +747,39 @@ const getRunnerStatusColor = (status: string): string => {
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
   }
 }
+
+// ============================================================================
+// COMPETITIVE UPGRADE MOCK DATA - GitHub Actions Level Build Intelligence
+// ============================================================================
+
+const mockBuildsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Build Health', description: 'Build success rate at 96% this week - excellent!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'warning' as const, title: 'Flaky Test', description: 'Unit test suite-3 failed 3 times in last 10 runs.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '3', type: 'info' as const, title: 'AI Optimization', description: 'Parallel job execution can reduce build time by 35%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockBuildsCollaborators = [
+  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Build Engineer', avatar: '/avatars/build.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '3', name: 'Release Manager', avatar: '/avatars/release.jpg', status: 'away' as const, role: 'Manager' },
+]
+
+const mockBuildsPredictions = [
+  { id: '1', title: 'Build Time', prediction: 'Next release build will complete in 12 minutes', confidence: 88, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Cache Efficiency', prediction: 'Dependency caching will improve build speed by 40%', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockBuildsActivities = [
+  { id: '1', user: 'DevOps Lead', action: 'Deployed', target: 'v2.4.0 to production', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Build Engineer', action: 'Fixed', target: 'CI pipeline cache issue', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Release Manager', action: 'Approved', target: 'hotfix build #1234', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockBuildsQuickActions = [
+  { id: '1', label: 'New Build', icon: 'plus', action: () => console.log('New build'), variant: 'default' as const },
+  { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => console.log('Retry'), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'file-text', action: () => console.log('Logs'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1610,6 +1655,39 @@ export default function BuildsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockBuildsAIInsights}
+              title="Build Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockBuildsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockBuildsPredictions}
+              title="Build Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockBuildsActivities}
+            title="Build Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockBuildsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Build Detail Dialog */}
         <Dialog open={!!selectedBuild} onOpenChange={() => setSelectedBuild(null)}>

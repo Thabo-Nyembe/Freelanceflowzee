@@ -66,6 +66,27 @@ import {
   Hash,
   AtSign
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  aiAssistantAIInsights,
+  aiAssistantCollaborators,
+  aiAssistantPredictions,
+  aiAssistantActivities,
+  aiAssistantQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -636,6 +657,38 @@ const getFileIcon = (type: FileType): React.ReactNode => {
   }
   return icons[type]
 }
+
+// Enhanced AI Assistant Mock Data
+const mockAIAssistantAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Response Quality', description: 'AI response accuracy at 94%. Users rating responses highly this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '2', type: 'info' as const, title: 'Popular Topics', description: 'Code generation and debugging are trending. Consider adding more examples.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '3', type: 'warning' as const, title: 'Rate Limits', description: 'Approaching 80% of monthly API quota. Consider upgrading plan.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+]
+
+const mockAIAssistantCollaborators = [
+  { id: '1', name: 'AI Engineer', avatar: '/avatars/ai-eng.jpg', status: 'online' as const, role: 'Model Training', lastActive: 'Now' },
+  { id: '2', name: 'Prompt Designer', avatar: '/avatars/prompt.jpg', status: 'online' as const, role: 'Prompt Engineering', lastActive: '5m ago' },
+  { id: '3', name: 'Data Scientist', avatar: '/avatars/data.jpg', status: 'away' as const, role: 'Analytics', lastActive: '20m ago' },
+]
+
+const mockAIAssistantPredictions = [
+  { id: '1', label: 'Daily Queries', current: 4520, target: 5000, predicted: 4800, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Response Time', current: 1.2, target: 1.0, predicted: 1.1, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'User Satisfaction', current: 92, target: 95, predicted: 94, confidence: 82, trend: 'up' as const },
+]
+
+const mockAIAssistantActivities = [
+  { id: '1', user: 'AI Engineer', action: 'deployed', target: 'new model version 2.4', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'Prompt Designer', action: 'created', target: '5 new prompt templates', timestamp: '30m ago', type: 'info' as const },
+  { id: '3', user: 'Data Scientist', action: 'analyzed', target: 'conversation patterns', timestamp: '1h ago', type: 'info' as const },
+]
+
+const mockAIAssistantQuickActions = [
+  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => console.log('New chat') },
+  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => console.log('Templates') },
+  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => console.log('Knowledge') },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+]
 
 export default function AIAssistantClient() {
   const [activeTab, setActiveTab] = useState('chat')
@@ -1689,6 +1742,39 @@ export default function AIAssistantClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAIAssistantAIInsights}
+              title="AI Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAIAssistantCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAIAssistantPredictions}
+              title="Assistant Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAIAssistantActivities}
+            title="AI Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAIAssistantQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* New Assistant Dialog */}

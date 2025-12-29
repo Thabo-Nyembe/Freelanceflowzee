@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import DataExportClient from './data-export-client'
 
 export default function Page() {

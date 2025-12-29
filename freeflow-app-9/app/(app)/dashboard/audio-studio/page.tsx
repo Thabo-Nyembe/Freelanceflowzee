@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * World-Class Audio Studio
  * Complete implementation of professional audio editing and production

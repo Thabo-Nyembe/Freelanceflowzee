@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import AddOnsClient from './add-ons-client'
 
 export default function Page() {

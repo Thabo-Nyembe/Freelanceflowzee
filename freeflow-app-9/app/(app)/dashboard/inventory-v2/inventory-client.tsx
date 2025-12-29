@@ -48,6 +48,30 @@ import {
   ChevronRight,
   X
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  inventoryAIInsights,
+  inventoryCollaborators,
+  inventoryPredictions,
+  inventoryActivities,
+  inventoryQuickActions,
+} from '@/lib/mock-data/adapters'
+
+import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
+import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -313,6 +337,40 @@ const mockStats: InventoryStats = {
   avgTurnoverRate: 4.2,
   inventoryAccuracy: 98.5
 }
+
+// Enhanced Competitive Upgrade Mock Data - Inventory Context
+const mockInventoryAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Low Stock Alert', description: '3 products below reorder point. Auto-purchase orders recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Stock' },
+  { id: '2', type: 'success' as const, title: 'Inventory Optimization', description: 'Warehouse efficiency improved 12% after recent reorganization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Operations' },
+  { id: '3', type: 'info' as const, title: 'Demand Forecast', description: 'Expected 25% increase in electronics demand next month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
+]
+
+const mockInventoryCollaborators = [
+  { id: '1', name: 'Tom Rodriguez', avatar: '/avatars/tom.jpg', status: 'online' as const, role: 'Warehouse Manager', lastActive: 'Now' },
+  { id: '2', name: 'Nancy Lee', avatar: '/avatars/nancy.jpg', status: 'online' as const, role: 'Inventory Analyst', lastActive: '3m ago' },
+  { id: '3', name: 'Carlos Mendez', avatar: '/avatars/carlos.jpg', status: 'away' as const, role: 'Procurement', lastActive: '30m ago' },
+  { id: '4', name: 'Anna Brown', avatar: '/avatars/anna.jpg', status: 'offline' as const, role: 'Logistics', lastActive: '3h ago' },
+]
+
+const mockInventoryPredictions = [
+  { id: '1', label: 'Stock Turnover Rate', current: 4.2, target: 5.0, predicted: 4.8, confidence: 80, trend: 'up' as const },
+  { id: '2', label: 'Inventory Accuracy', current: 98.5, target: 99.5, predicted: 99.2, confidence: 85, trend: 'up' as const },
+  { id: '3', label: 'Fulfillment Rate', current: 94, target: 98, predicted: 97, confidence: 78, trend: 'up' as const },
+]
+
+const mockInventoryActivities = [
+  { id: '1', user: 'Tom Rodriguez', action: 'received', target: 'PO-2024-089 shipment', timestamp: '8m ago', type: 'success' as const },
+  { id: '2', user: 'Nancy Lee', action: 'flagged', target: '5 items for recount', timestamp: '20m ago', type: 'warning' as const },
+  { id: '3', user: 'Carlos Mendez', action: 'created', target: 'purchase order PO-2024-090', timestamp: '45m ago', type: 'info' as const },
+  { id: '4', user: 'Anna Brown', action: 'completed', target: 'stock transfer to Store #3', timestamp: '1h ago', type: 'success' as const },
+]
+
+const mockInventoryQuickActions = [
+  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => console.log('Stock count') },
+  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => console.log('Transfer stock') },
+  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => console.log('New PO') },
+  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => console.log('Print labels') },
+]
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {
   const [activeTab, setActiveTab] = useState('products')
@@ -1551,6 +1609,43 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          {/* AI Insights Panel */}
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockInventoryAIInsights}
+              title="Inventory Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+
+          {/* Team Collaboration & Activity */}
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockInventoryCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockInventoryPredictions}
+              title="Inventory Forecasts"
+            />
+          </div>
+        </div>
+
+        {/* Activity Feed & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockInventoryActivities}
+            title="Warehouse Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockInventoryQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Product Detail/Create Dialog */}

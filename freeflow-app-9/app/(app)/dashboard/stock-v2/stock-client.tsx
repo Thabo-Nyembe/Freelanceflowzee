@@ -67,6 +67,26 @@ import {
   Mail
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  stockAIInsights,
+  stockCollaborators,
+  stockPredictions,
+  stockActivities,
+  stockQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - E*Trade Level Inventory Management
 // ============================================================================
@@ -661,6 +681,36 @@ const formatDate = (dateString: string) => {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
+
+// Mock data for AI-powered competitive upgrade components
+const mockStockAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Inventory Optimized', description: 'AI reorder points saved $25K in carrying costs this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '2', type: 'warning' as const, title: 'Low Stock Alert', description: '8 SKUs below safety stock level. Reorder recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Inventory' },
+  { id: '3', type: 'info' as const, title: 'Turnover Improving', description: 'Inventory turnover ratio increased to 8.5 from 7.2.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockStockCollaborators = [
+  { id: '1', name: 'Inventory Manager', avatar: '/avatars/inventory.jpg', status: 'online' as const, role: 'Manager' },
+  { id: '2', name: 'Warehouse Lead', avatar: '/avatars/warehouse.jpg', status: 'online' as const, role: 'Operations' },
+  { id: '3', name: 'Procurement', avatar: '/avatars/procurement.jpg', status: 'away' as const, role: 'Procurement' },
+]
+
+const mockStockPredictions = [
+  { id: '1', title: 'Stockout Risk', prediction: 'SKU-5523 will stockout in 5 days based on current velocity', confidence: 92, trend: 'down' as const, impact: 'high' as const },
+  { id: '2', title: 'Seasonal Demand', prediction: 'Q4 demand surge expected - increase safety stock 20%', confidence: 84, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockStockActivities = [
+  { id: '1', user: 'Warehouse Lead', action: 'Received', target: 'PO-8834 shipment (500 units)', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Inventory Manager', action: 'Adjusted', target: 'cycle count for Zone A', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Procurement', action: 'Created', target: 'reorder for 12 low-stock items', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockStockQuickActions = [
+  { id: '1', label: 'Add Stock', icon: 'plus', action: () => console.log('Add stock'), variant: 'default' as const },
+  { id: '2', label: 'Transfer', icon: 'arrow-right', action: () => console.log('Transfer'), variant: 'default' as const },
+  { id: '3', label: 'Count', icon: 'clipboard', action: () => console.log('Count'), variant: 'outline' as const },
+]
 
 export default function StockClient() {
   const [activeTab, setActiveTab] = useState('inventory')
@@ -1690,6 +1740,39 @@ export default function StockClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockStockAIInsights}
+              title="Inventory Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockStockCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockStockPredictions}
+              title="Stock Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockStockActivities}
+            title="Inventory Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockStockQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Product Detail Dialog */}

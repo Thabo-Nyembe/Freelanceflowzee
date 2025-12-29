@@ -90,6 +90,27 @@ import {
   Terminal,
   Webhook
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  backupsAIInsights,
+  backupsCollaborators,
+  backupsPredictions,
+  backupsActivities,
+  backupsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { CardDescription } from '@/components/ui/card'
 
 // Types
@@ -476,6 +497,36 @@ const mockRecoveryTests: RecoveryTest[] = [
   { id: '2', name: 'Monthly Restore Test - Email', jobId: '5', jobName: 'Email Server Backup', status: 'passed', lastRun: '2024-01-05T08:00:00Z', nextRun: '2024-02-05T08:00:00Z', duration: 3600, dataVerified: true, applicationVerified: true, notes: 'Email server restored and validated. All mailboxes intact.' },
   { id: '3', name: 'Weekly App Server Test', jobId: '2', jobName: 'Application Servers Backup', status: 'scheduled', lastRun: '2024-01-08T06:00:00Z', nextRun: '2024-01-15T18:00:00Z', duration: 0, dataVerified: false, applicationVerified: false, notes: 'Scheduled for maintenance window.' },
   { id: '4', name: 'Annual Compliance DR Drill', jobId: '6', jobName: 'Continuous Database Replication', status: 'passed', lastRun: '2024-01-01T00:00:00Z', nextRun: '2025-01-01T00:00:00Z', duration: 7200, dataVerified: true, applicationVerified: true, notes: 'Annual disaster recovery drill completed successfully. Documented for compliance audit.' }
+]
+
+// Competitive Upgrade Mock Data - Veeam/Commvault-level Backup Intelligence
+const mockBackupsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Recovery Ready', description: 'All critical systems have verified restore points!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Recovery' },
+  { id: '2', type: 'warning' as const, title: 'Storage Alert', description: 'Backup vault at 85% capacity - consider archival policy.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '3', type: 'info' as const, title: 'AI Optimization', description: 'Deduplication can save 40% storage on incremental backups.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockBackupsCollaborators = [
+  { id: '1', name: 'Backup Admin', avatar: '/avatars/backup.jpg', status: 'online' as const, role: 'Admin' },
+  { id: '2', name: 'DR Specialist', avatar: '/avatars/dr.jpg', status: 'online' as const, role: 'Specialist' },
+  { id: '3', name: 'Storage Engineer', avatar: '/avatars/storage.jpg', status: 'away' as const, role: 'Engineer' },
+]
+
+const mockBackupsPredictions = [
+  { id: '1', title: 'Storage Forecast', prediction: 'Current growth rate will require additional storage in 45 days', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'RTO Achievement', prediction: 'Recovery time objective will improve by 30% with new policy', confidence: 84, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockBackupsActivities = [
+  { id: '1', user: 'Backup Admin', action: 'Completed', target: 'full database backup', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'DR Specialist', action: 'Tested', target: 'disaster recovery failover', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Storage Engineer', action: 'Archived', target: '30-day retention backups', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockBackupsQuickActions = [
+  { id: '1', label: 'New Backup', icon: 'plus', action: () => console.log('New backup'), variant: 'default' as const },
+  { id: '2', label: 'Restore', icon: 'refresh-cw', action: () => console.log('Restore'), variant: 'default' as const },
+  { id: '3', label: 'Verify', icon: 'check', action: () => console.log('Verify'), variant: 'outline' as const },
 ]
 
 export default function BackupsClient() {
@@ -1607,6 +1658,40 @@ export default function BackupsClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockBackupsAIInsights}
+              title="Backup Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockBackupsCollaborators}
+              maxVisible={4}
+              showStatus={true}
+            />
+            <PredictiveAnalytics
+              predictions={mockBackupsPredictions}
+              title="Storage Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockBackupsActivities}
+            title="Backup Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockBackupsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Job Detail Dialog */}
         <Dialog open={!!selectedJob} onOpenChange={() => setSelectedJob(null)}>

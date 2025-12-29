@@ -82,6 +82,26 @@ import {
   Copy
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  monitoringAIInsights,
+  monitoringCollaborators,
+  monitoringPredictions,
+  monitoringActivities,
+  monitoringQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Datadog Level Infrastructure Monitoring
 // ============================================================================
@@ -461,6 +481,38 @@ const getMetricColor = (value: number, threshold: number): string => {
   if (value >= threshold * 0.8) return 'text-yellow-600'
   return 'text-green-600'
 }
+
+// Enhanced Monitoring Mock Data
+const mockMonitoringAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Infrastructure Health', description: 'All 24 hosts healthy. Zero critical alerts in 48 hours.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'info' as const, title: 'Cost Optimization', description: '3 instances underutilized. Consider downsizing to save $450/mo.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Costs' },
+  { id: '3', type: 'warning' as const, title: 'Disk Space', description: 'prod-db-01 at 85% disk usage. Cleanup recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
+]
+
+const mockMonitoringCollaborators = [
+  { id: '1', name: 'Infra Lead', avatar: '/avatars/infra.jpg', status: 'online' as const, role: 'Infrastructure', lastActive: 'Now' },
+  { id: '2', name: 'Cloud Architect', avatar: '/avatars/cloud.jpg', status: 'online' as const, role: 'Architecture', lastActive: '5m ago' },
+  { id: '3', name: 'SysAdmin', avatar: '/avatars/sys.jpg', status: 'away' as const, role: 'Operations', lastActive: '20m ago' },
+]
+
+const mockMonitoringPredictions = [
+  { id: '1', label: 'Uptime', current: 99.95, target: 99.99, predicted: 99.97, confidence: 90, trend: 'up' as const },
+  { id: '2', label: 'CPU Usage', current: 45, target: 70, predicted: 52, confidence: 82, trend: 'up' as const },
+  { id: '3', label: 'Memory', current: 62, target: 80, predicted: 68, confidence: 85, trend: 'up' as const },
+]
+
+const mockMonitoringActivities = [
+  { id: '1', user: 'Infra Lead', action: 'provisioned', target: '2 new app servers', timestamp: '30m ago', type: 'success' as const },
+  { id: '2', user: 'Cloud Architect', action: 'updated', target: 'auto-scaling policies', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'SysAdmin', action: 'patched', target: '8 servers', timestamp: '3h ago', type: 'info' as const },
+]
+
+const mockMonitoringQuickActions = [
+  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => console.log('Add host') },
+  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => console.log('Dashboards') },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => console.log('Alerts') },
+  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => console.log('Metrics') },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1715,6 +1767,39 @@ export default function MonitoringClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockMonitoringAIInsights}
+              title="Monitoring Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockMonitoringCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockMonitoringPredictions}
+              title="Infrastructure Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockMonitoringActivities}
+            title="Monitoring Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockMonitoringQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Host Detail Dialog */}
         <Dialog open={!!selectedHost} onOpenChange={() => setSelectedHost(null)}>

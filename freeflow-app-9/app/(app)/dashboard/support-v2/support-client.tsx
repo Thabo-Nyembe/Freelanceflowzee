@@ -71,6 +71,27 @@ import {
   AlertOctagon,
   CreditCard
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  supportAIInsights,
+  supportCollaborators,
+  supportPredictions,
+  supportActivities,
+  supportQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -397,6 +418,36 @@ interface SupportClientProps {
   initialTickets?: any[]
   initialStats?: any
 }
+
+// Competitive Upgrade Mock Data - Zendesk/Freshdesk Level Support Intelligence
+const mockSupportAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Resolution Time', description: 'Average first response time improved to 12 minutes—industry leading!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Ticket Surge', description: 'Billing tickets up 45% this week. Consider FAQ update.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Volume' },
+  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Auto-response templates could resolve 30% of password reset tickets.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockSupportCollaborators = [
+  { id: '1', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Senior Agent', avatar: '/avatars/agent.jpg', status: 'online' as const, role: 'Tier 2' },
+  { id: '3', name: 'Technical Expert', avatar: '/avatars/tech.jpg', status: 'away' as const, role: 'Tier 3' },
+]
+
+const mockSupportPredictions = [
+  { id: '1', title: 'CSAT Score', prediction: 'Customer satisfaction trending toward 4.8/5.0 this month', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Ticket Volume', prediction: 'Expect 15% increase during product launch week', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockSupportActivities = [
+  { id: '1', user: 'Support Lead', action: 'Resolved', target: 'Priority 1 escalation #4521', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Senior Agent', action: 'Escalated', target: 'Technical issue to engineering', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'AI Bot', action: 'Auto-resolved', target: '23 password reset requests', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockSupportQuickActions = [
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => console.log('New Ticket'), variant: 'default' as const },
+  { id: '2', label: 'Live Chat', icon: 'messageSquare', action: () => console.log('Live Chat'), variant: 'default' as const },
+  { id: '3', label: 'Knowledge', icon: 'book', action: () => console.log('Knowledge Base'), variant: 'outline' as const },
+]
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {
   const [activeTab, setActiveTab] = useState('tickets')
@@ -1649,6 +1700,39 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSupportAIInsights}
+              title="Support Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSupportCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSupportPredictions}
+              title="Support Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSupportActivities}
+            title="Support Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSupportQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Ticket Detail Dialog */}
         <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>

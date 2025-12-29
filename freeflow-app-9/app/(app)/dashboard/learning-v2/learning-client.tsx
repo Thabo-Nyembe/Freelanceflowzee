@@ -71,6 +71,19 @@ import {
   Mail,
   Globe
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -501,6 +514,38 @@ const mockProgress: UserProgress[] = [
     completedAt: null,
     certificateUrl: null
   }
+]
+
+// Enhanced Competitive Upgrade Mock Data - Learning Context
+const mockLearningAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Course Completed', description: 'JavaScript Fundamentals completed with 95% score. Certificate available!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Progress' },
+  { id: '2', type: 'info' as const, title: 'Learning Streak', description: 'You\'ve maintained a 7-day learning streak. Keep it up!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '3', type: 'warning' as const, title: 'Course Expiring', description: 'React Advanced course access expires in 5 days. Complete to retain progress.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deadlines' },
+]
+
+const mockLearningCollaborators = [
+  { id: '1', name: 'Dr. Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Course Instructor', lastActive: 'Now' },
+  { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Study Group', lastActive: '5m ago' },
+  { id: '3', name: 'Emma Davis', avatar: '/avatars/emma.jpg', status: 'away' as const, role: 'Mentor', lastActive: '20m ago' },
+]
+
+const mockLearningPredictions = [
+  { id: '1', label: 'Completion Rate', current: 68, target: 100, predicted: 85, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Weekly Hours', current: 5.5, target: 8, predicted: 7, confidence: 75, trend: 'up' as const },
+  { id: '3', label: 'Skill Score', current: 78, target: 90, predicted: 85, confidence: 80, trend: 'up' as const },
+]
+
+const mockLearningActivities = [
+  { id: '1', user: 'You', action: 'completed', target: 'Module 5: State Management', timestamp: '15m ago', type: 'success' as const },
+  { id: '2', user: 'Dr. Sarah Chen', action: 'posted', target: 'new assignment', timestamp: '1h ago', type: 'info' as const },
+  { id: '3', user: 'Mike Johnson', action: 'shared', target: 'study notes', timestamp: '2h ago', type: 'info' as const },
+]
+
+const mockLearningQuickActions = [
+  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => console.log('Continue learning') },
+  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => console.log('Browse courses') },
+  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => console.log('View certificates') },
+  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => console.log('View plan') },
 ]
 
 // ============================================================================
@@ -1780,6 +1825,39 @@ export default function LearningClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockLearningAIInsights}
+              title="Learning Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockLearningCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockLearningPredictions}
+              title="Learning Progress Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockLearningActivities}
+            title="Learning Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockLearningQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Course Detail Dialog */}

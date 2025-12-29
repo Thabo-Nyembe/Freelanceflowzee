@@ -73,6 +73,18 @@ import {
   Activity
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'pending_approval'
 type ContentType = 'text' | 'image' | 'video' | 'carousel' | 'story' | 'reel' | 'thread' | 'poll'
@@ -340,6 +352,36 @@ const mockHashtags: Hashtag[] = [
   { id: '3', tag: '#launch2024', posts: 45, reach: 180000, engagement: 15000, trend: 'up', competitors: 3 },
   { id: '4', tag: '#digital', posts: 67, reach: 250000, engagement: 22000, trend: 'down', competitors: 15 },
   { id: '5', tag: '#success', posts: 34, reach: 120000, engagement: 9500, trend: 'stable', competitors: 6 }
+]
+
+// Enhanced Competitive Upgrade Mock Data
+const mockSocialMediaAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Engagement Spike', description: 'Instagram engagement up 45% this week. Carousel posts performing best.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '2', type: 'info' as const, title: 'Optimal Posting', description: 'Best time to post: 9 AM and 6 PM for your audience.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Timing' },
+  { id: '3', type: 'warning' as const, title: 'Competitor Alert', description: 'Competitor launched similar campaign. Consider differentiation.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Competition' },
+]
+
+const mockSocialMediaCollaborators = [
+  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Designer', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Designer' },
+  { id: '3', name: 'Copywriter', avatar: '/avatars/copy.jpg', status: 'busy' as const, role: 'Writer' },
+]
+
+const mockSocialMediaPredictions = [
+  { id: '1', title: 'Follower Growth', prediction: '+5,000 followers projected this month', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Viral Potential', prediction: 'Scheduled reel has 40% viral potential', confidence: 68, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockSocialMediaActivities = [
+  { id: '1', user: 'AI Assistant', action: 'Optimized hashtags for', target: 'Campaign #Launch2024', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Scheduler', action: 'Published post to', target: 'Instagram, Twitter', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Analytics', action: 'Report generated for', target: 'Weekly Performance', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockSocialMediaQuickActions = [
+  { id: '1', label: 'Create Post', icon: 'edit', action: () => console.log('Create post'), variant: 'default' as const },
+  { id: '2', label: 'Schedule', icon: 'calendar', action: () => console.log('Schedule'), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
 ]
 
 export default function SocialMediaClient() {
@@ -1742,6 +1784,39 @@ export default function SocialMediaClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSocialMediaAIInsights}
+              title="Social Media Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSocialMediaCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSocialMediaPredictions}
+              title="Social Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSocialMediaActivities}
+            title="Social Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSocialMediaQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Post Detail Dialog */}
         <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>

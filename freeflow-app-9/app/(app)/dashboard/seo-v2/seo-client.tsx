@@ -61,6 +61,18 @@ import {
   LineChart
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Types
 type KeywordDifficulty = 'easy' | 'medium' | 'hard' | 'very_hard'
 type KeywordTrend = 'up' | 'down' | 'stable' | 'new'
@@ -388,6 +400,36 @@ interface SEOClientProps {
   initialKeywords?: Keyword[]
   initialBacklinks?: Backlink[]
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockSEOAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Rankings Up', description: '15 keywords moved to page 1 this month. Organic traffic +32%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Rankings' },
+  { id: '2', type: 'info' as const, title: 'Content Gap', description: '8 high-value keywords identified. Competitors ranking, you are not.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Opportunity' },
+  { id: '3', type: 'warning' as const, title: 'Lost Backlinks', description: '5 high-DA backlinks lost this week. Outreach recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Backlinks' },
+]
+
+const mockSEOCollaborators = [
+  { id: '1', name: 'SEO Lead', avatar: '/avatars/seo.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Content Writer', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Writer' },
+  { id: '3', name: 'Link Builder', avatar: '/avatars/links.jpg', status: 'busy' as const, role: 'Outreach' },
+]
+
+const mockSEOPredictions = [
+  { id: '1', title: 'Traffic Growth', prediction: '+45% organic traffic by Q2', confidence: 72, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Domain Authority', prediction: 'DA 55 achievable in 6 months', confidence: 68, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockSEOActivities = [
+  { id: '1', user: 'Rank Tracker', action: 'Keyword ranked #1', target: '"best project management"', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Backlink Monitor', action: 'New backlink from', target: 'TechCrunch (DA 94)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Content Team', action: 'Published article', target: '15 Best Tools Guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockSEOQuickActions = [
+  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => console.log('Add keyword'), variant: 'default' as const },
+  { id: '2', label: 'Site Audit', icon: 'search', action: () => console.log('Site audit'), variant: 'default' as const },
+  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => console.log('Competitor'), variant: 'outline' as const },
+]
 
 export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1706,6 +1748,39 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSEOAIInsights}
+              title="SEO Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSEOCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSEOPredictions}
+              title="SEO Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSEOActivities}
+            title="SEO Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSEOQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Keyword Detail Dialog */}
         <Dialog open={showKeywordDialog} onOpenChange={setShowKeywordDialog}>

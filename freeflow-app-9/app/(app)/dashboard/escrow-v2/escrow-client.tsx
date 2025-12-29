@@ -44,6 +44,27 @@ import {
   Send,
   XCircle
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+
+import {
+  escrowAIInsights,
+  escrowCollaborators,
+  escrowPredictions,
+  escrowActivities,
+  escrowQuickActions,
+} from '@/lib/mock-data/adapters'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -395,6 +416,38 @@ const mockDisputes: Dispute[] = [
     createdAt: '2024-11-28T09:00:00Z',
     evidence: { submitted: true, dueDate: '2024-12-10T00:00:00Z' }
   }
+]
+
+// Enhanced Competitive Upgrade Mock Data - Escrow Context
+const mockEscrowAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Pending Payouts', description: '3 payouts totaling $12,500 awaiting verification. Review required.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Payouts' },
+  { id: '2', type: 'success' as const, title: 'Volume Increase', description: 'Transaction volume up 25% this month. Platform growing well!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Growth' },
+  { id: '3', type: 'info' as const, title: 'Dispute Resolution', description: '2 disputes resolved favorably this week. Win rate: 85%', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Disputes' },
+]
+
+const mockEscrowCollaborators = [
+  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Treasury Manager', lastActive: 'Now' },
+  { id: '2', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Risk & Compliance', lastActive: '8m ago' },
+  { id: '3', name: 'Support Team', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Merchant Support', lastActive: '25m ago' },
+]
+
+const mockEscrowPredictions = [
+  { id: '1', label: 'Monthly Volume', current: 125000, target: 150000, predicted: 140000, confidence: 82, trend: 'up' as const },
+  { id: '2', label: 'Platform Fee Revenue', current: 3750, target: 4500, predicted: 4200, confidence: 78, trend: 'up' as const },
+  { id: '3', label: 'Dispute Rate', current: 1.2, target: 0.8, predicted: 1.0, confidence: 75, trend: 'down' as const },
+]
+
+const mockEscrowActivities = [
+  { id: '1', user: 'Finance Lead', action: 'approved', target: 'payout of $5,000 to Seller #245', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'System', action: 'processed', target: '15 transactions totaling $8,500', timestamp: '30m ago', type: 'info' as const },
+  { id: '3', user: 'Compliance Officer', action: 'flagged', target: 'transaction for review', timestamp: '1h ago', type: 'warning' as const },
+]
+
+const mockEscrowQuickActions = [
+  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => console.log('New transfer') },
+  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => console.log('View payouts') },
+  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => console.log('View disputes') },
+  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => console.log('View reports') },
 ]
 
 export default function EscrowClient() {
@@ -1642,6 +1695,39 @@ export default function EscrowClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockEscrowAIInsights}
+              title="Escrow Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockEscrowCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockEscrowPredictions}
+              title="Transaction Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockEscrowActivities}
+            title="Transaction Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockEscrowQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Transaction Detail Dialog */}
         <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>

@@ -75,6 +75,25 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sliders, Bell, Webhook, Key, Database, Mail, Archive, Workflow } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+import {
+  testingAIInsights,
+  testingCollaborators,
+  testingPredictions,
+  testingActivities,
+  testingQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type TestStatus = 'passed' | 'failed' | 'skipped' | 'pending' | 'running' | 'flaky'
 type BrowserType = 'chromium' | 'firefox' | 'webkit' | 'edge'
@@ -454,6 +473,38 @@ const getBrowserIcon = (browser: BrowserType): React.ReactNode => {
     case 'edge': return <Globe className="h-4 w-4 text-blue-600" />
   }
 }
+
+// Enhanced Competitive Upgrade Mock Data - Testing Context
+const mockTestingAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'Flaky Tests Detected', description: '3 tests showing intermittent failures. Consider adding retries or fixing race conditions.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+  { id: '2', type: 'success' as const, title: 'Coverage Improved', description: 'Code coverage increased to 87% after latest test additions.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Coverage' },
+  { id: '3', type: 'info' as const, title: 'Performance Insight', description: 'Parallel execution reduced total run time by 45%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+]
+
+const mockTestingCollaborators = [
+  { id: '1', name: 'Jake Martinez', avatar: '/avatars/jake.jpg', status: 'online' as const, role: 'QA Lead', lastActive: 'Now' },
+  { id: '2', name: 'Natalie Chen', avatar: '/avatars/natalie.jpg', status: 'online' as const, role: 'Test Engineer', lastActive: '4m ago' },
+  { id: '3', name: 'Ryan Foster', avatar: '/avatars/ryan.jpg', status: 'away' as const, role: 'Developer', lastActive: '18m ago' },
+]
+
+const mockTestingPredictions = [
+  { id: '1', label: 'Pass Rate', current: 94.5, target: 98, predicted: 96.2, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Avg Run Duration', current: 8.5, target: 6, predicted: 7.2, confidence: 78, trend: 'down' as const },
+  { id: '3', label: 'Test Coverage', current: 87, target: 95, predicted: 91, confidence: 80, trend: 'up' as const },
+]
+
+const mockTestingActivities = [
+  { id: '1', user: 'Jake Martinez', action: 'triggered', target: 'full regression suite', timestamp: '5m ago', type: 'info' as const },
+  { id: '2', user: 'Natalie Chen', action: 'fixed', target: 'flaky login test', timestamp: '20m ago', type: 'success' as const },
+  { id: '3', user: 'Ryan Foster', action: 'added', target: '12 new unit tests', timestamp: '45m ago', type: 'success' as const },
+]
+
+const mockTestingQuickActions = [
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => console.log('Run tests') },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => console.log('View report') },
+  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => console.log('Debug failed') },
+  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => console.log('Add test') },
+]
 
 export default function TestingClient() {
   const [activeTab, setActiveTab] = useState('runs')
@@ -1848,6 +1899,39 @@ export default defineConfig({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockTestingAIInsights}
+              title="Testing Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockTestingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockTestingPredictions}
+              title="Test Metrics Forecast"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockTestingActivities}
+            title="Testing Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockTestingQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Run Tests Dialog */}

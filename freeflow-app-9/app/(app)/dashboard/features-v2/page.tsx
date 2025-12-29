@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import FeaturesClient from './features-client'
 
 export default function Page() {

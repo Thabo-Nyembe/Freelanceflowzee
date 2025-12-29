@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import FilesHubClient from './files-hub-client'
 
 export default function Page() {

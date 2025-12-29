@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * A++++ AI ENHANCED PAGE - WORLD-CLASS IMPLEMENTATION
  * Enterprise-grade AI tools management with complete CRUD operations

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 /**
  * World-Class Motion Graphics Studio
  * Complete implementation of motion design and animation tools

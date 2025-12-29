@@ -1,6 +1,6 @@
-import EmployeesClient from './employees-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import EmployeesClient from './employees-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

@@ -56,6 +56,25 @@ import {
   BarChart3
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+import {
+  releasesAIInsights,
+  releasesCollaborators,
+  releasesPredictions,
+  releasesActivities,
+  releasesQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type ReleaseStatus = 'deployed' | 'rolling' | 'scheduled' | 'draft' | 'failed' | 'cancelled'
 type ReleaseType = 'major' | 'minor' | 'patch' | 'hotfix' | 'prerelease'
@@ -420,6 +439,36 @@ const mockStats: ReleaseStats = {
   totalCommits: 1234,
   releaseFrequency: 2.3
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockReleasesAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Deployment Success', description: 'All recent deployments completed successfully. Zero rollbacks this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Deployment' },
+  { id: '2', type: 'info' as const, title: 'Release Cadence', description: 'Release frequency increased 23% compared to last quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Metrics' },
+  { id: '3', type: 'warning' as const, title: 'Staging Bottleneck', description: 'Staging environment utilization at 89%. Consider scaling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Infrastructure' },
+]
+
+const mockReleasesCollaborators = [
+  { id: '1', name: 'Release Manager', avatar: '/avatars/release.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '3', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
+]
+
+const mockReleasesPredictions = [
+  { id: '1', title: 'Next Major Release', prediction: 'v3.0 estimated ready in 2 weeks based on current velocity', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Hotfix Likelihood', prediction: 'Low probability of emergency fixes this sprint', confidence: 91, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockReleasesActivities = [
+  { id: '1', user: 'DevOps', action: 'Deployed', target: 'v2.5.1 to production', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Release Manager', action: 'Scheduled', target: 'v2.6.0 for next Tuesday', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'QA Team', action: 'Approved', target: 'v2.5.1 release candidate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockReleasesQuickActions = [
+  { id: '1', label: 'New Release', icon: 'plus', action: () => console.log('New release'), variant: 'default' as const },
+  { id: '2', label: 'Rollback', icon: 'undo', action: () => console.log('Rollback'), variant: 'default' as const },
+  { id: '3', label: 'Export Changelog', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+]
 
 export default function ReleasesClient() {
   const [activeTab, setActiveTab] = useState('releases')
@@ -1630,6 +1679,39 @@ export default function ReleasesClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockReleasesAIInsights}
+              title="Release Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockReleasesCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockReleasesPredictions}
+              title="Release Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockReleasesActivities}
+            title="Release Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockReleasesQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Release Detail Dialog */}

@@ -84,6 +84,26 @@ import {
   Terminal
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  aiCreateAIInsights,
+  aiCreateCollaborators,
+  aiCreatePredictions,
+  aiCreateActivities,
+  aiCreateQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPES & INTERFACES - Midjourney Level AI Creation Platform
 // ============================================================================
@@ -529,6 +549,36 @@ const formatNumber = (num: number) => {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
   return num.toString()
 }
+
+// Enhanced Competitive Upgrade Mock Data
+const mockAICreateInsights = [
+  { id: '1', type: 'success' as const, title: 'Creative Boost', description: 'Your creations got 2.5K views this week. 40% more than last week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
+  { id: '2', type: 'info' as const, title: 'Style Trending', description: 'Anime style is trending. Consider creating more in this style.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+  { id: '3', type: 'warning' as const, title: 'Credits Running Low', description: 'You have 50 credits remaining. Consider upgrading your plan.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
+]
+
+const mockAICreateCollaborators = [
+  { id: '1', name: 'Creative Lead', avatar: '/avatars/creative.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'AI Artist', avatar: '/avatars/artist.jpg', status: 'online' as const, role: 'Artist' },
+  { id: '3', name: 'Content Creator', avatar: '/avatars/content.jpg', status: 'away' as const, role: 'Creator' },
+]
+
+const mockAICreatePredictions = [
+  { id: '1', title: 'Style Forecast', prediction: 'Cyberpunk aesthetics will trend next month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'Usage Pattern', prediction: 'Peak generation times are 2-4 PM your timezone', confidence: 85, trend: 'stable' as const, impact: 'low' as const },
+]
+
+const mockAICreateActivities = [
+  { id: '1', user: 'You', action: 'Generated', target: 'stunning landscape image', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'AI Model', action: 'Completed', target: 'batch of 4 variations', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Saved', target: 'creation to gallery', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockAICreateQuickActions = [
+  { id: '1', label: 'New Creation', icon: 'sparkles', action: () => console.log('New creation'), variant: 'default' as const },
+  { id: '2', label: 'Use Template', icon: 'copy', action: () => console.log('Use template'), variant: 'default' as const },
+  { id: '3', label: 'View Gallery', icon: 'image', action: () => console.log('View gallery'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1880,6 +1930,39 @@ export default function AICreateClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockAICreateInsights}
+              title="AI Creation Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockAICreateCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockAICreatePredictions}
+              title="Creative Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockAICreateActivities}
+            title="Creation Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockAICreateQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Generation Detail Dialog */}
         <Dialog open={!!selectedGeneration} onOpenChange={() => setSelectedGeneration(null)}>

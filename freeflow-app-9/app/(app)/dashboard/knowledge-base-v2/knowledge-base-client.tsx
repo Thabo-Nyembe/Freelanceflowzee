@@ -63,6 +63,27 @@ import {
   Network,
   Shield
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  knowledgeBaseAIInsights,
+  knowledgeBaseCollaborators,
+  knowledgeBasePredictions,
+  knowledgeBaseActivities,
+  knowledgeBaseQuickActions,
+} from '@/lib/mock-data/adapters'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -631,6 +652,36 @@ const mockAnalytics: Analytics = {
     { type: 'Blog Posts', count: 57, percentage: 6.4 }
   ]
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockKnowledgeBaseAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Content Popular', description: 'API Documentation page viewed 500+ times this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '2', type: 'warning' as const, title: 'Outdated Content', description: '23 pages haven\'t been updated in 6+ months. Review needed.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
+  { id: '3', type: 'info' as const, title: 'Search Trend', description: '"Integration guides" is the top search term this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Search' },
+]
+
+const mockKnowledgeBaseCollaborators = [
+  { id: '1', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
+  { id: '2', name: 'Editor', avatar: '/avatars/editor.jpg', status: 'online' as const, role: 'Editor' },
+  { id: '3', name: 'SME', avatar: '/avatars/sme.jpg', status: 'away' as const, role: 'Expert' },
+]
+
+const mockKnowledgeBasePredictions = [
+  { id: '1', title: 'Content Growth', prediction: 'Knowledge base will need restructuring at 1000+ pages', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'User Adoption', prediction: 'Self-service resolution rate will hit 80% by Q2', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockKnowledgeBaseActivities = [
+  { id: '1', user: 'Tech Writer', action: 'Published', target: 'new API authentication guide', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Editor', action: 'Reviewed', target: 'troubleshooting documentation', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'SME', action: 'Updated', target: 'integration specifications', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockKnowledgeBaseQuickActions = [
+  { id: '1', label: 'New Page', icon: 'plus', action: () => console.log('New page'), variant: 'default' as const },
+  { id: '2', label: 'Import Docs', icon: 'upload', action: () => console.log('Import'), variant: 'default' as const },
+  { id: '3', label: 'Search All', icon: 'search', action: () => console.log('Search'), variant: 'outline' as const },
+]
 
 export default function KnowledgeBaseClient() {
   const [activeTab, setActiveTab] = useState('pages')
@@ -1610,6 +1661,39 @@ export default function KnowledgeBaseClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockKnowledgeBaseAIInsights}
+              title="Knowledge Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockKnowledgeBaseCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockKnowledgeBasePredictions}
+              title="Content Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockKnowledgeBaseActivities}
+            title="Knowledge Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockKnowledgeBaseQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Page Detail Dialog */}

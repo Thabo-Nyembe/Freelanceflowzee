@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import CampaignsClient from './campaigns-client'
 
 export default function Page() {

@@ -1,6 +1,6 @@
-import MyDayClient from './my-day-client'
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'
+import MyDayClient from './my-day-client'
 
 export default function Page() {
   // Auth is handled by NextAuth middleware

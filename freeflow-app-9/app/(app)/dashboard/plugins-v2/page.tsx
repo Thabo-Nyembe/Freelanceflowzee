@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import PluginsClient from './plugins-client'
 
 export default function Page() {

@@ -34,6 +34,26 @@ import {
   Key, Webhook, Mail, Bell, AlertOctagon, Palette, Database, GitBranch
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  documentsAIInsights,
+  documentsCollaborators,
+  documentsPredictions,
+  documentsActivities,
+  documentsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // ============================================================================
 // TYPE DEFINITIONS - Google Docs Level Document Platform
 // ============================================================================
@@ -283,6 +303,36 @@ const getActionIcon = (action: RecentActivity['action']) => {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
+
+// Mock data for AI-powered competitive upgrade components
+const mockDocumentsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Storage Optimized', description: 'Smart compression saved 8GB across 2,500 documents this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Storage' },
+  { id: '2', type: 'warning' as const, title: 'Stale Documents', description: '45 documents haven\'t been accessed in 90+ days. Consider archiving.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
+  { id: '3', type: 'info' as const, title: 'Popular Content', description: 'Q4 Strategy Doc viewed 150 times this week - most accessed file!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+]
+
+const mockDocumentsCollaborators = [
+  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Editor' },
+  { id: '2', name: 'Legal Team', avatar: '/avatars/legal.jpg', status: 'online' as const, role: 'Reviewer' },
+  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Contributor' },
+]
+
+const mockDocumentsPredictions = [
+  { id: '1', title: 'Storage Forecast', prediction: 'Document storage will reach 85% capacity by end of quarter', confidence: 89, trend: 'up' as const, impact: 'medium' as const },
+  { id: '2', title: 'Collaboration Trend', prediction: 'Real-time editing sessions up 40% - consider upgrading plan', confidence: 92, trend: 'up' as const, impact: 'high' as const },
+]
+
+const mockDocumentsActivities = [
+  { id: '1', user: 'Content Lead', action: 'Created', target: 'Q4 Marketing Strategy', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Legal Team', action: 'Approved', target: 'Vendor Contract v2', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
+  { id: '3', user: 'Marketing', action: 'Shared', target: 'Brand Guidelines', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
+]
+
+const mockDocumentsQuickActions = [
+  { id: '1', label: 'New Document', icon: 'plus', action: () => console.log('New doc'), variant: 'default' as const },
+  { id: '2', label: 'Upload Files', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
+  { id: '3', label: 'Create Folder', icon: 'folder', action: () => console.log('New folder'), variant: 'outline' as const },
+]
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -1707,6 +1757,39 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockDocumentsAIInsights}
+              title="Document Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockDocumentsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockDocumentsPredictions}
+              title="Storage Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockDocumentsActivities}
+            title="Document Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockDocumentsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Document Detail Modal */}
         {selectedDocument && (

@@ -27,6 +27,26 @@ import {
   GitBranch, HelpCircle, Globe, Headphones, Code, Sliders
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  supportTicketsAIInsights,
+  supportTicketsCollaborators,
+  supportTicketsPredictions,
+  supportTicketsActivities,
+  supportTicketsQuickActions,
+} from '@/lib/mock-data/adapters'
+
 type TicketStatus = 'open' | 'in-progress' | 'waiting' | 'resolved' | 'closed'
 type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
 type TicketCategory = 'technical' | 'billing' | 'feature-request' | 'bug' | 'general' | 'account'
@@ -153,6 +173,36 @@ const mockCustomer: CustomerProfile = {
   lifetimeValue: 12500,
   tags: ['VIP', 'Enterprise', 'Beta Tester']
 }
+
+// Mock data for AI-powered competitive upgrade components
+const mockSupportTicketsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Fast Resolution', description: 'Average first response time down to 12 minutes!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'SLA At Risk', description: '3 urgent tickets approaching SLA breach in 2 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'SLA' },
+  { id: '3', type: 'info' as const, title: 'CSAT Trending Up', description: 'Customer satisfaction score improved to 4.7/5.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Satisfaction' },
+]
+
+const mockSupportTicketsCollaborators = [
+  { id: '1', name: 'Support Lead', avatar: '/avatars/support-lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Agent Sarah', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Agent' },
+  { id: '3', name: 'Agent Mike', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Agent' },
+]
+
+const mockSupportTicketsPredictions = [
+  { id: '1', title: 'Volume Forecast', prediction: 'Expect 40% more tickets tomorrow (product launch)', confidence: 89, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Escalation Risk', prediction: '2 tickets likely to escalate based on sentiment analysis', confidence: 76, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockSupportTicketsActivities = [
+  { id: '1', user: 'Agent Sarah', action: 'Resolved', target: 'billing inquiry #4521', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Support Lead', action: 'Escalated', target: 'critical bug report to engineering', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'warning' as const },
+  { id: '3', user: 'Agent Mike', action: 'Updated', target: 'knowledge base article', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
+]
+
+const mockSupportTicketsQuickActions = [
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => console.log('New ticket'), variant: 'default' as const },
+  { id: '2', label: 'My Queue', icon: 'inbox', action: () => console.log('My queue'), variant: 'default' as const },
+  { id: '3', label: 'Macros', icon: 'zap', action: () => console.log('Macros'), variant: 'outline' as const },
+]
 
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {
   const { tickets, loading, getStats } = useSupportTickets()
@@ -1662,6 +1712,39 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockSupportTicketsAIInsights}
+              title="Support Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockSupportTicketsCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockSupportTicketsPredictions}
+              title="Ticket Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockSupportTicketsActivities}
+            title="Support Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockSupportTicketsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Create Ticket Modal */}
         <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>

@@ -78,6 +78,26 @@ import {
   Mail
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  roadmapAIInsights,
+  roadmapCollaborators,
+  roadmapPredictions,
+  roadmapActivities,
+  roadmapQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type InitiativeStatus = 'backlog' | 'planned' | 'in_progress' | 'review' | 'released' | 'archived'
 type Priority = 'critical' | 'high' | 'medium' | 'low'
@@ -516,6 +536,36 @@ interface RoadmapClientProps {
   initialInitiatives?: any[]
   initialMilestones?: any[]
 }
+
+// Competitive Upgrade Mock Data - Productboard/Aha!-level Roadmap Intelligence
+const mockRoadmapAIInsights = [
+  { id: '1', type: 'success' as const, title: 'On Track', description: '85% of Q1 initiatives are on schedule!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Progress' },
+  { id: '2', type: 'warning' as const, title: 'Scope Creep', description: 'Mobile App v2 has grown 40% beyond original scope.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
+  { id: '3', type: 'info' as const, title: 'AI Priority', description: 'Customer requests suggest API improvements should move up.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockRoadmapCollaborators = [
+  { id: '1', name: 'Product Lead', avatar: '/avatars/product.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'PM', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
+  { id: '3', name: 'Engineering', avatar: '/avatars/eng.jpg', status: 'away' as const, role: 'Engineering' },
+]
+
+const mockRoadmapPredictions = [
+  { id: '1', title: 'Q1 Delivery', prediction: '4 of 5 major features will ship on time', confidence: 86, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Resource Needs', prediction: 'Mobile initiative will require 2 additional engineers', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockRoadmapActivities = [
+  { id: '1', user: 'Product Lead', action: 'Prioritized', target: 'Q2 feature backlog', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'PM', action: 'Updated', target: 'API v3 timeline', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Engineering', action: 'Completed', target: 'infrastructure milestone', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mockRoadmapQuickActions = [
+  { id: '1', label: 'New Initiative', icon: 'plus', action: () => console.log('New initiative'), variant: 'default' as const },
+  { id: '2', label: 'Timeline', icon: 'calendar', action: () => console.log('Timeline'), variant: 'default' as const },
+  { id: '3', label: 'Share', icon: 'share', action: () => console.log('Share'), variant: 'outline' as const },
+]
 
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {
   const [activeTab, setActiveTab] = useState('roadmap')
@@ -1658,6 +1708,39 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockRoadmapAIInsights}
+              title="Roadmap Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockRoadmapCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={mockRoadmapPredictions}
+              title="Delivery Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockRoadmapActivities}
+            title="Roadmap Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockRoadmapQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Feature Detail Dialog */}
         <Dialog open={isFeatureDialogOpen} onOpenChange={setIsFeatureDialogOpen}>

@@ -23,6 +23,27 @@ import {
   Languages, Volume2, Calendar, Timer
 } from 'lucide-react'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  customerSupportAIInsights,
+  customerSupportCollaborators,
+  customerSupportPredictions,
+  customerSupportActivities,
+  customerSupportQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type TicketStatus = 'new' | 'open' | 'pending' | 'on-hold' | 'solved' | 'closed'
 type TicketPriority = 'low' | 'normal' | 'high' | 'urgent'
@@ -172,6 +193,38 @@ const mockCannedResponses: CannedResponse[] = [
   { id: 'cr2', title: 'Password Reset', content: 'To reset your password, please click on "Forgot Password" on the login page...', category: 'Account', usageCount: 189 },
   { id: 'cr3', title: 'Billing Inquiry', content: 'I understand you have questions about your billing. Let me pull up your account...', category: 'Billing', usageCount: 156 },
   { id: 'cr4', title: 'Closing - Resolved', content: 'I\'m glad I could help resolve this for you! Is there anything else you need?', category: 'General', usageCount: 312 },
+]
+
+// Competitive Upgrade Mock Data
+const mockSupportAIInsights = [
+  { id: '1', query: "Which tickets need urgent attention?", insight: "3 tickets are approaching SLA breach in the next hour. TKT-1234 (Enterprise client) has highest priority.", confidence: 0.95, category: 'engagement' as const, timestamp: new Date().toISOString() },
+  { id: '2', query: "What's causing ticket volume spike?", insight: "Payment processing issues account for 45% of today's tickets. Consider proactive status page update.", confidence: 0.88, category: 'conversion' as const, timestamp: new Date().toISOString() },
+  { id: '3', query: "How can we improve CSAT?", insight: "Tickets with first response under 5 minutes have 23% higher satisfaction. Focus on quick initial acknowledgment.", confidence: 0.86, category: 'revenue' as const, timestamp: new Date().toISOString() },
+]
+
+const mockSupportCollaborators = [
+  { id: '1', name: 'Support Team', avatar: '/avatars/support.jpg', status: 'active' as const, lastActive: 'Just now', role: 'On-call' },
+  { id: '2', name: 'Alex Rivera', avatar: '/avatars/alex.jpg', status: 'active' as const, lastActive: '1m ago', role: 'Senior Agent' },
+  { id: '3', name: 'Jordan Kim', avatar: '/avatars/jordan.jpg', status: 'active' as const, lastActive: '3m ago', role: 'Agent' },
+]
+
+const mockSupportPredictions = [
+  { id: '1', metric: 'Daily Tickets', currentValue: 156, predictedValue: 180, confidence: 0.79, trend: 'up' as const, timeframe: 'Next 24 hours', factors: ['New feature release', 'Weekend approaching'] },
+  { id: '2', metric: 'CSAT Score', currentValue: 92, predictedValue: 94, confidence: 0.82, trend: 'up' as const, timeframe: 'This week', factors: ['New canned responses', 'Agent training'] },
+  { id: '3', metric: 'Avg Resolution Time', currentValue: 4.2, predictedValue: 3.5, confidence: 0.76, trend: 'down' as const, timeframe: 'Next 2 weeks', factors: ['AI suggestions', 'Knowledge base updates'] },
+]
+
+const mockSupportActivities = [
+  { id: '1', type: 'update' as const, title: 'Ticket resolved', description: 'TKT-1234 marked as solved by Alex Rivera', user: { name: 'Alex Rivera', avatar: '/avatars/alex.jpg' }, timestamp: new Date().toISOString(), metadata: {} },
+  { id: '2', type: 'assignment' as const, title: 'Ticket assigned', description: 'TKT-1235 assigned to Jordan Kim', user: { name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 900000).toISOString(), metadata: {} },
+  { id: '3', type: 'milestone' as const, title: 'SLA achieved', description: 'First response SLA met for all morning tickets', user: { name: 'Support Team', avatar: '/avatars/support.jpg' }, timestamp: new Date(Date.now() - 7200000).toISOString(), metadata: {} },
+]
+
+const mockSupportQuickActions = [
+  { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => console.log('New ticket') },
+  { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => console.log('Quick reply') },
+  { id: '3', label: 'Escalate', icon: 'AlertTriangle', shortcut: '⌘E', action: () => console.log('Escalate') },
+  { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => console.log('View queue') },
 ]
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
@@ -1860,6 +1913,27 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           )}
         </DialogContent>
       </Dialog>
+
+      {/* AI-Powered Support Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <AIInsightsPanel
+          insights={mockSupportAIInsights}
+          onAskQuestion={(q) => console.log('Support Question:', q)}
+        />
+        <PredictiveAnalytics predictions={mockSupportPredictions} />
+      </div>
+
+      {/* Activity Feed */}
+      <div className="mt-6">
+        <ActivityFeed
+          activities={mockSupportActivities}
+          maxItems={5}
+          showFilters={true}
+        />
+      </div>
+
+      {/* Quick Actions Toolbar */}
+      <QuickActionsToolbar actions={mockSupportQuickActions} />
     </div>
   )
 }

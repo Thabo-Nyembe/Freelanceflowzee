@@ -84,6 +84,26 @@ import {
   Code
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  onboardingAIInsights,
+  onboardingCollaborators,
+  onboardingPredictions,
+  onboardingActivities,
+  onboardingQuickActions,
+} from '@/lib/mock-data/adapters'
+
 // Types
 type FlowStatus = 'active' | 'paused' | 'draft' | 'archived'
 type FlowType = 'onboarding' | 'feature_adoption' | 'announcement' | 'survey' | 'checklist'
@@ -1596,6 +1616,39 @@ export default function OnboardingClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={onboardingAIInsights}
+              title="Onboarding Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={onboardingCollaborators}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={onboardingPredictions}
+              title="User Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={onboardingActivities}
+            title="Onboarding Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={onboardingQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Flow Detail Dialog */}
         <Dialog open={!!selectedFlow} onOpenChange={() => setSelectedFlow(null)}>
