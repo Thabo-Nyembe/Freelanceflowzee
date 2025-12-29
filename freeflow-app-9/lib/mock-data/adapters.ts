@@ -435,28 +435,21 @@ export const projectsHubAIInsights = [
   { id: '3', type: 'info' as const, title: 'Resource Optimization', description: 'David Thompson has capacity. Consider assigning Mobile App tasks to accelerate delivery.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Resources' }
 ]
 
-export const projectsHubCollaborators = COLLABORATORS.slice(0, 4).map(c => ({
-  id: c.id,
-  name: c.name,
-  avatar: c.avatar,
-  status: c.status === 'active' ? 'online' as const : c.status === 'idle' ? 'away' as const : 'offline' as const,
-  role: c.role,
-  lastActive: c.lastActive
-}))
+export const projectsHubCollaborators = COLLABORATORS.slice(0, 4)
 
 export const projectsHubPredictions = [
-  { id: '1', label: 'Sprint Completion', current: 58, target: 100, predicted: 85, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Q1 Delivery', current: 52, target: 100, predicted: 92, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Team Velocity', current: 72, target: 85, predicted: 78, confidence: 85, trend: 'up' as const }
+  { id: '1', label: 'Sprint Completion', currentValue: 58, predictedValue: 85, confidence: 82, trend: 'up' as const, timeframe: 'This Sprint', factors: [{ name: 'Team velocity', impact: 'positive' as const, weight: 0.5 }, { name: 'Scope changes', impact: 'negative' as const, weight: 0.3 }, { name: 'Resource availability', impact: 'positive' as const, weight: 0.2 }] },
+  { id: '2', label: 'Q1 Delivery', currentValue: 52, predictedValue: 92, confidence: 78, trend: 'up' as const, timeframe: 'End of Q1', factors: [{ name: 'Current progress', impact: 'positive' as const, weight: 0.4 }, { name: 'Dependencies', impact: 'neutral' as const, weight: 0.3 }, { name: 'Team capacity', impact: 'positive' as const, weight: 0.3 }] },
+  { id: '3', label: 'Team Velocity', currentValue: 72, predictedValue: 78, confidence: 85, trend: 'up' as const, timeframe: 'Next 2 Sprints', factors: [{ name: 'Process improvements', impact: 'positive' as const, weight: 0.5 }, { name: 'New hires onboarding', impact: 'neutral' as const, weight: 0.5 }] }
 ]
 
 export const projectsHubActivities = RECENT_ACTIVITIES.slice(0, 5).map(a => ({
   id: a.id,
-  user: a.user.name,
-  action: a.type,
-  target: a.title,
-  timestamp: a.timestamp,
-  type: a.type === 'milestone' ? 'success' as const : 'info' as const
+  type: a.type,
+  title: a.title,
+  description: a.description,
+  user: { id: a.user.id || a.id, name: a.user.name, avatar: a.user.avatar },
+  timestamp: a.timestamp
 }))
 
 export const projectsHubQuickActions = [
