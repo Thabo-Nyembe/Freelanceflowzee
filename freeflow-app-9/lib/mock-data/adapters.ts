@@ -555,13 +555,17 @@ const createCollaborators = () => COLLABORATORS.slice(0, 4).map(c => ({
 // Generic Predictions generator
 const createPredictions = (metrics: string[]) => metrics.map((metric, i) => ({
   id: String(i + 1),
-  metric,
+  label: metric,
   currentValue: 65 + Math.floor(Math.random() * 20),
   predictedValue: 85 + Math.floor(Math.random() * 10),
   confidence: 0.75 + Math.random() * 0.15,
   trend: 'up' as const,
   timeframe: 'Next 30 days',
-  factors: ['Improved efficiency', 'Team growth', 'Process optimization']
+  factors: [
+    { name: 'Improved efficiency', impact: 'positive' as const, weight: 0.4 },
+    { name: 'Team growth', impact: 'positive' as const, weight: 0.35 },
+    { name: 'Process optimization', impact: 'positive' as const, weight: 0.25 }
+  ]
 }))
 
 // Generic Activities generator

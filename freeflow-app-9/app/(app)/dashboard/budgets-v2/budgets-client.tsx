@@ -241,14 +241,14 @@ const mockBudgetsCollaborators = [
 ]
 
 const mockBudgetsPredictions = [
-  { id: '1', title: 'Year-End Forecast', prediction: '$45K surplus projected', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Q2 Spending', prediction: 'Within 5% of planned budget', confidence: 78, trend: 'stable' as const, impact: 'medium' as const },
+  { id: '1', label: 'Year-End Forecast', currentValue: 42500, predictedValue: 45000, confidence: 85, trend: 'up' as const, timeframe: 'Next Quarter', factors: [{ name: 'Reduced spending', impact: 'positive' as const, weight: 0.5 }, { name: 'Revenue growth', impact: 'positive' as const, weight: 0.5 }] },
+  { id: '2', label: 'Monthly Spending', currentValue: 8500, predictedValue: 8900, confidence: 78, trend: 'stable' as const, timeframe: 'Next Month', factors: [{ name: 'Seasonal patterns', impact: 'neutral' as const, weight: 0.6 }, { name: 'Fixed costs', impact: 'neutral' as const, weight: 0.4 }] },
 ]
 
 const mockBudgetsActivities = [
-  { id: '1', user: 'Budget System', action: 'Auto-allocated funds to', target: 'Emergency Reserve', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Finance Team', action: 'Approved request for', target: 'Equipment ($5,000)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Budget refresh for', target: 'January 2024', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+  { id: '1', type: 'update' as const, title: 'Auto-allocated funds to Emergency Reserve', user: { id: '1', name: 'Budget System', avatar: '' }, timestamp: new Date().toISOString() },
+  { id: '2', type: 'create' as const, title: 'Approved request for Equipment ($5,000)', user: { id: '2', name: 'Finance Team', avatar: '' }, timestamp: new Date(Date.now() - 3600000).toISOString() },
+  { id: '3', type: 'update' as const, title: 'Budget refresh for January 2024', user: { id: '3', name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 7200000).toISOString() },
 ]
 
 const mockBudgetsQuickActions = [
@@ -565,15 +565,15 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <div className="text-3xl font-bold">{formatCurrency(totalIncome)}</div>
+                    <div className="text-3xl font-bold">{formatCurrency(stats.income)}</div>
                     <p className="text-purple-200 text-sm">Income</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold">{formatCurrency(totalExpenses)}</div>
+                    <div className="text-3xl font-bold">{formatCurrency(stats.expenses)}</div>
                     <p className="text-purple-200 text-sm">Spent</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold">{formatCurrency(totalIncome - totalExpenses)}</div>
+                    <div className="text-3xl font-bold">{formatCurrency(stats.income - stats.expenses)}</div>
                     <p className="text-purple-200 text-sm">Remaining</p>
                   </div>
                 </div>
@@ -581,12 +581,12 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <div className="mt-4 bg-white/20 rounded-full h-3">
                 <div
                   className="bg-white h-3 rounded-full transition-all"
-                  style={{ width: `${Math.min((totalExpenses / totalIncome) * 100, 100)}%` }}
+                  style={{ width: `${Math.min((stats.expenses / stats.income) * 100, 100)}%` }}
                 />
               </div>
               <div className="flex items-center justify-between mt-2 text-sm">
-                <span className="text-purple-200">{Math.round((totalExpenses / totalIncome) * 100)}% of budget used</span>
-                <span className="text-purple-200">{Math.round((1 - totalExpenses / totalIncome) * 100)}% remaining</span>
+                <span className="text-purple-200">{Math.round((stats.expenses / stats.income) * 100)}% of budget used</span>
+                <span className="text-purple-200">{Math.round((1 - stats.expenses / stats.income) * 100)}% remaining</span>
               </div>
             </div>
 
@@ -828,17 +828,17 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <ArrowDownRight className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</div>
+                      <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.income)}</div>
                       <p className="text-sm text-gray-500">Income</p>
                     </div>
                     <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <ArrowUpRight className="h-6 w-6 text-red-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExpenses)}</div>
+                      <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.expenses)}</div>
                       <p className="text-sm text-gray-500">Expenses</p>
                     </div>
                     <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <DollarSign className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalIncome - totalExpenses)}</div>
+                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(stats.income - stats.expenses)}</div>
                       <p className="text-sm text-gray-500">Net</p>
                     </div>
                   </div>
