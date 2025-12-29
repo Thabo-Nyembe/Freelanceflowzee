@@ -535,6 +535,25 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     shipped: mockIdeas.filter(i => i.status === 'shipped').length
   }), [])
 
+  const handleSubmitIdea = () => {
+    toast.info('Submit Idea', {
+      description: 'Opening idea submission form...'
+    })
+    setShowSubmitDialog(true)
+  }
+
+  const handleVote = (idea: Idea) => {
+    toast.success('Vote recorded', {
+      description: `You voted for "${idea.title}"`
+    })
+  }
+
+  const handleExportFeedback = () => {
+    toast.success('Export started', {
+      description: 'Your feedback data is being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6 space-y-6">

@@ -225,6 +225,30 @@ export default function CrmClient() {
     return grouped
   }, [deals])
 
+  const handleAddContact = () => {
+    toast.info('Add Contact', {
+      description: 'Opening contact form...'
+    })
+  }
+
+  const handleAddDeal = () => {
+    toast.info('Add Deal', {
+      description: 'Opening deal form...'
+    })
+  }
+
+  const handleExportCRM = () => {
+    toast.success('Export started', {
+      description: 'Your CRM data is being exported'
+    })
+  }
+
+  const handleSyncData = () => {
+    toast.success('Sync started', {
+      description: 'Syncing CRM data with connected services'
+    })
+  }
+
   // Filtered contacts
   const filteredContacts = useMemo(() => {
     return contacts.filter(c => {

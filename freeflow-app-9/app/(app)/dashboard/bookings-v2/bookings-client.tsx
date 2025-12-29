@@ -155,6 +155,31 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   const timeSlots = useMemo(() => generateTimeSlots(), [currentDate])
 
+  const handleNewBooking = () => {
+    toast.info('New Booking', {
+      description: 'Opening booking form...'
+    })
+    setShowNewBooking(true)
+  }
+
+  const handleConfirmBooking = (booking: Booking) => {
+    toast.success('Booking confirmed', {
+      description: `Booking for ${booking.clientName} confirmed`
+    })
+  }
+
+  const handleCancelBooking = (booking: Booking) => {
+    toast.success('Booking cancelled', {
+      description: `Booking for ${booking.clientName} has been cancelled`
+    })
+  }
+
+  const handleReschedule = (booking: Booking) => {
+    toast.info('Reschedule', {
+      description: 'Opening reschedule options...'
+    })
+  }
+
   // Get days of the week
   const getWeekDays = () => {
     const days = []

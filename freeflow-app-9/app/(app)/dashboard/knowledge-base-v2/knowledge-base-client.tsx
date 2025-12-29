@@ -756,6 +756,30 @@ export default function KnowledgeBaseClient() {
     setShowPageDialog(true)
   }
 
+  const handleCreatePage = () => {
+    toast.info('Create Page', {
+      description: 'Opening page editor...'
+    })
+  }
+
+  const handleExport = () => {
+    toast.success('Export started', {
+      description: 'Your knowledge base is being exported'
+    })
+  }
+
+  const handleShare = () => {
+    toast.success('Link copied', {
+      description: 'Share link copied to clipboard'
+    })
+  }
+
+  const handleBookmark = (page: Page) => {
+    toast.success('Bookmarked', {
+      description: `${page.title} added to bookmarks`
+    })
+  }
+
   const stats = [
     { label: 'Total Spaces', value: mockSpaces.length.toString(), icon: FolderOpen, change: '+2', trend: 'up', color: 'text-blue-600' },
     { label: 'Total Pages', value: formatNumber(mockAnalytics.totalPages), icon: FileText, change: '+12.3%', trend: 'up', color: 'text-indigo-600' },

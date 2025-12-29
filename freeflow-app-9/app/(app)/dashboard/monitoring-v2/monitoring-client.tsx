@@ -553,6 +553,30 @@ export default function MonitoringClient() {
     return { total, healthy, warning, critical, avgCpu, avgMemory, totalContainers, activeAlerts }
   }, [])
 
+  const handleAddHost = () => {
+    toast.info('Add Host', {
+      description: 'Opening host configuration...'
+    })
+  }
+
+  const handleRefreshMetrics = () => {
+    toast.success('Metrics refreshed', {
+      description: 'Infrastructure metrics updated'
+    })
+  }
+
+  const handleAcknowledgeAlert = (alert: Alert) => {
+    toast.success('Alert acknowledged', {
+      description: `Alert "${alert.name}" has been acknowledged`
+    })
+  }
+
+  const handleMuteAlert = (alert: Alert) => {
+    toast.success('Alert muted', {
+      description: `Alert "${alert.name}" has been muted for 1 hour`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

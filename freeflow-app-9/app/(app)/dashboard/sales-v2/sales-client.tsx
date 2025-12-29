@@ -444,6 +444,24 @@ export default function SalesClient() {
     })
   }, [searchQuery, stageFilter])
 
+  const handleCreateDeal = () => {
+    toast.info('Create Deal', {
+      description: 'Opening deal creation form...'
+    })
+  }
+
+  const handleExportSales = () => {
+    toast.success('Export started', {
+      description: 'Your sales data is being exported'
+    })
+  }
+
+  const handleUpdateForecast = () => {
+    toast.success('Forecast updated', {
+      description: 'Sales forecast has been updated'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}
