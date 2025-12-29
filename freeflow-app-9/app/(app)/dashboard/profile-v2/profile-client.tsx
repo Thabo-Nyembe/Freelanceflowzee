@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import {
   User, Edit, Camera, Phone, Mail, MapPin, Calendar, Globe,
   Briefcase, Award, Star, Users, Shield, MessageSquare, Settings,
