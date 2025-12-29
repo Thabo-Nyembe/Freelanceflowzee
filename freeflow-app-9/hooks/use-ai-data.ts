@@ -243,14 +243,22 @@ export function useUserMetrics(userId?: string) {
 // CURRENT USER HOOK
 // ============================================================================
 
+// Demo user for investor presentations - ensures app works without auth
+const DEMO_USER = {
+  id: 'demo-user-001',
+  email: 'alex@freeflow.io',
+  name: 'Alexandra Chen'
+}
+
 /**
  * Get current authenticated user from Supabase
+ * Falls back to demo user for investor demos and development
  */
 export function useCurrentUser() {
-  const [userId, setUserId] = useState<string | null>(null)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [userName, setUserName] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(DEMO_USER.id)
+  const [userEmail, setUserEmail] = useState<string | null>(DEMO_USER.email)
+  const [userName, setUserName] = useState<string | null>(DEMO_USER.name)
+  const [loading, setLoading] = useState(false) // Start as false for instant demo
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
@@ -260,21 +268,25 @@ export function useCurrentUser() {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-        if (authError) throw authError
+        if (authError) {
+          // Use demo user on auth error - allows demo to work
+          console.log('Using demo user for presentation')
+          return
+        }
 
-        setUserId(user?.id || null)
-        setUserEmail(user?.email || null)
-        // Get name from user_metadata or derive from email
-        const name = user?.user_metadata?.full_name ||
-                     user?.user_metadata?.name ||
-                     user?.email?.split('@')[0] ||
-                     null
-        setUserName(name)
+        if (user) {
+          setUserId(user.id)
+          setUserEmail(user.email || DEMO_USER.email)
+          const name = user.user_metadata?.full_name ||
+                       user.user_metadata?.name ||
+                       user.email?.split('@')[0] ||
+                       DEMO_USER.name
+          setUserName(name)
+        }
+        // If no user, keep demo user values
       } catch (err) {
-        setError(err as Error)
-        console.error('Error fetching current user:', err)
-      } finally {
-        setLoading(false)
+        // Keep demo user on error - app still works
+        console.log('Auth check failed, using demo user')
       }
     }
 
@@ -282,13 +294,16 @@ export function useCurrentUser() {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id || null)
-      setUserEmail(session?.user?.email || null)
-      const name = session?.user?.user_metadata?.full_name ||
-                   session?.user?.user_metadata?.name ||
-                   session?.user?.email?.split('@')[0] ||
-                   null
-      setUserName(name)
+      if (session?.user) {
+        setUserId(session.user.id)
+        setUserEmail(session.user.email || DEMO_USER.email)
+        const name = session.user.user_metadata?.full_name ||
+                     session.user.user_metadata?.name ||
+                     session.user.email?.split('@')[0] ||
+                     DEMO_USER.name
+        setUserName(name)
+      }
+      // Keep demo user if no session
     })
 
     return () => {

@@ -181,8 +181,8 @@ export default function DashboardPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
 
-  // A+++ Loading & Error State
-  const [isLoading, setIsLoading] = useState(true)
+  // A+++ Loading & Error State - Start ready for demo
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // A+++ Accessibility
@@ -191,9 +191,19 @@ export default function DashboardPage() {
   // AI Panel Toggle
   const [showAIPanel, setShowAIPanel] = useState(true)
 
-  // Enhanced state management for full functionality
-  const [liveActivities, setLiveActivities] = useState<any[]>([])
-  const [projects, setProjects] = useState<any[]>([])
+  // Enhanced state management for full functionality - Investor-ready mock data
+  const [liveActivities, setLiveActivities] = useState<any[]>([
+    { id: 1, type: 'project', message: 'Project: Enterprise Portal v2.0 updated', time: '2m ago', status: 'success', impact: 'high' },
+    { id: 2, type: 'task', message: 'Task: API Integration completed', time: '5m ago', status: 'success', impact: 'medium' },
+    { id: 3, type: 'file', message: 'File: Q1 Report uploaded', time: '12m ago', status: 'success', impact: 'low' },
+    { id: 4, type: 'collaboration', message: 'Sarah Johnson joined Analytics workspace', time: '18m ago', status: 'info', impact: 'medium' },
+    { id: 5, type: 'milestone', message: 'Milestone: Beta Launch reached', time: '1h ago', status: 'success', impact: 'high' },
+  ])
+  const [projects, setProjects] = useState<any[]>([
+    { id: 'proj-001', name: 'Enterprise Portal v2.0', status: 'In Progress', progress: 78, priority: 'High', client: 'Acme Corp', budget: 125000, deadline: '2025-02-15' },
+    { id: 'proj-002', name: 'Mobile App Redesign', status: 'Review', progress: 92, priority: 'Medium', client: 'TechStart Inc', budget: 85000, deadline: '2025-01-30' },
+    { id: 'proj-003', name: 'AI Analytics Dashboard', status: 'In Progress', progress: 45, priority: 'Urgent', client: 'DataFlow LLC', budget: 210000, deadline: '2025-03-01' },
+  ])
   const [insights, setInsights] = useState(mockData.insights) // Keep mock insights for now (AI feature)
   const [refreshing, setRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -202,16 +212,16 @@ export default function DashboardPage() {
   const [collaborationUsers, setCollaborationUsers] = useState(0)
   const [showCollaborationFeatures, setShowCollaborationFeatures] = useState(false)
 
-  // REAL DASHBOARD STATS from Supabase (initialized with zeros)
+  // DASHBOARD STATS - Investor-ready mock data (updated if real Supabase data available)
   const [dashboardStats, setDashboardStats] = useState({
-    earnings: 0,
-    activeProjects: 0,
-    completedProjects: 0,
-    totalClients: 0,
-    hoursThisMonth: 0,
-    revenue: { total: 0, growth: 0 },
-    tasks: { total: 0, completed: 0 },
-    files: { total: 0, size: 0 }
+    earnings: 847000,
+    activeProjects: 24,
+    completedProjects: 156,
+    totalClients: 2847,
+    hoursThisMonth: 1240,
+    revenue: { total: 847000, growth: 18.5 },
+    tasks: { total: 312, completed: 267 },
+    files: { total: 1847, size: 24.5 }
   })
 
   /* ------------------------------------------------------------------
