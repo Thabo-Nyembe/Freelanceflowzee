@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
@@ -10,6 +10,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Wallet, PiggyBank, TrendingUp, TrendingDown, DollarSign, CreditCard, Target,
   ArrowUpRight, ArrowDownRight, Plus, ChevronLeft, ChevronRight, Calendar,
@@ -20,8 +23,9 @@ import {
   Building2, Landmark, CreditCardIcon, Coins, TrendingDown as TrendingDownIcon,
   Clock, Bell, MoreVertical, Repeat, ArrowLeftRight, Search, ExternalLink,
   FileText, Lock, Unlock, ChevronDown, Trash2, Edit3, Copy, CheckCircle2,
-  Folder, Cog, Upload, MoreHorizontal
+  Folder, Cog, Upload, MoreHorizontal, Loader2
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -43,7 +47,8 @@ import {
   budgetsActivities,
   budgetsQuickActions
 } from '@/lib/mock-data/adapters'
-import { useBudgets, type Budget, type BudgetType, type BudgetStatus } from '@/lib/hooks/use-budgets'
+import { useBudgets, type Budget, type BudgetType, type BudgetStatus, type BudgetPeriodType } from '@/lib/hooks/use-budgets'
+import { useTransactions, type Transaction } from '@/lib/hooks/use-transactions'
 
 // ============================================================================
 // TYPE DEFINITIONS - YNAB Level Budget Platform
@@ -64,7 +69,8 @@ interface BudgetCategory {
   carryover: boolean
 }
 
-interface Transaction {
+// Local transaction interface for UI display (mock data format)
+interface LocalTransaction {
   id: string
   date: Date
   payee: string
@@ -261,6 +267,65 @@ const mockBudgetsQuickActions = [
 // MAIN COMPONENT
 // ============================================================================
 
+// Default form state for new budget
+const defaultBudgetForm = {
+  name: '',
+  description: '',
+  budget_type: 'monthly' as BudgetType,
+  total_amount: 0,
+  category: 'general',
+  department: '',
+  period_type: 'monthly' as BudgetPeriodType,
+  start_date: new Date().toISOString().split('T')[0],
+  end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  alerts_enabled: true,
+  alert_threshold: 90,
+  warning_threshold: 75,
+  allows_rollover: false,
+  notes: ''
+}
+
+// Default form state for new transaction (matches financial_transactions table)
+// Valid categories: project_payment, consulting, subscription, software, hardware, marketing, office_expenses, professional_services, taxes, other
+const defaultTransactionForm = {
+  description: '',
+  type: 'expense' as 'income' | 'expense',
+  amount: 0,
+  category: 'other' as string, // Default to 'other' which is always valid
+  vendor_name: '',
+  client_name: '',
+  notes: '',
+  transaction_date: new Date().toISOString().split('T')[0]
+}
+
+// Default form state for transfers
+const defaultTransferForm = {
+  from_account: '',
+  to_account: '',
+  amount: 0,
+  notes: '',
+  transfer_date: new Date().toISOString().split('T')[0]
+}
+
+// Default form state for new goal
+const defaultGoalForm = {
+  name: '',
+  target_amount: 0,
+  current_amount: 0,
+  target_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  category: 'savings',
+  notes: ''
+}
+
+// Default form state for new account
+const defaultAccountForm = {
+  name: '',
+  type: 'checking' as const,
+  institution: '',
+  balance: 0,
+  on_budget: true
+}
+
 export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budget[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -270,25 +335,62 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
   const [showNewCategoryModal, setShowNewCategoryModal] = useState(false)
   const [showNewTransactionModal, setShowNewTransactionModal] = useState(false)
   const [showNewAccountModal, setShowNewAccountModal] = useState(false)
+  const [showNewBudgetModal, setShowNewBudgetModal] = useState(false)
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [showScheduledModal, setShowScheduledModal] = useState(false)
+  const [showReportsModal, setShowReportsModal] = useState(false)
+  const [showNewGoalModal, setShowNewGoalModal] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['needs', 'wants', 'savings', 'debt'])
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+  const [selectedTransaction, setSelectedTransaction] = useState<LocalTransaction | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null)
 
-  const { budgets, loading, error } = useBudgets({ budgetType: typeFilter, status: statusFilter })
+  // Form states
+  const [budgetForm, setBudgetForm] = useState(defaultBudgetForm)
+  const [transactionForm, setTransactionForm] = useState(defaultTransactionForm)
+  const [transferForm, setTransferForm] = useState(defaultTransferForm)
+  const [goalForm, setGoalForm] = useState(defaultGoalForm)
+  const [accountForm, setAccountForm] = useState(defaultAccountForm)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Real data hooks
+  const { budgets, loading, error, createBudget, updateBudget, deleteBudget, refetch: refetchBudgets } = useBudgets({
+    budgetType: typeFilter,
+    status: statusFilter
+  })
+  const { transactions: dbTransactions, createTransaction, stats: txStats, loading: txLoading } = useTransactions({ limit: 50 })
+
   const displayBudgets = budgets.length > 0 ? budgets : initialBudgets
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-  // Calculate comprehensive stats
+  // Calculate comprehensive stats - uses real data when available, falls back to mock
   const stats = useMemo(() => {
-    const groups = mockCategories.filter(c => c.isGroup)
-    const totalBudgeted = groups.reduce((sum, c) => sum + c.budgeted, 0)
-    const totalSpent = groups.reduce((sum, c) => sum + c.spent, 0)
-    const totalAvailable = groups.reduce((sum, c) => sum + c.available, 0)
+    // Use real budget data if available
+    const realTotalBudgeted = displayBudgets.reduce((sum, b) => sum + (b.total_amount || 0), 0)
+    const realTotalSpent = displayBudgets.reduce((sum, b) => sum + (b.spent_amount || 0), 0)
+    const realTotalAvailable = displayBudgets.reduce((sum, b) => sum + (b.available_amount || 0), 0)
 
-    const income = mockTransactions.filter(t => t.type === 'inflow').reduce((sum, t) => sum + t.amount, 0)
-    const expenses = mockTransactions.filter(t => t.type === 'outflow').reduce((sum, t) => sum + Math.abs(t.amount), 0)
+    // Use real transaction stats if available
+    const realIncome = txStats?.totalIncome || 0
+    const realExpenses = txStats?.totalExpenses || 0
+
+    // Fall back to mock data for categories display
+    const groups = mockCategories.filter(c => c.isGroup)
+    const mockTotalBudgeted = groups.reduce((sum, c) => sum + c.budgeted, 0)
+    const mockTotalSpent = groups.reduce((sum, c) => sum + c.spent, 0)
+    const mockTotalAvailable = groups.reduce((sum, c) => sum + c.available, 0)
+
+    const mockIncome = mockTransactions.filter(t => t.type === 'inflow').reduce((sum, t) => sum + t.amount, 0)
+    const mockExpenses = mockTransactions.filter(t => t.type === 'outflow').reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+    // Use real data if we have budgets, otherwise mock
+    const totalBudgeted = displayBudgets.length > 0 ? realTotalBudgeted : mockTotalBudgeted
+    const totalSpent = displayBudgets.length > 0 ? realTotalSpent : mockTotalSpent
+    const totalAvailable = displayBudgets.length > 0 ? realTotalAvailable : mockTotalAvailable
+    const income = dbTransactions?.length > 0 ? realIncome : mockIncome
+    const expenses = dbTransactions?.length > 0 ? realExpenses : mockExpenses
 
     const onBudgetAccounts = mockAccounts.filter(a => a.onBudget)
     const netWorth = mockAccounts.reduce((sum, a) => sum + a.balance, 0)
@@ -308,9 +410,219 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
       cashBalance,
       goalsProgress: goalsProgress.toFixed(0),
       accountsCount: mockAccounts.filter(a => !a.closed).length,
-      transactionsCount: mockTransactions.length,
+      transactionsCount: dbTransactions?.length || mockTransactions.length,
+      budgetsCount: displayBudgets.length
     }
-  }, [])
+  }, [displayBudgets, dbTransactions, txStats])
+
+  // Handler for creating a new budget
+  const handleCreateBudget = useCallback(async () => {
+    if (!budgetForm.name.trim()) {
+      toast.error('Budget name is required')
+      return
+    }
+    if (budgetForm.total_amount <= 0) {
+      toast.error('Budget amount must be greater than 0')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await createBudget({
+        name: budgetForm.name,
+        description: budgetForm.description,
+        budget_type: budgetForm.budget_type,
+        total_amount: budgetForm.total_amount,
+        category: budgetForm.category,
+        department: budgetForm.department || undefined,
+        period_type: budgetForm.period_type,
+        start_date: new Date(budgetForm.start_date).toISOString(),
+        end_date: new Date(budgetForm.end_date).toISOString(),
+        alerts_enabled: budgetForm.alerts_enabled,
+        alert_threshold: budgetForm.alert_threshold,
+        warning_threshold: budgetForm.warning_threshold,
+        allows_rollover: budgetForm.allows_rollover,
+        notes: budgetForm.notes
+      })
+      toast.success('Budget created successfully!')
+      setShowNewBudgetModal(false)
+      setBudgetForm(defaultBudgetForm)
+    } catch (err) {
+      console.error('Failed to create budget:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [budgetForm, createBudget])
+
+  // Handler for creating a new transaction
+  const handleCreateTransaction = useCallback(async () => {
+    if (!transactionForm.description.trim()) {
+      toast.error('Transaction description is required')
+      return
+    }
+    if (transactionForm.amount <= 0) {
+      toast.error('Amount must be greater than 0')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await createTransaction({
+        description: transactionForm.description,
+        type: transactionForm.type,
+        amount: Math.abs(transactionForm.amount),
+        category: transactionForm.category || 'General',
+        vendor_name: transactionForm.vendor_name,
+        client_name: transactionForm.client_name,
+        notes: transactionForm.notes,
+        transaction_date: new Date(transactionForm.transaction_date).toISOString()
+      })
+      toast.success('Transaction created successfully!')
+      setShowNewTransactionModal(false)
+      setTransactionForm(defaultTransactionForm)
+    } catch (err) {
+      console.error('Failed to create transaction:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [transactionForm, createTransaction])
+
+  // Handler for deleting a budget
+  const handleDeleteBudget = useCallback(async (budgetId: string) => {
+    if (!confirm('Are you sure you want to delete this budget?')) return
+
+    try {
+      await deleteBudget(budgetId)
+      toast.success('Budget deleted successfully!')
+      setSelectedBudget(null)
+    } catch (err) {
+      console.error('Failed to delete budget:', err)
+    }
+  }, [deleteBudget])
+
+  // Handler for transferring funds between accounts
+  const handleTransferFunds = useCallback(async () => {
+    if (!transferForm.from_account || !transferForm.to_account) {
+      toast.error('Please select both accounts')
+      return
+    }
+    if (transferForm.from_account === transferForm.to_account) {
+      toast.error('Cannot transfer to the same account')
+      return
+    }
+    if (transferForm.amount <= 0) {
+      toast.error('Amount must be greater than 0')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Create two transactions: one withdrawal and one deposit
+      await createTransaction({
+        title: `Transfer to ${transferForm.to_account}`,
+        transaction_type: 'expense',
+        amount: -transferForm.amount,
+        account_name: transferForm.from_account,
+        category_name: 'Transfer',
+        notes: transferForm.notes,
+        transaction_date: new Date(transferForm.transfer_date).toISOString()
+      })
+      await createTransaction({
+        title: `Transfer from ${transferForm.from_account}`,
+        transaction_type: 'income',
+        amount: transferForm.amount,
+        account_name: transferForm.to_account,
+        category_name: 'Transfer',
+        notes: transferForm.notes,
+        transaction_date: new Date(transferForm.transfer_date).toISOString()
+      })
+      toast.success('Transfer completed successfully!')
+      setShowTransferModal(false)
+      setTransferForm(defaultTransferForm)
+    } catch (err) {
+      console.error('Failed to transfer funds:', err)
+      toast.error('Failed to complete transfer')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [transferForm, createTransaction])
+
+  // Handler for creating a new goal (using budgets table with goal type)
+  const handleCreateGoal = useCallback(async () => {
+    if (!goalForm.name.trim()) {
+      toast.error('Goal name is required')
+      return
+    }
+    if (goalForm.target_amount <= 0) {
+      toast.error('Target amount must be greater than 0')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await createBudget({
+        name: goalForm.name,
+        description: `Savings goal: ${goalForm.name}`,
+        budget_type: 'project',
+        total_amount: goalForm.target_amount,
+        allocated_amount: goalForm.current_amount,
+        spent_amount: 0,
+        category: goalForm.category,
+        period_type: 'project_based',
+        start_date: new Date().toISOString(),
+        end_date: new Date(goalForm.target_date).toISOString(),
+        notes: goalForm.notes,
+        status: 'active'
+      })
+      toast.success('Goal created successfully!')
+      setShowNewGoalModal(false)
+      setGoalForm(defaultGoalForm)
+    } catch (err) {
+      console.error('Failed to create goal:', err)
+      toast.error('Failed to create goal')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [goalForm, createBudget])
+
+  // Handler for creating a new account (stored in metadata for now)
+  const handleCreateAccount = useCallback(async () => {
+    if (!accountForm.name.trim()) {
+      toast.error('Account name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // For now, we'll store accounts as a special budget entry
+      // In production, you'd have a separate accounts table
+      await createBudget({
+        name: `Account: ${accountForm.name}`,
+        description: `${accountForm.type} account at ${accountForm.institution}`,
+        budget_type: 'operational',
+        total_amount: accountForm.balance,
+        allocated_amount: accountForm.balance,
+        category: 'account',
+        period_type: 'ongoing',
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        metadata: {
+          account_type: accountForm.type,
+          institution: accountForm.institution,
+          on_budget: accountForm.on_budget
+        },
+        status: 'active'
+      })
+      toast.success('Account added successfully!')
+      setShowNewAccountModal(false)
+      setAccountForm(defaultAccountForm)
+    } catch (err) {
+      console.error('Failed to create account:', err)
+      toast.error('Failed to add account')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [accountForm, createBudget])
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
@@ -376,67 +688,14 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
-                <Dialog open={showNewTransactionModal} onOpenChange={setShowNewTransactionModal}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-white text-blue-600 hover:bg-white/90">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Transaction
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Transaction</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Date</label>
-                          <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Account</label>
-                          <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                            {mockAccounts.filter(a => a.onBudget).map(account => (
-                              <option key={account.id} value={account.id}>{account.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Payee</label>
-                        <Input placeholder="Who did you pay?" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Category</label>
-                          <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                            {mockCategories.filter(c => !c.isGroup).map(cat => (
-                              <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Amount</label>
-                          <div className="flex">
-                            <select className="px-2 border rounded-l-lg dark:bg-gray-800 dark:border-gray-700">
-                              <option value="outflow">-</option>
-                              <option value="inflow">+</option>
-                            </select>
-                            <Input type="number" placeholder="0.00" className="rounded-l-none" />
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Memo (optional)</label>
-                        <Input placeholder="Add a note" />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowNewTransactionModal(false)}>Cancel</Button>
-                      <Button className="bg-blue-600 hover:bg-blue-700">Add Transaction</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <Button className="bg-white text-blue-600 hover:bg-white/90" onClick={() => setShowNewTransactionModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Transaction
+                </Button>
+                <Button className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm" onClick={() => setShowNewBudgetModal(true)}>
+                  <Wallet className="h-4 w-4 mr-2" />
+                  New Budget
+                </Button>
                 <Button variant="ghost" className="text-white hover:bg-white/20">
                   <Settings className="h-5 w-5" />
                 </Button>
@@ -592,19 +851,19 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
 
             {/* Quick Action Buttons */}
             <div className="flex items-center gap-4">
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowNewTransactionModal(true)}>
                 <Plus className="w-4 h-4" />
                 Add Transaction
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setShowTransferModal(true)}>
                 <ArrowLeftRight className="w-4 h-4" />
                 Transfer Funds
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setShowScheduledModal(true)}>
                 <Repeat className="w-4 h-4" />
                 Scheduled
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setShowReportsModal(true)}>
                 <FileText className="w-4 h-4" />
                 Reports
               </Button>
@@ -652,7 +911,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Accounts</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('accounts')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockAccounts.filter(a => !a.closed).slice(0, 4).map(account => {
@@ -681,7 +940,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('transactions')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {mockTransactions.slice(0, 5).map(tx => (
@@ -710,7 +969,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Goals</CardTitle>
-                  <Button variant="ghost" size="sm">Manage</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('goals')}>Manage</Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {mockGoals.slice(0, 3).map(goal => {
@@ -982,7 +1241,94 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
           </TabsContent>
 
           {/* Budget Tab */}
-          <TabsContent value="budget">
+          <TabsContent value="budget" className="space-y-6">
+            {/* Your Budgets Section - Shows Real Database Budgets */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-blue-600" />
+                    Your Budgets
+                  </CardTitle>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {displayBudgets.length} budget{displayBudgets.length !== 1 ? 's' : ''} created
+                  </p>
+                </div>
+                <Button onClick={() => setShowNewBudgetModal(true)} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Budget
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <span className="ml-3 text-gray-500">Loading budgets...</span>
+                  </div>
+                ) : displayBudgets.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
+                      <Wallet className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No budgets yet</h3>
+                    <p className="text-gray-500 mb-4 max-w-sm mx-auto">
+                      Create your first budget to start tracking your spending and financial goals.
+                    </p>
+                    <Button onClick={() => setShowNewBudgetModal(true)} className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Budget
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {displayBudgets.map((budget) => (
+                      <div
+                        key={budget.id}
+                        onClick={() => setSelectedBudget(budget)}
+                        className="p-4 border rounded-xl dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 cursor-pointer transition-all hover:shadow-md group"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                              {budget.name}
+                            </h4>
+                            <p className="text-sm text-gray-500 capitalize">{budget.budget_type} • {budget.category}</p>
+                          </div>
+                          <Badge className={
+                            budget.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                            budget.status === 'draft' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' :
+                            budget.status === 'exceeded' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                          }>
+                            {budget.status}
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">
+                              {formatCurrency(budget.spent_amount)} of {formatCurrency(budget.total_amount)}
+                            </span>
+                            <span className="font-medium">{budget.utilization_percent}%</span>
+                          </div>
+                          <Progress
+                            value={budget.utilization_percent}
+                            className={`h-2 ${budget.utilization_percent > 90 ? '[&>div]:bg-red-500' : budget.utilization_percent > 75 ? '[&>div]:bg-amber-500' : ''}`}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t dark:border-gray-700 text-xs text-gray-500">
+                          <span>Available: {formatCurrency(budget.available_amount)}</span>
+                          <span>{new Date(budget.end_date).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Budget Categories Section */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Budget Categories</CardTitle>
@@ -1147,7 +1493,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <h2 className="text-2xl font-bold">Savings Goals</h2>
                 <p className="text-gray-500">Track your progress towards financial freedom</p>
               </div>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setShowNewGoalModal(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Goal
               </Button>
@@ -1240,30 +1586,79 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Add Account</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-blue-600" />
+                          Add Account
+                        </DialogTitle>
+                        <DialogDescription>
+                          Add a new bank account or credit card to track
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Account Name</label>
-                          <Input placeholder="e.g., Chase Checking" />
+                        <div className="space-y-2">
+                          <Label htmlFor="account-name">Account Name *</Label>
+                          <Input
+                            id="account-name"
+                            placeholder="e.g., Chase Checking"
+                            value={accountForm.name}
+                            onChange={(e) => setAccountForm(prev => ({ ...prev, name: e.target.value }))}
+                          />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Account Type</label>
-                          <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                            <option value="checking">Checking</option>
-                            <option value="savings">Savings</option>
-                            <option value="credit">Credit Card</option>
-                            <option value="cash">Cash</option>
-                          </select>
+                        <div className="space-y-2">
+                          <Label>Account Type</Label>
+                          <Select
+                            value={accountForm.type}
+                            onValueChange={(value: 'checking' | 'savings' | 'credit' | 'cash' | 'investment' | 'loan') => setAccountForm(prev => ({ ...prev, type: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="checking">Checking</SelectItem>
+                              <SelectItem value="savings">Savings</SelectItem>
+                              <SelectItem value="credit">Credit Card</SelectItem>
+                              <SelectItem value="cash">Cash</SelectItem>
+                              <SelectItem value="investment">Investment</SelectItem>
+                              <SelectItem value="loan">Loan</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Current Balance</label>
-                          <Input type="number" placeholder="0.00" />
+                        <div className="space-y-2">
+                          <Label htmlFor="account-institution">Institution</Label>
+                          <Input
+                            id="account-institution"
+                            placeholder="e.g., Chase Bank"
+                            value={accountForm.institution}
+                            onChange={(e) => setAccountForm(prev => ({ ...prev, institution: e.target.value }))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="account-balance">Current Balance</Label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="account-balance"
+                              type="number"
+                              placeholder="0.00"
+                              className="pl-10"
+                              value={accountForm.balance || ''}
+                              onChange={(e) => setAccountForm(prev => ({ ...prev, balance: parseFloat(e.target.value) || 0 }))}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={accountForm.on_budget}
+                            onCheckedChange={(checked) => setAccountForm(prev => ({ ...prev, on_budget: checked }))}
+                          />
+                          <Label>Include in budget</Label>
                         </div>
                       </div>
                       <DialogFooter>
                         <Button variant="outline" onClick={() => setShowNewAccountModal(false)}>Cancel</Button>
-                        <Button>Add Account</Button>
+                        <Button onClick={handleCreateAccount} disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+                          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Account'}
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -1880,6 +2275,777 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewCategoryModal(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700">Create Category</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create New Budget Modal */}
+        <Dialog open={showNewBudgetModal} onOpenChange={setShowNewBudgetModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-blue-600" />
+                Create New Budget
+              </DialogTitle>
+              <DialogDescription>
+                Create a new budget to track your spending and financial goals.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="budget-name">Budget Name *</Label>
+                  <Input
+                    id="budget-name"
+                    placeholder="e.g., Marketing Budget Q1"
+                    value={budgetForm.name}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="budget-amount">Total Amount *</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="budget-amount"
+                      type="number"
+                      placeholder="0.00"
+                      className="pl-10"
+                      value={budgetForm.total_amount || ''}
+                      onChange={(e) => setBudgetForm(prev => ({ ...prev, total_amount: parseFloat(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="budget-description">Description</Label>
+                <Textarea
+                  id="budget-description"
+                  placeholder="Brief description of this budget..."
+                  value={budgetForm.description}
+                  onChange={(e) => setBudgetForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Budget Type</Label>
+                  <Select
+                    value={budgetForm.budget_type}
+                    onValueChange={(value: BudgetType) => setBudgetForm(prev => ({ ...prev, budget_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="annual">Annual</SelectItem>
+                      <SelectItem value="project">Project</SelectItem>
+                      <SelectItem value="department">Department</SelectItem>
+                      <SelectItem value="campaign">Campaign</SelectItem>
+                      <SelectItem value="operational">Operational</SelectItem>
+                      <SelectItem value="capital">Capital</SelectItem>
+                      <SelectItem value="discretionary">Discretionary</SelectItem>
+                      <SelectItem value="emergency">Emergency</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={budgetForm.category}
+                    onValueChange={(value) => setBudgetForm(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="operations">Operations</SelectItem>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="hr">Human Resources</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="admin">Administration</SelectItem>
+                      <SelectItem value="personal">Personal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="start-date">Start Date</Label>
+                  <Input
+                    id="start-date"
+                    type="date"
+                    value={budgetForm.start_date}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, start_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end-date">End Date</Label>
+                  <Input
+                    id="end-date"
+                    type="date"
+                    value={budgetForm.end_date}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, end_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="alert-threshold">Alert Threshold (%)</Label>
+                  <Input
+                    id="alert-threshold"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={budgetForm.alert_threshold}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, alert_threshold: parseInt(e.target.value) || 90 }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="warning-threshold">Warning Threshold (%)</Label>
+                  <Input
+                    id="warning-threshold"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={budgetForm.warning_threshold}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, warning_threshold: parseInt(e.target.value) || 75 }))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={budgetForm.alerts_enabled}
+                      onCheckedChange={(checked) => setBudgetForm(prev => ({ ...prev, alerts_enabled: checked }))}
+                    />
+                    <Label className="cursor-pointer">Enable Alerts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={budgetForm.allows_rollover}
+                      onCheckedChange={(checked) => setBudgetForm(prev => ({ ...prev, allows_rollover: checked }))}
+                    />
+                    <Label className="cursor-pointer">Allow Rollover</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowNewBudgetModal(false)
+                  setBudgetForm(defaultBudgetForm)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateBudget}
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Budget
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Budget Details Modal */}
+        <Dialog open={!!selectedBudget} onOpenChange={(open) => !open && setSelectedBudget(null)}>
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-blue-600" />
+                {selectedBudget?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedBudget && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Budget</p>
+                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(selectedBudget.total_amount)}</p>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Available</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedBudget.available_amount)}</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Spent</p>
+                    <p className="text-2xl font-bold text-purple-600">{formatCurrency(selectedBudget.spent_amount)}</p>
+                  </div>
+                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Utilization</p>
+                    <p className="text-2xl font-bold text-orange-600">{selectedBudget.utilization_percent}%</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Budget Progress</span>
+                    <span className="font-medium">{selectedBudget.utilization_percent}%</span>
+                  </div>
+                  <Progress value={selectedBudget.utilization_percent} className="h-3" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Type</p>
+                    <p className="font-medium capitalize">{selectedBudget.budget_type}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <Badge className={
+                      selectedBudget.status === 'active' ? 'bg-green-100 text-green-800' :
+                      selectedBudget.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                      selectedBudget.status === 'exceeded' ? 'bg-red-100 text-red-800' :
+                      'bg-blue-100 text-blue-800'
+                    }>
+                      {selectedBudget.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Start Date</p>
+                    <p className="font-medium">{new Date(selectedBudget.start_date).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">End Date</p>
+                    <p className="font-medium">{new Date(selectedBudget.end_date).toLocaleDateString()}</p>
+                  </div>
+                </div>
+
+                {selectedBudget.description && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Description</p>
+                    <p className="text-sm">{selectedBudget.description}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="destructive"
+                onClick={() => selectedBudget && handleDeleteBudget(selectedBudget.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+              <Button variant="outline" onClick={() => setSelectedBudget(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Transaction Modal (Wired Up) */}
+        <Dialog open={showNewTransactionModal} onOpenChange={setShowNewTransactionModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-purple-600" />
+                Add Transaction
+              </DialogTitle>
+              <DialogDescription>
+                Record a new income or expense transaction.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="txn-description">Description *</Label>
+                <Input
+                  id="txn-description"
+                  placeholder="e.g., Grocery shopping at Whole Foods"
+                  value={transactionForm.description}
+                  onChange={(e) => setTransactionForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={transactionForm.type}
+                    onValueChange={(value: 'income' | 'expense') => setTransactionForm(prev => ({ ...prev, type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="expense">
+                        <span className="flex items-center gap-2">
+                          <ArrowUpRight className="h-4 w-4 text-red-500" />
+                          Expense
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="income">
+                        <span className="flex items-center gap-2">
+                          <ArrowDownRight className="h-4 w-4 text-green-500" />
+                          Income
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="txn-amount">Amount *</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="txn-amount"
+                      type="number"
+                      placeholder="0.00"
+                      className="pl-10"
+                      value={transactionForm.amount || ''}
+                      onChange={(e) => setTransactionForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="txn-date">Date</Label>
+                  <Input
+                    id="txn-date"
+                    type="date"
+                    value={transactionForm.transaction_date}
+                    onChange={(e) => setTransactionForm(prev => ({ ...prev, transaction_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="txn-category">Category</Label>
+                  <Select
+                    value={transactionForm.category}
+                    onValueChange={(value) => setTransactionForm(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="project_payment">Project Payment</SelectItem>
+                      <SelectItem value="consulting">Consulting</SelectItem>
+                      <SelectItem value="subscription">Subscription</SelectItem>
+                      <SelectItem value="software">Software</SelectItem>
+                      <SelectItem value="hardware">Hardware</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="office_expenses">Office Expenses</SelectItem>
+                      <SelectItem value="professional_services">Professional Services</SelectItem>
+                      <SelectItem value="taxes">Taxes</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="txn-vendor">Vendor/Payee</Label>
+                  <Input
+                    id="txn-vendor"
+                    placeholder="Who did you pay?"
+                    value={transactionForm.vendor_name}
+                    onChange={(e) => setTransactionForm(prev => ({ ...prev, vendor_name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="txn-client">Client (if income)</Label>
+                  <Input
+                    id="txn-client"
+                    placeholder="Client name"
+                    value={transactionForm.client_name}
+                    onChange={(e) => setTransactionForm(prev => ({ ...prev, client_name: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="txn-notes">Notes</Label>
+                <Textarea
+                  id="txn-notes"
+                  placeholder="Add any additional notes..."
+                  value={transactionForm.notes}
+                  onChange={(e) => setTransactionForm(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowNewTransactionModal(false)
+                  setTransactionForm(defaultTransactionForm)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateTransaction}
+                disabled={isSubmitting}
+                className={transactionForm.type === 'expense' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add {transactionForm.type === 'income' ? 'Income' : 'Expense'}
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Transfer Funds Modal */}
+        <Dialog open={showTransferModal} onOpenChange={setShowTransferModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ArrowLeftRight className="h-5 w-5 text-blue-600" />
+                Transfer Funds
+              </DialogTitle>
+              <DialogDescription>
+                Move money between your accounts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label>From Account</Label>
+                <Select
+                  value={transferForm.from_account}
+                  onValueChange={(value) => setTransferForm(prev => ({ ...prev, from_account: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockAccounts.filter(a => a.onBudget && !a.closed).map(account => (
+                      <SelectItem key={account.id} value={account.name}>
+                        {account.name} ({formatCurrency(account.balance)})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>To Account</Label>
+                <Select
+                  value={transferForm.to_account}
+                  onValueChange={(value) => setTransferForm(prev => ({ ...prev, to_account: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select destination account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockAccounts.filter(a => a.onBudget && !a.closed).map(account => (
+                      <SelectItem key={account.id} value={account.name}>
+                        {account.name} ({formatCurrency(account.balance)})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="transfer-amount">Amount</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="transfer-amount"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-10"
+                    value={transferForm.amount || ''}
+                    onChange={(e) => setTransferForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="transfer-date">Date</Label>
+                <Input
+                  id="transfer-date"
+                  type="date"
+                  value={transferForm.transfer_date}
+                  onChange={(e) => setTransferForm(prev => ({ ...prev, transfer_date: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="transfer-notes">Notes (optional)</Label>
+                <Input
+                  id="transfer-notes"
+                  placeholder="Add a note..."
+                  value={transferForm.notes}
+                  onChange={(e) => setTransferForm(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTransferModal(false)}>Cancel</Button>
+              <Button onClick={handleTransferFunds} disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Transfer'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Scheduled Transactions Modal */}
+        <Dialog open={showScheduledModal} onOpenChange={setShowScheduledModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Repeat className="h-5 w-5 text-purple-600" />
+                Scheduled Transactions
+              </DialogTitle>
+              <DialogDescription>
+                Manage your recurring and scheduled transactions
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockTransactions.filter(t => t.recurring).length > 0 ? (
+                  mockTransactions.filter(t => t.recurring).map(tx => (
+                    <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+                          <Repeat className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{tx.payee}</p>
+                          <p className="text-sm text-gray-500">{tx.category} • Monthly</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-semibold ${tx.type === 'inflow' ? 'text-green-600' : ''}`}>
+                          {tx.type === 'inflow' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </p>
+                        <p className="text-xs text-gray-500">Next: {tx.date.toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Repeat className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-1">No scheduled transactions</h3>
+                    <p className="text-sm text-gray-500">Set up recurring transactions to automate your budget</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduledModal(false)}>Close</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Scheduled
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Modal */}
+        <Dialog open={showReportsModal} onOpenChange={setShowReportsModal}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                Financial Reports
+              </DialogTitle>
+              <DialogDescription>
+                View and export your financial reports
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg hover:border-blue-300 cursor-pointer transition-all">
+                  <div className="flex items-center gap-3 mb-2">
+                    <BarChart3 className="h-8 w-8 text-blue-600" />
+                    <div>
+                      <h4 className="font-semibold">Spending Report</h4>
+                      <p className="text-sm text-gray-500">View spending by category</p>
+                    </div>
+                  </div>
+                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:border-green-300 cursor-pointer transition-all">
+                  <div className="flex items-center gap-3 mb-2">
+                    <TrendingUp className="h-8 w-8 text-green-600" />
+                    <div>
+                      <h4 className="font-semibold">Income vs Expenses</h4>
+                      <p className="text-sm text-gray-500">Monthly comparison</p>
+                    </div>
+                  </div>
+                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:border-purple-300 cursor-pointer transition-all">
+                  <div className="flex items-center gap-3 mb-2">
+                    <PieChart className="h-8 w-8 text-purple-600" />
+                    <div>
+                      <h4 className="font-semibold">Net Worth</h4>
+                      <p className="text-sm text-gray-500">Assets vs liabilities</p>
+                    </div>
+                  </div>
+                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:border-orange-300 cursor-pointer transition-all">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Target className="h-8 w-8 text-orange-600" />
+                    <div>
+                      <h4 className="font-semibold">Budget Performance</h4>
+                      <p className="text-sm text-gray-500">Track budget goals</p>
+                    </div>
+                  </div>
+                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-semibold mb-2">Quick Summary - {monthNames[currentMonth.getMonth()]}</h4>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.income)}</p>
+                    <p className="text-sm text-gray-500">Total Income</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.expenses)}</p>
+                    <p className="text-sm text-gray-500">Total Expenses</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(stats.income - stats.expenses)}</p>
+                    <p className="text-sm text-gray-500">Net Savings</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportsModal(false)}>Close</Button>
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Goal Modal */}
+        <Dialog open={showNewGoalModal} onOpenChange={setShowNewGoalModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-orange-600" />
+                Create Savings Goal
+              </DialogTitle>
+              <DialogDescription>
+                Set a new financial goal to work towards
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="goal-name">Goal Name *</Label>
+                <Input
+                  id="goal-name"
+                  placeholder="e.g., Emergency Fund, Vacation"
+                  value={goalForm.name}
+                  onChange={(e) => setGoalForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="goal-target">Target Amount *</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="goal-target"
+                      type="number"
+                      placeholder="0.00"
+                      className="pl-10"
+                      value={goalForm.target_amount || ''}
+                      onChange={(e) => setGoalForm(prev => ({ ...prev, target_amount: parseFloat(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="goal-current">Current Amount</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="goal-current"
+                      type="number"
+                      placeholder="0.00"
+                      className="pl-10"
+                      value={goalForm.current_amount || ''}
+                      onChange={(e) => setGoalForm(prev => ({ ...prev, current_amount: parseFloat(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="goal-date">Target Date</Label>
+                <Input
+                  id="goal-date"
+                  type="date"
+                  value={goalForm.target_date}
+                  onChange={(e) => setGoalForm(prev => ({ ...prev, target_date: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={goalForm.category}
+                  onValueChange={(value) => setGoalForm(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="savings">Savings</SelectItem>
+                    <SelectItem value="emergency">Emergency Fund</SelectItem>
+                    <SelectItem value="vacation">Vacation</SelectItem>
+                    <SelectItem value="home">Home</SelectItem>
+                    <SelectItem value="car">Car</SelectItem>
+                    <SelectItem value="education">Education</SelectItem>
+                    <SelectItem value="retirement">Retirement</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewGoalModal(false)}>Cancel</Button>
+              <Button onClick={handleCreateGoal} disabled={isSubmitting} className="bg-orange-600 hover:bg-orange-700">
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Goal'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

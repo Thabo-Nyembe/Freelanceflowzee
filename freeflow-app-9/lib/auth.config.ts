@@ -170,6 +170,18 @@ export const authOptions: NextAuthOptions = {
           token.name = dbUser.name
           token.picture = dbUser.avatar_url
         }
+
+        // Also fetch the auth.users ID from profiles table for Supabase FK constraints
+        // This is needed because financial_transactions FK references auth.users, not public.users
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .limit(1)
+          .single()
+
+        if (profile?.id) {
+          token.authId = profile.id // Store auth.users ID for Supabase tables
+        }
       }
 
       return token
@@ -183,6 +195,8 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string
         session.user.role = token.role as string
         session.user.image = token.picture as string
+        // authId is the auth.users ID for Supabase FK constraints
+        ;(session.user as any).authId = token.authId as string
       }
 
       return session

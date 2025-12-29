@@ -75,6 +75,14 @@ export interface UseBudgetsOptions {
   limit?: number
 }
 
+// Generate a unique budget number
+function generateBudgetNumber(): string {
+  const prefix = 'BUD'
+  const timestamp = Date.now().toString(36).toUpperCase()
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+  return `${prefix}-${timestamp}-${random}`
+}
+
 export function useBudgets(options: UseBudgetsOptions = {}) {
   const { budgetType, status, fiscalYear, category, limit } = options
 
@@ -94,28 +102,90 @@ export function useBudgets(options: UseBudgetsOptions = {}) {
 
   const { data, loading, error, refetch } = useSupabaseQuery<Budget>(queryOptions)
 
-  const { mutate: create } = useSupabaseMutation<Budget>({
+  const { create, update, remove, loading: mutationLoading } = useSupabaseMutation({
     table: 'budgets',
-    operation: 'insert'
+    onSuccess: () => refetch()
   })
 
-  const { mutate: update } = useSupabaseMutation<Budget>({
-    table: 'budgets',
-    operation: 'update'
-  })
+  // Create a new budget with proper defaults
+  const createBudget = async (budgetData: Partial<Budget>) => {
+    const newBudget = {
+      budget_number: generateBudgetNumber(),
+      name: budgetData.name || 'New Budget',
+      description: budgetData.description || '',
+      budget_type: budgetData.budget_type || 'monthly',
+      total_amount: budgetData.total_amount || 0,
+      allocated_amount: budgetData.allocated_amount || 0,
+      spent_amount: 0,
+      remaining_amount: budgetData.total_amount || 0,
+      committed_amount: 0,
+      available_amount: budgetData.total_amount || 0,
+      utilization_percent: 0,
+      allocation_percent: 0,
+      currency: budgetData.currency || 'USD',
+      status: budgetData.status || 'draft',
+      period_type: budgetData.period_type || 'monthly',
+      start_date: budgetData.start_date || new Date().toISOString(),
+      end_date: budgetData.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      fiscal_year: budgetData.fiscal_year || new Date().getFullYear(),
+      category: budgetData.category || 'general',
+      department: budgetData.department,
+      alert_threshold: budgetData.alert_threshold || 90,
+      warning_threshold: budgetData.warning_threshold || 75,
+      is_exceeded: false,
+      alerts_enabled: budgetData.alerts_enabled ?? true,
+      allows_rollover: budgetData.allows_rollover ?? false,
+      rollover_amount: 0,
+      line_items: budgetData.line_items || [],
+      breakdown: budgetData.breakdown || {},
+      attachments: budgetData.attachments || [],
+      metadata: budgetData.metadata || {},
+      tags: budgetData.tags || [],
+      notes: budgetData.notes || ''
+    }
+    return create(newBudget)
+  }
 
-  const { mutate: remove } = useSupabaseMutation<Budget>({
-    table: 'budgets',
-    operation: 'delete'
-  })
+  // Update an existing budget
+  const updateBudget = async (id: string, budgetData: Partial<Budget>) => {
+    // Recalculate derived fields
+    const total = budgetData.total_amount
+    const spent = budgetData.spent_amount
+    const allocated = budgetData.allocated_amount
+
+    const updates: Partial<Budget> = {
+      ...budgetData,
+    }
+
+    if (total !== undefined && spent !== undefined) {
+      updates.remaining_amount = total - spent
+      updates.available_amount = total - spent
+      updates.utilization_percent = total > 0 ? Math.round((spent / total) * 100) : 0
+      updates.is_exceeded = spent > total
+      if (updates.is_exceeded && !budgetData.exceeded_at) {
+        updates.exceeded_at = new Date().toISOString()
+      }
+    }
+
+    if (total !== undefined && allocated !== undefined) {
+      updates.allocation_percent = total > 0 ? Math.round((allocated / total) * 100) : 0
+    }
+
+    return update(id, updates)
+  }
+
+  // Delete a budget (soft delete)
+  const deleteBudget = async (id: string, hardDelete = false) => {
+    return remove(id, hardDelete)
+  }
 
   return {
     budgets: data,
-    loading,
+    loading: loading || mutationLoading,
     error,
-    createBudget: create,
-    updateBudget: update,
-    deleteBudget: remove,
+    createBudget,
+    updateBudget,
+    deleteBudget,
     refetch
   }
 }

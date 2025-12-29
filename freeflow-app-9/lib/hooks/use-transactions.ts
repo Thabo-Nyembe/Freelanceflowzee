@@ -1,122 +1,125 @@
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
 
-export type TransactionType = 'payment' | 'refund' | 'transfer' | 'deposit' | 'withdrawal' | 'charge' | 'credit' | 'debit' | 'adjustment' | 'fee' | 'reversal' | 'settlement'
-export type TransactionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'refunded' | 'disputed' | 'on_hold' | 'authorized' | 'captured' | 'voided'
-export type TransactionPaymentMethod = 'cash' | 'check' | 'wire_transfer' | 'ach' | 'credit_card' | 'debit_card' | 'paypal' | 'stripe' | 'square' | 'venmo' | 'crypto' | 'other'
-export type RiskLevel = 'low' | 'medium' | 'high' | 'critical'
+// Types matching the financial_transactions table schema
+export type TransactionType = 'income' | 'expense'
 
 export interface Transaction {
   id: string
   user_id: string
-  transaction_number: string
-  transaction_type: TransactionType
-  title: string
-  description?: string
+  type: TransactionType
+  category: string
+  description: string
   amount: number
   currency: string
-  exchange_rate?: number
-  base_amount?: number
-  fee_amount: number
-  net_amount?: number
-  status: TransactionStatus
-  processing_status?: string
-  error_code?: string
-  error_message?: string
-  payment_method: TransactionPaymentMethod
-  payment_gateway?: string
-  gateway_transaction_id?: string
-  card_last4?: string
-  card_brand?: string
-  card_type?: string
-  bank_name?: string
-  account_last4?: string
-  routing_number?: string
-  payer_id?: string
-  payer_name?: string
-  payer_email?: string
-  payee_id?: string
-  payee_name?: string
-  payee_email?: string
-  invoice_id?: string
-  order_id?: string
-  contract_id?: string
-  subscription_id?: string
   transaction_date: string
-  processed_at?: string
-  settled_at?: string
-  refunded_at?: string
-  receipt_url?: string
-  receipt_number?: string
-  attachments: any
-  risk_score?: number
-  risk_level?: RiskLevel
-  is_flagged: boolean
-  flagged_reason?: string
-  ip_address?: string
-  user_agent?: string
-  is_reconciled: boolean
-  reconciled_at?: string
-  reconciled_by?: string
-  notes?: string
+  client_id?: string
+  client_name?: string
+  project_id?: string
+  project_name?: string
+  vendor_name?: string
+  invoice_id?: string
+  invoice_number?: string
+  is_recurring: boolean
+  recurring_frequency?: string
+  next_due_date?: string
   tags?: string[]
-  metadata: any
-  external_id?: string
-  external_source?: string
-  sync_status?: string
-  last_synced_at?: string
+  notes?: string
+  receipt_url?: string
   created_at: string
   updated_at: string
-  deleted_at?: string
+  created_by?: string
 }
 
 export interface UseTransactionsOptions {
-  transactionType?: TransactionType | 'all'
-  status?: TransactionStatus | 'all'
-  paymentMethod?: TransactionPaymentMethod | 'all'
+  type?: TransactionType | 'all'
+  category?: string | 'all'
   limit?: number
 }
 
+// Generate a unique transaction reference
+function generateTransactionRef(): string {
+  const prefix = 'TXN'
+  const timestamp = Date.now().toString(36).toUpperCase()
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+  return `${prefix}-${timestamp}-${random}`
+}
+
 export function useTransactions(options: UseTransactionsOptions = {}) {
-  const { transactionType, status, paymentMethod, limit } = options
+  const { type, category, limit } = options
 
   const filters: Record<string, any> = {}
-  if (transactionType && transactionType !== 'all') filters.transaction_type = transactionType
-  if (status && status !== 'all') filters.status = status
-  if (paymentMethod && paymentMethod !== 'all') filters.payment_method = paymentMethod
+  if (type && type !== 'all') filters.type = type
+  if (category && category !== 'all') filters.category = category
 
   const queryOptions: any = {
-    table: 'transactions',
+    table: 'financial_transactions',
     filters,
     orderBy: { column: 'transaction_date', ascending: false },
     limit: limit || 50,
-    realtime: true
+    realtime: true,
+    softDelete: false // financial_transactions table doesn't have deleted_at column
   }
 
   const { data, loading, error, refetch } = useSupabaseQuery<Transaction>(queryOptions)
 
-  const { mutate: create } = useSupabaseMutation<Transaction>({
-    table: 'transactions',
-    operation: 'insert'
+  const { create, update, remove, loading: mutationLoading } = useSupabaseMutation({
+    table: 'financial_transactions',
+    onSuccess: () => refetch()
   })
 
-  const { mutate: update } = useSupabaseMutation<Transaction>({
-    table: 'transactions',
-    operation: 'update'
-  })
+  // Create a new transaction with proper defaults
+  const createTransaction = async (txnData: Partial<Transaction>) => {
+    const newTransaction = {
+      type: txnData.type || 'expense',
+      category: txnData.category || 'General',
+      description: txnData.description || 'New Transaction',
+      amount: txnData.amount || 0,
+      currency: txnData.currency || 'USD',
+      transaction_date: txnData.transaction_date || new Date().toISOString(),
+      client_id: txnData.client_id,
+      client_name: txnData.client_name,
+      project_id: txnData.project_id,
+      project_name: txnData.project_name,
+      vendor_name: txnData.vendor_name,
+      invoice_id: txnData.invoice_id,
+      invoice_number: txnData.invoice_number,
+      is_recurring: txnData.is_recurring || false,
+      recurring_frequency: txnData.recurring_frequency,
+      next_due_date: txnData.next_due_date,
+      tags: txnData.tags || [],
+      notes: txnData.notes || '',
+      receipt_url: txnData.receipt_url
+    }
+    return create(newTransaction)
+  }
 
-  const { mutate: remove } = useSupabaseMutation<Transaction>({
-    table: 'transactions',
-    operation: 'delete'
-  })
+  // Update an existing transaction
+  const updateTransaction = async (id: string, txnData: Partial<Transaction>) => {
+    return update(id, txnData)
+  }
+
+  // Delete a transaction (hard delete since table doesn't have deleted_at)
+  const deleteTransaction = async (id: string) => {
+    return remove(id, true) // Always hard delete for financial_transactions
+  }
+
+  // Calculate summary stats
+  const stats = {
+    totalIncome: data.filter(t => t.type === 'income').reduce((sum, t) => sum + Math.abs(t.amount), 0),
+    totalExpenses: data.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0),
+    transactionCount: data.length,
+    pendingCount: 0 // financial_transactions doesn't have status field
+  }
 
   return {
     transactions: data,
-    loading,
+    loading: loading || mutationLoading,
     error,
-    createTransaction: create,
-    updateTransaction: update,
-    deleteTransaction: remove,
-    refetch
+    createTransaction,
+    updateTransaction,
+    deleteTransaction,
+    refetch,
+    stats
   }
 }

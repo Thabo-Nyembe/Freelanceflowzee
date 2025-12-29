@@ -11,6 +11,7 @@ interface UseSupabaseQueryOptions<T> {
   orderBy?: { column: string; ascending?: boolean }
   limit?: number
   realtime?: boolean
+  softDelete?: boolean // Set to false for tables without deleted_at column
 }
 
 export function useSupabaseQuery<T>({
@@ -19,7 +20,8 @@ export function useSupabaseQuery<T>({
   filters = {},
   orderBy,
   limit,
-  realtime = true
+  realtime = true,
+  softDelete = true
 }: UseSupabaseQueryOptions<T>) {
   const [data, setData] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
@@ -49,8 +51,10 @@ export function useSupabaseQuery<T>({
           query = query.limit(limit)
         }
 
-        // Filter out soft deletes
-        query = query.is('deleted_at', null)
+        // Filter out soft deletes (only for tables with deleted_at column)
+        if (softDelete) {
+          query = query.is('deleted_at', null)
+        }
 
         const { data: result, error: queryError } = await query
 
@@ -112,7 +116,10 @@ export function useSupabaseQuery<T>({
         query = query.limit(limit)
       }
 
-      query = query.is('deleted_at', null)
+      // Filter out soft deletes (only for tables with deleted_at column)
+      if (softDelete) {
+        query = query.is('deleted_at', null)
+      }
 
       const { data: result, error: queryError } = await query
 

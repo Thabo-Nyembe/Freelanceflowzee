@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 
 interface UseSupabaseMutationOptions {
@@ -25,6 +26,37 @@ export function useSupabaseMutation({
   const [loading, setLoading] = useState(false)
   const [lastMutation, setLastMutation] = useState<{ type: string; id?: string; timestamp: number } | null>(null)
   const supabase = createClientComponentClient()
+  const { data: session } = useSession()
+
+  // Get user ID from NextAuth session or Supabase auth
+  // IMPORTANT: financial_transactions has FK to auth.users, not public.users
+  // So we need to get the auth.users ID from the session's authId field
+  const getUserId = async (): Promise<string | null> => {
+    // First try Supabase auth (this gives us auth.users ID directly)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.id) {
+      return user.id
+    }
+
+    // Try authId from NextAuth session (set by auth.config.ts from profiles table)
+    // This is the auth.users-compatible ID for Supabase FK constraints
+    const authId = (session?.user as any)?.authId
+    if (authId) {
+      return authId
+    }
+
+    // Fallback: try NextAuth session user.id if it's a valid UUID
+    // Note: This may fail FK constraints if the ID is from public.users
+    if (session?.user?.id) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (uuidRegex.test(session.user.id)) {
+        console.log('Warning: Using public.users ID, may fail FK constraints')
+        return session.user.id
+      }
+    }
+
+    return null
+  }
 
   // Realtime subscription for mutation confirmations
   useEffect(() => {
@@ -59,9 +91,20 @@ export function useSupabaseMutation({
   const create = async <T extends Record<string, any>>(data: T) => {
     try {
       setLoading(true)
+
+      // Get user ID and add to data if not already present
+      let dataWithUser = { ...data }
+      if (!dataWithUser.user_id) {
+        const userId = await getUserId()
+        if (!userId) {
+          throw new Error('User not authenticated')
+        }
+        dataWithUser.user_id = userId
+      }
+
       const { data: result, error } = await supabase
         .from(table)
-        .insert(data)
+        .insert(dataWithUser)
         .select()
         .single()
 
