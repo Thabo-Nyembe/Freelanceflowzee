@@ -376,9 +376,10 @@ export function EnhancedNotifications({
     }
   }
 
-  const formatTimestamp = (timestamp: Date) => {
+  const formatTimestamp = (timestamp: Date | string) => {
     const now = new Date()
-    const diffInMinutes = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60))
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
     
     if (diffInMinutes < 1) return 'Just now'
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`
