@@ -28,7 +28,7 @@ import {
   Hexagon,
   Cylinder,
   Cone,
-  Sphere,
+  Globe,
   Plus,
   Minus,
   ZoomIn,
@@ -97,6 +97,19 @@ import {
   Mouse,
   Gamepad2
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -348,6 +361,36 @@ const mockSceneHierarchy: SceneObject[] = [
       }
     ]
   }
+]
+
+// Competitive Upgrade Mock Data - Blender/Maya-level 3D Modeling Intelligence
+const mock3DAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Render Optimization', description: 'GPU utilization at 95% - optimal performance!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'High Poly Count', description: 'Scene exceeds 5M polygons - consider LOD optimization.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '3', type: 'info' as const, title: 'AI Mesh Suggestion', description: 'Topology flow could improve with edge loop adjustments.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Assist' },
+]
+
+const mock3DCollaborators = [
+  { id: '1', name: '3D Lead', avatar: '/avatars/3d-lead.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Texture Artist', avatar: '/avatars/texture.jpg', status: 'online' as const, role: 'Artist' },
+  { id: '3', name: 'Rigger', avatar: '/avatars/rigger.jpg', status: 'away' as const, role: 'Animator' },
+]
+
+const mock3DPredictions = [
+  { id: '1', title: 'Render Completion', prediction: 'Final render will complete in 4 hours at current settings', confidence: 92, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Asset Pipeline', prediction: 'LOD generation can reduce load time by 40%', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mock3DActivities = [
+  { id: '1', user: 'Texture Artist', action: 'Updated', target: '4K PBR materials for hero model', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: '3D Lead', action: 'Approved', target: 'character animation rig', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'Rigger', action: 'Started', target: 'facial blend shapes', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+]
+
+const mock3DQuickActions = [
+  { id: '1', label: 'New Model', icon: 'plus', action: () => console.log('New model'), variant: 'default' as const },
+  { id: '2', label: 'Render', icon: 'play', action: () => console.log('Render'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
 export default function ThreeDModelingClient() {
@@ -1735,6 +1778,40 @@ export default function ThreeDModelingClient() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mock3DAIInsights}
+              title="3D Modeling Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mock3DCollaborators}
+              maxVisible={4}
+              showStatus={true}
+            />
+            <PredictiveAnalytics
+              predictions={mock3DPredictions}
+              title="Render Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mock3DActivities}
+            title="3D Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mock3DQuickActions}
+            variant="grid"
+          />
+        </div>
       </div>
 
       {/* Model Detail Dialog */}

@@ -1,5 +1,8 @@
 import DashboardLayoutClient from "./dashboard-layout-client"
 
+// Force dynamic rendering to prevent SSG issues with client components
+export const dynamic = 'force-dynamic'
+
 export default function DashboardLayout({
   children, }: {
   children: React.ReactNode
