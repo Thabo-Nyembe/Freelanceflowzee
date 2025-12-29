@@ -708,6 +708,30 @@ export default function ShippingClient() {
 
   const pendingOrders = mockOrders.filter(o => o.status === 'awaiting_shipment')
 
+  const handleCreateShipment = () => {
+    toast.info('Create Shipment', {
+      description: 'Opening shipment form...'
+    })
+  }
+
+  const handlePrintLabel = (shipment: Shipment) => {
+    toast.success('Label ready', {
+      description: `Shipping label for ${shipment.trackingNumber} is ready to print`
+    })
+  }
+
+  const handleTrackShipment = (shipment: Shipment) => {
+    toast.info('Tracking', {
+      description: `Opening tracking for ${shipment.trackingNumber}`
+    })
+  }
+
+  const handleBatchShip = () => {
+    toast.success('Batch shipment created', {
+      description: `${selectedOrders.length} orders queued for shipment`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

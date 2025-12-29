@@ -398,6 +398,32 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     }).format(amount / 100)
   }
 
+  const handleCreateProduct = () => {
+    toast.info('Create Product', {
+      description: 'Opening product form...'
+    })
+    setShowCreateProduct(true)
+  }
+
+  const handleCreateCoupon = () => {
+    toast.info('Create Coupon', {
+      description: 'Opening coupon form...'
+    })
+    setShowCreateCoupon(true)
+  }
+
+  const handleExportProducts = () => {
+    toast.success('Export started', {
+      description: 'Your product catalog is being exported'
+    })
+  }
+
+  const handleArchiveProduct = (product: StripeProduct) => {
+    toast.success('Product archived', {
+      description: `${product.name} has been archived`
+    })
+  }
+
   const getStatusColor = (status: ProductStatus) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'

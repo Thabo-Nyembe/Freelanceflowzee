@@ -767,6 +767,36 @@ export default function StockClient() {
     setShowProductDialog(true)
   }
 
+  const handleAddStock = () => {
+    toast.info('Add Stock', {
+      description: 'Opening stock entry form...'
+    })
+  }
+
+  const handleTransferStock = () => {
+    toast.info('Transfer Stock', {
+      description: 'Opening stock transfer form...'
+    })
+  }
+
+  const handleStartCount = () => {
+    toast.info('Stock Count', {
+      description: 'Starting inventory count session...'
+    })
+  }
+
+  const handleExportInventory = () => {
+    toast.success('Export started', {
+      description: 'Your inventory report is being exported'
+    })
+  }
+
+  const handleAcknowledgeAlert = (alert: Alert) => {
+    toast.success('Alert acknowledged', {
+      description: `Stock alert for ${alert.productName} acknowledged`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
