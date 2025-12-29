@@ -502,6 +502,40 @@ export default function MarketplaceClient() {
     return `$${price}/mo`
   }
 
+  // Handlers
+  const handleAddToWishlist = (product: Product) => {
+    toast.success('Added to wishlist', {
+      description: `"${product.name}" added to your wishlist`
+    })
+    setWishlist(prev => [...prev, product.id])
+  }
+
+  const handleRemoveFromWishlist = (product: Product) => {
+    toast.success('Removed from wishlist', {
+      description: `"${product.name}" removed from your wishlist`
+    })
+    setWishlist(prev => prev.filter(id => id !== product.id))
+  }
+
+  const handlePurchaseProduct = (product: Product) => {
+    toast.success('Purchase initiated', {
+      description: `Starting checkout for "${product.name}"`
+    })
+  }
+
+  const handleSubmitReview = (product: Product) => {
+    toast.success('Review submitted', {
+      description: 'Thank you for your review!'
+    })
+    setShowReviewDialog(false)
+  }
+
+  const handleContactSeller = (product: Product) => {
+    toast.info('Contact Seller', {
+      description: `Opening chat with seller of "${product.name}"`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

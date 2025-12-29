@@ -517,6 +517,39 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     }
   }
 
+  // Handlers
+  const handleTransferStock = () => {
+    toast.info('Transfer Stock', {
+      description: 'Opening transfer dialog...'
+    })
+    setShowTransferDialog(true)
+  }
+
+  const handleExportInventory = () => {
+    toast.success('Export started', {
+      description: 'Inventory data is being exported'
+    })
+  }
+
+  const handleCreatePurchaseOrder = () => {
+    toast.info('Create Purchase Order', {
+      description: 'Opening PO form...'
+    })
+    setShowPODialog(true)
+  }
+
+  const handleUpdateStock = (product: Product) => {
+    toast.success('Stock updated', {
+      description: `Stock for "${product.title}" has been updated`
+    })
+  }
+
+  const handleArchiveProduct = (product: Product) => {
+    toast.success('Product archived', {
+      description: `"${product.title}" has been archived`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

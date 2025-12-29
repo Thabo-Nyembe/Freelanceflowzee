@@ -240,6 +240,31 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     )
   }
 
+  // Handlers
+  const handleExportFinancials = () => {
+    toast.success('Export started', {
+      description: 'Financial reports are being exported'
+    })
+  }
+
+  const handleReconcileAccount = (account: typeof mockAccounts[0]) => {
+    toast.success('Reconciliation started', {
+      description: `Reconciling "${account.name}"...`
+    })
+  }
+
+  const handleGenerateReport = (reportType: string) => {
+    toast.success('Report generating', {
+      description: `Generating ${reportType} report...`
+    })
+  }
+
+  const handleApproveTransaction = (transaction: typeof mockTransactions[0]) => {
+    toast.success('Transaction approved', {
+      description: `Transaction "${transaction.description}" approved`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

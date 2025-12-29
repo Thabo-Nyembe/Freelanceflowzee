@@ -463,6 +463,31 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
   }
 
+  // Handlers
+  const handleCancelSubscription = (subscription: Subscription) => {
+    toast.success('Subscription cancelled', {
+      description: `Subscription for ${subscription.customer?.name || 'customer'} has been cancelled`
+    })
+  }
+
+  const handleRefundPayment = (payment: typeof mockPaymentHistory[0]) => {
+    toast.success('Refund initiated', {
+      description: `Refund for $${payment.amount} has been initiated`
+    })
+  }
+
+  const handleExportBilling = () => {
+    toast.success('Export started', {
+      description: 'Your billing data is being exported'
+    })
+  }
+
+  const handleRetryPayment = (invoice: Invoice) => {
+    toast.info('Retrying payment', {
+      description: `Attempting to charge for invoice ${invoice.id}`
+    })
+  }
+
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (

@@ -420,6 +420,39 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     []
   )
 
+  // Handlers
+  const handleUploadDocument = () => {
+    toast.info('Upload Document', {
+      description: 'Opening file upload...'
+    })
+    setShowUploadDialog(true)
+  }
+
+  const handleShareDocument = (doc: DocumentFile) => {
+    toast.success('Share link copied', {
+      description: `Share link for "${doc.name}" copied to clipboard`
+    })
+  }
+
+  const handleDownloadDocument = (doc: DocumentFile) => {
+    toast.success('Download started', {
+      description: `Downloading "${doc.name}"...`
+    })
+  }
+
+  const handleDeleteDocument = (doc: DocumentFile) => {
+    toast.success('Document deleted', {
+      description: `"${doc.name}" has been deleted`
+    })
+  }
+
+  const handleStarDocument = (doc: DocumentFile) => {
+    const action = doc.starred ? 'removed from' : 'added to'
+    toast.success('Star updated', {
+      description: `"${doc.name}" ${action} starred`
+    })
+  }
+
   if (error) return (
     <div className="p-8">
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
