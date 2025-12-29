@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { useDependencies, type Dependency, type DependencyStatus, type DependencyType } from '@/lib/hooks/use-dependencies'
 import {
   Package,

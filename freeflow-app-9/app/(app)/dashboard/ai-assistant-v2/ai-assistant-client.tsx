@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
 import {
   Bot,
   Send,
