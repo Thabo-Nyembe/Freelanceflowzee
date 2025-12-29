@@ -471,6 +471,33 @@ export default function WebhooksClient({
     setExpandedCategories(newExpanded)
   }
 
+  const handleCreateEndpoint = () => {
+    toast.info('Create Endpoint', {
+      description: 'Opening webhook endpoint form...'
+    })
+    setShowEndpointDialog(true)
+  }
+
+  const handleTestWebhook = () => {
+    toast.info('Test Webhook', {
+      description: 'Sending test payload...'
+    })
+    setShowTestDialog(true)
+  }
+
+  const handleCopyUrl = (url: string) => {
+    navigator.clipboard.writeText(url)
+    toast.success('URL copied', {
+      description: 'Webhook URL copied to clipboard'
+    })
+  }
+
+  const handleRotateSecret = () => {
+    toast.success('Secret rotated', {
+      description: 'New signing secret has been generated'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

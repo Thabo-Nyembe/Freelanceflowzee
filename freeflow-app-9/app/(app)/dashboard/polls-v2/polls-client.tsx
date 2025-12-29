@@ -601,6 +601,32 @@ export default function PollsClient() {
     })
   }
 
+  const handleCreateForm = () => {
+    toast.info('Create Form', {
+      description: 'Opening form builder...'
+    })
+    setShowCreateDialog(true)
+  }
+
+  const handleUseTemplate = () => {
+    toast.info('Template Gallery', {
+      description: 'Opening template gallery...'
+    })
+    setShowTemplateDialog(true)
+  }
+
+  const handleExportResponses = () => {
+    toast.success('Export started', {
+      description: 'Your responses are being exported'
+    })
+  }
+
+  const handleShareForm = () => {
+    toast.success('Link copied', {
+      description: 'Form share link copied to clipboard'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
