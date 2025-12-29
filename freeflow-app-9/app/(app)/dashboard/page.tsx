@@ -288,8 +288,18 @@ export default function DashboardPage() {
           impact: 'medium'
         })))
 
-        // Update projects with real data
-        setProjects(recentProjects)
+        // Update projects with real data - ensure required fields exist
+        if (recentProjects && recentProjects.length > 0) {
+          setProjects(recentProjects.map((p: any) => ({
+            ...p,
+            value: p.value || p.budget || 50000,
+            budget: p.budget || p.value || 50000,
+            progress: p.progress || 50,
+            priority: p.priority || 'Medium',
+            client: p.client || p.client_name || 'Client',
+            status: p.status || 'In Progress',
+          })))
+        }
 
         // Update dashboard stats with real Supabase data
         setDashboardStats({
@@ -1663,7 +1673,7 @@ export default function DashboardPage() {
                     </Badge>
                     <div className={cn("w-2 h-2 rounded-full", getPriorityColor(project.priority))} />
                   </div>
-                  <span className="font-medium text-green-600">${project.value.toLocaleString()}</span>
+                  <span className="font-medium text-green-600">${(project.value || project.budget || 0).toLocaleString()}</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">Client: {project.client}</p>
                 <div className="flex items-center justify-between">
