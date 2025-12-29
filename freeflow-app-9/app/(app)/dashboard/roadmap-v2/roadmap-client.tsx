@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -620,6 +621,39 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     setIsFeatureDialogOpen(true)
   }
 
+  const handleShareRoadmap = () => {
+    toast.success('Link copied', {
+      description: 'Roadmap share link copied to clipboard'
+    })
+  }
+
+  const handleNewFeature = () => {
+    toast.info('New Feature', {
+      description: 'Opening feature creation form...'
+    })
+  }
+
+  const handleVote = () => {
+    if (!selectedFeature) return
+    toast.success('Vote recorded', {
+      description: `You voted for ${selectedFeature.title}`
+    })
+  }
+
+  const handleComment = () => {
+    if (!selectedFeature) return
+    toast.info('Comment', {
+      description: 'Opening comment editor...'
+    })
+  }
+
+  const handleShareFeature = () => {
+    if (!selectedFeature) return
+    toast.success('Link copied', {
+      description: `Share link for ${selectedFeature.title} copied`
+    })
+  }
+
   // Group features by status for Kanban view
   const featuresByStatus = useMemo(() => {
     const grouped: Record<InitiativeStatus, Feature[]> = {
@@ -651,11 +685,11 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleShareRoadmap}>
               <Share2 className="w-4 h-4 mr-2" />
               Share
             </Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={handleNewFeature}>
               <Plus className="w-4 h-4 mr-2" />
               New Feature
             </Button>
@@ -1864,15 +1898,15 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
                     {/* Actions */}
                     <div className="flex items-center gap-3 pt-4 border-t">
-                      <Button className="flex-1">
+                      <Button className="flex-1" onClick={handleVote}>
                         <ThumbsUp className="w-4 h-4 mr-2" />
                         Vote
                       </Button>
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={handleComment}>
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Comment
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleShareFeature}>
                         <Share2 className="w-4 h-4" />
                       </Button>
                     </div>

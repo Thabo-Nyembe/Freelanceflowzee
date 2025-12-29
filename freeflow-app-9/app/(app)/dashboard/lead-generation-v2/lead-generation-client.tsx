@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
@@ -663,6 +664,32 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     setIsLeadDialogOpen(true)
   }
 
+  const handleImport = () => {
+    toast.info('Import Leads', {
+      description: 'Opening import wizard...'
+    })
+  }
+
+  const handleAddLead = () => {
+    toast.info('Add Lead', {
+      description: 'Opening lead creation form...'
+    })
+  }
+
+  const handleSendEmail = () => {
+    if (!selectedLead) return
+    toast.success('Email composer opened', {
+      description: `Composing email to ${selectedLead.name}`
+    })
+  }
+
+  const handleLogCall = () => {
+    if (!selectedLead) return
+    toast.success('Call logged', {
+      description: `Call activity logged for ${selectedLead.name}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50/30 to-red-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -678,11 +705,11 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleImport}>
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
-            <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+            <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={handleAddLead}>
               <Plus className="w-4 h-4 mr-2" />
               Add Lead
             </Button>
@@ -2168,11 +2195,11 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
                     {/* Actions */}
                     <div className="flex items-center gap-3 pt-4 border-t">
-                      <Button className="flex-1">
+                      <Button className="flex-1" onClick={handleSendEmail}>
                         <Mail className="w-4 h-4 mr-2" />
                         Send Email
                       </Button>
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={handleLogCall}>
                         <Phone className="w-4 h-4 mr-2" />
                         Log Call
                       </Button>

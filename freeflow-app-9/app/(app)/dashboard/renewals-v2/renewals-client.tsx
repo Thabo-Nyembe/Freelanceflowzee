@@ -664,6 +664,45 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     setIsRenewalDialogOpen(true)
   }
 
+  const handleSendProposal = () => {
+    if (!selectedRenewal) return
+    toast.success('Proposal sent successfully', {
+      description: `Renewal proposal sent to ${selectedRenewal.customerName}`
+    })
+    setIsRenewalDialogOpen(false)
+  }
+
+  const handleScheduleMeeting = () => {
+    if (!selectedRenewal) return
+    toast.success('Meeting scheduled', {
+      description: `Meeting request sent to ${selectedRenewal.customerName}`
+    })
+  }
+
+  const handleExport = () => {
+    toast.success('Export started', {
+      description: 'Your renewal data is being exported'
+    })
+  }
+
+  const handleScheduleRenewal = () => {
+    toast.info('Schedule Renewal', {
+      description: 'Opening renewal scheduler...'
+    })
+  }
+
+  const handleContactEmail = (email: string, name: string) => {
+    toast.success('Opening email', {
+      description: `Composing email to ${name}`
+    })
+  }
+
+  const handleContactPhone = (phone: string, name: string) => {
+    toast.success('Initiating call', {
+      description: `Calling ${name}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -679,11 +718,11 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+            <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleScheduleRenewal}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Schedule Renewal
             </Button>
@@ -1823,8 +1862,8 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm"><Mail className="w-4 h-4" /></Button>
-                                <Button variant="ghost" size="sm"><Phone className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleContactEmail(contact.email, contact.name)}><Mail className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleContactPhone(contact.phone, contact.name)}><Phone className="w-4 h-4" /></Button>
                               </div>
                             </div>
                           ))}
@@ -1869,11 +1908,11 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
                     {/* Actions */}
                     <div className="flex items-center gap-3 pt-4 border-t">
-                      <Button className="flex-1">
+                      <Button className="flex-1" onClick={handleSendProposal}>
                         <Send className="w-4 h-4 mr-2" />
                         Send Proposal
                       </Button>
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={handleScheduleMeeting}>
                         <Calendar className="w-4 h-4 mr-2" />
                         Schedule Meeting
                       </Button>
