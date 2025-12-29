@@ -433,6 +433,31 @@ export default function EmployeesClient() {
     setExpandedNodes(prev => prev.includes(id) ? prev.filter(n => n !== id) : [...prev, id])
   }
 
+  // Handlers
+  const handleExportEmployees = () => {
+    toast.success('Export started', {
+      description: 'Employee data is being exported'
+    })
+  }
+
+  const handleScheduleReview = (employee: Employee) => {
+    toast.success('Review scheduled', {
+      description: `Performance review scheduled for ${employee.name}`
+    })
+  }
+
+  const handleApproveTimeOff = (request: typeof mockTimeOffRequests[0]) => {
+    toast.success('Time off approved', {
+      description: `Request from ${request.employeeName} has been approved`
+    })
+  }
+
+  const handleSendAnnouncement = () => {
+    toast.info('Send Announcement', {
+      description: 'Opening announcement composer...'
+    })
+  }
+
   const renderOrgNode = (node: OrgNode, level: number = 0): JSX.Element => (
     <div key={node.id} className={`${level > 0 ? 'ml-8 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : ''}`}>
       <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">

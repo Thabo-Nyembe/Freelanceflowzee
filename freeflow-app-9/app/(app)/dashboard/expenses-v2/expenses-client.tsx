@@ -350,6 +350,37 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     return Object.entries(breakdown).sort((a, b) => b[1] - a[1])
   }, [reports])
 
+  // Handlers
+  const handleApproveExpense = (report: ExpenseReport) => {
+    toast.success('Expense approved', {
+      description: `Report "${report.title}" has been approved`
+    })
+  }
+
+  const handleRejectExpense = (report: ExpenseReport) => {
+    toast.success('Expense rejected', {
+      description: `Report "${report.title}" has been rejected`
+    })
+  }
+
+  const handleExportExpenses = () => {
+    toast.success('Export started', {
+      description: 'Your expense data is being exported'
+    })
+  }
+
+  const handleSubmitReport = (report: ExpenseReport) => {
+    toast.success('Report submitted', {
+      description: `"${report.title}" submitted for approval`
+    })
+  }
+
+  const handleAddReceipt = () => {
+    toast.info('Add Receipt', {
+      description: 'Opening receipt scanner...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

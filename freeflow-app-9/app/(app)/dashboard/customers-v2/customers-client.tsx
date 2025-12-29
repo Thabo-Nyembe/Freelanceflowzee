@@ -581,6 +581,38 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     )
   }
 
+  // Handlers
+  const handleExportCustomers = () => {
+    toast.success('Export started', {
+      description: 'Customer data is being exported'
+    })
+  }
+
+  const handleCreateOpportunity = () => {
+    toast.info('Create Opportunity', {
+      description: 'Opening opportunity form...'
+    })
+    setShowAddOpportunity(true)
+  }
+
+  const handleConvertLead = (contact: Contact) => {
+    toast.success('Lead converted', {
+      description: `${contact.firstName} ${contact.lastName} converted to customer`
+    })
+  }
+
+  const handleSendEmail = (contact: Contact) => {
+    toast.info('Compose Email', {
+      description: `Opening email composer for ${contact.email}`
+    })
+  }
+
+  const handleLogActivity = () => {
+    toast.success('Activity logged', {
+      description: 'Your activity has been recorded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

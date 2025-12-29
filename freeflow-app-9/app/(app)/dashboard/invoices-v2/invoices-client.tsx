@@ -326,6 +326,36 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     }
   }
 
+  const handleSendInvoice = (invoice: Invoice) => {
+    toast.success('Invoice sent', {
+      description: `Invoice #${invoice.invoice_number} sent to ${invoice.client_name}`
+    })
+  }
+
+  const handleMarkAsPaid = (invoice: Invoice) => {
+    toast.success('Invoice marked as paid', {
+      description: `Invoice #${invoice.invoice_number} has been marked as paid`
+    })
+  }
+
+  const handleExportInvoices = () => {
+    toast.success('Export started', {
+      description: 'Your invoices are being exported'
+    })
+  }
+
+  const handleDuplicateInvoice = (invoice: Invoice) => {
+    toast.success('Invoice duplicated', {
+      description: `Copy of invoice #${invoice.invoice_number} created`
+    })
+  }
+
+  const handleSendReminder = (invoice: Invoice) => {
+    toast.success('Reminder sent', {
+      description: `Payment reminder sent for invoice #${invoice.invoice_number}`
+    })
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'

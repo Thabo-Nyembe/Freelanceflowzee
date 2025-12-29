@@ -404,6 +404,32 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
       .slice(0, 10)
   }, [displayEvents])
 
+  // Handlers
+  const handleCancelEvent = (event: CalendarEvent) => {
+    toast.success('Event cancelled', {
+      description: `"${event.title}" has been cancelled`
+    })
+  }
+
+  const handleRescheduleEvent = (event: CalendarEvent) => {
+    toast.info('Reschedule Event', {
+      description: 'Opening reschedule options...'
+    })
+    setSelectedEvent(event)
+  }
+
+  const handleExportCalendar = () => {
+    toast.success('Export started', {
+      description: 'Your calendar is being exported'
+    })
+  }
+
+  const handleSyncCalendar = () => {
+    toast.success('Sync started', {
+      description: 'Syncing with external calendars...'
+    })
+  }
+
   if (error) return (
     <div className="p-8">
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">

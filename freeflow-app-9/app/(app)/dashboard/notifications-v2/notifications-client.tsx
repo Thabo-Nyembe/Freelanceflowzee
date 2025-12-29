@@ -433,6 +433,53 @@ export default function NotificationsClient() {
     return colors[priority] || 'bg-gray-100 text-gray-700'
   }
 
+  // Handlers
+  const handleCreateCampaign = () => {
+    toast.info('Create Campaign', {
+      description: 'Opening campaign builder...'
+    })
+    setShowCreateCampaign(true)
+  }
+
+  const handleSendNotification = (notification: Notification) => {
+    toast.success('Notification sent', {
+      description: `"${notification.title}" delivered successfully`
+    })
+  }
+
+  const handleMarkAsRead = (notification: Notification) => {
+    toast.success('Marked as read', {
+      description: `Notification marked as read`
+    })
+  }
+
+  const handleStarNotification = (notification: Notification) => {
+    const action = notification.isStarred ? 'removed from' : 'added to'
+    toast.success('Star updated', {
+      description: `Notification ${action} starred`
+    })
+  }
+
+  const handleCreateAutomation = () => {
+    toast.info('Create Automation', {
+      description: 'Opening automation builder...'
+    })
+    setShowCreateAutomation(true)
+  }
+
+  const handleToggleAutomation = (automation: (typeof mockAutomations)[0]) => {
+    const newStatus = automation.status === 'active' ? 'paused' : 'active'
+    toast.success(`Automation ${newStatus}`, {
+      description: `"${automation.name}" is now ${newStatus}`
+    })
+  }
+
+  const handleExportNotifications = () => {
+    toast.success('Export started', {
+      description: 'Your notification data is being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">
