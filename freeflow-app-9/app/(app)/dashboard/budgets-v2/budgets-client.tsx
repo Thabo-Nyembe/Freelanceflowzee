@@ -22,6 +22,27 @@ import {
   FileText, Lock, Unlock, ChevronDown, Trash2, Edit3, Copy, CheckCircle2,
   Folder, Cog, Upload, MoreHorizontal
 } from 'lucide-react'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Import mock data from centralized adapters
+import {
+  budgetsAIInsights,
+  budgetsCollaborators,
+  budgetsPredictions,
+  budgetsActivities,
+  budgetsQuickActions
+} from '@/lib/mock-data/adapters'
 import { useBudgets, type Budget, type BudgetType, type BudgetStatus } from '@/lib/hooks/use-budgets'
 
 // ============================================================================
@@ -202,6 +223,39 @@ const getAccountIcon = (type: Account['type']) => {
   }
   return icons[type]
 }
+
+// ============================================================================
+// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// ============================================================================
+
+const mockBudgetsAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Under Budget', description: 'Operating 12% under budget this month. Savings allocated to reserves.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Spending' },
+  { id: '2', type: 'info' as const, title: 'Spending Trend', description: 'Marketing spend optimized. ROI improved by 18% this quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
+  { id: '3', type: 'warning' as const, title: 'Budget Alert', description: 'Travel category at 95% of monthly allocation.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Alerts' },
+]
+
+const mockBudgetsCollaborators = [
+  { id: '1', name: 'CFO', avatar: '/avatars/cfo.jpg', status: 'online' as const, role: 'Executive' },
+  { id: '2', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '3', name: 'Budget Analyst', avatar: '/avatars/analyst.jpg', status: 'busy' as const, role: 'Analyst' },
+]
+
+const mockBudgetsPredictions = [
+  { id: '1', title: 'Year-End Forecast', prediction: '$45K surplus projected', confidence: 85, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Q2 Spending', prediction: 'Within 5% of planned budget', confidence: 78, trend: 'stable' as const, impact: 'medium' as const },
+]
+
+const mockBudgetsActivities = [
+  { id: '1', user: 'Budget System', action: 'Auto-allocated funds to', target: 'Emergency Reserve', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Finance Team', action: 'Approved request for', target: 'Equipment ($5,000)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+  { id: '3', user: 'System', action: 'Budget refresh for', target: 'January 2024', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+]
+
+const mockBudgetsQuickActions = [
+  { id: '1', label: 'New Budget', icon: 'plus', action: () => console.log('New budget'), variant: 'default' as const },
+  { id: '2', label: 'Transfer Funds', icon: 'arrow-right', action: () => console.log('Transfer'), variant: 'default' as const },
+  { id: '3', label: 'Reports', icon: 'chart', action: () => console.log('Reports'), variant: 'outline' as const },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1688,6 +1742,40 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={mockBudgetsAIInsights}
+              title="Budget Intelligence"
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={mockBudgetsCollaborators}
+              maxVisible={4}
+              showStatus={true}
+            />
+            <PredictiveAnalytics
+              predictions={mockBudgetsPredictions}
+              title="Budget Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={mockBudgetsActivities}
+            title="Budget Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={mockBudgetsQuickActions}
+            variant="grid"
+          />
+        </div>
 
         {/* Transaction Detail Modal */}
         {selectedTransaction && (
