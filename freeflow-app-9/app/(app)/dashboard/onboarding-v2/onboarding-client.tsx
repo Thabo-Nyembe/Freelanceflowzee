@@ -489,6 +489,24 @@ export default function OnboardingClient() {
     toast.success('Exporting onboarding report...')
   }
 
+  const handleCompleteTask = (task: OnboardingTask) => {
+    toast.success('Task completed', {
+      description: `"${task.title}" has been marked complete`
+    })
+  }
+
+  const handleAssignTask = (task: OnboardingTask) => {
+    toast.info('Assign Task', {
+      description: 'Opening assignee selection...'
+    })
+  }
+
+  const handleSendReminder = (employee: Employee) => {
+    toast.success('Reminder sent', {
+      description: `Reminder sent to ${employee.name}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

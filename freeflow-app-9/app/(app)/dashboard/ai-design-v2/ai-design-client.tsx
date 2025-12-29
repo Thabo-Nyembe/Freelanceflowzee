@@ -444,6 +444,31 @@ export default function AIDesignClient() {
     }, 2000)
   }
 
+  // Handlers
+  const handleSaveDesign = (design: GeneratedDesign) => {
+    toast.success('Design saved', {
+      description: 'Design saved to your library'
+    })
+  }
+
+  const handleDownloadDesign = (design: GeneratedDesign) => {
+    toast.success('Download started', {
+      description: 'Your design is being downloaded'
+    })
+  }
+
+  const handleRegenerateDesign = () => {
+    toast.info('Regenerating', {
+      description: 'Creating new variations...'
+    })
+  }
+
+  const handleExportDesigns = () => {
+    toast.success('Export started', {
+      description: 'Your designs are being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

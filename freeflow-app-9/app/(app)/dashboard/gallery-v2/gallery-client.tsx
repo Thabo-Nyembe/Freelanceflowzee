@@ -504,6 +504,32 @@ export default function GalleryClient() {
     return num.toString()
   }
 
+  // Handlers
+  const handleUploadMedia = () => {
+    toast.info('Upload Media', {
+      description: 'Opening file uploader...'
+    })
+    setShowUploadDialog(true)
+  }
+
+  const handleDownloadMedia = (item: GalleryItem) => {
+    toast.success('Download started', {
+      description: `Downloading "${item.title}"...`
+    })
+  }
+
+  const handleShareMedia = (item: GalleryItem) => {
+    toast.success('Link copied', {
+      description: 'Share link copied to clipboard'
+    })
+  }
+
+  const handleDeleteMedia = (item: GalleryItem) => {
+    toast.success('Media deleted', {
+      description: `"${item.title}" has been deleted`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

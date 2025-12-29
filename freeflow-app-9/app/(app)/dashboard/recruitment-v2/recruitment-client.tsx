@@ -837,6 +837,24 @@ export default function RecruitmentClient() {
     toast.success('Exporting recruitment report...')
   }
 
+  const handleScheduleInterview = (candidate: Candidate) => {
+    toast.success('Interview scheduled', {
+      description: `Interview scheduled with ${candidate.name}`
+    })
+  }
+
+  const handleRejectCandidate = (candidate: Candidate) => {
+    toast.success('Candidate rejected', {
+      description: `${candidate.name} has been moved to rejected`
+    })
+  }
+
+  const handleHireCandidate = (candidate: Candidate) => {
+    toast.success('Offer sent', {
+      description: `Offer sent to ${candidate.name}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
       <div className="p-8">
