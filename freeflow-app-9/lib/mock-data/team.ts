@@ -297,11 +297,14 @@ export const TEAM_MEMBERS: TeamMember[] = [
 ]
 
 // Collaborators format for competitive upgrades components
-export const COLLABORATORS = TEAM_MEMBERS.slice(0, 5).map(m => ({
+const COLLABORATOR_COLORS = ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
+
+export const COLLABORATORS = TEAM_MEMBERS.slice(0, 5).map((m, i) => ({
   id: m.id,
   name: m.name,
   avatar: m.avatar,
-  status: m.status as 'active' | 'idle' | 'offline',
+  color: COLLABORATOR_COLORS[i % COLLABORATOR_COLORS.length],
+  status: (m.status === 'active' ? 'online' : m.status === 'idle' ? 'away' : 'offline') as 'online' | 'away' | 'offline',
   lastActive: m.lastActive,
   role: m.title
 }))

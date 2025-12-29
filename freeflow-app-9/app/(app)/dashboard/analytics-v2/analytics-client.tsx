@@ -24,6 +24,36 @@ import {
   BarChart2, Database, GitBranch, Workflow, ArrowRight, Mail, Link
 } from 'lucide-react'
 
+// Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  Sparkline,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+// Centralized Mock Data - Investor-Ready
+import {
+  analyticsMetrics,
+  analyticsFunnels,
+  analyticsCohorts,
+  analyticsReports,
+  analyticsDashboards,
+  analyticsAIInsights,
+  analyticsCollaborators,
+  analyticsPredictions,
+  analyticsActivities,
+  analyticsQuickActions,
+  analyticsKeyMetrics,
+  analyticsRealtimeMetrics,
+  companyInfo,
+} from '@/lib/mock-data/adapters'
+
 // Type definitions
 interface AnalyticsMetric {
   id: string
@@ -97,92 +127,17 @@ interface Dashboard {
   sharedWith: string[]
 }
 
-// Mock data
-const mockMetrics: AnalyticsMetric[] = [
-  { id: '1', name: 'Total Users', value: 24892, previousValue: 22134, changePercent: 12.5, category: 'Users', type: 'count', status: 'up' },
-  { id: '2', name: 'Monthly Revenue', value: 148320, previousValue: 137100, changePercent: 8.2, category: 'Revenue', type: 'currency', status: 'up' },
-  { id: '3', name: 'Conversion Rate', value: 3.24, previousValue: 2.98, changePercent: 8.7, category: 'Conversion', type: 'percentage', status: 'up' },
-  { id: '4', name: 'Avg. Session Duration', value: 272, previousValue: 287, changePercent: -5.2, category: 'Engagement', type: 'duration', status: 'down' },
-  { id: '5', name: 'Page Views', value: 892000, previousValue: 774000, changePercent: 15.3, category: 'Traffic', type: 'count', status: 'up' },
-  { id: '6', name: 'Bounce Rate', value: 38.2, previousValue: 39.1, changePercent: -2.3, category: 'Engagement', type: 'percentage', status: 'up' },
-  { id: '7', name: 'Active Subscriptions', value: 3847, previousValue: 3512, changePercent: 9.5, category: 'Subscriptions', type: 'count', status: 'up' },
-  { id: '8', name: 'Churn Rate', value: 2.1, previousValue: 2.8, changePercent: -25.0, category: 'Retention', type: 'percentage', status: 'up' },
-  { id: '9', name: 'CAC', value: 45.20, previousValue: 52.30, changePercent: -13.6, category: 'Acquisition', type: 'currency', status: 'up' },
-  { id: '10', name: 'LTV', value: 847, previousValue: 792, changePercent: 6.9, category: 'Value', type: 'currency', status: 'up' },
-  { id: '11', name: 'NPS Score', value: 72, previousValue: 68, changePercent: 5.9, category: 'Satisfaction', type: 'count', status: 'up' },
-  { id: '12', name: 'Support Tickets', value: 234, previousValue: 289, changePercent: -19.0, category: 'Support', type: 'count', status: 'up' }
-]
-
-const mockFunnels: Funnel[] = [
-  {
-    id: '1',
-    name: 'Signup to Conversion',
-    steps: [
-      { name: 'Landing Page', count: 10000, conversion: 100, avgTime: '0s' },
-      { name: 'Signup Started', count: 3500, conversion: 35, avgTime: '45s' },
-      { name: 'Signup Completed', count: 2100, conversion: 60, avgTime: '2m' },
-      { name: 'First Action', count: 1400, conversion: 67, avgTime: '5m' },
-      { name: 'Converted', count: 840, conversion: 60, avgTime: '2d' }
-    ],
-    totalConversion: 8.4,
-    createdAt: '2024-11-15',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Product Purchase',
-    steps: [
-      { name: 'Product View', count: 8500, conversion: 100, avgTime: '0s' },
-      { name: 'Add to Cart', count: 2890, conversion: 34, avgTime: '1m' },
-      { name: 'Checkout Started', count: 1734, conversion: 60, avgTime: '3m' },
-      { name: 'Payment Completed', count: 1127, conversion: 65, avgTime: '2m' }
-    ],
-    totalConversion: 13.3,
-    createdAt: '2024-12-01',
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Onboarding Flow',
-    steps: [
-      { name: 'Welcome Screen', count: 5000, conversion: 100, avgTime: '0s' },
-      { name: 'Profile Setup', count: 4250, conversion: 85, avgTime: '2m' },
-      { name: 'Feature Tour', count: 3400, conversion: 80, avgTime: '5m' },
-      { name: 'First Project', count: 2720, conversion: 80, avgTime: '10m' },
-      { name: 'Invite Team', count: 1632, conversion: 60, avgTime: '1d' }
-    ],
-    totalConversion: 32.6,
-    createdAt: '2024-12-10',
-    status: 'active'
-  }
-]
-
-const mockCohorts: CohortRow[] = [
-  { cohort: 'Dec Week 1', users: 1250, week0: 100, week1: 72, week2: 58, week3: 45, week4: 38, week5: 32, week6: 28, week7: 25 },
-  { cohort: 'Dec Week 2', users: 1180, week0: 100, week1: 68, week2: 52, week3: 41, week4: 35, week5: 30, week6: 26, week7: 0 },
-  { cohort: 'Dec Week 3', users: 1340, week0: 100, week1: 75, week2: 61, week3: 48, week4: 42, week5: 36, week6: 0, week7: 0 },
-  { cohort: 'Dec Week 4', users: 1420, week0: 100, week1: 70, week2: 55, week3: 43, week4: 37, week5: 0, week6: 0, week7: 0 },
-  { cohort: 'Jan Week 1', users: 1580, week0: 100, week1: 73, week2: 59, week3: 46, week4: 0, week5: 0, week6: 0, week7: 0 },
-  { cohort: 'Jan Week 2', users: 1650, week0: 100, week1: 71, week2: 56, week3: 0, week4: 0, week5: 0, week6: 0, week7: 0 },
-  { cohort: 'Jan Week 3', users: 1720, week0: 100, week1: 74, week2: 0, week3: 0, week4: 0, week5: 0, week6: 0, week7: 0 },
-  { cohort: 'Jan Week 4', users: 1890, week0: 100, week1: 0, week2: 0, week3: 0, week4: 0, week5: 0, week6: 0, week7: 0 }
-]
-
-const mockReports: Report[] = [
-  { id: '1', name: 'Weekly Executive Summary', type: 'scheduled', frequency: 'weekly', lastRun: '2025-01-20', status: 'active', recipients: ['ceo@company.com', 'cto@company.com'], format: 'pdf' },
-  { id: '2', name: 'Monthly Revenue Report', type: 'scheduled', frequency: 'monthly', lastRun: '2025-01-01', status: 'active', recipients: ['finance@company.com'], format: 'excel' },
-  { id: '3', name: 'Daily Metrics Digest', type: 'scheduled', frequency: 'daily', lastRun: '2025-01-25', status: 'active', recipients: ['team@company.com'], format: 'pdf' },
-  { id: '4', name: 'Q4 Performance Analysis', type: 'one-time', lastRun: '2025-01-15', status: 'paused', recipients: ['board@company.com'], format: 'pdf' },
-  { id: '5', name: 'User Acquisition Report', type: 'scheduled', frequency: 'weekly', lastRun: '2025-01-22', status: 'active', recipients: ['marketing@company.com'], format: 'csv' }
-]
-
-const mockDashboards: Dashboard[] = [
-  { id: '1', name: 'Executive Overview', widgets: [], isDefault: true, createdAt: '2024-10-01', lastViewed: '2025-01-25', sharedWith: ['team'] },
-  { id: '2', name: 'Marketing Performance', widgets: [], isDefault: false, createdAt: '2024-11-15', lastViewed: '2025-01-24', sharedWith: ['marketing'] },
-  { id: '3', name: 'Sales Pipeline', widgets: [], isDefault: false, createdAt: '2024-12-01', lastViewed: '2025-01-23', sharedWith: ['sales'] },
-  { id: '4', name: 'Product Analytics', widgets: [], isDefault: false, createdAt: '2024-12-10', lastViewed: '2025-01-22', sharedWith: ['product'] },
-  { id: '5', name: 'Customer Success', widgets: [], isDefault: false, createdAt: '2024-12-20', lastViewed: '2025-01-21', sharedWith: ['support'] }
-]
+// Use centralized mock data - mapped to local variable names for compatibility
+const mockMetrics = analyticsMetrics
+const mockFunnels = analyticsFunnels
+const mockCohorts = analyticsCohorts
+const mockReports = analyticsReports
+const mockDashboards = analyticsDashboards
+const mockAIInsights = analyticsAIInsights
+const mockCollaborators = analyticsCollaborators
+const mockPredictions = analyticsPredictions
+const mockActivities = analyticsActivities
+const mockQuickActions = analyticsQuickActions
 
 export default function AnalyticsClient() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -224,24 +179,24 @@ export default function AnalyticsClient() {
     return status === 'up' ? 'text-emerald-600' : status === 'down' ? 'text-red-600' : 'text-gray-600'
   }
 
-  // Key metrics for header cards
+  // Key metrics for header cards - Using investor-ready data
   const keyMetrics = [
-    { label: 'Total Users', value: '24,892', change: '+12.5%', positive: true, icon: Users, gradient: 'from-indigo-500 to-indigo-600' },
-    { label: 'Revenue', value: '$148.3K', change: '+8.2%', positive: true, icon: DollarSign, gradient: 'from-emerald-500 to-emerald-600' },
-    { label: 'Conversion', value: '3.24%', change: '+0.26%', positive: true, icon: Target, gradient: 'from-purple-500 to-purple-600' },
-    { label: 'Avg Session', value: '4m 32s', change: '-5.2%', positive: false, icon: Clock, gradient: 'from-amber-500 to-amber-600' },
-    { label: 'Page Views', value: '892K', change: '+15.3%', positive: true, icon: Eye, gradient: 'from-blue-500 to-blue-600' },
-    { label: 'Bounce Rate', value: '38.2%', change: '-2.3%', positive: true, icon: MousePointer, gradient: 'from-rose-500 to-rose-600' },
-    { label: 'Active Subs', value: '3,847', change: '+9.5%', positive: true, icon: Zap, gradient: 'from-cyan-500 to-cyan-600' },
-    { label: 'NPS Score', value: '72', change: '+5.9%', positive: true, icon: TrendingUp, gradient: 'from-pink-500 to-pink-600' }
+    { label: 'Customers', value: companyInfo.metrics.customers.toLocaleString(), change: '+7.3%', positive: true, icon: Users, gradient: 'from-indigo-500 to-indigo-600' },
+    { label: 'MRR', value: `$${(companyInfo.metrics.mrr / 1000).toFixed(0)}K`, change: '+18.5%', positive: true, icon: DollarSign, gradient: 'from-emerald-500 to-emerald-600' },
+    { label: 'Conversion', value: '8.5%', change: '+18.1%', positive: true, icon: Target, gradient: 'from-purple-500 to-purple-600' },
+    { label: 'NPS', value: companyInfo.metrics.nps.toString(), change: '+5.9%', positive: true, icon: TrendingUp, gradient: 'from-amber-500 to-amber-600' },
+    { label: 'ARR', value: `$${(companyInfo.metrics.arr / 1000000).toFixed(1)}M`, change: '+312%', positive: true, icon: Eye, gradient: 'from-blue-500 to-blue-600' },
+    { label: 'Churn', value: `${companyInfo.metrics.churnRate}%`, change: '-25%', positive: true, icon: MousePointer, gradient: 'from-rose-500 to-rose-600' },
+    { label: 'LTV:CAC', value: `${companyInfo.metrics.ltvCacRatio.toFixed(1)}x`, change: '+30%', positive: true, icon: Zap, gradient: 'from-cyan-500 to-cyan-600' },
+    { label: 'Enterprise', value: companyInfo.metrics.enterprises.toString(), change: '+9.9%', positive: true, icon: Target, gradient: 'from-pink-500 to-pink-600' }
   ]
 
-  // Realtime metrics
+  // Realtime metrics - Investor demo data
   const realtimeMetrics = [
-    { label: 'Active Users', value: 247, icon: Users, trend: 12 },
-    { label: 'Page Views/min', value: 89, icon: Eye, trend: -3 },
-    { label: 'Events/min', value: 156, icon: Activity, trend: 8 },
-    { label: 'Conversions', value: 12, icon: ShoppingCart, trend: 2 }
+    { label: 'Active Users', value: analyticsRealtimeMetrics.activeUsersNow, icon: Users, trend: 12 },
+    { label: 'Page Views/min', value: analyticsRealtimeMetrics.pageViewsPerMin, icon: Eye, trend: 8 },
+    { label: 'AI Requests/min', value: analyticsRealtimeMetrics.aiRequestsPerMin, icon: Activity, trend: 15 },
+    { label: 'Conversions', value: analyticsRealtimeMetrics.currentConversions, icon: ShoppingCart, trend: 2 }
   ]
 
   return (
@@ -267,6 +222,11 @@ export default function AnalyticsClient() {
                 <p className="text-white/80">Mixpanel-level analytics • Funnels • Cohorts • Real-time • Custom Reports</p>
               </div>
               <div className="flex items-center gap-3">
+                {/* Collaboration Indicator */}
+                <CollaborationIndicator
+                  collaborators={mockCollaborators}
+                  maxVisible={3}
+                />
                 <Button
                   variant={compareMode ? 'secondary' : 'ghost'}
                   onClick={() => setCompareMode(!compareMode)}
@@ -1818,6 +1778,27 @@ export default function AnalyticsClient() {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* AI-Powered Insights Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <AIInsightsPanel
+            insights={mockAIInsights}
+            onAskQuestion={(q) => console.log('Question:', q)}
+          />
+          <PredictiveAnalytics predictions={mockPredictions} />
+        </div>
+
+        {/* Activity Feed */}
+        <div className="mt-6">
+          <ActivityFeed
+            activities={mockActivities}
+            maxItems={5}
+            showFilters={true}
+          />
+        </div>
+
+        {/* Quick Actions Toolbar */}
+        <QuickActionsToolbar actions={mockQuickActions} />
       </div>
     </div>
   )
