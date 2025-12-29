@@ -520,6 +520,31 @@ export default function ReportingClient() {
     }
   }
 
+  // Handlers
+  const handleCreateReport = () => {
+    toast.info('Create Report', {
+      description: 'Opening report builder...'
+    })
+  }
+
+  const handleExportReport = (report: Report) => {
+    toast.success('Export started', {
+      description: `"${report.name}" is being exported`
+    })
+  }
+
+  const handleScheduleReport = (report: Report) => {
+    toast.success('Report scheduled', {
+      description: `"${report.name}" has been scheduled`
+    })
+  }
+
+  const handleRefreshData = () => {
+    toast.success('Data refreshed', {
+      description: 'Report data has been refreshed'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

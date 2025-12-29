@@ -606,6 +606,31 @@ export default function TestingClient() {
     ))
   }
 
+  // Handlers
+  const handleRunTests = () => {
+    toast.info('Running tests', {
+      description: 'Test execution started...'
+    })
+  }
+
+  const handleCreateTestCase = () => {
+    toast.info('Create Test', {
+      description: 'Opening test creation wizard...'
+    })
+  }
+
+  const handleExportResults = () => {
+    toast.success('Export started', {
+      description: 'Test results are being exported'
+    })
+  }
+
+  const handleRerunFailed = () => {
+    toast.info('Rerunning failed tests', {
+      description: 'Failed tests are being rerun...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

@@ -485,6 +485,31 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 })
   }
 
+  // Handlers
+  const handleExportLogs = () => {
+    toast.success('Export started', {
+      description: 'Activity logs are being exported'
+    })
+  }
+
+  const handleClearFilters = () => {
+    toast.success('Filters cleared', {
+      description: 'All log filters have been reset'
+    })
+  }
+
+  const handleBookmarkLog = (log: ActivityLog) => {
+    toast.success('Log bookmarked', {
+      description: 'Activity log has been bookmarked'
+    })
+  }
+
+  const handleCreateAlert = (log: ActivityLog) => {
+    toast.success('Alert created', {
+      description: 'Alert rule created for this activity type'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

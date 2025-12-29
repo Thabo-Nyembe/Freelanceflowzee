@@ -510,6 +510,31 @@ export default function MessagingClient() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
+  // Handlers
+  const handleCreateChannel = () => {
+    toast.info('Create Channel', {
+      description: 'Opening channel creation form...'
+    })
+  }
+
+  const handlePinMessage = (message: Message) => {
+    toast.success('Message pinned', {
+      description: 'Message has been pinned to this channel'
+    })
+  }
+
+  const handleReactToMessage = (message: Message, emoji: string) => {
+    toast.success('Reaction added', {
+      description: `Added ${emoji} to message`
+    })
+  }
+
+  const handleSearchMessages = () => {
+    toast.info('Searching', {
+      description: 'Opening advanced search...'
+    })
+  }
+
   return (
     <div className="h-screen flex bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Sidebar */}

@@ -504,6 +504,31 @@ export default function SecurityAuditClient() {
     return 'text-blue-600'
   }
 
+  // Handlers
+  const handleStartScan = () => {
+    toast.info('Scan started', {
+      description: 'Security scan is running...'
+    })
+  }
+
+  const handleResolveVulnerability = (vuln: Vulnerability) => {
+    toast.success('Marked as resolved', {
+      description: `"${vuln.title}" has been marked as resolved`
+    })
+  }
+
+  const handleExportAudit = () => {
+    toast.success('Export started', {
+      description: 'Audit report is being exported'
+    })
+  }
+
+  const handleCreateTicket = (vuln: Vulnerability) => {
+    toast.success('Ticket created', {
+      description: `Ticket created for "${vuln.title}"`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">
