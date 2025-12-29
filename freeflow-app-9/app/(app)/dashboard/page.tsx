@@ -200,9 +200,9 @@ export default function DashboardPage() {
     { id: 5, type: 'milestone', message: 'Milestone: Beta Launch reached', time: '1h ago', status: 'success', impact: 'high' },
   ])
   const [projects, setProjects] = useState<any[]>([
-    { id: 'proj-001', name: 'Enterprise Portal v2.0', status: 'In Progress', progress: 78, priority: 'High', client: 'Acme Corp', budget: 125000, deadline: '2025-02-15' },
-    { id: 'proj-002', name: 'Mobile App Redesign', status: 'Review', progress: 92, priority: 'Medium', client: 'TechStart Inc', budget: 85000, deadline: '2025-01-30' },
-    { id: 'proj-003', name: 'AI Analytics Dashboard', status: 'In Progress', progress: 45, priority: 'Urgent', client: 'DataFlow LLC', budget: 210000, deadline: '2025-03-01' },
+    { id: 'proj-001', name: 'Enterprise Portal v2.0', status: 'In Progress', progress: 78, priority: 'High', client: 'Acme Corp', value: 125000, budget: 125000, deadline: '2025-02-15' },
+    { id: 'proj-002', name: 'Mobile App Redesign', status: 'Review', progress: 92, priority: 'Medium', client: 'TechStart Inc', value: 85000, budget: 85000, deadline: '2025-01-30' },
+    { id: 'proj-003', name: 'AI Analytics Dashboard', status: 'In Progress', progress: 45, priority: 'Urgent', client: 'DataFlow LLC', value: 210000, budget: 210000, deadline: '2025-03-01' },
   ])
   const [insights, setInsights] = useState(mockData.insights) // Keep mock insights for now (AI feature)
   const [refreshing, setRefreshing] = useState(false)

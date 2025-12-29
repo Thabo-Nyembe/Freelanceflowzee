@@ -6,6 +6,9 @@ import { withAuth } from 'next-auth/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+// Demo mode - set to true for investor presentations (bypasses auth)
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || true // Enable by default for now
+
 // Public routes that don't require authentication
 const publicRoutes = [
   '/',
@@ -34,7 +37,9 @@ const publicRoutes = [
   '/enhanced-collaboration-demo',
   '/verify-email',
   '/forgot-password',
-  '/reset-password'
+  '/reset-password',
+  // Demo mode: allow dashboard access without auth
+  ...(DEMO_MODE ? ['/dashboard'] : [])
 ]
 
 // API routes that don't require authentication
