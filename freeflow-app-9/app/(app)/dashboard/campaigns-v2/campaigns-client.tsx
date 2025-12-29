@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useCampaigns, type Campaign as CampaignDB, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -621,6 +623,77 @@ export default function CampaignsClient() {
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showAudienceDialog, setShowAudienceDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database integration
+  const { campaigns: dbCampaigns, createCampaign, loading: campaignsLoading, refetch } = useCampaigns({})
+
+  // Form state for new campaign
+  const [newCampaignForm, setNewCampaignForm] = useState({
+    name: '',
+    type: 'email' as CampaignTypeDB,
+    description: '',
+    budget: '',
+    startDate: ''
+  })
+  const [creatingCampaign, setCreatingCampaign] = useState(false)
+
+  const handleCreateCampaign = async () => {
+    if (!newCampaignForm.name) {
+      toast.error('Please enter a campaign name')
+      return
+    }
+
+    setCreatingCampaign(true)
+    try {
+      await createCampaign({
+        campaign_name: newCampaignForm.name,
+        campaign_type: newCampaignForm.type,
+        description: newCampaignForm.description || null,
+        status: 'draft' as CampaignStatusDB,
+        phase: 'planning',
+        budget_total: parseFloat(newCampaignForm.budget) || 0,
+        budget_spent: 0,
+        budget_remaining: parseFloat(newCampaignForm.budget) || 0,
+        currency: 'USD',
+        start_date: newCampaignForm.startDate || null,
+        audience_size: 0,
+        impressions: 0,
+        clicks: 0,
+        conversions: 0,
+        leads_generated: 0,
+        sales_generated: 0,
+        revenue_generated: 0,
+        likes_count: 0,
+        shares_count: 0,
+        comments_count: 0,
+        followers_gained: 0,
+        emails_sent: 0,
+        emails_delivered: 0,
+        emails_opened: 0,
+        emails_clicked: 0,
+        is_ab_test: false,
+        is_automated: false,
+        requires_approval: false,
+        approved: false
+      } as any)
+
+      toast.success('Campaign created successfully!')
+      setShowNewCampaignDialog(false)
+      setNewCampaignForm({
+        name: '',
+        type: 'email',
+        description: '',
+        budget: '',
+        startDate: ''
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to create campaign')
+      console.error(error)
+    } finally {
+      setCreatingCampaign(false)
+    }
+  }
 
   const stats = useMemo(() => ({
     totalCampaigns: mockCampaigns.length,
@@ -2093,30 +2166,75 @@ export default function CampaignsClient() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create New Campaign</DialogTitle>
-            <DialogDescription>Choose a campaign type to get started</DialogDescription>
+            <DialogDescription>Choose a campaign type and enter details</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
-              <Mail className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
-              <span className="font-medium">Email Campaign</span>
-              <span className="text-xs text-gray-500">Send a one-time email</span>
-            </button>
-            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
-              <Zap className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
-              <span className="font-medium">Automation</span>
-              <span className="text-xs text-gray-500">Create automated flows</span>
-            </button>
-            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
-              <Split className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
-              <span className="font-medium">A/B Test</span>
-              <span className="text-xs text-gray-500">Test and optimize</span>
-            </button>
-            <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors group">
-              <MessageSquare className="w-8 h-8 text-gray-400 group-hover:text-rose-600" />
-              <span className="font-medium">SMS Campaign</span>
-              <span className="text-xs text-gray-500">Send text messages</span>
-            </button>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setNewCampaignForm(prev => ({ ...prev, type: 'email' }))}
+                className={`flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl transition-colors group ${newCampaignForm.type === 'email' ? 'border-rose-400 bg-rose-50 dark:bg-rose-900/20' : 'hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20'}`}
+              >
+                <Mail className={`w-8 h-8 ${newCampaignForm.type === 'email' ? 'text-rose-600' : 'text-gray-400 group-hover:text-rose-600'}`} />
+                <span className="font-medium">Email Campaign</span>
+              </button>
+              <button
+                onClick={() => setNewCampaignForm(prev => ({ ...prev, type: 'sms' }))}
+                className={`flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl transition-colors group ${newCampaignForm.type === 'sms' ? 'border-rose-400 bg-rose-50 dark:bg-rose-900/20' : 'hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20'}`}
+              >
+                <MessageSquare className={`w-8 h-8 ${newCampaignForm.type === 'sms' ? 'text-rose-600' : 'text-gray-400 group-hover:text-rose-600'}`} />
+                <span className="font-medium">SMS Campaign</span>
+              </button>
+            </div>
+            <div>
+              <Label>Campaign Name</Label>
+              <Input
+                placeholder="Enter campaign name"
+                value={newCampaignForm.name}
+                onChange={(e) => setNewCampaignForm(prev => ({ ...prev, name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Description (optional)</Label>
+              <Input
+                placeholder="Brief description of your campaign"
+                value={newCampaignForm.description}
+                onChange={(e) => setNewCampaignForm(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Budget</Label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={newCampaignForm.budget}
+                  onChange={(e) => setNewCampaignForm(prev => ({ ...prev, budget: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={newCampaignForm.startDate}
+                  onChange={(e) => setNewCampaignForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCampaignDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleCreateCampaign}
+              disabled={creatingCampaign || !newCampaignForm.name}
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+            >
+              {creatingCampaign ? 'Creating...' : 'Create Campaign'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

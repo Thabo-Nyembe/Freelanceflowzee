@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuthUserId } from './use-auth-user-id'
+import { toast } from 'sonner'
 
 export interface Client {
   id: string
@@ -35,6 +37,7 @@ export function useClients(initialClients: Client[] = []) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClientComponentClient()
+  const { getUserId } = useAuthUserId()
 
   const fetchClients = useCallback(async () => {
     setIsLoading(true)
@@ -49,48 +52,86 @@ export function useClients(initialClients: Client[] = []) {
       setClients(data || [])
     } catch (err: any) {
       setError(err.message)
+      console.error('Failed to fetch clients:', err)
     } finally {
       setIsLoading(false)
     }
   }, [supabase])
 
   const createClient = async (client: Partial<Client>) => {
-    const { data, error } = await supabase
-      .from('clients')
-      .insert([client])
-      .select()
-      .single()
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        toast.error('You must be logged in to create a client')
+        throw new Error('User not authenticated')
+      }
 
-    if (error) throw error
-    setClients(prev => [data, ...prev])
-    return data
+      const clientData = {
+        ...client,
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
+      const { data, error } = await supabase
+        .from('clients')
+        .insert([clientData])
+        .select()
+        .single()
+
+      if (error) throw error
+      setClients(prev => [data, ...prev])
+      toast.success('Client created successfully')
+      return data
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create client')
+      throw err
+    }
   }
 
   const updateClient = async (id: string, updates: Partial<Client>) => {
-    const { data, error } = await supabase
-      .from('clients')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
 
-    if (error) throw error
-    setClients(prev => prev.map(c => c.id === id ? data : c))
-    return data
+      if (error) throw error
+      setClients(prev => prev.map(c => c.id === id ? data : c))
+      toast.success('Client updated successfully')
+      return data
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update client')
+      throw err
+    }
   }
 
   const archiveClient = async (id: string) => {
-    return updateClient(id, { status: 'archived' })
+    try {
+      const result = await updateClient(id, { status: 'archived' })
+      toast.success('Client archived')
+      return result
+    } catch (err) {
+      throw err
+    }
   }
 
   const deleteClient = async (id: string) => {
-    const { error } = await supabase
-      .from('clients')
-      .delete()
-      .eq('id', id)
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id)
 
-    if (error) throw error
-    setClients(prev => prev.filter(c => c.id !== id))
+      if (error) throw error
+      setClients(prev => prev.filter(c => c.id !== id))
+      toast.success('Client deleted')
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete client')
+      throw err
+    }
   }
 
   useEffect(() => {

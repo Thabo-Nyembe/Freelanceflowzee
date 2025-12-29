@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useProjects, Project as DbProject } from '@/lib/hooks/use-projects'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -281,14 +282,78 @@ export default function ProjectsHubClient() {
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null)
   const [showIssueDialog, setShowIssueDialog] = useState(false)
 
+  // Database integration - use real projects hook
+  const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
+
+  // New project form state
+  const [newProjectForm, setNewProjectForm] = useState({
+    title: '',
+    description: '',
+    budget: 0,
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    start_date: '',
+    end_date: ''
+  })
+
+  // Fetch projects on mount
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
+  // Combine database projects with mock data for display (fallback to mock if DB is empty)
+  const allProjects = useMemo(() => {
+    if (dbProjects.length > 0) {
+      // Map DB projects to component format
+      return dbProjects.map(p => ({
+        id: p.id,
+        name: p.title || p.name || 'Untitled',
+        description: p.description || '',
+        projectCode: `PRJ-${p.id.substring(0, 4).toUpperCase()}`,
+        status: (p.status as ProjectStatus) || 'planning',
+        priority: (p.priority as Priority) || 'medium',
+        progress: p.progress || 0,
+        budget: p.budget || 0,
+        spent: p.spent || 0,
+        startDate: p.start_date,
+        endDate: p.end_date,
+        teamMembers: [],
+        tags: [],
+        tasksTotal: 0,
+        tasksCompleted: 0
+      })) as Project[]
+    }
+    return mockProjects
+  }, [dbProjects])
+
+  // Handle creating a new project
+  const handleCreateProject = async () => {
+    try {
+      await createProject({
+        title: newProjectForm.title,
+        description: newProjectForm.description,
+        budget: newProjectForm.budget,
+        start_date: newProjectForm.start_date || null,
+        end_date: newProjectForm.end_date || null,
+        progress: 0,
+        spent: 0,
+        status: 'planning' as any,
+        priority: newProjectForm.priority as any
+      } as any)
+      setShowNewProjectDialog(false)
+      setNewProjectForm({ title: '', description: '', budget: 0, priority: 'medium', start_date: '', end_date: '' })
+    } catch (error) {
+      console.error('Failed to create project:', error)
+    }
+  }
+
   const filteredProjects = useMemo(() => {
-    return mockProjects.filter(project => {
+    return allProjects.filter(project => {
       const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            project.projectCode.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = selectedFilter === 'all' || project.status === selectedFilter || project.priority === selectedFilter
       return matchesSearch && matchesFilter
     })
-  }, [searchQuery, selectedFilter])
+  }, [searchQuery, selectedFilter, allProjects])
 
   const projectsByStatus = useMemo(() => {
     const grouped: Record<string, Project[]> = {}
@@ -299,15 +364,15 @@ export default function ProjectsHubClient() {
   }, [filteredProjects])
 
   const stats = useMemo(() => ({
-    total: mockProjects.length,
-    active: mockProjects.filter(p => p.status === 'active').length,
-    completed: mockProjects.filter(p => p.status === 'completed').length,
-    onTrack: mockProjects.filter(p => p.progress >= 50 && p.status !== 'on_hold').length,
-    totalBudget: mockProjects.reduce((sum, p) => sum + (p.budget || 0), 0),
-    totalSpent: mockProjects.reduce((sum, p) => sum + p.spent, 0),
-    avgProgress: Math.round(mockProjects.reduce((sum, p) => sum + p.progress, 0) / mockProjects.length),
-    overdue: mockProjects.filter(p => p.endDate && new Date(p.endDate) < new Date() && p.status !== 'completed').length
-  }), [])
+    total: allProjects.length,
+    active: allProjects.filter(p => p.status === 'active').length,
+    completed: allProjects.filter(p => p.status === 'completed').length,
+    onTrack: allProjects.filter(p => p.progress >= 50 && p.status !== 'on_hold').length,
+    totalBudget: allProjects.reduce((sum, p) => sum + (p.budget || 0), 0),
+    totalSpent: allProjects.reduce((sum, p) => sum + p.spent, 0),
+    avgProgress: allProjects.length > 0 ? Math.round(allProjects.reduce((sum, p) => sum + p.progress, 0) / allProjects.length) : 0,
+    overdue: allProjects.filter(p => p.endDate && new Date(p.endDate) < new Date() && p.status !== 'completed').length
+  }), [allProjects])
 
   const statsCards = [
     { label: 'Total Projects', value: stats.total.toString(), icon: FolderOpen, color: 'from-blue-500 to-blue-600', trend: '+2' },
@@ -1660,12 +1725,12 @@ export default function ProjectsHubClient() {
         <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
           <DialogContent><DialogHeader><DialogTitle>Create New Project</DialogTitle><DialogDescription>Set up a new project with details</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Project Name</Label><Input placeholder="Enter project name" className="mt-1" /></div>
-              <div><Label>Description</Label><Textarea placeholder="Describe the project..." className="mt-1" /></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Budget</Label><Input type="number" placeholder="0" className="mt-1" /></div><div><Label>Priority</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select priority" /></SelectTrigger><SelectContent>{Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent></Select></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Start Date</Label><Input type="date" className="mt-1" /></div><div><Label>Due Date</Label><Input type="date" className="mt-1" /></div></div>
+              <div><Label>Project Name</Label><Input placeholder="Enter project name" className="mt-1" value={newProjectForm.title} onChange={(e) => setNewProjectForm(f => ({ ...f, title: e.target.value }))} /></div>
+              <div><Label>Description</Label><Textarea placeholder="Describe the project..." className="mt-1" value={newProjectForm.description} onChange={(e) => setNewProjectForm(f => ({ ...f, description: e.target.value }))} /></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Budget</Label><Input type="number" placeholder="0" className="mt-1" value={newProjectForm.budget} onChange={(e) => setNewProjectForm(f => ({ ...f, budget: parseFloat(e.target.value) || 0 }))} /></div><div><Label>Priority</Label><Select value={newProjectForm.priority} onValueChange={(v) => setNewProjectForm(f => ({ ...f, priority: v as any }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select priority" /></SelectTrigger><SelectContent>{Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent></Select></div></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Start Date</Label><Input type="date" className="mt-1" value={newProjectForm.start_date} onChange={(e) => setNewProjectForm(f => ({ ...f, start_date: e.target.value }))} /></div><div><Label>Due Date</Label><Input type="date" className="mt-1" value={newProjectForm.end_date} onChange={(e) => setNewProjectForm(f => ({ ...f, end_date: e.target.value }))} /></div></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Create Project</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleCreateProject} disabled={!newProjectForm.title}>Create Project</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

@@ -41,7 +41,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useFinancial, type FinancialRecord } from '@/lib/hooks/use-financial'
+import { useFinancial, type FinancialRecord, type FinancialRecordType, type FinancialStatus } from '@/lib/hooks/use-financial'
+import { toast } from 'sonner'
 
 // Competitive Upgrade Components
 import {
@@ -139,8 +140,55 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const { records } = useFinancial({})
+  const { records, createRecord, loading: creating, refetch } = useFinancial({})
   const displayRecords = records.length > 0 ? records : initialFinancial
+
+  // Form state for new transaction
+  const [newTransactionForm, setNewTransactionForm] = useState({
+    title: '',
+    type: 'expense' as FinancialRecordType,
+    category: '',
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    description: ''
+  })
+
+  const handleCreateTransaction = async () => {
+    if (!newTransactionForm.title || !newTransactionForm.amount) {
+      toast.error('Please fill in title and amount')
+      return
+    }
+
+    try {
+      await createRecord({
+        title: newTransactionForm.title,
+        record_type: newTransactionForm.type,
+        category: newTransactionForm.category || 'General',
+        amount: parseFloat(newTransactionForm.amount),
+        description: newTransactionForm.description || null,
+        record_date: newTransactionForm.date,
+        status: 'pending' as FinancialStatus,
+        priority: 'medium',
+        currency: 'USD',
+        is_taxable: true
+      } as any)
+
+      toast.success('Transaction created successfully!')
+      setShowNewTransactionDialog(false)
+      setNewTransactionForm({
+        title: '',
+        type: 'expense',
+        category: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        description: ''
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to create transaction')
+      console.error(error)
+    }
+  }
 
   // Calculations
   const totalRevenue = Object.values(profitLossData.revenue).reduce((a, b) => a + b, 0)
@@ -1671,40 +1719,68 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <option value="income">Income</option>
+                <select
+                  value={newTransactionForm.type}
+                  onChange={(e) => setNewTransactionForm(prev => ({ ...prev, type: e.target.value as FinancialRecordType }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="revenue">Income</option>
                   <option value="expense">Expense</option>
-                  <option value="transfer">Transfer</option>
+                  <option value="general">Transfer</option>
                 </select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                <input type="date" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="date"
+                  value={newTransactionForm.date}
+                  onChange={(e) => setNewTransactionForm(prev => ({ ...prev, date: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <input type="text" placeholder="Enter description" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                <input
+                  type="text"
+                  placeholder="Enter title"
+                  value={newTransactionForm.title}
+                  onChange={(e) => setNewTransactionForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
-                <input type="number" placeholder="0.00" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Account</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <option>Business Checking</option>
-                  <option>Business Savings</option>
-                  <option>Business Credit Card</option>
-                </select>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={newTransactionForm.amount}
+                  onChange={(e) => setNewTransactionForm(prev => ({ ...prev, amount: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <option>Sales Revenue</option>
-                  <option>Service Revenue</option>
-                  <option>Operating Expenses</option>
-                  <option>Payroll Expenses</option>
+                <select
+                  value={newTransactionForm.category}
+                  onChange={(e) => setNewTransactionForm(prev => ({ ...prev, category: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="">Select category...</option>
+                  <option value="Sales Revenue">Sales Revenue</option>
+                  <option value="Service Revenue">Service Revenue</option>
+                  <option value="Operating Expenses">Operating Expenses</option>
+                  <option value="Payroll Expenses">Payroll Expenses</option>
                 </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <input
+                  type="text"
+                  placeholder="Optional description"
+                  value={newTransactionForm.description}
+                  onChange={(e) => setNewTransactionForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
             </div>
             <DialogFooter>
@@ -1715,10 +1791,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 Cancel
               </button>
               <button
-                onClick={() => setShowNewTransactionDialog(false)}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                onClick={handleCreateTransaction}
+                disabled={creating || !newTransactionForm.title || !newTransactionForm.amount}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Transaction
+                {creating ? 'Saving...' : 'Save Transaction'}
               </button>
             </DialogFooter>
           </DialogContent>

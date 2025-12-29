@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useEmployees, useCreateEmployee } from '@/lib/hooks/use-employees'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -325,6 +327,46 @@ export default function EmployeesClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [compensationTab, setCompensationTab] = useState('salary')
   const [performanceTab, setPerformanceTab] = useState('reviews')
+
+  // Database integration
+  const { data: dbEmployees, loading: employeesLoading, refetch } = useEmployees({ status: 'active' })
+  const { mutate: createEmployee, loading: creating } = useCreateEmployee()
+
+  // Form state for new employee
+  const [newEmployeeForm, setNewEmployeeForm] = useState({
+    name: '',
+    email: '',
+    department: '',
+    position: '',
+    startDate: ''
+  })
+
+  // Handle creating a new employee
+  const handleCreateEmployee = async () => {
+    if (!newEmployeeForm.name || !newEmployeeForm.email) {
+      toast.error('Please fill in name and email')
+      return
+    }
+    try {
+      await createEmployee({
+        employee_name: newEmployeeForm.name,
+        email: newEmployeeForm.email,
+        department: newEmployeeForm.department || null,
+        position: newEmployeeForm.position || null,
+        job_title: newEmployeeForm.position || null,
+        start_date: newEmployeeForm.startDate || null,
+        status: 'active',
+        employment_type: 'full-time',
+        currency: 'USD'
+      } as any)
+      setShowAddDialog(false)
+      setNewEmployeeForm({ name: '', email: '', department: '', position: '', startDate: '' })
+      toast.success('Employee added successfully')
+      refetch()
+    } catch (error) {
+      console.error('Failed to create employee:', error)
+    }
+  }
 
   const filteredEmployees = useMemo(() => {
     return mockEmployees.filter(emp => {
@@ -1782,12 +1824,12 @@ export default function EmployeesClient() {
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogContent><DialogHeader><DialogTitle>Add New Employee</DialogTitle><DialogDescription>Enter the new employee's information</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Full Name</Label><Input placeholder="John Doe" className="mt-1" /></div>
-              <div><Label>Email</Label><Input type="email" placeholder="john@company.com" className="mt-1" /></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Department</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="engineering">Engineering</SelectItem><SelectItem value="design">Design</SelectItem><SelectItem value="product">Product</SelectItem><SelectItem value="marketing">Marketing</SelectItem></SelectContent></Select></div><div><Label>Position</Label><Input placeholder="Software Engineer" className="mt-1" /></div></div>
-              <div><Label>Start Date</Label><Input type="date" className="mt-1" /></div>
+              <div><Label>Full Name</Label><Input placeholder="John Doe" className="mt-1" value={newEmployeeForm.name} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, name: e.target.value }))} /></div>
+              <div><Label>Email</Label><Input type="email" placeholder="john@company.com" className="mt-1" value={newEmployeeForm.email} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, email: e.target.value }))} /></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Department</Label><Select value={newEmployeeForm.department} onValueChange={(value) => setNewEmployeeForm(prev => ({ ...prev, department: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="engineering">Engineering</SelectItem><SelectItem value="design">Design</SelectItem><SelectItem value="product">Product</SelectItem><SelectItem value="marketing">Marketing</SelectItem></SelectContent></Select></div><div><Label>Position</Label><Input placeholder="Software Engineer" className="mt-1" value={newEmployeeForm.position} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, position: e.target.value }))} /></div></div>
+              <div><Label>Start Date</Label><Input type="date" className="mt-1" value={newEmployeeForm.startDate} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, startDate: e.target.value }))} /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Add Employee</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleCreateEmployee} disabled={creating || !newEmployeeForm.name || !newEmployeeForm.email}>{creating ? 'Adding...' : 'Add Employee'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

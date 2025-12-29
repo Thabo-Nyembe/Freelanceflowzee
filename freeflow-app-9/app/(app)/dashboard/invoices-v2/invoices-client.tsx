@@ -62,6 +62,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import { useInvoices, type Invoice, type InvoiceStatus } from '@/lib/hooks/use-invoices'
+import { toast } from 'sonner'
 
 // Currency data
 const currencies = [
@@ -167,7 +168,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     recurring: { enabled: false, frequency: 'monthly' as 'weekly' | 'monthly' | 'quarterly' | 'yearly', endDate: '' },
   })
 
-  const { invoices, loading, error } = useInvoices({ status: statusFilter, limit: 100 })
+  const { invoices, loading, error, createInvoice, mutating } = useInvoices({ status: statusFilter, limit: 100 })
   const displayInvoices = (invoices && invoices.length > 0) ? invoices : (initialInvoices || [])
 
   // Calculate comprehensive stats
@@ -263,6 +264,67 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
       : newInvoice.discount.value
   }
   const calculateTotal = () => calculateSubtotal() + calculateTax() - calculateDiscount()
+
+  // Handle creating a new invoice
+  const handleCreateInvoice = async () => {
+    if (!newInvoice.client || !newInvoice.title) {
+      toast.error('Please fill in client name and invoice title')
+      return
+    }
+    try {
+      const subtotal = calculateSubtotal()
+      const taxAmount = calculateTax()
+      const discountAmount = calculateDiscount()
+      const total = calculateTotal()
+
+      await createInvoice({
+        title: newInvoice.title,
+        client_name: newInvoice.client,
+        client_email: newInvoice.clientEmail,
+        invoice_number: `INV-${Date.now()}`,
+        currency: newInvoice.currency,
+        due_date: newInvoice.dueDate,
+        items: newInvoice.items,
+        item_count: newInvoice.items.length,
+        subtotal,
+        tax_amount: taxAmount,
+        tax_rate: newInvoice.items.length > 0 ? newInvoice.items[0].tax : 0,
+        discount_amount: discountAmount,
+        discount_percentage: newInvoice.discount.type === 'percentage' ? newInvoice.discount.value : 0,
+        total_amount: total,
+        amount_due: total,
+        amount_paid: 0,
+        status: 'draft',
+        notes: newInvoice.notes,
+        terms_and_conditions: newInvoice.terms,
+        is_recurring: newInvoice.recurring.enabled,
+        recurring_schedule: newInvoice.recurring.enabled ? newInvoice.recurring.frequency : null,
+        issue_date: new Date().toISOString().split('T')[0]
+      } as any)
+      setShowCreateModal(false)
+      toast.success('Invoice created successfully')
+      // Reset form
+      setNewInvoice({
+        client: '',
+        clientEmail: '',
+        title: '',
+        currency: 'USD',
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        items: [],
+        template: 'modern',
+        notes: '',
+        terms: 'Payment is due within 30 days of invoice date.',
+        enableReminders: true,
+        reminderSchedule: ['3days', 'dueday', '7daysafter'],
+        lateFee: { enabled: false, type: 'percentage', value: 5 },
+        discount: { enabled: false, type: 'percentage', value: 0 },
+        deposit: { enabled: false, percentage: 50 },
+        recurring: { enabled: false, frequency: 'monthly', endDate: '' }
+      })
+    } catch (error) {
+      console.error('Failed to create invoice:', error)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1840,9 +1902,13 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleCreateInvoice}
+              disabled={mutating || !newInvoice.client || !newInvoice.title}
+            >
               <FileText className="h-4 w-4 mr-2" />
-              Create Invoice
+              {mutating ? 'Creating...' : 'Create Invoice'}
             </Button>
           </DialogFooter>
         </DialogContent>

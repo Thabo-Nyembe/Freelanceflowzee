@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useCreateCoupon } from '@/lib/hooks/use-coupon-extended'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -361,6 +363,57 @@ export default function MarketplaceClient() {
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
   const [analyticsTab, setAnalyticsTab] = useState('overview')
+
+  // Database integration
+  const { create: createCouponMutation, isLoading: creatingCoupon } = useCreateCoupon()
+
+  // Form state for marketplace coupon
+  const [marketplaceCouponForm, setMarketplaceCouponForm] = useState({
+    code: '',
+    discountType: 'percentage' as 'percentage' | 'fixed' | 'free_trial',
+    value: '',
+    usageLimit: '',
+    minPurchase: '',
+    expiresAt: '',
+    applicableProducts: 'all'
+  })
+
+  const handleCreateMarketplaceCoupon = async () => {
+    if (!marketplaceCouponForm.code || !marketplaceCouponForm.value) {
+      toast.error('Please enter coupon code and value')
+      return
+    }
+
+    try {
+      await createCouponMutation({
+        code: marketplaceCouponForm.code.toUpperCase(),
+        name: `Marketplace Coupon - ${marketplaceCouponForm.code}`,
+        discount_type: marketplaceCouponForm.discountType === 'percentage' ? 'percent_off' : 'amount_off',
+        discount_value: parseFloat(marketplaceCouponForm.value),
+        max_redemptions: marketplaceCouponForm.usageLimit ? parseInt(marketplaceCouponForm.usageLimit) : null,
+        min_purchase: marketplaceCouponForm.minPurchase ? parseFloat(marketplaceCouponForm.minPurchase) : 0,
+        expires_at: marketplaceCouponForm.expiresAt || null,
+        is_active: true,
+        duration: 'once',
+        times_redeemed: 0
+      })
+
+      toast.success('Coupon created successfully!')
+      setShowCouponDialog(false)
+      setMarketplaceCouponForm({
+        code: '',
+        discountType: 'percentage',
+        value: '',
+        usageLimit: '',
+        minPurchase: '',
+        expiresAt: '',
+        applicableProducts: 'all'
+      })
+    } catch (error) {
+      toast.error('Failed to create coupon')
+      console.error(error)
+    }
+  }
 
   const filteredProducts = useMemo(() => {
     return mockProducts.filter(product => {
@@ -1822,16 +1875,16 @@ export default function MarketplaceClient() {
         <Dialog open={showCouponDialog} onOpenChange={setShowCouponDialog}>
           <DialogContent><DialogHeader><DialogTitle>Create Coupon</DialogTitle><DialogDescription>Create a new discount coupon for your marketplace</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Coupon Code</Label><Input placeholder="SUMMER25" className="mt-1 font-mono" /></div>
+              <div><Label>Coupon Code</Label><Input placeholder="SUMMER25" className="mt-1 font-mono" value={marketplaceCouponForm.code} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Discount Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="percentage">Percentage Off</SelectItem><SelectItem value="fixed">Fixed Amount</SelectItem><SelectItem value="free_trial">Free Trial Days</SelectItem></SelectContent></Select></div>
-                <div><Label>Value</Label><Input type="number" placeholder="25" className="mt-1" /></div>
+                <div><Label>Discount Type</Label><Select value={marketplaceCouponForm.discountType} onValueChange={(v) => setMarketplaceCouponForm(prev => ({ ...prev, discountType: v as 'percentage' | 'fixed' | 'free_trial' }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="percentage">Percentage Off</SelectItem><SelectItem value="fixed">Fixed Amount</SelectItem><SelectItem value="free_trial">Free Trial Days</SelectItem></SelectContent></Select></div>
+                <div><Label>Value</Label><Input type="number" placeholder="25" className="mt-1" value={marketplaceCouponForm.value} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, value: e.target.value }))} /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Usage Limit</Label><Input type="number" placeholder="100" className="mt-1" /></div><div><Label>Min Purchase</Label><Input type="number" placeholder="0" className="mt-1" /></div></div>
-              <div><Label>Expires At</Label><Input type="date" className="mt-1" /></div>
-              <div><Label>Applicable Products</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select products" /></SelectTrigger><SelectContent><SelectItem value="all">All Products</SelectItem><SelectItem value="selected">Selected Products</SelectItem></SelectContent></Select></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Usage Limit</Label><Input type="number" placeholder="100" className="mt-1" value={marketplaceCouponForm.usageLimit} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, usageLimit: e.target.value }))} /></div><div><Label>Min Purchase</Label><Input type="number" placeholder="0" className="mt-1" value={marketplaceCouponForm.minPurchase} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, minPurchase: e.target.value }))} /></div></div>
+              <div><Label>Expires At</Label><Input type="date" className="mt-1" value={marketplaceCouponForm.expiresAt} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, expiresAt: e.target.value }))} /></div>
+              <div><Label>Applicable Products</Label><Select value={marketplaceCouponForm.applicableProducts} onValueChange={(v) => setMarketplaceCouponForm(prev => ({ ...prev, applicableProducts: v }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select products" /></SelectTrigger><SelectContent><SelectItem value="all">All Products</SelectItem><SelectItem value="selected">Selected Products</SelectItem></SelectContent></Select></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowCouponDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Create Coupon</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowCouponDialog(false)}>Cancel</Button><Button onClick={handleCreateMarketplaceCoupon} disabled={creatingCoupon || !marketplaceCouponForm.code || !marketplaceCouponForm.value} className="bg-gradient-to-r from-violet-600 to-purple-600">{creatingCoupon ? 'Creating...' : 'Create Coupon'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

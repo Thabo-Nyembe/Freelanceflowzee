@@ -2,8 +2,9 @@
 // Comprehensive client relationship management with pipeline, deals, and activities
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useClients } from '@/lib/hooks/use-clients'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -449,6 +450,57 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database integration - use real clients hook
+  const { clients: dbClients, fetchClients, createClient, updateClient, isLoading: clientsLoading } = useClients()
+
+  // Form state for new client
+  const [newClientForm, setNewClientForm] = useState({
+    company: '',
+    industry: 'Technology',
+    website: '',
+    contactName: '',
+    contactTitle: '',
+    email: '',
+    phone: '',
+    status: 'prospect' as 'active' | 'inactive' | 'prospect' | 'archived'
+  })
+
+  // Fetch clients on mount
+  useEffect(() => {
+    fetchClients()
+  }, [fetchClients])
+
+  // Handle creating a new client
+  const handleCreateClient = async () => {
+    if (!newClientForm.company || !newClientForm.contactName || !newClientForm.email) {
+      return // Basic validation - required fields
+    }
+    try {
+      await createClient({
+        name: newClientForm.contactName,
+        email: newClientForm.email,
+        phone: newClientForm.phone || null,
+        company: newClientForm.company,
+        website: newClientForm.website || null,
+        industry: newClientForm.industry,
+        status: newClientForm.status
+      } as any)
+      setShowAddDialog(false)
+      setNewClientForm({
+        company: '',
+        industry: 'Technology',
+        website: '',
+        contactName: '',
+        contactTitle: '',
+        email: '',
+        phone: '',
+        status: 'prospect'
+      })
+    } catch (error) {
+      console.error('Failed to create client:', error)
+    }
+  }
 
   // Filter clients
   const filteredClients = useMemo(() => {
@@ -1870,61 +1922,104 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Company Name *</label>
-                <Input placeholder="Enter company name" className="mt-1" />
+                <Input
+                  placeholder="Enter company name"
+                  className="mt-1"
+                  value={newClientForm.company}
+                  onChange={(e) => setNewClientForm(prev => ({ ...prev, company: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Industry</label>
-                  <select className="w-full mt-1 p-2 rounded-lg border">
-                    <option>Technology</option>
-                    <option>Healthcare</option>
-                    <option>Finance</option>
-                    <option>Manufacturing</option>
-                    <option>Retail</option>
-                    <option>Other</option>
+                  <select
+                    className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={newClientForm.industry}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, industry: e.target.value }))}
+                  >
+                    <option value="Technology">Technology</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Status</label>
-                  <select className="w-full mt-1 p-2 rounded-lg border">
-                    <option value="lead">Lead</option>
+                  <select
+                    className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={newClientForm.status}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, status: e.target.value as any }))}
+                  >
+                    <option value="active">Active</option>
                     <option value="prospect">Prospect</option>
-                    <option value="opportunity">Opportunity</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Website</label>
-                <Input placeholder="https://company.com" className="mt-1" />
+                <Input
+                  placeholder="https://company.com"
+                  className="mt-1"
+                  value={newClientForm.website}
+                  onChange={(e) => setNewClientForm(prev => ({ ...prev, website: e.target.value }))}
+                />
               </div>
               <div className="border-t pt-4 mt-4">
                 <h4 className="font-medium mb-3">Primary Contact</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">Name *</label>
-                    <Input placeholder="Contact name" className="mt-1" />
+                    <Input
+                      placeholder="Contact name"
+                      className="mt-1"
+                      value={newClientForm.contactName}
+                      onChange={(e) => setNewClientForm(prev => ({ ...prev, contactName: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium">Title</label>
-                    <Input placeholder="Job title" className="mt-1" />
+                    <Input
+                      placeholder="Job title"
+                      className="mt-1"
+                      value={newClientForm.contactTitle}
+                      onChange={(e) => setNewClientForm(prev => ({ ...prev, contactTitle: e.target.value }))}
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="text-sm font-medium">Email *</label>
-                    <Input type="email" placeholder="email@company.com" className="mt-1" />
+                    <Input
+                      type="email"
+                      placeholder="email@company.com"
+                      className="mt-1"
+                      value={newClientForm.email}
+                      onChange={(e) => setNewClientForm(prev => ({ ...prev, email: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium">Phone</label>
-                    <Input placeholder="+1 555 000 0000" className="mt-1" />
+                    <Input
+                      placeholder="+1 555 000 0000"
+                      className="mt-1"
+                      value={newClientForm.phone}
+                      onChange={(e) => setNewClientForm(prev => ({ ...prev, phone: e.target.value }))}
+                    />
                   </div>
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowAddDialog(false)} className="flex-1">Cancel</Button>
-                <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                <Button
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                  onClick={handleCreateClient}
+                  disabled={clientsLoading || !newClientForm.company || !newClientForm.contactName || !newClientForm.email}
+                >
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Add Client
+                  {clientsLoading ? 'Adding...' : 'Add Client'}
                 </Button>
               </div>
             </div>

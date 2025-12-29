@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useInventory, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
+import { useInventory, useCreateInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
+import { toast } from 'sonner'
 import {
   Package,
   TrendingUp,
@@ -383,6 +384,87 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const [showTransferDialog, setShowTransferDialog] = useState(false)
   const [showPODialog, setShowPODialog] = useState(false)
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set())
+
+  // Database integration
+  const { data: dbInventory, loading: inventoryLoading, refetch } = useInventory({ status: statusFilter === 'all' ? 'all' : statusFilter as InventoryStatus })
+  const { mutate: createInventoryItem, loading: creating } = useCreateInventoryItem()
+
+  // Form state for new product
+  const [newProductForm, setNewProductForm] = useState({
+    title: '',
+    vendor: '',
+    description: '',
+    productType: 'Apparel',
+    status: 'draft' as 'active' | 'draft' | 'archived',
+    sku: '',
+    price: '',
+    costPrice: '',
+    quantity: ''
+  })
+
+  const handleCreateProduct = async () => {
+    if (!newProductForm.title) {
+      toast.error('Please enter a product title')
+      return
+    }
+
+    try {
+      await createInventoryItem({
+        product_name: newProductForm.title,
+        sku: newProductForm.sku || null,
+        category: newProductForm.productType,
+        status: newProductForm.status === 'active' ? 'in-stock' : 'out-of-stock',
+        quantity: parseInt(newProductForm.quantity) || 0,
+        available_quantity: parseInt(newProductForm.quantity) || 0,
+        reserved_quantity: 0,
+        unit_price: parseFloat(newProductForm.price) || 0,
+        selling_price: parseFloat(newProductForm.price) || 0,
+        cost_price: parseFloat(newProductForm.costPrice) || 0,
+        total_value: (parseFloat(newProductForm.price) || 0) * (parseInt(newProductForm.quantity) || 0),
+        description: newProductForm.description || null,
+        brand: newProductForm.vendor || null,
+        manufacturer: newProductForm.vendor || null,
+        reorder_point: 10,
+        reorder_quantity: 50,
+        minimum_stock_level: 5,
+        maximum_stock_level: 1000,
+        is_active: true,
+        currency: 'USD',
+        lead_time_days: 7,
+        weight_kg: 0,
+        volume_m3: 0,
+        turnover_rate: 0,
+        sell_through_rate: 0,
+        stock_cover_days: 0,
+        total_sales: 0,
+        total_revenue: 0,
+        low_stock_alert: false,
+        out_of_stock_alert: false,
+        expiry_alert: false,
+        has_expiry: false,
+        tax_rate: 0,
+        is_taxable: true
+      } as any)
+
+      toast.success('Product created successfully!')
+      setShowProductDialog(false)
+      setNewProductForm({
+        title: '',
+        vendor: '',
+        description: '',
+        productType: 'Apparel',
+        status: 'draft',
+        sku: '',
+        price: '',
+        costPrice: '',
+        quantity: ''
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to create product')
+      console.error(error)
+    }
+  }
 
   const filteredProducts = useMemo(() => {
     return mockProducts.filter(product => {
@@ -1666,7 +1748,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Title</label>
                   <input
                     type="text"
-                    defaultValue={selectedProduct?.title || ''}
+                    value={selectedProduct?.title || newProductForm.title}
+                    onChange={(e) => setNewProductForm(prev => ({ ...prev, title: e.target.value }))}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                     placeholder="Enter product title"
                   />
@@ -1675,7 +1758,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vendor</label>
                   <input
                     type="text"
-                    defaultValue={selectedProduct?.vendor || ''}
+                    value={selectedProduct?.vendor || newProductForm.vendor}
+                    onChange={(e) => setNewProductForm(prev => ({ ...prev, vendor: e.target.value }))}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                     placeholder="Enter vendor name"
                   />
@@ -1684,7 +1768,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea
-                  defaultValue={selectedProduct?.description || ''}
+                  value={selectedProduct?.description || newProductForm.description}
+                  onChange={(e) => setNewProductForm(prev => ({ ...prev, description: e.target.value }))}
                   rows={3}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                   placeholder="Enter product description"
@@ -1693,17 +1778,22 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Type</label>
-                  <select className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white">
-                    <option>Apparel</option>
-                    <option>Electronics</option>
-                    <option>Food & Beverage</option>
-                    <option>Accessories</option>
+                  <select
+                    value={newProductForm.productType}
+                    onChange={(e) => setNewProductForm(prev => ({ ...prev, productType: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  >
+                    <option value="Apparel">Apparel</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Accessories">Accessories</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                   <select
-                    defaultValue={selectedProduct?.status || 'draft'}
+                    value={selectedProduct?.status || newProductForm.status}
+                    onChange={(e) => setNewProductForm(prev => ({ ...prev, status: e.target.value as 'active' | 'draft' | 'archived' }))}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                   >
                     <option value="active">Active</option>
@@ -1781,8 +1871,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             >
               Cancel
             </button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
-              {selectedProduct ? 'Save Changes' : 'Create Product'}
+            <button
+              onClick={handleCreateProduct}
+              disabled={creating || !newProductForm.title}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {creating ? 'Creating...' : selectedProduct ? 'Save Changes' : 'Create Product'}
             </button>
           </div>
         </DialogContent>

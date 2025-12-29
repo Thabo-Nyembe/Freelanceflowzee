@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { useDocuments, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
+import { useDocuments, useCreateDocument, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -347,7 +348,36 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const { documents, loading, error } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
+  const { documents, loading, error, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
+  const { mutate: createDocument, loading: creating } = useCreateDocument()
+
+  // Handle creating a new document
+  const handleCreateDocument = async (docType: 'document' | 'spreadsheet' | 'presentation' | 'folder') => {
+    const typeMap: Record<string, DocumentType> = {
+      document: 'report',
+      spreadsheet: 'spreadsheet',
+      presentation: 'presentation',
+      folder: 'other'
+    }
+    try {
+      await createDocument({
+        document_title: `Untitled ${docType.charAt(0).toUpperCase() + docType.slice(1)}`,
+        document_type: typeMap[docType],
+        status: 'draft',
+        access_level: 'internal',
+        version: '1.0',
+        version_number: 1,
+        is_latest_version: true,
+        is_encrypted: false,
+        is_archived: false
+      } as any)
+      setShowCreateDialog(false)
+      toast.success(`${docType.charAt(0).toUpperCase() + docType.slice(1)} created`)
+      refetch()
+    } catch (error) {
+      console.error('Failed to create document:', error)
+    }
+  }
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {
@@ -439,15 +469,16 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     </DialogHeader>
                     <div className="grid grid-cols-2 gap-3 py-4">
                       {[
-                        { icon: <FileText className="h-6 w-6" />, label: 'Document', desc: 'Word processor', color: 'blue' },
-                        { icon: <FileSpreadsheet className="h-6 w-6" />, label: 'Spreadsheet', desc: 'Data & calculations', color: 'green' },
-                        { icon: <Presentation className="h-6 w-6" />, label: 'Presentation', desc: 'Slides & visuals', color: 'orange' },
-                        { icon: <FolderPlus className="h-6 w-6" />, label: 'Folder', desc: 'Organize files', color: 'purple' },
+                        { icon: <FileText className="h-6 w-6" />, label: 'Document', desc: 'Word processor', color: 'blue', type: 'document' as const },
+                        { icon: <FileSpreadsheet className="h-6 w-6" />, label: 'Spreadsheet', desc: 'Data & calculations', color: 'green', type: 'spreadsheet' as const },
+                        { icon: <Presentation className="h-6 w-6" />, label: 'Presentation', desc: 'Slides & visuals', color: 'orange', type: 'presentation' as const },
+                        { icon: <FolderPlus className="h-6 w-6" />, label: 'Folder', desc: 'Organize files', color: 'purple', type: 'folder' as const },
                       ].map((item, i) => (
                         <button
                           key={i}
-                          onClick={() => setShowCreateDialog(false)}
-                          className={`p-4 border rounded-lg hover:border-${item.color}-500 hover:bg-${item.color}-50 dark:hover:bg-${item.color}-900/20 transition-colors text-left`}
+                          onClick={() => handleCreateDocument(item.type)}
+                          disabled={creating}
+                          className={`p-4 border rounded-lg hover:border-${item.color}-500 hover:bg-${item.color}-50 dark:hover:bg-${item.color}-900/20 transition-colors text-left disabled:opacity-50`}
                         >
                           <div className={`text-${item.color}-600 mb-2`}>{item.icon}</div>
                           <h4 className="font-medium">{item.label}</h4>

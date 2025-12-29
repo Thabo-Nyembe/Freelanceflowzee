@@ -1,6 +1,7 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -233,7 +234,44 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [showNewEvent, setShowNewEvent] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { events, loading, error } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
+  const { events, loading, error, createEvent, refetch } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
+
+  // Form state for new event
+  const [newEventForm, setNewEventForm] = useState({
+    title: '',
+    startTime: '',
+    endTime: '',
+    eventType: 'meeting' as EventType,
+    location: '',
+    description: ''
+  })
+
+  // Handle creating a new event
+  const handleCreateEvent = async () => {
+    if (!newEventForm.title || !newEventForm.startTime || !newEventForm.endTime) {
+      toast.error('Please fill in title, start and end time')
+      return
+    }
+    try {
+      await createEvent({
+        title: newEventForm.title,
+        start_time: newEventForm.startTime,
+        end_time: newEventForm.endTime,
+        event_type: newEventForm.eventType,
+        location: newEventForm.location || null,
+        description: newEventForm.description || null,
+        status: 'confirmed',
+        all_day: false,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      } as any)
+      setShowNewEvent(false)
+      setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
+      toast.success('Event created')
+      refetch()
+    } catch (error) {
+      console.error('Failed to create event:', error)
+    }
+  }
   const displayEvents = (events && events.length > 0) ? events : (initialEvents || [])
 
   // Calculate comprehensive stats
@@ -419,26 +457,26 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       <div className="space-y-4 py-4 pr-4">
                         <div>
                           <label className="block text-sm font-medium mb-1">Event Title</label>
-                          <Input placeholder="Add title" />
+                          <Input placeholder="Add title" value={newEventForm.title} onChange={(e) => setNewEventForm(prev => ({ ...prev, title: e.target.value }))} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium mb-1">Start</label>
-                            <Input type="datetime-local" />
+                            <Input type="datetime-local" value={newEventForm.startTime} onChange={(e) => setNewEventForm(prev => ({ ...prev, startTime: e.target.value }))} />
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">End</label>
-                            <Input type="datetime-local" />
+                            <Input type="datetime-local" value={newEventForm.endTime} onChange={(e) => setNewEventForm(prev => ({ ...prev, endTime: e.target.value }))} />
                           </div>
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-1">Event Type</label>
-                          <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                          <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" value={newEventForm.eventType} onChange={(e) => setNewEventForm(prev => ({ ...prev, eventType: e.target.value as EventType }))}>
                             <option value="meeting">Meeting</option>
                             <option value="appointment">Appointment</option>
                             <option value="task">Task</option>
                             <option value="reminder">Reminder</option>
-                            <option value="focus">Focus Time</option>
+                            <option value="deadline">Deadline</option>
                           </select>
                         </div>
                         <div>
@@ -452,34 +490,19 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                         <div>
                           <label className="block text-sm font-medium mb-1">Location</label>
                           <div className="flex items-center gap-2">
-                            <Input placeholder="Add location or video link" className="flex-1" />
+                            <Input placeholder="Add location or video link" className="flex-1" value={newEventForm.location} onChange={(e) => setNewEventForm(prev => ({ ...prev, location: e.target.value }))} />
                             <Button variant="outline" size="sm">
                               <Video className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-1">Add Guests</label>
-                          <Input placeholder="Enter email addresses" />
-                        </div>
-                        <div>
                           <label className="block text-sm font-medium mb-1">Description</label>
-                          <textarea rows={3} placeholder="Add description" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" />
-                        </div>
-                        <div className="flex items-center gap-4 pt-2">
-                          <Button variant="ghost" size="sm" className="gap-2">
-                            <Bell className="h-4 w-4" /> Reminder
-                          </Button>
-                          <Button variant="ghost" size="sm" className="gap-2">
-                            <Repeat className="h-4 w-4" /> Repeat
-                          </Button>
-                          <Button variant="ghost" size="sm" className="gap-2">
-                            <Palette className="h-4 w-4" /> Color
-                          </Button>
+                          <textarea rows={3} placeholder="Add description" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" value={newEventForm.description} onChange={(e) => setNewEventForm(prev => ({ ...prev, description: e.target.value }))} />
                         </div>
                         <div className="flex justify-end gap-3 pt-4">
                           <Button variant="outline" onClick={() => setShowNewEvent(false)}>Cancel</Button>
-                          <Button className="bg-teal-600 hover:bg-teal-700">Create Event</Button>
+                          <Button className="bg-teal-600 hover:bg-teal-700" onClick={handleCreateEvent} disabled={loading || !newEventForm.title}>{loading ? 'Creating...' : 'Create Event'}</Button>
                         </div>
                       </div>
                     </ScrollArea>

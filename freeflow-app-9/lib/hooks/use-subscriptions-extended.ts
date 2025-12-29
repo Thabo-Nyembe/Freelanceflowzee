@@ -194,3 +194,31 @@ export function useSubscriptionStats() {
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
+
+export function useCreateSubscription() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
+
+  const create = useCallback(async (subscriptionData: any) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data, error: createError } = await supabase
+        .from('subscriptions')
+        .insert([{ ...subscriptionData, user_id: user?.id }])
+        .select()
+        .single()
+      if (createError) throw createError
+      return data
+    } catch (err) {
+      setError(err as Error)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  return { create, isLoading, error }
+}

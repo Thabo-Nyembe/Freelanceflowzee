@@ -45,6 +45,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBilling, type BillingTransaction, type BillingStatus } from '@/lib/hooks/use-billing'
+import { useCreateSubscription } from '@/lib/hooks/use-subscriptions-extended'
+import { useCreateCoupon } from '@/lib/hooks/use-coupon-extended'
+import { toast } from 'sonner'
 
 interface Subscription {
   id: string
@@ -222,6 +225,100 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
 
   const { transactions, loading, error } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
+
+  // Database integration for subscriptions and coupons
+  const { create: createSubscription, isLoading: creatingSubscription } = useCreateSubscription()
+  const { create: createCoupon, isLoading: creatingCoupon } = useCreateCoupon()
+
+  // Form state for new subscription
+  const [newSubscriptionForm, setNewSubscriptionForm] = useState({
+    customerEmail: '',
+    planId: '',
+    trialDays: '0',
+    couponCode: ''
+  })
+
+  // Form state for new coupon
+  const [newCouponForm, setNewCouponForm] = useState({
+    name: '',
+    code: '',
+    discountType: 'percent_off' as 'percent_off' | 'amount_off',
+    value: '',
+    duration: 'once' as 'once' | 'repeating' | 'forever',
+    maxRedemptions: ''
+  })
+
+  const handleCreateSubscription = async () => {
+    if (!newSubscriptionForm.customerEmail || !newSubscriptionForm.planId) {
+      toast.error('Please fill in customer email and select a plan')
+      return
+    }
+
+    try {
+      const trialDays = parseInt(newSubscriptionForm.trialDays) || 0
+      const now = new Date()
+      const trialEnd = trialDays > 0 ? new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000).toISOString() : null
+      const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+      await createSubscription({
+        customer_email: newSubscriptionForm.customerEmail,
+        plan_id: newSubscriptionForm.planId,
+        status: trialDays > 0 ? 'trialing' : 'active',
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd,
+        trial_end: trialEnd,
+        cancel_at_period_end: false,
+        billing_cycle: 'monthly',
+        coupon_code: newSubscriptionForm.couponCode || null
+      })
+
+      toast.success('Subscription created successfully!')
+      setShowNewSubscriptionModal(false)
+      setNewSubscriptionForm({
+        customerEmail: '',
+        planId: '',
+        trialDays: '0',
+        couponCode: ''
+      })
+    } catch (error) {
+      toast.error('Failed to create subscription')
+      console.error(error)
+    }
+  }
+
+  const handleCreateCoupon = async () => {
+    if (!newCouponForm.name || !newCouponForm.code || !newCouponForm.value) {
+      toast.error('Please fill in coupon name, code, and value')
+      return
+    }
+
+    try {
+      await createCoupon({
+        name: newCouponForm.name,
+        code: newCouponForm.code.toUpperCase(),
+        discount_type: newCouponForm.discountType,
+        discount_value: parseFloat(newCouponForm.value),
+        duration: newCouponForm.duration,
+        max_redemptions: newCouponForm.maxRedemptions ? parseInt(newCouponForm.maxRedemptions) : null,
+        is_active: true,
+        times_redeemed: 0
+      })
+
+      toast.success('Coupon created successfully!')
+      setShowNewCouponModal(false)
+      setNewCouponForm({
+        name: '',
+        code: '',
+        discountType: 'percent_off',
+        value: '',
+        duration: 'once',
+        maxRedemptions: ''
+      })
+    } catch (error) {
+      toast.error('Failed to create coupon')
+      console.error(error)
+    }
+  }
 
   // Mock subscriptions data
   const subscriptions: Subscription[] = [
@@ -1867,11 +1964,21 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Email</label>
-              <Input type="email" placeholder="customer@example.com" />
+              <Input
+                type="email"
+                placeholder="customer@example.com"
+                value={newSubscriptionForm.customerEmail}
+                onChange={(e) => setNewSubscriptionForm(prev => ({ ...prev, customerEmail: e.target.value }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Plan</label>
-              <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+              <select
+                value={newSubscriptionForm.planId}
+                onChange={(e) => setNewSubscriptionForm(prev => ({ ...prev, planId: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              >
+                <option value="">Select a plan...</option>
                 {pricingPlans.filter(p => p.is_active && p.amount > 0).map(plan => (
                   <option key={plan.id} value={plan.id}>{plan.name} ({formatCurrency(plan.amount)}/{plan.interval})</option>
                 ))}
@@ -1879,7 +1986,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trial Period</label>
-              <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+              <select
+                value={newSubscriptionForm.trialDays}
+                onChange={(e) => setNewSubscriptionForm(prev => ({ ...prev, trialDays: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              >
                 <option value="0">No trial</option>
                 <option value="7">7 days</option>
                 <option value="14">14 days</option>
@@ -1888,12 +1999,22 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coupon Code (optional)</label>
-              <Input placeholder="WELCOME10" />
+              <Input
+                placeholder="WELCOME10"
+                value={newSubscriptionForm.couponCode}
+                onChange={(e) => setNewSubscriptionForm(prev => ({ ...prev, couponCode: e.target.value }))}
+              />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewSubscriptionModal(false)}>Cancel</Button>
-            <Button className="bg-gradient-to-r from-indigo-600 to-violet-600">Create Subscription</Button>
+            <Button
+              onClick={handleCreateSubscription}
+              disabled={creatingSubscription || !newSubscriptionForm.customerEmail || !newSubscriptionForm.planId}
+              className="bg-gradient-to-r from-indigo-600 to-violet-600"
+            >
+              {creatingSubscription ? 'Creating...' : 'Create Subscription'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1912,28 +2033,50 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coupon Name</label>
-              <Input placeholder="Summer Sale" />
+              <Input
+                placeholder="Summer Sale"
+                value={newCouponForm.name}
+                onChange={(e) => setNewCouponForm(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Code</label>
-              <Input placeholder="SUMMER25" className="uppercase" />
+              <Input
+                placeholder="SUMMER25"
+                className="uppercase"
+                value={newCouponForm.code}
+                onChange={(e) => setNewCouponForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Type</label>
-                <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <select
+                  value={newCouponForm.discountType}
+                  onChange={(e) => setNewCouponForm(prev => ({ ...prev, discountType: e.target.value as 'percent_off' | 'amount_off' }))}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
                   <option value="percent_off">Percentage</option>
                   <option value="amount_off">Fixed Amount</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Value</label>
-                <Input type="number" placeholder="25" />
+                <Input
+                  type="number"
+                  placeholder="25"
+                  value={newCouponForm.value}
+                  onChange={(e) => setNewCouponForm(prev => ({ ...prev, value: e.target.value }))}
+                />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration</label>
-              <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+              <select
+                value={newCouponForm.duration}
+                onChange={(e) => setNewCouponForm(prev => ({ ...prev, duration: e.target.value as 'once' | 'repeating' | 'forever' }))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              >
                 <option value="once">Once</option>
                 <option value="repeating">Multiple months</option>
                 <option value="forever">Forever</option>
@@ -1941,12 +2084,23 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Redemptions (optional)</label>
-              <Input type="number" placeholder="100" />
+              <Input
+                type="number"
+                placeholder="100"
+                value={newCouponForm.maxRedemptions}
+                onChange={(e) => setNewCouponForm(prev => ({ ...prev, maxRedemptions: e.target.value }))}
+              />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewCouponModal(false)}>Cancel</Button>
-            <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Create Coupon</Button>
+            <Button
+              onClick={handleCreateCoupon}
+              disabled={creatingCoupon || !newCouponForm.name || !newCouponForm.code || !newCouponForm.value}
+              className="bg-gradient-to-r from-green-600 to-emerald-600"
+            >
+              {creatingCoupon ? 'Creating...' : 'Create Coupon'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -35,6 +35,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { CardDescription } from '@/components/ui/card'
+import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
+import { toast } from 'sonner'
 
 // Types
 type TimeEntryStatus = 'running' | 'stopped' | 'approved' | 'rejected'
@@ -322,6 +324,97 @@ export default function TimeTrackingClient() {
   const [reportsTab, setReportsTab] = useState('overview')
   const [teamTab, setTeamTab] = useState('activity')
 
+  // Database integration - use real time tracking hook
+  const { timeEntries: dbTimeEntries, createEntry, updateEntry, deleteEntry, loading: entriesLoading, refetch } = useTimeTracking()
+
+  // Form state for new time entry
+  const [newEntryForm, setNewEntryForm] = useState({
+    description: '',
+    projectId: '',
+    date: new Date().toISOString().split('T')[0],
+    duration: '',
+    startTime: '',
+    endTime: '',
+    isBillable: true
+  })
+
+  // Fetch time entries on mount
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  // Handle creating a new time entry
+  const handleCreateEntry = async () => {
+    if (!newEntryForm.description || !newEntryForm.projectId) {
+      toast.error('Please fill in description and project')
+      return
+    }
+    try {
+      // Parse duration (e.g., "1h 30m" or "1.5")
+      let durationSeconds = 0
+      const durationStr = newEntryForm.duration
+      if (durationStr.includes('h') || durationStr.includes('m')) {
+        const hours = durationStr.match(/(\d+)h/)?.[1] || '0'
+        const mins = durationStr.match(/(\d+)m/)?.[1] || '0'
+        durationSeconds = (parseInt(hours) * 3600) + (parseInt(mins) * 60)
+      } else {
+        durationSeconds = parseFloat(durationStr || '0') * 3600
+      }
+
+      await createEntry({
+        title: newEntryForm.description,
+        description: newEntryForm.description,
+        project_id: newEntryForm.projectId,
+        start_time: `${newEntryForm.date}T${newEntryForm.startTime || '09:00'}:00`,
+        end_time: newEntryForm.endTime ? `${newEntryForm.date}T${newEntryForm.endTime}:00` : undefined,
+        duration_seconds: durationSeconds,
+        duration_hours: durationSeconds / 3600,
+        is_billable: newEntryForm.isBillable,
+        entry_type: 'manual',
+        status: 'stopped'
+      } as any)
+      setShowEntryDialog(false)
+      setNewEntryForm({
+        description: '',
+        projectId: '',
+        date: new Date().toISOString().split('T')[0],
+        duration: '',
+        startTime: '',
+        endTime: '',
+        isBillable: true
+      })
+      toast.success('Time entry created')
+    } catch (error) {
+      console.error('Failed to create time entry:', error)
+    }
+  }
+
+  // Handle starting timer and saving entry
+  const handleSaveTimerEntry = async () => {
+    if (!timerDescription || !timerProject) {
+      toast.error('Please enter description and select project')
+      return
+    }
+    try {
+      await createEntry({
+        title: timerDescription,
+        description: timerDescription,
+        project_id: timerProject,
+        start_time: new Date(Date.now() - timerSeconds * 1000).toISOString(),
+        end_time: new Date().toISOString(),
+        duration_seconds: timerSeconds,
+        duration_hours: timerSeconds / 3600,
+        is_billable: timerBillable,
+        entry_type: 'timer',
+        status: 'stopped'
+      } as any)
+      stopTimer()
+      toast.success('Timer entry saved')
+    } catch (error) {
+      console.error('Failed to save timer entry:', error)
+    }
+  }
+
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isTimerRunning) {
@@ -430,7 +523,7 @@ export default function TimeTrackingClient() {
               <Button variant={timerBillable ? 'default' : 'outline'} size="icon" onClick={() => setTimerBillable(!timerBillable)} className={timerBillable ? 'bg-emerald-500 hover:bg-emerald-600' : ''}><DollarSign className="h-5 w-5" /></Button>
               <div className="text-4xl font-mono font-bold min-w-[160px] text-center">{formatTimer(timerSeconds)}</div>
               {isTimerRunning ? (
-                <><Button variant="outline" size="icon" onClick={toggleTimer}><Pause className="h-5 w-5" /></Button><Button variant="destructive" size="icon" onClick={stopTimer}><Square className="h-5 w-5" /></Button></>
+                <><Button variant="outline" size="icon" onClick={toggleTimer}><Pause className="h-5 w-5" /></Button><Button variant="destructive" size="icon" onClick={handleSaveTimerEntry} title="Stop and save"><Square className="h-5 w-5" /></Button></>
               ) : (
                 <Button size="icon" className="bg-amber-500 hover:bg-amber-600" onClick={toggleTimer}><Play className="h-5 w-5" /></Button>
               )}
@@ -1806,13 +1899,13 @@ export default function TimeTrackingClient() {
         <Dialog open={showEntryDialog} onOpenChange={setShowEntryDialog}>
           <DialogContent><DialogHeader><DialogTitle>Add Time Entry</DialogTitle><DialogDescription>Manually log a time entry</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" /></div>
-              <div><Label>Project</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Date</Label><Input type="date" className="mt-1" defaultValue={new Date().toISOString().split('T')[0]} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" /></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" /></div><div><Label>End Time</Label><Input type="time" className="mt-1" /></div></div>
-              <div className="flex items-center gap-2"><Switch id="billable" defaultChecked /><Label htmlFor="billable">Billable</Label></div>
+              <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
+              <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
+              <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowEntryDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Save Entry</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowEntryDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={handleCreateEntry} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : 'Save Entry'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

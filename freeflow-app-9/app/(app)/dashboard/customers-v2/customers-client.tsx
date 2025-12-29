@@ -53,7 +53,7 @@ import {
   customersQuickActions,
 } from '@/lib/mock-data/adapters'
 
-import { useCustomers, type Customer, type CustomerSegment } from '@/lib/hooks/use-customers'
+import { useCustomers, useCreateCustomer, type Customer, type CustomerSegment } from '@/lib/hooks/use-customers'
 
 // ============================================================================
 // TYPES - SALESFORCE CRM LEVEL
@@ -467,7 +467,44 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const { customers, loading, error } = useCustomers({ segment: 'all' })
+  const { customers, loading, error, refetch } = useCustomers({ segment: 'all' })
+  const { mutate: createCustomer, loading: creating } = useCreateCustomer()
+
+  // Form state for new contact
+  const [newContactForm, setNewContactForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    title: '',
+    accountId: ''
+  })
+
+  // Handle creating a new contact
+  const handleCreateContact = async () => {
+    if (!newContactForm.firstName || !newContactForm.lastName || !newContactForm.email) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    try {
+      await createCustomer({
+        customer_name: `${newContactForm.firstName} ${newContactForm.lastName}`,
+        first_name: newContactForm.firstName,
+        last_name: newContactForm.lastName,
+        email: newContactForm.email,
+        phone: newContactForm.phone || null,
+        job_title: newContactForm.title || null,
+        status: 'active',
+        segment: 'new'
+      } as any)
+      setShowAddContact(false)
+      setNewContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', accountId: '' })
+      toast.success('Contact created successfully')
+      refetch()
+    } catch (error) {
+      console.error('Failed to create contact:', error)
+    }
+  }
 
   // Stats
   const stats = useMemo(() => {
@@ -1949,28 +1986,28 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
-                  <Input placeholder="John" />
+                  <Input placeholder="John" value={newContactForm.firstName} onChange={(e) => setNewContactForm(prev => ({ ...prev, firstName: e.target.value }))} />
                 </div>
                 <div className="space-y-2">
                   <Label>Last Name *</Label>
-                  <Input placeholder="Smith" />
+                  <Input placeholder="Smith" value={newContactForm.lastName} onChange={(e) => setNewContactForm(prev => ({ ...prev, lastName: e.target.value }))} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Email *</Label>
-                <Input type="email" placeholder="john@company.com" />
+                <Input type="email" placeholder="john@company.com" value={newContactForm.email} onChange={(e) => setNewContactForm(prev => ({ ...prev, email: e.target.value }))} />
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
-                <Input placeholder="+1 (555) 123-4567" />
+                <Input placeholder="+1 (555) 123-4567" value={newContactForm.phone} onChange={(e) => setNewContactForm(prev => ({ ...prev, phone: e.target.value }))} />
               </div>
               <div className="space-y-2">
                 <Label>Title</Label>
-                <Input placeholder="VP of Engineering" />
+                <Input placeholder="VP of Engineering" value={newContactForm.title} onChange={(e) => setNewContactForm(prev => ({ ...prev, title: e.target.value }))} />
               </div>
               <div className="space-y-2">
                 <Label>Account</Label>
-                <Select>
+                <Select value={newContactForm.accountId} onValueChange={(value) => setNewContactForm(prev => ({ ...prev, accountId: value }))}>
                   <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                   <SelectContent>
                     {MOCK_ACCOUNTS.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
@@ -1980,8 +2017,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddContact(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { toast.success('Contact created'); setShowAddContact(false) }}>
-                <UserPlus className="h-4 w-4 mr-2" />Create Contact
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleCreateContact} disabled={creating || !newContactForm.firstName || !newContactForm.email}>
+                <UserPlus className="h-4 w-4 mr-2" />{creating ? 'Creating...' : 'Create Contact'}
               </Button>
             </DialogFooter>
           </DialogContent>

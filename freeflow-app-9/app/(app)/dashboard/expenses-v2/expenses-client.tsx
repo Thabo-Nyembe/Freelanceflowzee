@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useExpenses, useCreateExpense } from '@/lib/hooks/use-expenses'
+import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -230,6 +232,51 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [showNewExpenseDialog, setShowNewExpenseDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database integration - use real expenses hooks
+  const { data: dbExpenses, loading: expensesLoading, refetch } = useExpenses({ status: statusFilter as any })
+  const { mutate: createExpense, loading: creating } = useCreateExpense()
+
+  // Form state for new expense
+  const [newExpenseForm, setNewExpenseForm] = useState({
+    title: '',
+    paymentMethod: 'corporate_card',
+    notes: '',
+    amount: 0,
+    category: 'travel' as const
+  })
+
+  // Fetch expenses on mount
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  // Handle creating a new expense
+  const handleCreateExpense = async () => {
+    if (!newExpenseForm.title) {
+      toast.error('Please enter a report title')
+      return
+    }
+    try {
+      await createExpense({
+        expense_title: newExpenseForm.title,
+        expense_category: newExpenseForm.category,
+        amount: newExpenseForm.amount,
+        total_amount: newExpenseForm.amount,
+        currency: 'USD',
+        status: 'draft',
+        payment_method: newExpenseForm.paymentMethod,
+        description: newExpenseForm.notes || null,
+        expense_date: new Date().toISOString().split('T')[0]
+      } as any)
+      setShowNewExpenseDialog(false)
+      setNewExpenseForm({ title: '', paymentMethod: 'corporate_card', notes: '', amount: 0, category: 'travel' })
+      toast.success('Expense report created')
+      refetch()
+    } catch (error) {
+      console.error('Failed to create expense:', error)
+    }
+  }
 
   const reports = mockReports
   const policies = mockPolicies
@@ -1853,11 +1900,28 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Report Title</label>
-              <Input placeholder="e.g., Q1 Sales Conference" />
+              <Input
+                placeholder="e.g., Q1 Sales Conference"
+                value={newExpenseForm.title}
+                onChange={(e) => setNewExpenseForm(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Amount</label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={newExpenseForm.amount || ''}
+                onChange={(e) => setNewExpenseForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Payment Method</label>
-              <select className="w-full px-3 py-2 border rounded-lg">
+              <select
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                value={newExpenseForm.paymentMethod}
+                onChange={(e) => setNewExpenseForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+              >
                 <option value="corporate_card">Corporate Card</option>
                 <option value="personal_card">Personal Card</option>
                 <option value="cash">Cash</option>
@@ -1865,14 +1929,24 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Notes (Optional)</label>
-              <textarea className="w-full px-3 py-2 border rounded-lg" rows={3} placeholder="Add any relevant notes..." />
+              <textarea
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                rows={3}
+                placeholder="Add any relevant notes..."
+                value={newExpenseForm.notes}
+                onChange={(e) => setNewExpenseForm(prev => ({ ...prev, notes: e.target.value }))}
+              />
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setShowNewExpenseDialog(false)}>
                 Cancel
               </Button>
-              <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
-                Create Report
+              <Button
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                onClick={handleCreateExpense}
+                disabled={creating || !newExpenseForm.title}
+              >
+                {creating ? 'Creating...' : 'Create Report'}
               </Button>
             </div>
           </div>
