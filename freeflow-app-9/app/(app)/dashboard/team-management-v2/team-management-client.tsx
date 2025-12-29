@@ -32,6 +32,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
+import { toast } from 'sonner'
 import {
   teamManagementAIInsights,
   teamManagementCollaborators,
@@ -110,8 +111,58 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [settingsTab, setSettingsTab] = useState('organization')
 
-  const { teams, loading, error } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
+  const { teams, loading, error, createTeam, refetch } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
   const displayTeams = teams.length > 0 ? teams : initialTeams
+
+  // Form state for new OKR/Goal
+  const [newGoalForm, setNewGoalForm] = useState({
+    objective: '',
+    type: 'team',
+    keyResults: ['', '', ''],
+    dueDate: ''
+  })
+  const [creatingGoal, setCreatingGoal] = useState(false)
+
+  const handleCreateGoal = async () => {
+    if (!newGoalForm.objective) {
+      toast.error('Please enter an objective')
+      return
+    }
+    setCreatingGoal(true)
+    try {
+      // Create as a team with goals/objectives
+      await createTeam({
+        team_name: newGoalForm.objective,
+        team_type: 'functional' as TeamType,
+        status: 'active' as TeamStatus,
+        description: `OKR: ${newGoalForm.objective}`,
+        visibility: 'public',
+        join_policy: 'open',
+        member_count: 0,
+        budget_used: 0,
+        can_invite_members: true,
+        can_remove_members: true,
+        can_manage_projects: true,
+        chat_enabled: true,
+        access_level: 'standard',
+        objectives: { objective: newGoalForm.objective, type: newGoalForm.type },
+        key_results: newGoalForm.keyResults.filter(kr => kr.trim()),
+        milestones: [],
+        settings: {},
+        preferences: {},
+        metadata: { dueDate: newGoalForm.dueDate }
+      } as any)
+      toast.success('OKR created successfully!')
+      setShowNewGoalModal(false)
+      setNewGoalForm({ objective: '', type: 'team', keyResults: ['', '', ''], dueDate: '' })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to create OKR')
+      console.error(error)
+    } finally {
+      setCreatingGoal(false)
+    }
+  }
 
   // Mock team members data
   const [teamMembers] = useState<TeamMember[]>([
@@ -649,11 +700,19 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Objective</label>
-                        <Input placeholder="What do you want to achieve?" />
+                        <Input
+                          placeholder="What do you want to achieve?"
+                          value={newGoalForm.objective}
+                          onChange={(e) => setNewGoalForm(prev => ({ ...prev, objective: e.target.value }))}
+                        />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Type</label>
-                        <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                        <select
+                          value={newGoalForm.type}
+                          onChange={(e) => setNewGoalForm(prev => ({ ...prev, type: e.target.value }))}
+                          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                        >
                           <option value="company">Company</option>
                           <option value="team">Team</option>
                           <option value="individual">Individual</option>
@@ -662,23 +721,37 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Key Results</label>
                         <div className="space-y-2">
-                          <Input placeholder="Key Result 1" />
-                          <Input placeholder="Key Result 2" />
-                          <Input placeholder="Key Result 3" />
+                          <Input
+                            placeholder="Key Result 1"
+                            value={newGoalForm.keyResults[0]}
+                            onChange={(e) => setNewGoalForm(prev => ({ ...prev, keyResults: [e.target.value, prev.keyResults[1], prev.keyResults[2]] }))}
+                          />
+                          <Input
+                            placeholder="Key Result 2"
+                            value={newGoalForm.keyResults[1]}
+                            onChange={(e) => setNewGoalForm(prev => ({ ...prev, keyResults: [prev.keyResults[0], e.target.value, prev.keyResults[2]] }))}
+                          />
+                          <Input
+                            placeholder="Key Result 3"
+                            value={newGoalForm.keyResults[2]}
+                            onChange={(e) => setNewGoalForm(prev => ({ ...prev, keyResults: [prev.keyResults[0], prev.keyResults[1], e.target.value] }))}
+                          />
                         </div>
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <Plus className="w-3 h-3" />
-                          Add Key Result
-                        </Button>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Due Date</label>
-                        <Input type="date" />
+                        <Input
+                          type="date"
+                          value={newGoalForm.dueDate}
+                          onChange={(e) => setNewGoalForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                        />
                       </div>
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setShowNewGoalModal(false)}>Cancel</Button>
-                      <Button>Create OKR</Button>
+                      <Button onClick={handleCreateGoal} disabled={creatingGoal || !newGoalForm.objective}>
+                        {creatingGoal ? 'Creating...' : 'Create OKR'}
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

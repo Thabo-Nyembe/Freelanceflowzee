@@ -5,6 +5,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClients } from '@/lib/hooks/use-clients'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -474,7 +475,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   // Handle creating a new client
   const handleCreateClient = async () => {
     if (!newClientForm.company || !newClientForm.contactName || !newClientForm.email) {
-      return // Basic validation - required fields
+      toast.error('Please fill in company name, contact name, and email')
+      return
     }
     try {
       await createClient({
@@ -486,6 +488,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         industry: newClientForm.industry,
         status: newClientForm.status
       } as any)
+      toast.success('Client created successfully!')
       setShowAddDialog(false)
       setNewClientForm({
         company: '',
@@ -498,6 +501,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         status: 'prospect'
       })
     } catch (error) {
+      toast.error('Failed to create client')
       console.error('Failed to create client:', error)
     }
   }

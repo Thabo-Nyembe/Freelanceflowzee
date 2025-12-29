@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useProjects, Project as DbProject } from '@/lib/hooks/use-projects'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -327,6 +328,10 @@ export default function ProjectsHubClient() {
 
   // Handle creating a new project
   const handleCreateProject = async () => {
+    if (!newProjectForm.title) {
+      toast.error('Please enter a project title')
+      return
+    }
     try {
       await createProject({
         title: newProjectForm.title,
@@ -339,9 +344,11 @@ export default function ProjectsHubClient() {
         status: 'planning' as any,
         priority: newProjectForm.priority as any
       } as any)
+      toast.success('Project created successfully!')
       setShowNewProjectDialog(false)
       setNewProjectForm({ title: '', description: '', budget: 0, priority: 'medium', start_date: '', end_date: '' })
     } catch (error) {
+      toast.error('Failed to create project')
       console.error('Failed to create project:', error)
     }
   }
