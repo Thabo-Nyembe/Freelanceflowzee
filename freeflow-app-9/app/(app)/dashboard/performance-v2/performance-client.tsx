@@ -517,6 +517,31 @@ export default function PerformanceClient() {
 
   const currentTest = selectedTest || mockPageTests[0]
 
+  // Handlers
+  const handleRunTest = () => {
+    toast.info('Running performance test', {
+      description: 'Test is being executed...'
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.success('Export started', {
+      description: 'Performance report is being exported'
+    })
+  }
+
+  const handleScheduleTest = () => {
+    toast.success('Test scheduled', {
+      description: 'Performance test has been scheduled'
+    })
+  }
+
+  const handleCompareResults = () => {
+    toast.info('Opening comparison', {
+      description: 'Loading test results for comparison'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

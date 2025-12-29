@@ -742,6 +742,27 @@ export default function InvoicingClient() {
     // In production, this would open a creation dialog or navigate to creation page
   }
 
+  const handleExportInvoices = () => {
+    toast.success('Export started', {
+      description: 'Invoice data is being exported'
+    })
+  }
+
+  const handleVoidInvoice = () => {
+    if (!selectedInvoice) return
+    toast.success('Invoice voided', {
+      description: `Invoice ${selectedInvoice.invoiceNumber} has been voided`
+    })
+    setShowInvoiceDialog(false)
+  }
+
+  const handleRecordPayment = () => {
+    if (!selectedInvoice) return
+    toast.success('Payment recorded', {
+      description: `Payment recorded for ${selectedInvoice.invoiceNumber}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
