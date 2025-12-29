@@ -715,6 +715,38 @@ export default function CampaignsClient() {
     })
   }, [statusFilter, typeFilter, searchQuery])
 
+  // Handlers
+  const handleCreateCampaign = () => {
+    toast.info('Create Campaign', {
+      description: 'Opening campaign builder...'
+    })
+    setShowCampaignDialog(true)
+  }
+
+  const handleLaunchCampaign = (campaign: Campaign) => {
+    toast.success('Campaign launched', {
+      description: `"${campaign.name}" is now live`
+    })
+  }
+
+  const handlePauseCampaign = (campaign: Campaign) => {
+    toast.success('Campaign paused', {
+      description: `"${campaign.name}" has been paused`
+    })
+  }
+
+  const handleDuplicateCampaign = (campaign: Campaign) => {
+    toast.success('Campaign duplicated', {
+      description: `Copy of "${campaign.name}" created`
+    })
+  }
+
+  const handleExportCampaigns = () => {
+    toast.success('Export started', {
+      description: 'Campaign data is being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

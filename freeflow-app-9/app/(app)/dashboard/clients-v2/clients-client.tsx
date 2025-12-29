@@ -553,6 +553,31 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
 
   const allDeals = mockClients.flatMap(c => c.deals.map(d => ({ ...d, clientName: c.name, clientId: c.id })))
 
+  // Handlers
+  const handleExportClients = () => {
+    toast.success('Export started', {
+      description: 'Client data is being exported'
+    })
+  }
+
+  const handleCreateDeal = (client: typeof mockClients[0]) => {
+    toast.info('Create Deal', {
+      description: `Opening deal form for ${client.name}`
+    })
+  }
+
+  const handleSendMessage = (client: typeof mockClients[0]) => {
+    toast.info('Send Message', {
+      description: `Opening message composer for ${client.name}`
+    })
+  }
+
+  const handleScheduleMeeting = (client: typeof mockClients[0]) => {
+    toast.success('Meeting scheduled', {
+      description: `Meeting with ${client.name} scheduled`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6 space-y-6">

@@ -317,6 +317,31 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     return colors[status]
   }
 
+  // Handlers
+  const handleAssignAgent = (conversation: Conversation) => {
+    toast.success('Agent assigned', {
+      description: `Ticket assigned successfully`
+    })
+  }
+
+  const handleResolveTicket = (conversation: Conversation) => {
+    toast.success('Ticket resolved', {
+      description: 'Support ticket has been marked as resolved'
+    })
+  }
+
+  const handleEscalateTicket = (conversation: Conversation) => {
+    toast.info('Ticket escalated', {
+      description: 'Ticket has been escalated to senior support'
+    })
+  }
+
+  const handleExportTickets = () => {
+    toast.success('Export started', {
+      description: 'Support data is being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

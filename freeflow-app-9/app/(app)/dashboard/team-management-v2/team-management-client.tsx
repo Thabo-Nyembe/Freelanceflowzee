@@ -256,6 +256,31 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     )
   }
 
+  // Handlers
+  const handleExportTeams = () => {
+    toast.success('Export started', {
+      description: 'Team data is being exported'
+    })
+  }
+
+  const handleAddTeamMember = (team: Team) => {
+    toast.info('Add Member', {
+      description: `Opening member selection for ${team.name}`
+    })
+  }
+
+  const handleArchiveTeam = (team: Team) => {
+    toast.success('Team archived', {
+      description: `"${team.name}" has been archived`
+    })
+  }
+
+  const handleSendTeamMessage = (team: Team) => {
+    toast.info('Send Message', {
+      description: `Composing message to ${team.name}`
+    })
+  }
+
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (

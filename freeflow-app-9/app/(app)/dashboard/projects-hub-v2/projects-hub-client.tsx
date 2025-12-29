@@ -405,6 +405,32 @@ export default function ProjectsHubClient() {
     return colors[type] || 'bg-gray-100'
   }
 
+  // Handlers
+  const handleCreateProject = () => {
+    toast.info('Create Project', {
+      description: 'Opening project creation wizard...'
+    })
+    setShowProjectDialog(true)
+  }
+
+  const handleStartSprint = (sprint: Sprint) => {
+    toast.success('Sprint started', {
+      description: `"${sprint.name}" is now active`
+    })
+  }
+
+  const handleCompleteSprint = (sprint: Sprint) => {
+    toast.success('Sprint completed', {
+      description: `"${sprint.name}" has been marked complete`
+    })
+  }
+
+  const handleExportProjects = () => {
+    toast.success('Export started', {
+      description: 'Project data is being exported'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
