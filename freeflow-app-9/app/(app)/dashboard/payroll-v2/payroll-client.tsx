@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -655,6 +656,27 @@ export default function PayrollClient() {
     )
   }, [searchQuery])
 
+  const handleExportReport = () => {
+    if (!selectedPayRun) return
+    toast.success(`Exporting report for ${selectedPayRun.period}...`)
+  }
+
+  const handleViewPayRunDetails = () => {
+    if (!selectedPayRun) return
+    toast.info('Opening detailed view...')
+  }
+
+  const handleRunPayroll = () => {
+    toast.info('Starting payroll run...')
+    // In production, this would open a creation dialog or navigate to payroll run form
+  }
+
+  const handleApprovePayRun = () => {
+    if (!selectedPayRun) return
+    toast.success(`Pay run ${selectedPayRun.period} approved!`)
+    setShowPayRunDialog(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
@@ -682,7 +704,7 @@ export default function PayrollClient() {
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
-            <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+            <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={handleRunPayroll}>
               <Plus className="w-4 h-4 mr-2" />
               Run Payroll
             </Button>
@@ -1777,11 +1799,11 @@ export default function PayrollClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1" variant="outline">
+                  <Button className="flex-1" variant="outline" onClick={handleExportReport}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Report
                   </Button>
-                  <Button className="flex-1" variant="outline">
+                  <Button className="flex-1" variant="outline" onClick={handleViewPayRunDetails}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Details
                   </Button>

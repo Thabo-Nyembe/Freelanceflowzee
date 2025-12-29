@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
+import { toast } from 'sonner'
 import { useSupportTickets, SupportTicket, SupportStats } from '@/lib/hooks/use-support-tickets'
 import { createSupportTicket, deleteSupportTicket, resolveTicket, closeTicket, assignTicket, escalateTicket } from '@/app/actions/support-tickets'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -295,18 +296,29 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   }
 
   const handleCreate = async () => {
+    if (!formData.subject.trim()) {
+      toast.error('Please enter a subject')
+      return
+    }
     try {
       await createSupportTicket(formData)
+      toast.success('Ticket created successfully!')
       setShowCreateModal(false)
       setFormData({ subject: '', description: '', category: 'general', priority: 'medium', customer_name: '', customer_email: '' })
     } catch (error) {
+      toast.error('Failed to create ticket')
       console.error('Failed to create:', error)
     }
   }
 
   const handleReply = useCallback(() => {
-    if (!replyContent.trim() || !selectedTicket) return
-    console.log('Sending reply:', { ticketId: selectedTicket.id, type: replyType, content: replyContent })
+    if (!replyContent.trim()) {
+      toast.error('Please enter a reply')
+      return
+    }
+    if (!selectedTicket) return
+    // In production, this would call an API to send the reply
+    toast.success(replyType === 'public' ? 'Reply sent!' : 'Internal note added!')
     setReplyContent('')
   }, [replyContent, selectedTicket, replyType])
 

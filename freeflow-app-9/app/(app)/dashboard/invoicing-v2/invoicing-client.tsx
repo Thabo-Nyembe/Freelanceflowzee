@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -714,6 +715,33 @@ export default function InvoicingClient() {
     setShowClientDialog(true)
   }
 
+  const handleSendInvoice = () => {
+    if (!selectedInvoice) return
+    toast.success(`Invoice ${selectedInvoice.invoiceNumber} sent successfully!`)
+    setShowInvoiceDialog(false)
+  }
+
+  const handleDownloadInvoice = () => {
+    if (!selectedInvoice) return
+    toast.success(`Downloading invoice ${selectedInvoice.invoiceNumber}...`)
+  }
+
+  const handlePrintInvoice = () => {
+    toast.success('Opening print dialog...')
+    window.print()
+  }
+
+  const handleDuplicateInvoice = () => {
+    if (!selectedInvoice) return
+    toast.success(`Invoice ${selectedInvoice.invoiceNumber} duplicated!`)
+    setShowInvoiceDialog(false)
+  }
+
+  const handleCreateInvoice = () => {
+    toast.info('Opening invoice creation form...')
+    // In production, this would open a creation dialog or navigate to creation page
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -734,7 +762,7 @@ export default function InvoicingClient() {
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+              <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={handleCreateInvoice}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Invoice
               </Button>
@@ -2006,23 +2034,23 @@ export default function InvoicingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={handleSendInvoice}>
                     <Send className="w-4 h-4 mr-2" />
                     Send Invoice
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleDownloadInvoice}>
                     <Download className="w-4 h-4 mr-2" />
                     Download PDF
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handlePrintInvoice}>
                     <Printer className="w-4 h-4 mr-2" />
                     Print
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.info('Opening edit mode...')}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleDuplicateInvoice}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>

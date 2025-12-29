@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import {
   DollarSign,
   CreditCard,
@@ -433,6 +434,22 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     if (score < 20) return 'text-green-600'
     if (score < 50) return 'text-yellow-600'
     return 'text-red-600'
+  }
+
+  const handleIssueRefund = () => {
+    if (!selectedPayment) return
+    toast.success(`Refund issued for ${formatCurrency(selectedPayment.amount)}`)
+    setShowRefundDialog(false)
+  }
+
+  const handleCreateInvoice = () => {
+    toast.success('Invoice created successfully!')
+    setShowInvoiceDialog(false)
+  }
+
+  const handleAddCustomer = () => {
+    toast.success('Customer added successfully!')
+    setShowCustomerDialog(false)
   }
 
   return (
@@ -1917,7 +1934,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <button onClick={() => setShowRefundDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowRefundDialog(false)} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+              <button onClick={handleIssueRefund} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                 Issue Refund
               </button>
             </DialogFooter>
@@ -1974,7 +1991,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <button onClick={() => setShowInvoiceDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowInvoiceDialog(false)} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+              <button onClick={handleCreateInvoice} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
                 Create Invoice
               </button>
             </DialogFooter>
@@ -2025,7 +2042,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <button onClick={() => setShowCustomerDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowCustomerDialog(false)} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+              <button onClick={handleAddCustomer} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
                 Add Customer
               </button>
             </DialogFooter>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -269,6 +270,18 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const openTicketDetails = (ticket: Ticket) => {
     setSelectedTicket(ticket)
     setShowTicketDialog(true)
+  }
+
+  const handleSendReply = () => {
+    if (!messageInput.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+    if (!selectedTicket) return
+
+    // In production, this would call an API
+    toast.success(isInternalNote ? 'Internal note added' : 'Reply sent successfully')
+    setMessageInput('')
   }
 
   const getStatusColor = (status: TicketStatus) => {
@@ -1628,7 +1641,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                       <Button variant="ghost" size="icon">
                         <Smile className="h-4 w-4" />
                       </Button>
-                      <Button className="bg-emerald-600 hover:bg-emerald-700">
+                      <Button
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                        onClick={handleSendReply}
+                        disabled={!messageInput.trim()}
+                      >
                         <Send className="h-4 w-4" />
                       </Button>
                     </div>
