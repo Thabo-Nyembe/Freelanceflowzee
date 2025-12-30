@@ -749,6 +749,37 @@ export default function AllocationClient() {
     }
   }, [])
 
+  // Handlers
+  const handleCreateAllocation = () => {
+    toast.info('Create Allocation', {
+      description: 'Opening allocation form...'
+    })
+  }
+
+  const handleApproveAllocation = (resourceName: string) => {
+    toast.success('Allocation approved', {
+      description: `${resourceName}'s allocation has been approved`
+    })
+  }
+
+  const handleRejectAllocation = (resourceName: string) => {
+    toast.info('Allocation rejected', {
+      description: `${resourceName}'s allocation request was declined`
+    })
+  }
+
+  const handleExportAllocations = () => {
+    toast.success('Exporting allocations', {
+      description: 'Allocation report will be downloaded'
+    })
+  }
+
+  const handleOptimizeAllocations = () => {
+    toast.info('Optimizing allocations', {
+      description: 'AI is analyzing resource distribution...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

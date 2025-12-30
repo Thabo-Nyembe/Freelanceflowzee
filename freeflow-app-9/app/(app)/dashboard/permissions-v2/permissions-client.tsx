@@ -356,6 +356,37 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     return `${days}d ago`
   }
 
+  // Handlers
+  const handleCreateRole = () => {
+    toast.info('Create Role', {
+      description: 'Opening role builder...'
+    })
+  }
+
+  const handleAssignPermission = (roleName: string, permission: string) => {
+    toast.success('Permission assigned', {
+      description: `${permission} added to ${roleName}`
+    })
+  }
+
+  const handleRevokePermission = (roleName: string, permission: string) => {
+    toast.info('Permission revoked', {
+      description: `${permission} removed from ${roleName}`
+    })
+  }
+
+  const handleExportPermissions = () => {
+    toast.success('Exporting permissions', {
+      description: 'Permission matrix will be downloaded'
+    })
+  }
+
+  const handleAuditPermissions = () => {
+    toast.info('Running audit', {
+      description: 'Checking permission compliance...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

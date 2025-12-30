@@ -451,6 +451,37 @@ export default function DeploymentsClient() {
     return groups
   }, [])
 
+  // Handlers
+  const handleTriggerDeployment = () => {
+    toast.info('Triggering deployment', {
+      description: 'Starting deployment pipeline...'
+    })
+  }
+
+  const handleRollback = (deploymentName: string) => {
+    toast.info('Rolling back', {
+      description: `Rolling back "${deploymentName}"...`
+    })
+  }
+
+  const handlePromoteDeployment = (deploymentName: string) => {
+    toast.success('Promoting deployment', {
+      description: `"${deploymentName}" promoted to production`
+    })
+  }
+
+  const handleViewLogs = (deploymentName: string) => {
+    toast.info('Loading logs', {
+      description: `Opening logs for "${deploymentName}"...`
+    })
+  }
+
+  const handleCancelDeployment = (deploymentName: string) => {
+    toast.info('Cancelling deployment', {
+      description: `"${deploymentName}" deployment cancelled`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">

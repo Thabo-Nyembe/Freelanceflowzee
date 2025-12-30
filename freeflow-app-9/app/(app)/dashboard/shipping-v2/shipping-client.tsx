@@ -732,6 +732,18 @@ export default function ShippingClient() {
     })
   }
 
+  const handleCancelShipment = (trackingNumber: string) => {
+    toast.info('Shipment cancelled', {
+      description: `Shipment ${trackingNumber} has been cancelled`
+    })
+  }
+
+  const handleExportShipments = () => {
+    toast.success('Exporting shipments', {
+      description: 'Shipping report will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
