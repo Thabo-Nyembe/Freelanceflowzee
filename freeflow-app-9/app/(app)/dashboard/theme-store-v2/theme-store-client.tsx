@@ -297,6 +297,77 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const categories: ThemeCategory[] = ['minimal', 'professional', 'creative', 'dark', 'light', 'modern', 'e-commerce', 'portfolio', 'blog', 'dashboard']
   const frameworks: Framework[] = ['react', 'vue', 'angular', 'nextjs', 'nuxt', 'universal']
 
+  // Toast handlers for theme actions
+  const handleInstallTheme = (themeName: string) => {
+    toast.info('Installing Theme', { description: `Installing "${themeName}"...` })
+  }
+  const handlePreviewTheme = (themeName: string) => {
+    toast.info('Preview', { description: `Previewing "${themeName}"...` })
+  }
+  const handleActivateTheme = (themeName: string) => {
+    toast.success('Theme Activated', { description: `"${themeName}" is now active` })
+  }
+  const handleCustomizeTheme = () => {
+    toast.info('Customize', { description: 'Opening theme customizer...' })
+  }
+  const handleWishlist = () => {
+    toast.info('Wishlist', { description: 'Opening your wishlist...' })
+  }
+  const handleMyThemes = () => {
+    toast.info('My Themes', { description: 'Opening your themes library...' })
+  }
+  const handleQuickAction = (label: string) => {
+    toast.info(label, { description: `Executing ${label.toLowerCase()} action...` })
+  }
+  const handleDeactivateTheme = () => {
+    toast.warning('Deactivate', { description: 'Deactivating current theme...' })
+  }
+  const handleThemeSettings = () => {
+    toast.info('Settings', { description: 'Opening theme settings...' })
+  }
+  const handleRemoveTheme = (themeName: string) => {
+    toast.warning('Remove Theme', { description: `Removing "${themeName}"...` })
+  }
+  const handleSaveChanges = () => {
+    toast.success('Saved', { description: 'Theme changes saved successfully' })
+  }
+  const handleClearCache = () => {
+    toast.info('Clear Cache', { description: 'Clearing theme cache...' })
+  }
+  const handleOptimizeStorage = () => {
+    toast.info('Optimize', { description: 'Optimizing storage...' })
+  }
+  const handleAddPaymentMethod = () => {
+    toast.info('Payment', { description: 'Opening payment method form...' })
+  }
+  const handleConnect = (integration: string) => {
+    toast.info('Connect', { description: `Connecting to ${integration}...` })
+  }
+  const handleRegenerateKey = () => {
+    toast.warning('Regenerate', { description: 'Regenerating API key...' })
+  }
+  const handleViewDocs = () => {
+    toast.info('Documentation', { description: 'Opening API documentation...' })
+  }
+  const handleDownloadSDK = () => {
+    toast.info('Download', { description: 'Downloading SDK...' })
+  }
+  const handleRemoveAll = () => {
+    toast.error('Remove All', { description: 'Removing all installed themes...' })
+  }
+  const handleResetPreferences = () => {
+    toast.warning('Reset', { description: 'Resetting store preferences...' })
+  }
+  const handleAddToWishlist = (themeName: string) => {
+    toast.success('Added to Wishlist', { description: `"${themeName}" added to wishlist` })
+  }
+  const handleVerifyLicense = () => {
+    toast.info('Verify', { description: 'Verifying license...' })
+  }
+  const handleViewReceipt = (invoice: string) => {
+    toast.info('Receipt', { description: `Opening receipt for ${invoice}...` })
+  }
+
   const getCategoryIcon = (cat: ThemeCategory) => {
     const icons: Record<string, any> = {
       minimal: Layout, professional: Shield, creative: Sparkles, dark: Moon, light: Sun,
@@ -320,11 +391,11 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
               <p className="text-rose-100 mt-1">Discover beautiful themes for your application</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={handleWishlist}>
                 <Heart className="h-4 w-4 mr-2" />
                 Wishlist
               </Button>
-              <Button className="bg-white text-rose-600 hover:bg-rose-50">
+              <Button className="bg-white text-rose-600 hover:bg-rose-50" onClick={handleMyThemes}>
                 <Package className="h-4 w-4 mr-2" />
                 My Themes
               </Button>
@@ -408,6 +479,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -575,7 +647,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                           <Badge className="absolute top-3 right-3 bg-red-500">Sale</Badge>
                         )}
                         <div className="absolute bottom-3 right-3 flex gap-2">
-                          <Button size="sm" variant="secondary" className="h-8" onClick={(e) => { e.stopPropagation() }}>
+                          <Button size="sm" variant="secondary" className="h-8" onClick={(e) => { e.stopPropagation(); handlePreviewTheme(theme.name) }}>
                             <Eye className="h-4 w-4 mr-1" />
                             Preview
                           </Button>
@@ -678,7 +750,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   { icon: Trash2, label: 'Uninstall', color: 'text-red-600 dark:text-red-400' },
                   { icon: Upload, label: 'Import', color: 'text-indigo-600 dark:text-indigo-400' }
                 ].map((action, i) => (
-                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={() => handleQuickAction(action.label)}>
                     <action.icon className={`h-5 w-5 ${action.color}`} />
                     <span className="text-xs">{action.label}</span>
                   </Button>
@@ -707,15 +779,15 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                           <span className="text-sm text-gray-500">Last updated: {activeTheme.lastUpdated}</span>
                         </div>
                         <div className="flex gap-3">
-                          <Button onClick={() => setCustomizerOpen(true)}>
+                          <Button onClick={() => { setCustomizerOpen(true); handleCustomizeTheme() }}>
                             <Paintbrush className="h-4 w-4 mr-2" />
                             Customize
                           </Button>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={handleThemeSettings}>
                             <Settings className="h-4 w-4 mr-2" />
                             Settings
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={handleDeactivateTheme}>
                             Deactivate
                           </Button>
                         </div>
@@ -746,12 +818,12 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                         </div>
                         <div className="flex gap-2">
                           {theme.status !== 'active' && (
-                            <Button size="sm">Activate</Button>
+                            <Button size="sm" onClick={() => handleActivateTheme(theme.name)}>Activate</Button>
                           )}
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={handleThemeSettings}>
                             <Settings className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" className="text-red-600">
+                          <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleRemoveTheme(theme.name)}>
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -803,7 +875,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   { icon: TrendingUp, label: 'Trending', color: 'text-cyan-600 dark:text-cyan-400' },
                   { icon: Gift, label: 'Bundle Deals', color: 'text-red-600 dark:text-red-400' }
                 ].map((action, i) => (
-                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={() => handleQuickAction(action.label)}>
                     <action.icon className={`h-5 w-5 ${action.color}`} />
                     <span className="text-xs">{action.label}</span>
                   </Button>
@@ -885,7 +957,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 { icon: RefreshCw, label: 'Reset', color: 'text-gray-600 dark:text-gray-400' },
                 { icon: Share2, label: 'Export', color: 'text-indigo-600 dark:text-indigo-400' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={() => handleQuickAction(action.label)}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -989,10 +1061,10 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 </Card>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-rose-600 hover:bg-rose-700">
+                  <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={handleSaveChanges}>
                     Save Changes
                   </Button>
-                  <Button variant="outline" onClick={() => setCustomColors({})}>
+                  <Button variant="outline" onClick={() => { setCustomColors({}); toast.info('Reset', { description: 'Colors reset to defaults' }) }}>
                     Reset
                   </Button>
                 </div>
@@ -1039,7 +1111,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 { icon: Bell, label: 'Notifications', color: 'text-orange-600 dark:text-orange-400' },
                 { icon: Link2, label: 'Integrations', color: 'text-pink-600 dark:text-pink-400' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={() => handleQuickAction(action.label)}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1152,11 +1224,11 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                           <p className="text-xs text-gray-500 mt-2">45% of 500 MB limit used</p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={handleClearCache}>
                             <RefreshCw className="w-4 h-4" />
                             Clear Cache
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={handleOptimizeStorage}>
                             <Database className="w-4 h-4" />
                             Optimize Storage
                           </Button>
@@ -1343,7 +1415,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Envato Purchase Code</Label>
-                            <Button variant="ghost" size="sm">Verify</Button>
+                            <Button variant="ghost" size="sm" onClick={handleVerifyLicense}>Verify</Button>
                           </div>
                           <Input type="password" value="••••••••-••••-••••-••••-••••••••••••" readOnly className="font-mono" />
                         </div>
@@ -1385,7 +1457,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                           </div>
                           <Badge>Default</Badge>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleAddPaymentMethod}>
                           <CreditCard className="w-4 h-4 mr-2" />
                           Add Payment Method
                         </Button>
@@ -1412,7 +1484,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="font-medium">{purchase.amount}</span>
-                                <Button variant="ghost" size="sm">Receipt</Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleViewReceipt(purchase.invoice)}>Receipt</Button>
                               </div>
                             </div>
                           ))}

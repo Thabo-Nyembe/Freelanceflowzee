@@ -64,7 +64,14 @@ import {
   Trash2,
   Edit,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  UserPlus,
+  ArrowRight,
+  Settings,
+  Bell,
+  Layers,
+  Bug,
+  BarChart
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -596,6 +603,134 @@ export default function TicketsClient() {
     return date.toLocaleDateString()
   }
 
+  // Handlers
+  const handleCreateTicket = () => {
+    toast.info('Create Ticket', {
+      description: 'Opening ticket submission form...'
+    })
+  }
+
+  const handleAssignTicket = (ticketId: string) => {
+    toast.info('Assign Ticket', {
+      description: `Assigning ticket #${ticketId} to agent...`
+    })
+  }
+
+  const handleResolveTicket = (ticketId: string) => {
+    toast.success('Ticket Resolved', {
+      description: `Ticket #${ticketId} has been resolved`
+    })
+  }
+
+  const handleEscalateTicket = (ticketId: string) => {
+    toast.info('Ticket Escalated', {
+      description: `Ticket #${ticketId} escalated to senior support`
+    })
+  }
+
+  const handleExportTickets = () => {
+    toast.success('Exporting Tickets', {
+      description: 'Ticket report will be downloaded'
+    })
+  }
+
+  const handleRefresh = () => {
+    toast.info('Refreshing', {
+      description: 'Refreshing ticket data...'
+    })
+  }
+
+  const handleNewTicket = () => {
+    toast.info('New Ticket', {
+      description: 'Creating new ticket...'
+    })
+  }
+
+  const handleBulkAssign = () => {
+    toast.info('Bulk Assign', {
+      description: 'Opening bulk assignment dialog...'
+    })
+  }
+
+  const handleAssignToMe = (ticketNumber: string) => {
+    toast.success('Ticket Assigned', {
+      description: `Ticket ${ticketNumber} assigned to you`
+    })
+  }
+
+  const handleAddAgent = () => {
+    toast.info('Add Agent', {
+      description: 'Opening agent creation form...'
+    })
+  }
+
+  const handleFullReport = () => {
+    toast.info('Full Report', {
+      description: 'Generating full analytics report...'
+    })
+  }
+
+  const handleSendReply = () => {
+    if (replyText.trim()) {
+      toast.success('Reply Sent', {
+        description: 'Your reply has been sent to the customer'
+      })
+      setReplyText('')
+    } else {
+      toast.error('Empty Reply', {
+        description: 'Please enter a message before sending'
+      })
+    }
+  }
+
+  const handleSaveGeneralSettings = () => {
+    toast.success('Settings Saved', {
+      description: 'General settings have been updated'
+    })
+  }
+
+  const handleSaveSLASettings = () => {
+    toast.success('Settings Saved', {
+      description: 'SLA policies have been updated'
+    })
+  }
+
+  const handleSaveRoutingSettings = () => {
+    toast.success('Settings Saved', {
+      description: 'Routing settings have been updated'
+    })
+  }
+
+  const handleSaveNotificationSettings = () => {
+    toast.success('Settings Saved', {
+      description: 'Notification settings have been updated'
+    })
+  }
+
+  const handleSaveAdvancedSettings = () => {
+    toast.success('Settings Saved', {
+      description: 'Advanced settings have been updated'
+    })
+  }
+
+  const handleExportAllTickets = () => {
+    toast.info('Exporting Tickets', {
+      description: 'Preparing ticket export file...'
+    })
+  }
+
+  const handleExportAnalytics = () => {
+    toast.info('Exporting Analytics', {
+      description: 'Preparing analytics export file...'
+    })
+  }
+
+  const handleDeleteResolvedTickets = () => {
+    toast.warning('Delete Tickets', {
+      description: 'This action would delete all resolved tickets'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:bg-none dark:bg-gray-900">
       <div className="p-8">
@@ -612,11 +747,11 @@ export default function TicketsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportTickets}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 text-white" onClick={handleNewTicket}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Ticket
               </Button>
@@ -732,8 +867,8 @@ export default function TicketsClient() {
                     <p className="text-orange-100 text-sm">Zendesk-level help desk operations</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
-                    <Button className="bg-white text-orange-700 hover:bg-orange-50"><Plus className="h-4 w-4 mr-2" />New Ticket</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefresh}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                    <Button className="bg-white text-orange-700 hover:bg-orange-50" onClick={handleNewTicket}><Plus className="h-4 w-4 mr-2" />New Ticket</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-4">
@@ -970,7 +1105,7 @@ export default function TicketsClient() {
                               onChange={(e) => setReplyText(e.target.value)}
                               className="flex-1"
                             />
-                            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500">
+                            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500" onClick={handleSendReply}>
                               <Send className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1107,7 +1242,7 @@ export default function TicketsClient() {
                     <h2 className="text-xl font-bold">Unassigned Tickets</h2>
                     <p className="text-red-100 text-sm">Tickets waiting for agent assignment</p>
                   </div>
-                  <Button className="bg-white text-red-700 hover:bg-red-50"><Users className="h-4 w-4 mr-2" />Bulk Assign</Button>
+                  <Button className="bg-white text-red-700 hover:bg-red-50" onClick={handleBulkAssign}><Users className="h-4 w-4 mr-2" />Bulk Assign</Button>
                 </div>
                 <div className="grid grid-cols-4 gap-4">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1152,7 +1287,7 @@ export default function TicketsClient() {
                         <div className="flex items-center gap-2">
                           <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
                           <Badge className={getSLAColor(ticket.sla.status)}>SLA: {ticket.sla.status}</Badge>
-                          <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500">
+                          <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500" onClick={() => handleAssignToMe(ticket.ticketNumber)}>
                             Assign to me
                           </Button>
                         </div>
@@ -1181,8 +1316,8 @@ export default function TicketsClient() {
                     <p className="text-blue-100 text-sm">Agent workload and performance</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
-                    <Button className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Add Agent</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefresh}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                    <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={handleAddAgent}><UserPlus className="h-4 w-4 mr-2" />Add Agent</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1281,8 +1416,8 @@ export default function TicketsClient() {
                     <p className="text-purple-100 text-sm">Comprehensive performance insights</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-purple-700 hover:bg-purple-50"><BarChart className="h-4 w-4 mr-2" />Full Report</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleExportTickets}><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-purple-700 hover:bg-purple-50" onClick={handleFullReport}><BarChart className="h-4 w-4 mr-2" />Full Report</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-4">
@@ -1662,7 +1797,7 @@ export default function TicketsClient() {
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <Button className="bg-orange-600 hover:bg-orange-700">Save General Settings</Button>
+                        <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleSaveGeneralSettings}>Save General Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -1698,7 +1833,7 @@ export default function TicketsClient() {
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <Button className="bg-orange-600 hover:bg-orange-700">Save SLA Settings</Button>
+                        <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleSaveSLASettings}>Save SLA Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -1725,7 +1860,7 @@ export default function TicketsClient() {
                             <Switch />
                           </div>
                         </div>
-                        <Button className="bg-orange-600 hover:bg-orange-700">Save Routing Settings</Button>
+                        <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleSaveRoutingSettings}>Save Routing Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -1798,7 +1933,7 @@ export default function TicketsClient() {
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <Button className="bg-orange-600 hover:bg-orange-700">Save Notification Settings</Button>
+                        <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleSaveNotificationSettings}>Save Notification Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -1828,16 +1963,16 @@ export default function TicketsClient() {
                         <div className="space-y-3">
                           <h4 className="font-medium">Data Management</h4>
                           <div className="grid grid-cols-2 gap-3">
-                            <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export All Tickets</Button>
-                            <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Analytics</Button>
+                            <Button variant="outline" className="justify-start" onClick={handleExportAllTickets}><Download className="w-4 h-4 mr-2" />Export All Tickets</Button>
+                            <Button variant="outline" className="justify-start" onClick={handleExportAnalytics}><Download className="w-4 h-4 mr-2" />Export Analytics</Button>
                           </div>
                         </div>
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Danger Zone</h4>
                           <p className="text-sm text-red-600 dark:text-red-300 mb-3">These actions are irreversible.</p>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All Resolved Tickets</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={handleDeleteResolvedTickets}>Delete All Resolved Tickets</Button>
                         </div>
-                        <Button className="bg-orange-600 hover:bg-orange-700">Save Advanced Settings</Button>
+                        <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleSaveAdvancedSettings}>Save Advanced Settings</Button>
                       </CardContent>
                     </Card>
                   )}

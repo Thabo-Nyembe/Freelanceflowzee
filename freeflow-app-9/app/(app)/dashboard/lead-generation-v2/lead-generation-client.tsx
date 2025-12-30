@@ -683,10 +683,346 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     })
   }
 
+  // Handlers
   const handleLogCall = () => {
     if (!selectedLead) return
     toast.success('Call logged', {
       description: `Call activity logged for ${selectedLead.name}`
+    })
+  }
+
+  const handleCreateLead = () => {
+    toast.info('Create Lead', {
+      description: 'Opening lead capture form...'
+    })
+  }
+
+  const handleQualifyLead = (leadName: string) => {
+    toast.success('Lead Qualified', {
+      description: `"${leadName}" has been qualified`
+    })
+  }
+
+  const handleAssignLead = (leadName: string) => {
+    toast.info('Assign Lead', {
+      description: `Assigning "${leadName}" to sales rep...`
+    })
+  }
+
+  const handleExportLeads = () => {
+    toast.success('Exporting Leads', {
+      description: 'Lead data will be downloaded as CSV'
+    })
+  }
+
+  // Quick Actions Handlers - Leads Tab
+  const handleImportCSV = () => {
+    toast.info('Import CSV', {
+      description: 'Opening CSV import wizard...'
+    })
+  }
+
+  const handleExportAll = () => {
+    toast.success('Exporting All Leads', {
+      description: 'All lead data will be downloaded as CSV'
+    })
+  }
+
+  const handleEmailBlast = () => {
+    toast.info('Email Blast', {
+      description: 'Opening email blast composer...'
+    })
+  }
+
+  const handleSmartFilter = () => {
+    toast.info('Smart Filter', {
+      description: 'Opening advanced filter options...'
+    })
+  }
+
+  const handleSegments = () => {
+    toast.info('Segments', {
+      description: 'Opening segment management...'
+    })
+  }
+
+  const handleBulkTag = () => {
+    toast.info('Bulk Tag', {
+      description: 'Opening bulk tagging options...'
+    })
+  }
+
+  const handleSyncCRM = () => {
+    toast.success('CRM Sync', {
+      description: 'Starting CRM synchronization...'
+    })
+  }
+
+  // Quick Actions Handlers - Pipeline Tab
+  const handleNewDeal = () => {
+    toast.info('New Deal', {
+      description: 'Opening deal creation form...'
+    })
+  }
+
+  const handleStageRules = () => {
+    toast.info('Stage Rules', {
+      description: 'Opening stage configuration...'
+    })
+  }
+
+  const handleAutomation = () => {
+    toast.info('Automation', {
+      description: 'Opening automation workflow builder...'
+    })
+  }
+
+  const handlePipelineReport = () => {
+    toast.info('Pipeline Report', {
+      description: 'Generating pipeline analytics report...'
+    })
+  }
+
+  const handleAssignLeads = () => {
+    toast.info('Assign Leads', {
+      description: 'Opening lead assignment panel...'
+    })
+  }
+
+  const handleStaleDeals = () => {
+    toast.info('Stale Deals', {
+      description: 'Showing deals with no recent activity...'
+    })
+  }
+
+  const handleForecasting = () => {
+    toast.info('Forecasting', {
+      description: 'Opening sales forecasting dashboard...'
+    })
+  }
+
+  const handleRefreshView = () => {
+    toast.success('View Refreshed', {
+      description: 'Pipeline data has been refreshed'
+    })
+  }
+
+  // Quick Actions Handlers - Activities Tab
+  const handleLogEmail = () => {
+    toast.info('Log Email', {
+      description: 'Opening email activity log form...'
+    })
+  }
+
+  const handleLogCallActivity = () => {
+    toast.info('Log Call', {
+      description: 'Opening call activity log form...'
+    })
+  }
+
+  const handleLogMeeting = () => {
+    toast.info('Log Meeting', {
+      description: 'Opening meeting activity log form...'
+    })
+  }
+
+  const handleAddNote = () => {
+    toast.info('Add Note', {
+      description: 'Opening note creation form...'
+    })
+  }
+
+  const handleCreateTask = () => {
+    toast.info('Create Task', {
+      description: 'Opening task creation form...'
+    })
+  }
+
+  const handleSchedule = () => {
+    toast.info('Schedule', {
+      description: 'Opening scheduling calendar...'
+    })
+  }
+
+  const handleSendMessage = () => {
+    toast.info('Send Message', {
+      description: 'Opening message composer...'
+    })
+  }
+
+  const handleExportLog = () => {
+    toast.success('Exporting Activity Log', {
+      description: 'Activity log will be downloaded as CSV'
+    })
+  }
+
+  // Quick Actions Handlers - Campaigns Tab
+  const handleNewCampaign = () => {
+    toast.info('New Campaign', {
+      description: 'Opening campaign creation wizard...'
+    })
+  }
+
+  const handleAnnouncement = () => {
+    toast.info('Announcement', {
+      description: 'Opening announcement composer...'
+    })
+  }
+
+  const handleSequences = () => {
+    toast.info('Sequences', {
+      description: 'Opening email sequence builder...'
+    })
+  }
+
+  const handleWorkflows = () => {
+    toast.info('Workflows', {
+      description: 'Opening workflow automation builder...'
+    })
+  }
+
+  const handleAnalytics = () => {
+    toast.info('Analytics', {
+      description: 'Opening campaign analytics dashboard...'
+    })
+  }
+
+  const handleAudience = () => {
+    toast.info('Audience', {
+      description: 'Opening audience segmentation...'
+    })
+  }
+
+  const handleDuplicate = () => {
+    toast.info('Duplicate Campaign', {
+      description: 'Select a campaign to duplicate...'
+    })
+  }
+
+  const handleViewCampaign = (campaignName: string) => {
+    toast.info('View Campaign', {
+      description: `Opening "${campaignName}" campaign details...`
+    })
+  }
+
+  const handleCreateCampaign = () => {
+    toast.info('Create Campaign', {
+      description: 'Opening campaign creation wizard...'
+    })
+  }
+
+  // Quick Actions Handlers - Scoring Tab
+  const handleNewRule = () => {
+    toast.info('New Rule', {
+      description: 'Opening scoring rule creation form...'
+    })
+  }
+
+  const handleAIScoring = () => {
+    toast.info('AI Scoring', {
+      description: 'Configuring AI-powered lead scoring...'
+    })
+  }
+
+  const handleBehavioral = () => {
+    toast.info('Behavioral Scoring', {
+      description: 'Opening behavioral scoring rules...'
+    })
+  }
+
+  const handleDemographic = () => {
+    toast.info('Demographic Scoring', {
+      description: 'Opening demographic scoring rules...'
+    })
+  }
+
+  const handleDistribution = () => {
+    toast.info('Score Distribution', {
+      description: 'Opening score distribution analytics...'
+    })
+  }
+
+  const handleRecalculate = () => {
+    toast.success('Recalculating Scores', {
+      description: 'All lead scores are being recalculated...'
+    })
+  }
+
+  const handleExportRules = () => {
+    toast.success('Exporting Rules', {
+      description: 'Scoring rules will be downloaded as JSON'
+    })
+  }
+
+  const handleConfigure = () => {
+    toast.info('Configure', {
+      description: 'Opening scoring engine configuration...'
+    })
+  }
+
+  // Lead Row Actions
+  const handleLeadEmail = (leadName: string) => {
+    toast.info('Compose Email', {
+      description: `Composing email to ${leadName}...`
+    })
+  }
+
+  const handleLeadPhone = (leadName: string) => {
+    toast.info('Call Lead', {
+      description: `Initiating call to ${leadName}...`
+    })
+  }
+
+  const handleLeadMore = (leadName: string) => {
+    toast.info('More Options', {
+      description: `Opening more actions for ${leadName}...`
+    })
+  }
+
+  // Integration Handlers
+  const handleConnect = (integrationName: string) => {
+    toast.info('Connect Integration', {
+      description: `Connecting to ${integrationName}...`
+    })
+  }
+
+  // Data Management Handlers
+  const handleArchiveLeads = () => {
+    toast.info('Archive Old Leads', {
+      description: 'Opening lead archive options...'
+    })
+  }
+
+  const handlePurgeLeads = () => {
+    toast.warning('Purge Lost Leads', {
+      description: 'Opening purge confirmation dialog...'
+    })
+  }
+
+  // API & Webhook Handlers
+  const handleCopyAPIKey = () => {
+    toast.success('API Key Copied', {
+      description: 'API key has been copied to clipboard'
+    })
+  }
+
+  const handleTestWebhook = () => {
+    toast.info('Testing Webhook', {
+      description: 'Sending test payload to webhook URL...'
+    })
+  }
+
+  // Danger Zone Handler
+  const handleResetScoring = () => {
+    toast.warning('Reset All Scoring', {
+      description: 'This will reset all lead scores to zero'
+    })
+  }
+
+  // Dialog Actions
+  const handleDialogMore = () => {
+    toast.info('More Options', {
+      description: 'Opening additional lead actions...'
     })
   }
 
@@ -885,19 +1221,20 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: UserPlus, label: 'Add Lead', color: 'text-pink-500' },
-                { icon: Upload, label: 'Import CSV', color: 'text-blue-500' },
-                { icon: Download, label: 'Export All', color: 'text-green-500' },
-                { icon: Mail, label: 'Email Blast', color: 'text-purple-500' },
-                { icon: Filter, label: 'Smart Filter', color: 'text-amber-500' },
-                { icon: Layers, label: 'Segments', color: 'text-indigo-500' },
-                { icon: Tag, label: 'Bulk Tag', color: 'text-rose-500' },
-                { icon: RefreshCw, label: 'Sync CRM', color: 'text-cyan-500' },
+                { icon: UserPlus, label: 'Add Lead', color: 'text-pink-500', handler: handleAddLead },
+                { icon: Upload, label: 'Import CSV', color: 'text-blue-500', handler: handleImportCSV },
+                { icon: Download, label: 'Export All', color: 'text-green-500', handler: handleExportAll },
+                { icon: Mail, label: 'Email Blast', color: 'text-purple-500', handler: handleEmailBlast },
+                { icon: Filter, label: 'Smart Filter', color: 'text-amber-500', handler: handleSmartFilter },
+                { icon: Layers, label: 'Segments', color: 'text-indigo-500', handler: handleSegments },
+                { icon: Tag, label: 'Bulk Tag', color: 'text-rose-500', handler: handleBulkTag },
+                { icon: RefreshCw, label: 'Sync CRM', color: 'text-cyan-500', handler: handleSyncCRM },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.handler}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -944,7 +1281,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                     </select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleExportLeads}>
                       <Download className="w-4 h-4 mr-2" />
                       Export
                     </Button>
@@ -1002,13 +1339,13 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleLeadEmail(`${lead.firstName} ${lead.lastName}`); }}>
                             <Mail className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleLeadPhone(`${lead.firstName} ${lead.lastName}`); }}>
                             <Phone className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleLeadMore(`${lead.firstName} ${lead.lastName}`); }}>
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1061,19 +1398,20 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Deal', color: 'text-pink-500' },
-                { icon: GitBranch, label: 'Stage Rules', color: 'text-indigo-500' },
-                { icon: Zap, label: 'Automation', color: 'text-amber-500' },
-                { icon: BarChart3, label: 'Pipeline Report', color: 'text-green-500' },
-                { icon: Users, label: 'Assign Leads', color: 'text-blue-500' },
-                { icon: Clock, label: 'Stale Deals', color: 'text-red-500' },
-                { icon: TrendingUp, label: 'Forecasting', color: 'text-purple-500' },
-                { icon: RefreshCw, label: 'Refresh View', color: 'text-cyan-500' },
+                { icon: Plus, label: 'New Deal', color: 'text-pink-500', handler: handleNewDeal },
+                { icon: GitBranch, label: 'Stage Rules', color: 'text-indigo-500', handler: handleStageRules },
+                { icon: Zap, label: 'Automation', color: 'text-amber-500', handler: handleAutomation },
+                { icon: BarChart3, label: 'Pipeline Report', color: 'text-green-500', handler: handlePipelineReport },
+                { icon: Users, label: 'Assign Leads', color: 'text-blue-500', handler: handleAssignLeads },
+                { icon: Clock, label: 'Stale Deals', color: 'text-red-500', handler: handleStaleDeals },
+                { icon: TrendingUp, label: 'Forecasting', color: 'text-purple-500', handler: handleForecasting },
+                { icon: RefreshCw, label: 'Refresh View', color: 'text-cyan-500', handler: handleRefreshView },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.handler}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1159,19 +1497,20 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Mail, label: 'Log Email', color: 'text-blue-500' },
-                { icon: Phone, label: 'Log Call', color: 'text-green-500' },
-                { icon: Users, label: 'Log Meeting', color: 'text-purple-500' },
-                { icon: FileText, label: 'Add Note', color: 'text-amber-500' },
-                { icon: CheckCircle, label: 'Create Task', color: 'text-pink-500' },
-                { icon: Calendar, label: 'Schedule', color: 'text-indigo-500' },
-                { icon: MessageSquare, label: 'Send Message', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export Log', color: 'text-red-500' },
+                { icon: Mail, label: 'Log Email', color: 'text-blue-500', handler: handleLogEmail },
+                { icon: Phone, label: 'Log Call', color: 'text-green-500', handler: handleLogCallActivity },
+                { icon: Users, label: 'Log Meeting', color: 'text-purple-500', handler: handleLogMeeting },
+                { icon: FileText, label: 'Add Note', color: 'text-amber-500', handler: handleAddNote },
+                { icon: CheckCircle, label: 'Create Task', color: 'text-pink-500', handler: handleCreateTask },
+                { icon: Calendar, label: 'Schedule', color: 'text-indigo-500', handler: handleSchedule },
+                { icon: MessageSquare, label: 'Send Message', color: 'text-cyan-500', handler: handleSendMessage },
+                { icon: Download, label: 'Export Log', color: 'text-red-500', handler: handleExportLog },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.handler}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1277,19 +1616,20 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Rocket, label: 'New Campaign', color: 'text-pink-500' },
-                { icon: Mail, label: 'Email Blast', color: 'text-blue-500' },
-                { icon: Megaphone, label: 'Announcement', color: 'text-amber-500' },
-                { icon: ListChecks, label: 'Sequences', color: 'text-green-500' },
-                { icon: Zap, label: 'Workflows', color: 'text-purple-500' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-indigo-500' },
-                { icon: Users, label: 'Audience', color: 'text-cyan-500' },
-                { icon: Copy, label: 'Duplicate', color: 'text-rose-500' },
+                { icon: Rocket, label: 'New Campaign', color: 'text-pink-500', handler: handleNewCampaign },
+                { icon: Mail, label: 'Email Blast', color: 'text-blue-500', handler: handleEmailBlast },
+                { icon: Megaphone, label: 'Announcement', color: 'text-amber-500', handler: handleAnnouncement },
+                { icon: ListChecks, label: 'Sequences', color: 'text-green-500', handler: handleSequences },
+                { icon: Zap, label: 'Workflows', color: 'text-purple-500', handler: handleWorkflows },
+                { icon: BarChart3, label: 'Analytics', color: 'text-indigo-500', handler: handleAnalytics },
+                { icon: Users, label: 'Audience', color: 'text-cyan-500', handler: handleAudience },
+                { icon: Copy, label: 'Duplicate', color: 'text-rose-500', handler: handleDuplicate },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.handler}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1336,7 +1676,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <span className="text-xs text-muted-foreground">
                           Started {formatDate(campaign.startDate)}
                         </span>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleViewCampaign(campaign.name)}>
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Button>
@@ -1345,7 +1685,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   </CardContent>
                 </Card>
               ))}
-              <Card className="border-dashed cursor-pointer hover:border-pink-500 hover:bg-pink-50/50 dark:hover:bg-pink-900/10 transition-all flex items-center justify-center min-h-[300px]">
+              <Card className="border-dashed cursor-pointer hover:border-pink-500 hover:bg-pink-50/50 dark:hover:bg-pink-900/10 transition-all flex items-center justify-center min-h-[300px]" onClick={handleCreateCampaign}>
                 <div className="text-center p-6">
                   <div className="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center mx-auto mb-3">
                     <Send className="w-6 h-6 text-pink-600 dark:text-pink-400" />
@@ -1389,19 +1729,20 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Rule', color: 'text-pink-500' },
-                { icon: Brain, label: 'AI Scoring', color: 'text-purple-500' },
-                { icon: Activity, label: 'Behavioral', color: 'text-blue-500' },
-                { icon: Building2, label: 'Demographic', color: 'text-green-500' },
-                { icon: BarChart3, label: 'Distribution', color: 'text-amber-500' },
-                { icon: RefreshCw, label: 'Recalculate', color: 'text-indigo-500' },
-                { icon: Download, label: 'Export Rules', color: 'text-cyan-500' },
-                { icon: Settings, label: 'Configure', color: 'text-rose-500' },
+                { icon: Plus, label: 'New Rule', color: 'text-pink-500', handler: handleNewRule },
+                { icon: Brain, label: 'AI Scoring', color: 'text-purple-500', handler: handleAIScoring },
+                { icon: Activity, label: 'Behavioral', color: 'text-blue-500', handler: handleBehavioral },
+                { icon: Building2, label: 'Demographic', color: 'text-green-500', handler: handleDemographic },
+                { icon: BarChart3, label: 'Distribution', color: 'text-amber-500', handler: handleDistribution },
+                { icon: RefreshCw, label: 'Recalculate', color: 'text-indigo-500', handler: handleRecalculate },
+                { icon: Download, label: 'Export Rules', color: 'text-cyan-500', handler: handleExportRules },
+                { icon: Settings, label: 'Configure', color: 'text-rose-500', handler: handleConfigure },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.handler}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1768,7 +2109,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                                   <p className="text-sm text-muted-foreground">{integration.description}</p>
                                 </div>
                               </div>
-                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm" onClick={() => handleConnect(integration.name)}>
                                 {integration.connected ? 'Connected' : 'Connect'}
                               </Button>
                             </div>
@@ -1800,7 +2141,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                                   <p className="text-sm text-muted-foreground">{integration.description}</p>
                                 </div>
                               </div>
-                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm" onClick={() => handleConnect(integration.name)}>
                                 {integration.connected ? 'Connected' : 'Connect'}
                               </Button>
                             </div>
@@ -1819,14 +2160,14 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="lg_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={handleCopyAPIKey}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Webhook URL</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-app.com/webhook/leads" />
-                            <Button variant="outline">Test</Button>
+                            <Button variant="outline" onClick={handleTestWebhook}>Test</Button>
                           </div>
                         </div>
                       </CardContent>

@@ -503,6 +503,66 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     </div>
   )
 
+  // Toast Handlers
+  const handleCreateTutorial = () => {
+    toast.info('Create Tutorial', { description: 'Opening tutorial editor...' })
+  }
+  const handlePublishTutorial = (tutorialName: string) => {
+    toast.success('Tutorial Published', { description: `"${tutorialName}" is now live` })
+  }
+  const handleStartTutorial = (tutorialName: string) => {
+    toast.info('Starting Tutorial', { description: `Loading "${tutorialName}"...` })
+  }
+  const handleCompleteTutorial = (tutorialName: string) => {
+    toast.success('Tutorial Completed', { description: `You finished "${tutorialName}"!` })
+  }
+  const handleMyList = () => {
+    toast.info('My List', { description: 'Opening your saved courses...' })
+  }
+  const handleQuickAction = (actionLabel: string) => {
+    toast.info(actionLabel, { description: `Performing ${actionLabel.toLowerCase()} action...` })
+  }
+  const handleMarkAllRead = () => {
+    toast.success('Notifications', { description: 'All notifications marked as read' })
+  }
+  const handleChangePhoto = () => {
+    toast.info('Change Photo', { description: 'Opening photo upload dialog...' })
+  }
+  const handleUpgradePlan = (planName: string) => {
+    toast.info('Upgrade Plan', { description: `Upgrading to ${planName} plan...` })
+  }
+  const handleAddPaymentMethod = () => {
+    toast.info('Add Payment', { description: 'Opening payment method form...' })
+  }
+  const handleConnectService = (serviceName: string) => {
+    toast.info('Connect Service', { description: `Connecting to ${serviceName}...` })
+  }
+  const handleCopyApiKey = () => {
+    toast.success('Copied', { description: 'API key copied to clipboard' })
+  }
+  const handleRegenerateApiKey = () => {
+    toast.warning('Regenerate API Key', { description: 'Generating new API key...' })
+  }
+  const handleDownloadData = () => {
+    toast.info('Download Data', { description: 'Preparing your data export...' })
+  }
+  const handleClearHistory = () => {
+    toast.success('History Cleared', { description: 'Watch history has been cleared' })
+  }
+  const handleResetProgress = () => {
+    toast.warning('Reset Progress', { description: 'Resetting all course progress...' })
+  }
+  const handleDeleteAccount = () => {
+    toast.error('Delete Account', { description: 'Please confirm account deletion' })
+  }
+  const handleEnrollCourse = (courseName: string) => {
+    toast.success('Enrolled', { description: `Successfully enrolled in "${courseName}"` })
+  }
+  const handleCreateGoal = () => {
+    toast.success('Goal Created', { description: 'Your learning goal has been set' })
+    setShowGoalDialog(false)
+  }
+
   const CourseCard = ({ course }: { course: Course }) => {
     const progress = mockProgress.find(p => p.courseId === course.id)
 
@@ -572,11 +632,11 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
               <p className="text-rose-100 mt-1">Master new skills with expert-led courses</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-0">
+              <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-0" onClick={handleMyList}>
                 <Bookmark className="w-4 h-4 mr-2" />
                 My List
               </Button>
-              <Button className="bg-white text-rose-600 hover:bg-rose-50">
+              <Button className="bg-white text-rose-600 hover:bg-rose-50" onClick={handleCreateTutorial}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Course
               </Button>
@@ -683,7 +743,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                 { icon: Users, label: 'Popular', color: 'text-cyan-600 dark:text-cyan-400' },
                 { icon: Filter, label: 'Filter', color: 'text-gray-600 dark:text-gray-400' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={() => handleQuickAction(action.label)}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -775,7 +835,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                             </div>
                             <p className="text-xs text-gray-500 mt-1">{p.lessonsCompleted} of {p.totalLessons} lessons • Last accessed {p.lastAccessed}</p>
                           </div>
-                          <Button size="sm" className="bg-rose-600"><Play className="w-4 h-4 mr-1" />Continue</Button>
+                          <Button size="sm" className="bg-rose-600" onClick={(e) => { e.stopPropagation(); handleStartTutorial(course.title) }}><Play className="w-4 h-4 mr-1" />Continue</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -979,7 +1039,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Recent Notifications</CardTitle>
-                <Button variant="outline" size="sm">Mark All Read</Button>
+                <Button variant="outline" size="sm" onClick={handleMarkAllRead}>Mark All Read</Button>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
@@ -1105,7 +1165,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <div className="flex items-center gap-4">
                           <Avatar className="w-20 h-20"><AvatarFallback className="text-2xl">JD</AvatarFallback></Avatar>
                           <div className="space-y-2">
-                            <Button variant="outline">Change Photo</Button>
+                            <Button variant="outline" onClick={handleChangePhoto}>Change Photo</Button>
                             <p className="text-xs text-gray-500">JPG, PNG. Max 2MB</p>
                           </div>
                         </div>
@@ -1310,7 +1370,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                                   </li>
                                 ))}
                               </ul>
-                              {!sub.isCurrent && <Button variant="outline" className="w-full">Upgrade</Button>}
+                              {!sub.isCurrent && <Button variant="outline" className="w-full" onClick={() => handleUpgradePlan(sub.name)}>Upgrade</Button>}
                             </div>
                           ))}
                         </div>
@@ -1338,7 +1398,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                           </div>
                           <Badge variant="outline">Default</Badge>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleAddPaymentMethod}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Payment Method
                         </Button>
@@ -1507,7 +1567,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleConnectService('Slack')}>Connect</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div className="flex items-center gap-3">
@@ -1519,7 +1579,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleConnectService('Zoom')}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1537,8 +1597,8 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="learn_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={handleCopyApiKey}>Copy</Button>
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1633,11 +1693,11 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                           <Switch />
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleDownloadData}>
                             <Download className="w-4 h-4 mr-2" />
                             Download My Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleClearHistory}>
                             <HardDrive className="w-4 h-4 mr-2" />
                             Clear Watch History
                           </Button>
@@ -1659,7 +1719,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                             <div className="font-medium text-red-700 dark:text-red-400">Reset Progress</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Clear all course progress and history</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={handleResetProgress}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1669,7 +1729,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                             <div className="font-medium text-red-700 dark:text-red-400">Delete Account</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete your account and data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={handleDeleteAccount}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1736,7 +1796,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                   </div>
                   <div className="text-right">
                     {selectedCourse.discountPrice ? (<><div className="text-2xl font-bold text-gray-900">${selectedCourse.discountPrice}</div><div className="text-sm text-gray-400 line-through">${selectedCourse.price}</div></>) : (<div className="text-2xl font-bold text-gray-900">${selectedCourse.price}</div>)}
-                    <Button className="mt-2 bg-rose-600 w-full">Enroll Now</Button>
+                    <Button className="mt-2 bg-rose-600 w-full" onClick={() => handleEnrollCourse(selectedCourse.title)}>Enroll Now</Button>
                   </div>
                 </div>
               </DialogHeader>
@@ -1867,7 +1927,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button>
-            <Button className="bg-rose-600 hover:bg-rose-700">Create Goal</Button>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleCreateGoal}>Create Goal</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

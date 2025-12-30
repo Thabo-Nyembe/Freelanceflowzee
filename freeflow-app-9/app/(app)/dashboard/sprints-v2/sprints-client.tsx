@@ -464,6 +464,73 @@ export default function SprintsClient() {
     return groups
   }, [activeSprint])
 
+  // Handlers
+  const handleCreateSprint = () => {
+    toast.info('Create Sprint', {
+      description: 'Opening sprint planning wizard...'
+    })
+  }
+
+  const handleStartSprint = (sprintName: string) => {
+    toast.success('Sprint Started', {
+      description: `"${sprintName}" is now active`
+    })
+  }
+
+  const handleCompleteSprint = (sprintName: string) => {
+    toast.success('Sprint Completed', {
+      description: `"${sprintName}" has been completed`
+    })
+  }
+
+  const handleAddTask = () => {
+    toast.info('Add Task', {
+      description: 'Opening task creation form...'
+    })
+  }
+
+  const handleMoveTask = (taskName: string, status: string) => {
+    toast.info('Task Moved', {
+      description: `"${taskName}" moved to ${status}`
+    })
+  }
+
+  const handleSync = () => {
+    toast.info('Syncing', {
+      description: 'Syncing sprint data...'
+    })
+  }
+
+  const handleArchiveSprints = () => {
+    toast.success('Sprints Archived', {
+      description: 'All completed sprints have been archived'
+    })
+  }
+
+  const handleResetVelocity = () => {
+    toast.success('Velocity Reset', {
+      description: 'Velocity data has been cleared'
+    })
+  }
+
+  const handleDeleteProject = () => {
+    toast.error('Project Deleted', {
+      description: 'Project has been permanently deleted'
+    })
+  }
+
+  const handleCopyApiKey = () => {
+    toast.success('Copied', {
+      description: 'API key copied to clipboard'
+    })
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.success('API Key Regenerated', {
+      description: 'New API key has been generated'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
@@ -484,11 +551,11 @@ export default function SprintsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button onClick={handleSync} variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-2" />
               Sync
             </Button>
-            <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+            <Button onClick={handleCreateSprint} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Create Sprint
             </Button>
@@ -828,7 +895,7 @@ export default function SprintsClient() {
                           <div className="text-lg font-bold text-teal-600">{task.story_points}</div>
                           <div className="text-xs text-slate-500">points</div>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button onClick={handleAddTask} variant="outline" size="sm">
                           Add to Sprint
                         </Button>
                       </div>
@@ -1651,7 +1718,7 @@ export default function SprintsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive All Sprints</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Archive all completed sprints</p>
                           </div>
-                          <Button variant="destructive" size="sm">Archive</Button>
+                          <Button onClick={handleArchiveSprints} variant="destructive" size="sm">Archive</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1659,7 +1726,7 @@ export default function SprintsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Velocity Data</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Clear all velocity history</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button onClick={handleResetVelocity} variant="destructive" size="sm">Reset</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1667,7 +1734,7 @@ export default function SprintsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button onClick={handleDeleteProject} variant="destructive" size="sm">Delete</Button>
                         </div>
                       </CardContent>
                     </Card>

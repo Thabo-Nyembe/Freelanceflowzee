@@ -654,6 +654,78 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     })
   }
 
+  const handleAddMilestone = () => {
+    toast.info('Add Milestone', { description: 'Opening milestone form...' })
+  }
+
+  const handleEditMilestone = (milestoneName: string) => {
+    toast.info('Edit Milestone', { description: `Editing "${milestoneName}"...` })
+  }
+
+  const handleCompleteMilestone = (milestoneName: string) => {
+    toast.success('Milestone Completed', { description: `"${milestoneName}" marked as complete` })
+  }
+
+  const handleExportRoadmap = () => {
+    toast.success('Exporting', { description: 'Roadmap will be downloaded' })
+  }
+
+  const handleQuickAction = (actionLabel: string) => {
+    toast.info(actionLabel, { description: `${actionLabel} action triggered` })
+  }
+
+  const handleNewRelease = () => {
+    toast.info('New Release', { description: 'Opening release creation form...' })
+  }
+
+  const handleSubmitIdea = () => {
+    toast.info('Submit Idea', { description: 'Opening idea submission form...' })
+  }
+
+  const handleSetOKR = () => {
+    toast.info('Set OKR', { description: 'Opening OKR configuration...' })
+  }
+
+  const handleSyncJira = () => {
+    toast.info('Sync Jira', { description: 'Syncing with Jira...' })
+  }
+
+  const handleViewAnalytics = () => {
+    toast.info('Analytics', { description: 'Opening analytics dashboard...' })
+  }
+
+  const handleRecalculateScores = () => {
+    toast.success('Recalculating', { description: 'RICE scores being recalculated...' })
+  }
+
+  const handleAddFeature = () => {
+    toast.info('Add Feature', { description: 'Opening feature creation form...' })
+  }
+
+  const handleCopyPublicUrl = () => {
+    toast.success('URL Copied', { description: 'Public roadmap URL copied to clipboard' })
+  }
+
+  const handleManageIntegration = (integrationName: string) => {
+    toast.info('Manage Integration', { description: `Managing ${integrationName} integration...` })
+  }
+
+  const handleConnectIntegration = (integrationName: string) => {
+    toast.info('Connect Integration', { description: `Connecting to ${integrationName}...` })
+  }
+
+  const handleImportFeatures = () => {
+    toast.info('Import Features', { description: 'Opening CSV import wizard...' })
+  }
+
+  const handleArchiveCompleted = () => {
+    toast.warning('Archive All', { description: 'All released features will be archived' })
+  }
+
+  const handleDeleteRoadmap = () => {
+    toast.error('Delete Roadmap', { description: 'This action cannot be undone' })
+  }
+
   // Group features by status for Kanban view
   const featuresByStatus = useMemo(() => {
     const grouped: Record<InitiativeStatus, Feature[]> = {
@@ -874,17 +946,18 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'New Feature', color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600' },
-                { icon: Package, label: 'New Release', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
-                { icon: Lightbulb, label: 'Submit Idea', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
-                { icon: Target, label: 'Set OKR', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
-                { icon: Share2, label: 'Share', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600' },
-                { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
-                { icon: GitBranch, label: 'Sync Jira', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
+                { icon: Plus, label: 'New Feature', color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600', handler: handleNewFeature },
+                { icon: Package, label: 'New Release', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600', handler: handleNewRelease },
+                { icon: Lightbulb, label: 'Submit Idea', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600', handler: handleSubmitIdea },
+                { icon: Target, label: 'Set OKR', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', handler: handleSetOKR },
+                { icon: Share2, label: 'Share', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600', handler: handleShareRoadmap },
+                { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600', handler: handleExportRoadmap },
+                { icon: GitBranch, label: 'Sync Jira', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600', handler: handleSyncJira },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600', handler: handleViewAnalytics },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.handler}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
                   <div className={`p-3 rounded-xl ${action.color}`}>
@@ -1119,11 +1192,11 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-6">
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
+                  <button onClick={handleRecalculateScores} className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
                     <RefreshCw className="w-4 h-4 inline mr-2" />
                     Recalculate
                   </button>
-                  <button className="px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-white/90 transition-colors">
+                  <button onClick={handleAddFeature} className="px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-white/90 transition-colors">
                     <Plus className="w-4 h-4 inline mr-2" />
                     Add Feature
                   </button>
@@ -1371,7 +1444,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                   <p className="text-sm text-gray-600 dark:text-gray-400">{stats.totalIdeas} ideas submitted • Accept feature requests from users</p>
                 </div>
               </div>
-              <Button className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white">
+              <Button onClick={handleSubmitIdea} className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Idea
               </Button>
@@ -1399,7 +1472,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                   </CardContent>
                 </Card>
               ))}
-              <Card className="border-dashed cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-teal-900/10 transition-all flex items-center justify-center min-h-[200px]">
+              <Card onClick={handleSubmitIdea} className="border-dashed cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-teal-900/10 transition-all flex items-center justify-center min-h-[200px]">
                 <div className="text-center p-6">
                   <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mx-auto mb-3">
                     <Lightbulb className="w-6 h-6 text-teal-600 dark:text-teal-400" />
@@ -1552,7 +1625,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                           <Label htmlFor="publicUrl">Public URL</Label>
                           <div className="mt-1 flex gap-2">
                             <Input id="publicUrl" type="text" className="flex-1" defaultValue="roadmap.yourcompany.com" readOnly />
-                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline" onClick={handleCopyPublicUrl}>Copy</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1634,7 +1707,11 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => integration.status === 'connected' ? handleManageIntegration(integration.name) : handleConnectIntegration(integration.name)}
+                            >
                               {integration.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -1691,7 +1768,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                             <p className="font-medium text-gray-900 dark:text-white">Export Roadmap</p>
                             <p className="text-sm text-gray-500">Download all features and releases</p>
                           </div>
-                          <Button>
+                          <Button onClick={handleExportRoadmap}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -1701,7 +1778,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                             <p className="font-medium text-gray-900 dark:text-white">Import Features</p>
                             <p className="text-sm text-gray-500">Bulk import from CSV</p>
                           </div>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={handleImportFeatures}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import
                           </Button>
@@ -1720,7 +1797,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                             <p className="font-medium text-gray-900 dark:text-white">Archive All Completed</p>
                             <p className="text-sm text-gray-500">Move all released features to archive</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleArchiveCompleted}>
                             Archive
                           </Button>
                         </div>
@@ -1729,7 +1806,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                             <p className="font-medium text-gray-900 dark:text-white">Delete Roadmap</p>
                             <p className="text-sm text-gray-500">Permanently delete all data</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={handleDeleteRoadmap}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>

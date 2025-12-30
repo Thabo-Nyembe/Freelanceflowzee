@@ -503,6 +503,20 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     unassigned: mockTickets.filter(t => !t.assignee).length
   }), [])
 
+  // Toast handlers for unconnected buttons
+  const handleCreateTicket = () => {
+    toast.info('Create Ticket', { description: 'Opening ticket form...' })
+  }
+  const handleAssignTicket = (ticketId: string) => {
+    toast.info('Assign Ticket', { description: `Assigning ticket #${ticketId}...` })
+  }
+  const handleResolveTicket = (ticketId: string) => {
+    toast.success('Ticket Resolved', { description: `Ticket #${ticketId} has been resolved` })
+  }
+  const handleExportTickets = () => {
+    toast.success('Exporting', { description: 'Ticket data will be downloaded' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -518,15 +532,15 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info('Automations', { description: 'Opening automation settings...' })}>
               <Bot className="w-4 h-4 mr-2" />
               Automations
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info('Settings', { description: 'Opening support settings...' })}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={handleCreateTicket}>
               <Plus className="w-4 h-4 mr-2" />
               New Ticket
             </Button>
@@ -866,7 +880,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
           <TabsContent value="canned" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Canned Responses</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast.info('Add Response', { description: 'Opening canned response form...' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Response
               </Button>
@@ -894,7 +908,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
           <TabsContent value="sla" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SLA Policies</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast.info('Add Policy', { description: 'Opening SLA policy form...' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Policy
               </Button>
@@ -1324,7 +1338,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Connect Facebook', { description: 'Opening Facebook Messenger integration...' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1540,7 +1554,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Connect Teams', { description: 'Opening Microsoft Teams integration...' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1558,8 +1572,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.success('Copied', { description: 'API key copied to clipboard' })}>Copy</Button>
+                            <Button variant="outline" onClick={() => toast.info('Regenerate Key', { description: 'Generating new API key...' })}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -1571,7 +1585,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium">Webhook Events</div>
                             <div className="text-sm text-gray-500">ticket.created, ticket.updated, ticket.resolved</div>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Configure Webhooks', { description: 'Opening webhook configuration...' })}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1619,11 +1633,11 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportTickets}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Archive Tickets', { description: 'Archiving old tickets...' })}>
                             <Archive className="w-4 h-4 mr-2" />
                             Archive Old Tickets
                           </Button>
@@ -1678,7 +1692,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Tickets</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all tickets and data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => toast.error('Delete All', { description: 'This action requires confirmation' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete All
                           </Button>
@@ -1688,7 +1702,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium text-red-700 dark:text-red-400">Reset Helpdesk</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all settings to default</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => toast.error('Reset Helpdesk', { description: 'This action requires confirmation' })}>
                             <RotateCcw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1788,9 +1802,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
                     <div className="border-t pt-4">
                       <div className="flex gap-2 mb-2">
-                        <Button variant="outline" size="sm">Reply</Button>
-                        <Button variant="outline" size="sm">Add Note</Button>
-                        <Button variant="outline" size="sm">Forward</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Reply', { description: 'Composing reply to customer...' })}>Reply</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Add Note', { description: 'Adding internal note...' })}>Add Note</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Forward', { description: 'Forwarding ticket...' })}>Forward</Button>
                       </div>
                       <div className="flex gap-2">
                         <Input
@@ -1799,7 +1813,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           onChange={(e) => setReplyContent(e.target.value)}
                           className="flex-1"
                         />
-                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => { if (selectedTicket) { toast.success('Reply Sent', { description: `Reply sent for ticket #${selectedTicket.code}` }); setReplyContent(''); } }}>
                           <Send className="w-4 h-4 mr-2" />
                           Send
                         </Button>

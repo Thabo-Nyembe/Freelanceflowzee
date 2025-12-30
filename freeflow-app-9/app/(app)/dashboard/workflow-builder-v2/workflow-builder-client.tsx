@@ -548,6 +548,465 @@ export default function WorkflowBuilderClient() {
     )
   }, [searchQuery])
 
+  // Handlers
+  const handleCreateWorkflow = () => {
+    toast.info('Create Workflow', {
+      description: 'Opening workflow builder canvas...'
+    })
+  }
+
+  const handleEditWorkflow = (workflowName: string) => {
+    toast.info('Edit Workflow', {
+      description: `Opening "${workflowName}" in editor...`
+    })
+  }
+
+  const handleActivateWorkflow = (workflowName: string) => {
+    toast.success('Workflow Activated', {
+      description: `"${workflowName}" is now active`
+    })
+  }
+
+  const handleDuplicateWorkflow = (workflowName: string) => {
+    toast.success('Workflow Duplicated', {
+      description: `Copy of "${workflowName}" created`
+    })
+  }
+
+  const handleDeleteWorkflow = (workflowName: string) => {
+    toast.info('Workflow Deleted', {
+      description: `"${workflowName}" has been removed`
+    })
+  }
+
+  // Workflows Tab Handlers
+  const handleImportWorkflow = () => {
+    toast.info('Import Workflow', {
+      description: 'Opening workflow import dialog...'
+    })
+  }
+
+  const handleRunAllWorkflows = () => {
+    toast.info('Run All Workflows', {
+      description: 'Starting all active workflows...'
+    })
+  }
+
+  const handlePauseAllWorkflows = () => {
+    toast.info('Pause All Workflows', {
+      description: 'Pausing all running workflows...'
+    })
+  }
+
+  const handleExportWorkflows = () => {
+    toast.info('Export Workflows', {
+      description: 'Preparing workflow export...'
+    })
+  }
+
+  const handleViewHistory = () => {
+    toast.info('View History', {
+      description: 'Opening workflow history...'
+    })
+  }
+
+  const handleWorkflowSettings = () => {
+    toast.info('Workflow Settings', {
+      description: 'Opening workflow settings...'
+    })
+  }
+
+  const handleFilter = () => {
+    toast.info('Filter', {
+      description: 'Opening filter options...'
+    })
+  }
+
+  const handleWorkflowCardSettings = (workflowName: string) => {
+    toast.info('Workflow Settings', {
+      description: `Opening settings for "${workflowName}"...`
+    })
+  }
+
+  const handlePauseWorkflow = (workflowName: string) => {
+    toast.info('Pause Workflow', {
+      description: `Pausing "${workflowName}"...`
+    })
+  }
+
+  const handlePlayWorkflow = (workflowName: string) => {
+    toast.info('Run Workflow', {
+      description: `Starting "${workflowName}"...`
+    })
+  }
+
+  const handleWorkflowCardMore = (workflowName: string) => {
+    toast.info('More Options', {
+      description: `Showing options for "${workflowName}"...`
+    })
+  }
+
+  // Executions Tab Handlers
+  const handleRunNow = () => {
+    toast.info('Run Now', {
+      description: 'Starting manual execution...'
+    })
+  }
+
+  const handleStopAll = () => {
+    toast.info('Stop All', {
+      description: 'Stopping all running executions...'
+    })
+  }
+
+  const handleRetryFailed = () => {
+    toast.info('Retry Failed', {
+      description: 'Retrying failed executions...'
+    })
+  }
+
+  const handleDebug = () => {
+    toast.info('Debug', {
+      description: 'Opening debug console...'
+    })
+  }
+
+  const handleLiveView = () => {
+    toast.info('Live View', {
+      description: 'Opening real-time execution view...'
+    })
+  }
+
+  const handleExportLogs = () => {
+    toast.info('Export Logs', {
+      description: 'Exporting execution logs...'
+    })
+  }
+
+  const handleClearExecutions = () => {
+    toast.info('Clear Executions', {
+      description: 'Clearing execution history...'
+    })
+  }
+
+  const handleExecutionSettings = () => {
+    toast.info('Execution Settings', {
+      description: 'Opening execution settings...'
+    })
+  }
+
+  const handleViewExecution = (workflowName: string) => {
+    toast.info('View Execution', {
+      description: `Opening execution details for "${workflowName}"...`
+    })
+  }
+
+  // Nodes Tab Handlers
+  const handleCreateNode = () => {
+    toast.info('Create Node', {
+      description: 'Opening node creation wizard...'
+    })
+  }
+
+  const handleImportNode = () => {
+    toast.info('Import Node', {
+      description: 'Opening node import dialog...'
+    })
+  }
+
+  const handleCustomCode = () => {
+    toast.info('Custom Code', {
+      description: 'Opening custom code editor...'
+    })
+  }
+
+  const handleWebhooks = () => {
+    toast.info('Webhooks', {
+      description: 'Opening webhook configuration...'
+    })
+  }
+
+  const handleDataNodes = () => {
+    toast.info('Data Nodes', {
+      description: 'Showing data integration nodes...'
+    })
+  }
+
+  const handleEmailNodes = () => {
+    toast.info('Email Nodes', {
+      description: 'Showing email integration nodes...'
+    })
+  }
+
+  const handleHttpNodes = () => {
+    toast.info('HTTP Nodes', {
+      description: 'Showing HTTP request nodes...'
+    })
+  }
+
+  const handleFavoriteNodes = () => {
+    toast.info('Favorites', {
+      description: 'Showing favorite nodes...'
+    })
+  }
+
+  // Templates Tab Handlers
+  const handleFeaturedTemplates = () => {
+    toast.info('Featured Templates', {
+      description: 'Showing featured templates...'
+    })
+  }
+
+  const handlePopularTemplates = () => {
+    toast.info('Popular Templates', {
+      description: 'Showing popular templates...'
+    })
+  }
+
+  const handleRecentTemplates = () => {
+    toast.info('Recent Templates', {
+      description: 'Showing recently used templates...'
+    })
+  }
+
+  const handleEmailTemplates = () => {
+    toast.info('Email Templates', {
+      description: 'Showing email automation templates...'
+    })
+  }
+
+  const handleDataSyncTemplates = () => {
+    toast.info('Data Sync Templates', {
+      description: 'Showing data synchronization templates...'
+    })
+  }
+
+  const handleChatTemplates = () => {
+    toast.info('Chat Templates', {
+      description: 'Showing chat automation templates...'
+    })
+  }
+
+  const handleCreateTemplate = () => {
+    toast.info('Create Template', {
+      description: 'Opening template creation wizard...'
+    })
+  }
+
+  const handleShareTemplate = () => {
+    toast.info('Share Template', {
+      description: 'Opening template sharing options...'
+    })
+  }
+
+  const handleUseTemplate = (templateName: string) => {
+    toast.info('Use Template', {
+      description: `Creating workflow from "${templateName}"...`
+    })
+  }
+
+  // Credentials Tab Handlers
+  const handleAddKey = () => {
+    toast.info('Add Key', {
+      description: 'Opening API key creation form...'
+    })
+  }
+
+  const handleApiKeys = () => {
+    toast.info('API Keys', {
+      description: 'Showing API key credentials...'
+    })
+  }
+
+  const handleOAuth = () => {
+    toast.info('OAuth', {
+      description: 'Showing OAuth credentials...'
+    })
+  }
+
+  const handleSecuritySettings = () => {
+    toast.info('Security', {
+      description: 'Opening security settings...'
+    })
+  }
+
+  const handleShareCredentials = () => {
+    toast.info('Share Credentials', {
+      description: 'Opening credential sharing options...'
+    })
+  }
+
+  const handleRotateCredentials = () => {
+    toast.info('Rotate Credentials', {
+      description: 'Opening credential rotation wizard...'
+    })
+  }
+
+  const handleExportCredentials = () => {
+    toast.info('Export Credentials', {
+      description: 'Exporting credentials...'
+    })
+  }
+
+  const handleCredentialSettings = () => {
+    toast.info('Credential Settings', {
+      description: 'Opening credential settings...'
+    })
+  }
+
+  const handleAddCredential = () => {
+    toast.info('Add Credential', {
+      description: 'Opening credential creation form...'
+    })
+  }
+
+  const handleCredentialItemSettings = (credName: string) => {
+    toast.info('Credential Settings', {
+      description: `Opening settings for "${credName}"...`
+    })
+  }
+
+  const handleDeleteCredential = (credName: string) => {
+    toast.info('Delete Credential', {
+      description: `Deleting "${credName}"...`
+    })
+  }
+
+  // Variables Tab Handlers
+  const handleAddVariable = () => {
+    toast.info('Add Variable', {
+      description: 'Opening variable creation form...'
+    })
+  }
+
+  const handleAddSecret = () => {
+    toast.info('Add Secret', {
+      description: 'Opening secret creation form...'
+    })
+  }
+
+  const handleImportVariables = () => {
+    toast.info('Import Variables', {
+      description: 'Opening variable import dialog...'
+    })
+  }
+
+  const handleExportVariables = () => {
+    toast.info('Export Variables', {
+      description: 'Exporting variables...'
+    })
+  }
+
+  const handleDuplicateVariable = () => {
+    toast.info('Duplicate Variable', {
+      description: 'Duplicating selected variable...'
+    })
+  }
+
+  const handleSyncVariables = () => {
+    toast.info('Sync Variables', {
+      description: 'Syncing variables across environments...'
+    })
+  }
+
+  const handleViewAllVariables = () => {
+    toast.info('View All', {
+      description: 'Showing all variables...'
+    })
+  }
+
+  const handleVariableSettings = () => {
+    toast.info('Variable Settings', {
+      description: 'Opening variable settings...'
+    })
+  }
+
+  const handleVariableItemSettings = (varKey: string) => {
+    toast.info('Variable Settings', {
+      description: `Opening settings for "${varKey}"...`
+    })
+  }
+
+  // Settings Tab Handlers
+  const handleGeneralSettings = () => {
+    toast.info('General Settings', {
+      description: 'Opening general settings...'
+    })
+  }
+
+  const handleExecutionSettingsNav = () => {
+    toast.info('Execution Settings', {
+      description: 'Opening execution settings...'
+    })
+  }
+
+  const handleAlertsSettings = () => {
+    toast.info('Alerts Settings', {
+      description: 'Opening alert settings...'
+    })
+  }
+
+  const handleSecuritySettingsNav = () => {
+    toast.info('Security Settings', {
+      description: 'Opening security settings...'
+    })
+  }
+
+  const handleIntegrationsSettings = () => {
+    toast.info('Integrations Settings', {
+      description: 'Opening integration settings...'
+    })
+  }
+
+  const handleAdvancedSettings = () => {
+    toast.info('Advanced Settings', {
+      description: 'Opening advanced settings...'
+    })
+  }
+
+  const handleSaveAllSettings = () => {
+    toast.success('Settings Saved', {
+      description: 'All settings have been saved successfully.'
+    })
+  }
+
+  const handleResetSettings = () => {
+    toast.info('Reset Settings', {
+      description: 'Resetting settings to defaults...'
+    })
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.info('Regenerate API Key', {
+      description: 'Generating new API key...'
+    })
+  }
+
+  const handleCopyToClipboard = (label: string) => {
+    toast.success('Copied', {
+      description: `${label} copied to clipboard.`
+    })
+  }
+
+  const handleClearAllExecutions = () => {
+    toast.warning('Clear Executions', {
+      description: 'Clearing all execution history...'
+    })
+  }
+
+  const handleDeleteAllWorkflows = () => {
+    toast.error('Delete All Workflows', {
+      description: 'This action cannot be undone. Please confirm.'
+    })
+  }
+
+  const handleCreateWorkflowSubmit = () => {
+    toast.success('Workflow Created', {
+      description: 'New workflow has been created successfully.'
+    })
+    setShowNewWorkflowDialog(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -735,19 +1194,20 @@ export default function WorkflowBuilderClient() {
             {/* Workflows Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Workflow', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Play, label: 'Run All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Pause, label: 'Pause All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Plus, label: 'New Workflow', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: handleCreateWorkflow },
+                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: handleImportWorkflow },
+                { icon: Play, label: 'Run All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: handleRunAllWorkflows },
+                { icon: Pause, label: 'Pause All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handlePauseAllWorkflows },
+                { icon: Copy, label: 'Duplicate', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => handleDuplicateWorkflow('Selected Workflow') },
+                { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: handleExportWorkflows },
+                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handleViewHistory },
+                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleWorkflowSettings },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -766,7 +1226,7 @@ export default function WorkflowBuilderClient() {
                     className="pl-9"
                   />
                 </div>
-                <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                <Button variant="outline" onClick={handleFilter}><Filter className="w-4 h-4 mr-2" />Filter</Button>
               </div>
 
               <div className="grid grid-cols-3 gap-6">
@@ -783,7 +1243,7 @@ export default function WorkflowBuilderClient() {
                             <Badge className={getStatusColor(workflow.status)}>{workflow.status}</Badge>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleWorkflowCardMore(workflow.name) }}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -829,11 +1289,11 @@ export default function WorkflowBuilderClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button size="sm" variant="ghost"><Settings className="w-3 h-3" /></Button>
+                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleWorkflowCardSettings(workflow.name) }}><Settings className="w-3 h-3" /></Button>
                           {workflow.status === 'active' ? (
-                            <Button size="sm" variant="ghost"><Pause className="w-3 h-3" /></Button>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handlePauseWorkflow(workflow.name) }}><Pause className="w-3 h-3" /></Button>
                           ) : workflow.status !== 'archived' && (
-                            <Button size="sm" variant="ghost"><Play className="w-3 h-3" /></Button>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handlePlayWorkflow(workflow.name) }}><Play className="w-3 h-3" /></Button>
                           )}
                         </div>
                       </div>
@@ -873,19 +1333,20 @@ export default function WorkflowBuilderClient() {
             {/* Executions Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Play, label: 'Run Now', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Pause, label: 'Stop All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Bug, label: 'Debug', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Eye, label: 'Live View', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Export Logs', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Trash2, label: 'Clear', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Play, label: 'Run Now', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: handleRunNow },
+                { icon: Pause, label: 'Stop All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: handleStopAll },
+                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: handleRetryFailed },
+                { icon: Bug, label: 'Debug', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: handleDebug },
+                { icon: Eye, label: 'Live View', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleLiveView },
+                { icon: Download, label: 'Export Logs', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: handleExportLogs },
+                { icon: Trash2, label: 'Clear', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: handleClearExecutions },
+                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: handleExecutionSettings },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -927,7 +1388,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                         )}
                         <Badge className={getExecutionStatusColor(execution.status)}>{execution.status}</Badge>
-                        <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleViewExecution(execution.workflowName)}><Eye className="w-4 h-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -965,19 +1426,20 @@ export default function WorkflowBuilderClient() {
             {/* Nodes Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Create Node', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Code, label: 'Custom Code', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Webhook, label: 'Webhooks', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Database, label: 'Data', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Mail, label: 'Email', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Globe, label: 'HTTP', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Star, label: 'Favorites', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Plus, label: 'Create Node', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleCreateNode },
+                { icon: Download, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: handleImportNode },
+                { icon: Code, label: 'Custom Code', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: handleCustomCode },
+                { icon: Webhook, label: 'Webhooks', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: handleWebhooks },
+                { icon: Database, label: 'Data', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: handleDataNodes },
+                { icon: Mail, label: 'Email', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleEmailNodes },
+                { icon: Globe, label: 'HTTP', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: handleHttpNodes },
+                { icon: Star, label: 'Favorites', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleFavoriteNodes },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1055,17 +1517,18 @@ export default function WorkflowBuilderClient() {
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Sparkles, label: 'Featured', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Star, label: 'Popular', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Clock, label: 'Recent', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Mail, label: 'Email', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Database, label: 'Data Sync', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: MessageSquare, label: 'Chat', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Upload, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Share2, label: 'Share', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Sparkles, label: 'Featured', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleFeaturedTemplates },
+                { icon: Star, label: 'Popular', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handlePopularTemplates },
+                { icon: Clock, label: 'Recent', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: handleRecentTemplates },
+                { icon: Mail, label: 'Email', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: handleEmailTemplates },
+                { icon: Database, label: 'Data Sync', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleDataSyncTemplates },
+                { icon: MessageSquare, label: 'Chat', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: handleChatTemplates },
+                { icon: Upload, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: handleCreateTemplate },
+                { icon: Share2, label: 'Share', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: handleShareTemplate },
               ].map((action, idx) => (
                 <Button
                   key={idx}
+                  onClick={action.onClick}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
@@ -1100,7 +1563,7 @@ export default function WorkflowBuilderClient() {
                       </div>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{template.estimatedTime}</span>
                     </div>
-                    <Button className="w-full mt-4" variant="outline">Use Template</Button>
+                    <Button className="w-full mt-4" variant="outline" onClick={() => handleUseTemplate(template.name)}>Use Template</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1132,19 +1595,20 @@ export default function WorkflowBuilderClient() {
             {/* Credentials Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Key', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Key, label: 'API Keys', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: Lock, label: 'OAuth', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
-                { icon: Shield, label: 'Security', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
-                { icon: Users, label: 'Share', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400' },
-                { icon: RefreshCw, label: 'Rotate', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Download, label: 'Export', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Plus, label: 'Add Key', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: handleAddKey },
+                { icon: Key, label: 'API Keys', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: handleApiKeys },
+                { icon: Lock, label: 'OAuth', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', onClick: handleOAuth },
+                { icon: Shield, label: 'Security', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400', onClick: handleSecuritySettings },
+                { icon: Users, label: 'Share', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400', onClick: handleShareCredentials },
+                { icon: RefreshCw, label: 'Rotate', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleRotateCredentials },
+                { icon: Download, label: 'Export', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handleExportCredentials },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: handleCredentialSettings },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1158,7 +1622,7 @@ export default function WorkflowBuilderClient() {
                   <h2 className="text-xl font-semibold">Credentials</h2>
                   <p className="text-gray-500">Manage API keys and authentication</p>
                 </div>
-                <Button><Plus className="w-4 h-4 mr-2" />Add Credential</Button>
+                <Button onClick={handleAddCredential}><Plus className="w-4 h-4 mr-2" />Add Credential</Button>
               </div>
 
               <div className="grid gap-4">
@@ -1179,8 +1643,8 @@ export default function WorkflowBuilderClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="sm"><Trash2 className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleCredentialItemSettings(cred.name)}><Settings className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteCredential(cred.name)}><Trash2 className="w-4 h-4" /></Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1214,19 +1678,20 @@ export default function WorkflowBuilderClient() {
             {/* Variables Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Variable', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Lock, label: 'Add Secret', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Upload, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Download, label: 'Export', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Eye, label: 'View All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Plus, label: 'Add Variable', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: handleAddVariable },
+                { icon: Lock, label: 'Add Secret', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: handleAddSecret },
+                { icon: Upload, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleImportVariables },
+                { icon: Download, label: 'Export', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: handleExportVariables },
+                { icon: Copy, label: 'Duplicate', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: handleDuplicateVariable },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleSyncVariables },
+                { icon: Eye, label: 'View All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handleViewAllVariables },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: handleVariableSettings },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1240,7 +1705,7 @@ export default function WorkflowBuilderClient() {
                   <h2 className="text-xl font-semibold">Variables</h2>
                   <p className="text-gray-500">Global variables available in all workflows</p>
                 </div>
-                <Button><Plus className="w-4 h-4 mr-2" />Add Variable</Button>
+                <Button onClick={handleAddVariable}><Plus className="w-4 h-4 mr-2" />Add Variable</Button>
               </div>
 
               <Card>
@@ -1265,7 +1730,7 @@ export default function WorkflowBuilderClient() {
                         </div>
                         <div className="flex items-center gap-4">
                           <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{variable.value}</code>
-                          <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleVariableItemSettings(variable.key)}><Settings className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1300,19 +1765,20 @@ export default function WorkflowBuilderClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: Play, label: 'Execution', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
-                { icon: Shield, label: 'Security', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
-                { icon: Network, label: 'Integrations', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400' },
-                { icon: Sliders, label: 'Advanced', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Save, label: 'Save All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: RotateCcw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => { setSettingsTab('general'); handleGeneralSettings() } },
+                { icon: Play, label: 'Execution', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => { setSettingsTab('execution'); handleExecutionSettingsNav() } },
+                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', onClick: () => { setSettingsTab('notifications'); handleAlertsSettings() } },
+                { icon: Shield, label: 'Security', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400', onClick: () => { setSettingsTab('security'); handleSecuritySettingsNav() } },
+                { icon: Network, label: 'Integrations', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400', onClick: () => { setSettingsTab('integrations'); handleIntegrationsSettings() } },
+                { icon: Sliders, label: 'Advanced', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => { setSettingsTab('advanced'); handleAdvancedSettings() } },
+                { icon: Save, label: 'Save All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleSaveAllSettings },
+                { icon: RotateCcw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: handleResetSettings },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>

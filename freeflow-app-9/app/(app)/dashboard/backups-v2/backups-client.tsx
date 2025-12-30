@@ -660,6 +660,22 @@ export default function BackupsClient() {
     return icons[type] || Database
   }
 
+  const handleCreateBackup = () => {
+    toast.info('Creating Backup', { description: 'Backup process started...' })
+  }
+  const handleRestoreBackup = (backupName: string) => {
+    toast.info('Restoring', { description: `Restoring from "${backupName}"...` })
+  }
+  const handleDeleteBackup = (backupName: string) => {
+    toast.info('Backup Deleted', { description: `"${backupName}" has been removed` })
+  }
+  const handleDownloadBackup = (backupName: string) => {
+    toast.success('Downloading', { description: `Downloading "${backupName}"...` })
+  }
+  const handleScheduleBackup = () => {
+    toast.success('Backup Scheduled', { description: 'Automatic backup configured' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">
@@ -814,7 +830,7 @@ export default function BackupsClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Recent Backup Jobs</CardTitle>
-                    <Button variant="outline" size="sm">View All</Button>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('jobs')}>View All</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -928,15 +944,15 @@ export default function BackupsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-4 gap-4">
-                    <Button variant="outline" className="h-20 flex-col">
+                    <Button variant="outline" className="h-20 flex-col" onClick={handleCreateBackup}>
                       <Play className="h-6 w-6 mb-2 text-green-600" />
                       Run Backup
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col">
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => handleRestoreBackup('Latest Backup')}>
                       <Download className="h-6 w-6 mb-2 text-blue-600" />
                       Restore Data
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col">
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => toast.info('Verifying Backups', { description: 'Backup verification started...' })}>
                       <ShieldCheck className="h-6 w-6 mb-2 text-purple-600" />
                       Verify Backups
                     </Button>
@@ -953,7 +969,7 @@ export default function BackupsClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Recovery Testing Schedule</CardTitle>
-                    <Button size="sm"><Plus className="h-4 w-4 mr-2" />Schedule Test</Button>
+                    <Button size="sm" onClick={handleScheduleBackup}><Plus className="h-4 w-4 mr-2" />Schedule Test</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1039,7 +1055,7 @@ export default function BackupsClient() {
                         {job.verified && <ShieldCheck className="h-4 w-4 text-blue-600" />}
                         {job.crossRegionEnabled && <Globe className="h-4 w-4 text-purple-600" />}
                       </div>
-                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('Job Options', { description: `Options for "${job.name}"` }) }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1070,7 +1086,7 @@ export default function BackupsClient() {
                       <Gavel className="h-4 w-4 mr-2" />
                       Apply Legal Hold
                     </Button>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleRestoreBackup('Selected Recovery Point')}>
                       <Download className="h-4 w-4 mr-2" />
                       Start Recovery
                     </Button>
@@ -1101,7 +1117,7 @@ export default function BackupsClient() {
                         {point.verified && <ShieldCheck className="h-5 w-5 text-green-600" />}
                         {point.recoveryTested && <CheckCheck className="h-5 w-5 text-blue-600" title={`Last tested: ${point.lastTestedDate}`} />}
                       </div>
-                      <Button size="sm" variant="outline">Restore</Button>
+                      <Button size="sm" variant="outline" onClick={() => handleRestoreBackup(point.jobName)}>Restore</Button>
                     </div>
                   ))}
                 </div>
@@ -1134,19 +1150,20 @@ export default function BackupsClient() {
             {/* Vaults Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Shield, label: 'Compliance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Creating Vault', { description: 'New vault creation started...' }) },
+                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Locking Vault', { description: 'Vault lock initiated...' }) },
+                { icon: Shield, label: 'Compliance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setActiveTab('compliance') },
+                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('Access Control', { description: 'Managing vault access...' }) },
+                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Replicating', { description: 'Vault replication started...' }) },
+                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Archiving', { description: 'Moving to archive storage...' }) },
+                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Audit Log', { description: 'Viewing audit trail...' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>

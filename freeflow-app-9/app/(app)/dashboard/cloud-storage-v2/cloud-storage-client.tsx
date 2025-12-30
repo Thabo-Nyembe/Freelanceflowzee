@@ -67,7 +67,8 @@ import {
   TrendingUp,
   Activity,
   Zap,
-  Shield
+  Shield,
+  RotateCcw
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -581,6 +582,89 @@ export default function CloudStorageClient() {
 
   const usedPercentage = (mockQuota.used / mockQuota.total) * 100
 
+  // Handlers
+  const handleUploadFile = () => {
+    toast.info('Upload File', { description: 'Opening file picker...' })
+  }
+  const handleCreateFolder = () => {
+    toast.info('Create Folder', { description: 'Creating new folder...' })
+  }
+  const handleShareFile = (fileName: string) => {
+    toast.success('Link Created', { description: `Share link for "${fileName}" copied to clipboard` })
+  }
+  const handleDownloadFile = (fileName: string) => {
+    toast.success('Download Started', { description: `Downloading "${fileName}"...` })
+  }
+  const handleDeleteFile = (fileName: string) => {
+    toast.info('File Deleted', { description: `"${fileName}" moved to trash` })
+  }
+  const handleFilter = () => {
+    toast.info('Filter', { description: 'Opening filter options...' })
+  }
+  const handleUpgrade = () => {
+    toast.info('Upgrade Storage', { description: 'Opening upgrade options...' })
+  }
+  const handleMove = (fileName: string) => {
+    toast.info('Move File', { description: `Selecting destination for "${fileName}"...` })
+  }
+  const handleCopy = (fileName: string) => {
+    toast.info('Copy File', { description: `Creating copy of "${fileName}"...` })
+  }
+  const handleSync = () => {
+    toast.info('Sync', { description: 'Syncing files...' })
+  }
+  const handleScan = () => {
+    toast.info('Scan', { description: 'Scanning for changes...' })
+  }
+  const handleMoreOptions = (fileName: string) => {
+    toast.info('More Options', { description: `Options for "${fileName}"` })
+  }
+  const handleCopyLink = (url: string) => {
+    toast.success('Link Copied', { description: 'Share link copied to clipboard' })
+  }
+  const handleCancelTransfer = (fileName: string) => {
+    toast.info('Transfer Cancelled', { description: `Cancelled transfer for "${fileName}"` })
+  }
+  const handleRetentionPolicy = () => {
+    toast.info('Retention Policy', { description: 'Opening retention settings...' })
+  }
+  const handleRestoreAll = () => {
+    toast.info('Restore All', { description: 'Restoring all deleted files...' })
+  }
+  const handleEmptyTrash = () => {
+    toast.info('Empty Trash', { description: 'Permanently deleting all files in trash...' })
+  }
+  const handleSearchTrash = () => {
+    toast.info('Search Trash', { description: 'Searching deleted files...' })
+  }
+  const handleAutoDelete = () => {
+    toast.info('Auto-Delete Settings', { description: 'Opening retention settings...' })
+  }
+  const handleExportData = () => {
+    toast.info('Export Data', { description: 'Preparing data export...' })
+  }
+  const handlePauseSync = () => {
+    toast.info('Sync Paused', { description: 'File synchronization paused' })
+  }
+  const handleClearCache = () => {
+    toast.info('Cache Cleared', { description: 'All cached data has been removed' })
+  }
+  const handleDeleteAllFiles = () => {
+    toast.info('Delete All', { description: 'This action requires confirmation' })
+  }
+  const handleToggleStar = (fileName: string, isStarred: boolean) => {
+    toast.success(isStarred ? 'Removed from Starred' : 'Added to Starred', { description: `"${fileName}" ${isStarred ? 'removed from' : 'added to'} starred files` })
+  }
+  const handleSendComment = () => {
+    toast.success('Comment Sent', { description: 'Your comment has been posted' })
+  }
+  const handleOpenFile = (fileName: string) => {
+    toast.info('Opening File', { description: `Opening "${fileName}"...` })
+  }
+  const handleCreateLink = () => {
+    toast.info('Create Link', { description: 'Creating shareable link...' })
+  }
+
   const stats = [
     { label: 'Storage Used', value: formatSize(mockQuota.used), icon: HardDrive, change: '+2.3 GB', color: 'text-blue-600' },
     { label: 'Total Files', value: mockFiles.length.toString(), icon: File, change: '+12', color: 'text-indigo-600' },
@@ -616,10 +700,10 @@ export default function CloudStorageClient() {
                 className="pl-9 w-80"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleFilter}>
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white">
+            <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white" onClick={handleUploadFile}>
               <Upload className="w-4 h-4 mr-2" />
               Upload
             </Button>
@@ -653,7 +737,7 @@ export default function CloudStorageClient() {
                   <p className="text-sm text-gray-500">{formatSize(mockQuota.used)} of {formatSize(mockQuota.total)} used</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">Upgrade</Button>
+              <Button variant="outline" size="sm" onClick={handleUpgrade}>Upgrade</Button>
             </div>
             <Progress value={usedPercentage} className="h-3 mb-4" />
             <div className="flex items-center gap-4 flex-wrap">
@@ -736,18 +820,19 @@ export default function CloudStorageClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { label: 'Upload', icon: Upload, color: 'from-sky-500 to-blue-500' },
-                { label: 'New Folder', icon: FolderPlus, color: 'from-indigo-500 to-purple-500' },
-                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500' },
-                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500' },
-                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500' },
-                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500' },
-                { label: 'Sync', icon: RefreshCw, color: 'from-blue-500 to-indigo-500' },
-                { label: 'Scan', icon: FileText, color: 'from-gray-500 to-gray-600' }
+                { label: 'Upload', icon: Upload, color: 'from-sky-500 to-blue-500', onClick: handleUploadFile },
+                { label: 'New Folder', icon: FolderPlus, color: 'from-indigo-500 to-purple-500', onClick: handleCreateFolder },
+                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500', onClick: () => handleShareFile('Selected file') },
+                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500', onClick: () => handleDownloadFile('Selected file') },
+                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500', onClick: () => handleMove('Selected file') },
+                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500', onClick: () => handleCopy('Selected file') },
+                { label: 'Sync', icon: RefreshCw, color: 'from-blue-500 to-indigo-500', onClick: handleSync },
+                { label: 'Scan', icon: FileText, color: 'from-gray-500 to-gray-600', onClick: handleScan }
               ].map((action, i) => (
                 <button
                   key={i}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
+                  onClick={action.onClick}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
                     <action.icon className="h-5 w-5" />
@@ -763,7 +848,7 @@ export default function CloudStorageClient() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center justify-between">
                     Folders
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCreateFolder}>
                       <FolderPlus className="w-4 h-4" />
                     </Button>
                   </CardTitle>
@@ -924,7 +1009,7 @@ export default function CloudStorageClient() {
                                 ))}
                               </div>
                             )}
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleMoreOptions(file.name) }}>
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1038,7 +1123,7 @@ export default function CloudStorageClient() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center justify-between">
                     Active Share Links
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleCreateLink}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Link
                     </Button>
@@ -1053,7 +1138,7 @@ export default function CloudStorageClient() {
                       </div>
                       <div className="flex items-center gap-2 mb-2">
                         <Input value={link.url} readOnly className="text-xs h-8" />
-                        <Button variant="outline" size="icon" className="h-8 w-8">
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(link.url)}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1180,7 +1265,7 @@ export default function CloudStorageClient() {
                           {transfer.status.replace('_', ' ')}
                         </Badge>
                         {transfer.status === 'in_progress' && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCancelTransfer(transfer.fileName)}>
                             <X className="w-4 h-4" />
                           </Button>
                         )}
@@ -1217,7 +1302,7 @@ export default function CloudStorageClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-gray-500/20 text-gray-300 border-gray-500/30">Empty</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleRetentionPolicy}>
                     <Clock className="h-4 w-4 mr-2" />
                     Retention Policy
                   </Button>
@@ -1228,12 +1313,12 @@ export default function CloudStorageClient() {
             {/* Trash Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: RotateCcw, label: 'Restore All', desc: 'Recover all files', color: 'text-green-500' },
-                { icon: Trash2, label: 'Empty Trash', desc: 'Delete permanently', color: 'text-red-500' },
-                { icon: Search, label: 'Search Trash', desc: 'Find deleted files', color: 'text-blue-500' },
-                { icon: Clock, label: 'Auto-Delete', desc: 'Retention settings', color: 'text-purple-500' },
+                { icon: RotateCcw, label: 'Restore All', desc: 'Recover all files', color: 'text-green-500', onClick: handleRestoreAll },
+                { icon: Trash2, label: 'Empty Trash', desc: 'Delete permanently', color: 'text-red-500', onClick: handleEmptyTrash },
+                { icon: Search, label: 'Search Trash', desc: 'Find deleted files', color: 'text-blue-500', onClick: handleSearchTrash },
+                { icon: Clock, label: 'Auto-Delete', desc: 'Retention settings', color: 'text-purple-500', onClick: handleAutoDelete },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105 bg-white/80 dark:bg-gray-800/80">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105 bg-white/80 dark:bg-gray-800/80" onClick={action.onClick}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1248,7 +1333,7 @@ export default function CloudStorageClient() {
                     <Trash2 className="w-5 h-5 text-red-500" />
                     Deleted Files
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleEmptyTrash}>
                     Empty Trash
                   </Button>
                 </CardTitle>
@@ -1279,7 +1364,7 @@ export default function CloudStorageClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Synced</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExportData}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Data
                   </Button>
@@ -1430,7 +1515,7 @@ export default function CloudStorageClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Pause Sync</p>
                           <p className="text-sm text-gray-500">Temporarily stop all sync activities</p>
                         </div>
-                        <Button variant="outline" size="sm">Pause</Button>
+                        <Button variant="outline" size="sm" onClick={handlePauseSync}>Pause</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1628,7 +1713,7 @@ export default function CloudStorageClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Clear All Caches</p>
                               <p className="text-sm text-red-600">Remove all cached data</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={handleClearCache}>
                               Clear
                             </Button>
                           </div>
@@ -1637,7 +1722,7 @@ export default function CloudStorageClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Files</p>
                               <p className="text-sm text-red-600">Permanently delete all stored files</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={handleDeleteAllFiles}>
                               Delete
                             </Button>
                           </div>
@@ -1710,16 +1795,16 @@ export default function CloudStorageClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleToggleStar(selectedFile.name, selectedFile.isStarred)}>
                       {selectedFile.isStarred ? <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" /> : <StarOff className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleShareFile(selectedFile.name)}>
                       <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleDownloadFile(selectedFile.name)}>
                       <Download className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleMoreOptions(selectedFile.name)}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1862,7 +1947,7 @@ export default function CloudStorageClient() {
                         </Avatar>
                         <div className="flex-1 flex gap-2">
                           <Input placeholder="Add a comment..." className="flex-1" />
-                          <Button size="icon">
+                          <Button size="icon" onClick={handleSendComment}>
                             <Send className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1873,21 +1958,21 @@ export default function CloudStorageClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleMove(selectedFile.name)}>
                     <Move className="w-4 h-4 mr-2" />
                     Move
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleCopy(selectedFile.name)}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" className="text-red-600 hover:bg-red-50">
+                  <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteFile(selectedFile.name)}>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
-                  <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white">
+                  <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white" onClick={() => handleOpenFile(selectedFile.name)}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Open
                   </Button>

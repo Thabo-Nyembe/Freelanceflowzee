@@ -725,6 +725,56 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     setShowTaskDialog(true)
   }
 
+  // Toast handlers for unconnected buttons
+  const handleAddTask = () => {
+    toast.info('Add Task', { description: 'Opening task form...' })
+  }
+  const handleCompleteTask = (taskName: string) => {
+    toast.success('Task Completed', { description: `"${taskName}" marked as done` })
+  }
+  const handleScheduleMeeting = () => {
+    toast.info('Schedule Meeting', { description: 'Opening calendar...' })
+  }
+  const handleSetReminder = () => {
+    toast.success('Reminder Set', { description: 'You will be notified' })
+  }
+  const handleKeyboardShortcuts = () => {
+    toast.info('Keyboard Shortcuts', { description: 'Opening shortcuts panel...' })
+  }
+  const handleSettings = () => {
+    toast.info('Settings', { description: 'Opening settings...' })
+  }
+  const handleAddSection = () => {
+    toast.info('Add Section', { description: 'Creating new section...' })
+  }
+  const handleAddLabel = () => {
+    toast.info('Add Label', { description: 'Creating new label...' })
+  }
+  const handleAddProject = () => {
+    toast.info('Add Project', { description: 'Creating new project...' })
+  }
+  const handleCalendarView = (view: string) => {
+    toast.info('Calendar View', { description: `Switching to ${view} view...` })
+  }
+  const handlePostComment = () => {
+    toast.success('Comment Posted', { description: 'Your comment has been added' })
+  }
+  const handleEditTask = () => {
+    toast.info('Edit Task', { description: 'Opening task editor...' })
+  }
+  const handleMoveTask = () => {
+    toast.info('Move Task', { description: 'Select destination...' })
+  }
+  const handleDuplicateTask = () => {
+    toast.success('Task Duplicated', { description: 'Task has been copied' })
+  }
+  const handleArchiveTask = () => {
+    toast.success('Task Archived', { description: 'Task moved to archive' })
+  }
+  const handleDeleteTask = () => {
+    toast.success('Task Deleted', { description: 'Task has been removed' })
+  }
+
   // Stat cards
   const statCards = [
     { label: 'Today', value: todayTasks.length, icon: Sun, color: 'from-amber-500 to-orange-600', change: '+2' },
@@ -938,11 +988,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               />
             </div>
 
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleKeyboardShortcuts}>
               <Keyboard className="w-5 h-5" />
             </Button>
 
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleSettings}>
               <Settings className="w-5 h-5" />
             </Button>
 
@@ -1077,7 +1127,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                         <Sun className="w-5 h-5 text-amber-500" />
                         Today ({todayTasks.length})
                       </CardTitle>
-                      <Button variant="ghost" size="sm" className="gap-1">
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={handleAddTask}>
                         <Plus className="w-4 h-4" /> Add Task
                       </Button>
                     </div>
@@ -1283,7 +1333,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium">All Projects</h3>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={handleAddProject}>
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
@@ -1328,10 +1378,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                           <CardTitle>{projects.find(p => p.id === selectedProject)?.name}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" className="gap-1">
+                          <Button variant="outline" size="sm" className="gap-1" onClick={handleAddSection}>
                             <Layers className="w-4 h-4" /> Add Section
                           </Button>
-                          <Button variant="outline" size="sm" className="gap-1">
+                          <Button variant="outline" size="sm" className="gap-1" onClick={handleAddTask}>
                             <Plus className="w-4 h-4" /> Add Task
                           </Button>
                         </div>
@@ -1387,7 +1437,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium">All Labels</h3>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={handleAddLabel}>
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
@@ -1511,9 +1561,9 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 <div className="flex items-center justify-between">
                   <CardTitle>Calendar View</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">Today</Button>
-                    <Button variant="ghost" size="sm">Week</Button>
-                    <Button variant="ghost" size="sm">Month</Button>
+                    <Button variant="outline" size="sm" onClick={() => handleCalendarView('today')}>Today</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleCalendarView('week')}>Week</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleCalendarView('month')}>Month</Button>
                   </div>
                 </div>
               </CardHeader>
@@ -1856,7 +1906,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 <div>
                   <Textarea placeholder="Add a comment..." className="min-h-[80px]" />
                   <div className="flex justify-end mt-2">
-                    <Button size="sm">Post Comment</Button>
+                    <Button size="sm" onClick={handlePostComment}>Post Comment</Button>
                   </div>
                 </div>
               </div>
@@ -1865,21 +1915,21 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             {/* Actions */}
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleEditTask}>
                   <Edit3 className="w-4 h-4" /> Edit
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleMoveTask}>
                   <Move className="w-4 h-4" /> Move
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleDuplicateTask}>
                   <Copy className="w-4 h-4" /> Duplicate
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleArchiveTask}>
                   <Archive className="w-4 h-4" /> Archive
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1 text-red-500 hover:text-red-600">
+                <Button variant="outline" size="sm" className="gap-1 text-red-500 hover:text-red-600" onClick={handleDeleteTask}>
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>

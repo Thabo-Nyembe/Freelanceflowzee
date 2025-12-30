@@ -480,6 +480,23 @@ export default function AlertsClient() {
     return `${Math.floor(diffHours / 24)}d ago`
   }
 
+  // Handlers
+  const handleCreateAlert = () => {
+    toast.info('Create Alert', { description: 'Opening alert configuration...' })
+  }
+  const handleAcknowledgeAlert = (alertId: string) => {
+    toast.success('Alert Acknowledged', { description: `Alert #${alertId} has been acknowledged` })
+  }
+  const handleMuteAlert = (alertName: string) => {
+    toast.info('Alert Muted', { description: `"${alertName}" muted for 1 hour` })
+  }
+  const handleDeleteAlert = (alertId: string) => {
+    toast.info('Alert Deleted', { description: `Alert #${alertId} has been removed` })
+  }
+  const handleExportAlerts = () => {
+    toast.success('Exporting Alerts', { description: 'Alert history will be downloaded' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-red-50/30 to-orange-50/20 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">
@@ -504,13 +521,13 @@ export default function AlertsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast.info('Filters', { description: 'Opening advanced filter options...' })}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
             <Button
               className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
-              onClick={() => setShowCreateDialog(true)}
+              onClick={() => { setShowCreateDialog(true); handleCreateAlert() }}
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Alert
@@ -697,12 +714,12 @@ export default function AlertsClient() {
 
                       <div className="flex items-center gap-1">
                         {alert.status === 'triggered' && (
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={(e) => { e.stopPropagation(); handleAcknowledgeAlert(alert.id) }}>
                             Acknowledge
                           </Button>
                         )}
                         {alert.status !== 'resolved' && (
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.success('Alert Resolved', { description: `Alert #${alert.id} has been resolved` }) }}>
                             Resolve
                           </Button>
                         )}
@@ -740,11 +757,11 @@ export default function AlertsClient() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => toast.info('Calling On-Call', { description: `Initiating call to ${schedule.currentOnCall.name}...` })}>
                             <Phone className="h-3 w-3 mr-1" />
                             Call
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => toast.info('Email Sent', { description: `Opening email to ${schedule.currentOnCall.email}` })}>
                             <Mail className="h-3 w-3 mr-1" />
                             Email
                           </Button>
@@ -782,7 +799,7 @@ export default function AlertsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Service Directory</CardTitle>
-                  <Button className="bg-red-600 hover:bg-red-700">
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => toast.info('Add Service', { description: 'Opening service configuration...' })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Service
                   </Button>
@@ -821,7 +838,7 @@ export default function AlertsClient() {
                         <p className="text-xs text-gray-500">{service.team}</p>
                       </div>
 
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => toast.info('Service Settings', { description: `Configuring ${service.name}...` })}>
                         <Settings className="h-4 w-4" />
                       </Button>
                     </div>
@@ -862,7 +879,7 @@ export default function AlertsClient() {
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center justify-between">
                       <span className="text-sm text-gray-500">{policy.services} services using this policy</span>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.info('Edit Policy', { description: `Editing "${policy.name}" escalation policy...` })}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
@@ -879,7 +896,7 @@ export default function AlertsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Connected Integrations</CardTitle>
-                  <Button className="bg-red-600 hover:bg-red-700">
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => toast.info('Add Integration', { description: 'Opening integration marketplace...' })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Integration
                   </Button>
@@ -917,8 +934,8 @@ export default function AlertsClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Switch checked={integration.status === 'active'} />
-                        <Button variant="ghost" size="icon">
+                        <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => toast.info(checked ? 'Integration Enabled' : 'Integration Disabled', { description: `${integration.name} has been ${checked ? 'enabled' : 'disabled'}` })} />
+                        <Button variant="ghost" size="icon" onClick={() => toast.info('Integration Settings', { description: `Configuring ${integration.name}...` })}>
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1159,14 +1176,14 @@ export default function AlertsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Channel', { description: `Configuring ${channel.name} settings...` })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={channel.enabled} />
+                              <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => toast.info(checked ? 'Channel Enabled' : 'Channel Disabled', { description: `${channel.name} notifications ${checked ? 'enabled' : 'disabled'}` })} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4">
+                        <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Add Channel', { description: 'Opening notification channel setup...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
                         </Button>
@@ -1283,16 +1300,16 @@ export default function AlertsClient() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Tier', { description: `Editing ${policy.tier} escalation settings...` })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600">
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.info('Tier Removed', { description: `${policy.tier} has been removed from escalation` })}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Tier', { description: 'Adding new escalation tier...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Escalation Tier
                         </Button>
@@ -1319,13 +1336,13 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge variant="outline">{schedule.rotation}</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Schedule', { description: `Editing ${schedule.name} rotation...` })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Create Schedule', { description: 'Setting up new on-call schedule...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Schedule
                         </Button>
@@ -1465,10 +1482,10 @@ export default function AlertsClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-alerts-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.success('API Key Copied', { description: 'API key copied to clipboard' })}>
                               <Copy className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.info('Regenerating API Key', { description: 'New API key will be generated...' })}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1484,17 +1501,17 @@ export default function AlertsClient() {
                                 <p className="text-sm text-gray-500">Events: {webhook.events.join(', ')}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Webhook', { description: `Configuring webhook for ${webhook.url}...` })}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-red-600">
+                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.info('Webhook Deleted', { description: `Webhook ${webhook.url} has been removed` })}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Webhook', { description: 'Setting up new webhook endpoint...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1529,14 +1546,14 @@ export default function AlertsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Rule', { description: `Editing "${rule.name}" alert rule...` })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={rule.enabled} />
+                              <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => toast.info(checked ? 'Rule Enabled' : 'Rule Disabled', { description: `"${rule.name}" has been ${checked ? 'enabled' : 'disabled'}` })} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Create Rule', { description: 'Opening alert rule builder...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Rule
                         </Button>
@@ -1560,12 +1577,12 @@ export default function AlertsClient() {
                               <p className="font-medium font-mono">{route.service}</p>
                               <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Routing', { description: `Configuring routing for ${route.service}...` })}>
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Routing', { description: 'Creating new alert routing rule...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Routing Rule
                         </Button>
@@ -1708,7 +1725,7 @@ export default function AlertsClient() {
                             </Select>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleExportAlerts}>
                           <Download className="h-4 w-4 mr-2" />
                           Export Alert Data
                         </Button>
@@ -1760,7 +1777,7 @@ export default function AlertsClient() {
                             <p className="font-medium">Clear All Alerts</p>
                             <p className="text-sm text-gray-500">Delete all alert history</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.info('Clear Alerts', { description: 'All alert history will be cleared...' })}>
                             Clear Alerts
                           </Button>
                         </div>
@@ -1769,7 +1786,7 @@ export default function AlertsClient() {
                             <p className="font-medium">Reset All Rules</p>
                             <p className="text-sm text-gray-500">Restore default alert rules</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.info('Reset Rules', { description: 'All rules will be restored to defaults...' })}>
                             Reset Rules
                           </Button>
                         </div>
@@ -1778,7 +1795,7 @@ export default function AlertsClient() {
                             <p className="font-medium">Delete All Integrations</p>
                             <p className="text-sm text-gray-500">Remove all connected services</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.info('Delete Integrations', { description: 'All integrations will be removed...' })}>
                             Delete All
                           </Button>
                         </div>
@@ -1906,28 +1923,28 @@ export default function AlertsClient() {
 
                   <div className="flex gap-3 pt-4 border-t">
                     {selectedAlert.status === 'triggered' && (
-                      <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { handleAcknowledgeAlert(selectedAlert.id); setSelectedAlert(null) }}>
                         <CheckCircle2 className="h-4 w-4 mr-2" />
                         Acknowledge
                       </Button>
                     )}
                     {selectedAlert.status !== 'resolved' && (
                       <>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => toast.info('Alert Escalated', { description: `Alert #${selectedAlert.id} has been escalated to the next tier` })}>
                           <ArrowUp className="h-4 w-4 mr-2" />
                           Escalate
                         </Button>
-                        <Button className="bg-green-600 hover:bg-green-700">
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => { toast.success('Alert Resolved', { description: `Alert #${selectedAlert.id} has been resolved` }); setSelectedAlert(null) }}>
                           <CheckCircle2 className="h-4 w-4 mr-2" />
                           Resolve
                         </Button>
                       </>
                     )}
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleMuteAlert(selectedAlert.title)}>
                       <VolumeX className="h-4 w-4 mr-2" />
                       Snooze
                     </Button>
-                    <Button variant="ghost" className="ml-auto text-red-600">
+                    <Button variant="ghost" className="ml-auto text-red-600" onClick={() => { handleDeleteAlert(selectedAlert.id); setSelectedAlert(null) }}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>

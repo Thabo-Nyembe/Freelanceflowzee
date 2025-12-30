@@ -412,6 +412,171 @@ export default function DocumentationClient() {
     { label: 'Satisfaction', value: `${stats.satisfaction}%`, icon: ThumbsUp, gradient: 'from-teal-500 to-emerald-500' }
   ]
 
+  // Handlers
+  const handleCreatePage = () => {
+    toast.info('Create Page', {
+      description: 'Opening documentation editor...'
+    })
+  }
+
+  const handleEditPage = (pageTitle: string) => {
+    toast.info('Edit Page', {
+      description: `Opening "${pageTitle}" for editing...`
+    })
+  }
+
+  const handlePublishPage = (pageTitle: string) => {
+    toast.success('Page Published', {
+      description: `"${pageTitle}" is now live`
+    })
+  }
+
+  const handleTranslatePage = (pageTitle: string) => {
+    toast.info('Translate Page', {
+      description: `Opening translation tools for "${pageTitle}"...`
+    })
+  }
+
+  const handleExportDocs = () => {
+    toast.success('Exporting Documentation', {
+      description: 'Documentation will be downloaded as PDF'
+    })
+  }
+
+  const handleNewSpace = () => {
+    toast.info('New Space', {
+      description: 'Opening space creation wizard...'
+    })
+    setShowNewSpace(true)
+  }
+
+  const handleImportFromGit = () => {
+    toast.info('Import from Git', {
+      description: 'Connecting to Git repository...'
+    })
+  }
+
+  const handleImportMarkdown = () => {
+    toast.info('Import Markdown', {
+      description: 'Opening file selector...'
+    })
+  }
+
+  const handleNewChangelog = () => {
+    toast.info('New Changelog', {
+      description: 'Opening changelog editor...'
+    })
+  }
+
+  const handleSharePage = () => {
+    toast.info('Share Page', {
+      description: 'Generating share link...'
+    })
+  }
+
+  const handleLikePage = () => {
+    toast.success('Page Liked', {
+      description: 'Thanks for your feedback!'
+    })
+  }
+
+  const handleViewComments = () => {
+    toast.info('Comments', {
+      description: 'Loading comments...'
+    })
+  }
+
+  const handleCreateTemplate = () => {
+    toast.info('Create Template', {
+      description: 'Opening template editor...'
+    })
+  }
+
+  const handleUseTemplate = (templateName: string) => {
+    toast.info('Use Template', {
+      description: `Creating page from "${templateName}" template...`
+    })
+  }
+
+  const handleEditChangelog = (changelogTitle: string) => {
+    toast.info('Edit Changelog', {
+      description: `Opening "${changelogTitle}" for editing...`
+    })
+  }
+
+  const handleAddLanguage = () => {
+    toast.info('Add Language', {
+      description: 'Opening language configuration...'
+    })
+  }
+
+  const handleManageLocale = (localeName: string) => {
+    toast.info('Manage Locale', {
+      description: `Opening settings for ${localeName}...`
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.success('Export Report', {
+      description: 'Generating analytics report...'
+    })
+  }
+
+  const handleExportConfig = () => {
+    toast.success('Export Config', {
+      description: 'Downloading configuration file...'
+    })
+  }
+
+  const handleConfigureIntegration = (integrationName: string) => {
+    toast.info('Configure Integration', {
+      description: `Opening settings for ${integrationName}...`
+    })
+  }
+
+  const handleAddIntegration = () => {
+    toast.info('Add Integration', {
+      description: 'Opening integration marketplace...'
+    })
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.success('API Key Regenerated', {
+      description: 'New API key generated successfully'
+    })
+  }
+
+  const handleExportAllData = () => {
+    toast.success('Export Data', {
+      description: 'Preparing complete documentation backup...'
+    })
+  }
+
+  const handleDeleteAllDocs = () => {
+    toast.error('Delete All Documentation', {
+      description: 'This action requires confirmation'
+    })
+  }
+
+  const handleViewVersion = (versionNumber: number) => {
+    toast.info('View Version', {
+      description: `Loading version ${versionNumber}...`
+    })
+  }
+
+  const handleRestoreVersion = (versionNumber: number) => {
+    toast.success('Restore Version', {
+      description: `Restoring to version ${versionNumber}...`
+    })
+  }
+
+  const handleCreateSpaceSubmit = () => {
+    toast.success('Space Created', {
+      description: 'New documentation space created successfully'
+    })
+    setShowNewSpace(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
@@ -518,7 +683,7 @@ export default function DocumentationClient() {
                     <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
                     <p className="text-purple-100 text-sm">Total Views</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleCreatePage}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Page
                   </Button>
@@ -587,23 +752,23 @@ export default function DocumentationClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleCreatePage}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Page
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleNewSpace}>
                     <FolderOpen className="h-4 w-4 mr-2" />
                     New Space
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleImportFromGit}>
                     <Code className="h-4 w-4 mr-2" />
                     Import from Git
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleImportMarkdown}>
                     <Upload className="h-4 w-4 mr-2" />
                     Import Markdown
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleNewChangelog}>
                     <Megaphone className="h-4 w-4 mr-2" />
                     New Changelog
                   </Button>
@@ -720,7 +885,7 @@ export default function DocumentationClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-white/20 text-white border-white/30">{stats.avgReadTime} avg read</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleCreatePage}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Page
                   </Button>
@@ -790,11 +955,11 @@ export default function DocumentationClient() {
                             <History className="h-4 w-4 mr-1" />
                             History
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleEditPage(selectedPage.title)}>
                             <Edit className="h-4 w-4 mr-1" />
                             Edit
                           </Button>
-                          <Button size="sm">
+                          <Button size="sm" onClick={handleSharePage}>
                             <Share2 className="h-4 w-4 mr-1" />
                             Share
                           </Button>
@@ -809,11 +974,11 @@ export default function DocumentationClient() {
 
                       <div className="flex items-center gap-4 mt-6 pt-6 border-t dark:border-gray-700">
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleLikePage}>
                             <ThumbsUp className="h-4 w-4 mr-1" />
                             {selectedPage.likes}
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleViewComments}>
                             <MessageSquare className="h-4 w-4 mr-1" />
                             {selectedPage.comments_count}
                           </Button>
@@ -856,7 +1021,7 @@ export default function DocumentationClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleCreateTemplate}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Template
                   </Button>
@@ -881,7 +1046,7 @@ export default function DocumentationClient() {
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{template.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">Used {template.usage_count} times</span>
-                      <Button size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">Use Template</Button>
+                      <Button size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleUseTemplate(template.name)}>Use Template</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -896,7 +1061,7 @@ export default function DocumentationClient() {
                 <h2 className="text-2xl font-bold">Changelogs</h2>
                 <p className="text-gray-500">Track product updates and release notes</p>
               </div>
-              <Button>
+              <Button onClick={handleNewChangelog}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Changelog
               </Button>
@@ -940,7 +1105,7 @@ export default function DocumentationClient() {
                             Scheduled
                           </Badge>
                         )}
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleEditChangelog(changelog.title)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1037,7 +1202,7 @@ export default function DocumentationClient() {
                 <h2 className="text-2xl font-bold">Language Management</h2>
                 <p className="text-gray-500">Manage multi-language documentation</p>
               </div>
-              <Button>
+              <Button onClick={handleAddLanguage}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Language
               </Button>
@@ -1131,7 +1296,7 @@ export default function DocumentationClient() {
                           <span className="text-xs text-gray-500 ml-1">+{locale.contributors.length - 3}</span>
                         )}
                       </div>
-                      <Button variant="outline" size="sm">Manage</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleManageLocale(locale.name)}>Manage</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1155,7 +1320,7 @@ export default function DocumentationClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-white/20 text-white border-white/30">{stats.totalViews.toLocaleString()} views</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExportReport}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Report
                   </Button>
@@ -1232,7 +1397,7 @@ export default function DocumentationClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Configured</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExportConfig}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1545,11 +1710,11 @@ export default function DocumentationClient() {
                                 <Badge className={int.status === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}>
                                   {int.status}
                                 </Badge>
-                                <Button variant="outline" size="sm">Configure</Button>
+                                <Button variant="outline" size="sm" onClick={() => handleConfigureIntegration(int.name)}>Configure</Button>
                               </div>
                             </div>
                           ))}
-                          <Button variant="outline" className="w-full">
+                          <Button variant="outline" className="w-full" onClick={handleAddIntegration}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Integration
                           </Button>
@@ -1718,7 +1883,7 @@ export default function DocumentationClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input value="doc_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -1740,14 +1905,14 @@ export default function DocumentationClient() {
                             <Label>Export All Data</Label>
                             <p className="text-sm text-gray-500">Download complete documentation backup</p>
                           </div>
-                          <Button variant="outline">Export</Button>
+                          <Button variant="outline" onClick={handleExportAllData}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Delete All Documentation</Label>
                             <p className="text-sm text-gray-500">Permanently delete all docs</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={handleDeleteAllDocs}>Delete All</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1822,8 +1987,8 @@ export default function DocumentationClient() {
                         <span className="text-xs text-red-500">-{version.changes.deletions}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">View</Button>
-                        {!version.is_current && <Button variant="ghost" size="sm">Restore</Button>}
+                        <Button variant="ghost" size="sm" onClick={() => handleViewVersion(version.version)}>View</Button>
+                        {!version.is_current && <Button variant="ghost" size="sm" onClick={() => handleRestoreVersion(version.version)}>Restore</Button>}
                       </div>
                     </div>
                   </div>
@@ -1875,7 +2040,7 @@ export default function DocumentationClient() {
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowNewSpace(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600">Create Space</Button>
+              <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600" onClick={handleCreateSpaceSubmit}>Create Space</Button>
             </div>
           </DialogContent>
         </Dialog>

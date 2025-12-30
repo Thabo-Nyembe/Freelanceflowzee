@@ -487,6 +487,23 @@ export default function RolesClient() {
     return grouped
   }, [])
 
+  // Handlers
+  const handleCreateRole = () => {
+    toast.info('Create Role', { description: 'Opening role builder...' })
+  }
+  const handleEditRole = (roleName: string) => {
+    toast.info('Edit Role', { description: `Editing "${roleName}" permissions...` })
+  }
+  const handleDeleteRole = (roleName: string) => {
+    toast.info('Role Deleted', { description: `"${roleName}" has been removed` })
+  }
+  const handleDuplicateRole = (roleName: string) => {
+    toast.success('Role Duplicated', { description: `Copy of "${roleName}" created` })
+  }
+  const handleAssignRole = (roleName: string) => {
+    toast.info('Assign Role', { description: `Assigning "${roleName}" to users...` })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900">
       <div className="p-8">
@@ -511,7 +528,7 @@ export default function RolesClient() {
                 <Download className="w-4 h-4" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center gap-2">
+              <Button onClick={handleCreateRole} className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 Create Role
               </Button>
@@ -590,7 +607,7 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
-                    <Button className="bg-white text-purple-700 hover:bg-purple-50"><Plus className="h-4 w-4 mr-2" />New Role</Button>
+                    <Button onClick={handleCreateRole} className="bg-white text-purple-700 hover:bg-purple-50"><Plus className="h-4 w-4 mr-2" />New Role</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-4">
@@ -788,8 +805,8 @@ export default function RolesClient() {
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start text-sm"><Plus className="w-4 h-4 mr-2" />Create New Role</Button>
-                      <Button variant="outline" className="w-full justify-start text-sm"><UserPlus className="w-4 h-4 mr-2" />Assign Users</Button>
+                      <Button onClick={handleCreateRole} variant="outline" className="w-full justify-start text-sm"><Plus className="w-4 h-4 mr-2" />Create New Role</Button>
+                      <Button onClick={() => handleAssignRole('selected role')} variant="outline" className="w-full justify-start text-sm"><UserPlus className="w-4 h-4 mr-2" />Assign Users</Button>
                       <Button variant="outline" className="w-full justify-start text-sm"><Download className="w-4 h-4 mr-2" />Export Report</Button>
                       <Button variant="outline" className="w-full justify-start text-sm"><RefreshCw className="w-4 h-4 mr-2" />Sync Directory</Button>
                     </div>
@@ -868,7 +885,7 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-indigo-700 hover:bg-indigo-50"><Plus className="h-4 w-4 mr-2" />Create Role</Button>
+                    <Button onClick={handleCreateRole} className="bg-white text-indigo-700 hover:bg-indigo-50"><Plus className="h-4 w-4 mr-2" />Create Role</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -990,14 +1007,14 @@ export default function RolesClient() {
                         ))}
                       </div>
                       <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(role.name)}>
                           <Eye className="w-4 h-4 mr-1" /> View
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleDuplicateRole(role.name)}>
                           <Copy className="w-4 h-4" />
                         </Button>
                         {!role.isSystem && (
-                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteRole(role.name)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         )}
@@ -1019,7 +1036,7 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
-                    <Button className="bg-white text-amber-700 hover:bg-amber-50"><Plus className="h-4 w-4 mr-2" />Add Permission</Button>
+                    <Button onClick={handleCreateRole} className="bg-white text-amber-700 hover:bg-amber-50"><Plus className="h-4 w-4 mr-2" />Add Permission</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1126,7 +1143,7 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
+                    <Button onClick={() => handleAssignRole('selected user')} className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1216,8 +1233,8 @@ export default function RolesClient() {
                             )}
                           </div>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline">Edit</Button>
-                            <Button size="sm" variant="outline" className="text-red-600">
+                            <Button size="sm" variant="outline" onClick={() => handleEditRole(assignment.roleName)}>Edit</Button>
+                            <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeleteRole(assignment.roleName)}>
                               <UserX className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1240,7 +1257,7 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Evaluate</Button>
-                    <Button className="bg-white text-green-700 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />Add Policy</Button>
+                    <Button onClick={handleCreateRole} className="bg-white text-green-700 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />Add Policy</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1341,8 +1358,8 @@ export default function RolesClient() {
                         <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                           <span className="text-xs text-gray-500">Priority: {policy.priority}</span>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline">Edit</Button>
-                            <Button size="sm" variant="outline" className="text-red-600">Delete</Button>
+                            <Button size="sm" variant="outline" onClick={() => handleEditRole(policy.name)}>Edit</Button>
+                            <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeleteRole(policy.name)}>Delete</Button>
                           </div>
                         </div>
                       </div>
@@ -1470,7 +1487,7 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
-                    <Button className="bg-white text-rose-700 hover:bg-rose-50"><Plus className="h-4 w-4 mr-2" />Create Group</Button>
+                    <Button onClick={handleCreateRole} className="bg-white text-rose-700 hover:bg-rose-50"><Plus className="h-4 w-4 mr-2" />Create Group</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1560,14 +1577,14 @@ export default function RolesClient() {
                             ))}
                           </div>
                           <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-600">
-                            <Button size="sm" variant="outline" className="flex-1">
+                            <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(group.name)}>
                               <Eye className="w-4 h-4 mr-1" /> View
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleAssignRole(group.name)}>
                               <UserPlus className="w-4 h-4" />
                             </Button>
                             {!group.isSystem && (
-                              <Button size="sm" variant="outline" className="text-red-600">
+                              <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeleteRole(group.name)}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             )}

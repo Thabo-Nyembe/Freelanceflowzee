@@ -828,31 +828,77 @@ export default function RecruitmentClient() {
     { stage: 'offer', label: 'Offer', color: 'border-yellow-300' }
   ]
 
+  // Handlers
   const handlePostJob = () => {
-    toast.info('Opening job posting form...')
-    // In production, this would open a job creation dialog or navigate to posting page
+    toast.info('Post Job', { description: 'Opening job posting form...' })
   }
 
   const handleExportReport = () => {
-    toast.success('Exporting recruitment report...')
+    toast.success('Exporting', { description: 'Recruitment report will be downloaded' })
   }
 
-  const handleScheduleInterview = (candidate: Candidate) => {
-    toast.success('Interview scheduled', {
-      description: `Interview scheduled with ${candidate.name}`
-    })
+  const handleScheduleInterview = (candidateName: string) => {
+    toast.info('Schedule Interview', { description: `Opening scheduler for ${candidateName}...` })
   }
 
-  const handleRejectCandidate = (candidate: Candidate) => {
-    toast.success('Candidate rejected', {
-      description: `${candidate.name} has been moved to rejected`
-    })
+  const handleRejectCandidate = (candidateName: string) => {
+    toast.info('Candidate Rejected', { description: `${candidateName} has been rejected` })
   }
 
-  const handleHireCandidate = (candidate: Candidate) => {
-    toast.success('Offer sent', {
-      description: `Offer sent to ${candidate.name}`
-    })
+  const handleExportCandidates = () => {
+    toast.success('Exporting', { description: 'Candidate data will be downloaded' })
+  }
+
+  const handleViewJob = (jobTitle: string) => {
+    toast.info('View Job', { description: `Opening details for ${jobTitle}...` })
+  }
+
+  const handleEditJob = (jobTitle: string) => {
+    toast.info('Edit Job', { description: `Opening editor for ${jobTitle}...` })
+  }
+
+  const handleViewResume = (candidateName: string) => {
+    toast.info('View Resume', { description: `Opening resume for ${candidateName}...` })
+  }
+
+  const handleEmailCandidate = (candidateName: string) => {
+    toast.info('Email Candidate', { description: `Opening email composer for ${candidateName}...` })
+  }
+
+  const handleViewOffer = (candidateName: string) => {
+    toast.info('View Offer', { description: `Opening offer details for ${candidateName}...` })
+  }
+
+  const handleEditOffer = (candidateName: string) => {
+    toast.info('Edit Offer', { description: `Opening offer editor for ${candidateName}...` })
+  }
+
+  const handleSendOffer = (candidateName: string) => {
+    toast.success('Send Offer', { description: `Offer sent to ${candidateName}` })
+  }
+
+  const handleFilterTalentPool = () => {
+    toast.info('Filter', { description: 'Opening filter options...' })
+  }
+
+  const handleImportCandidates = () => {
+    toast.info('Import', { description: 'Opening import dialog...' })
+  }
+
+  const handleAddCandidate = () => {
+    toast.info('Add Candidate', { description: 'Opening candidate form...' })
+  }
+
+  const handleReachOut = (candidateName: string) => {
+    toast.info('Reach Out', { description: `Opening message composer for ${candidateName}...` })
+  }
+
+  const handleMatchJobs = (candidateName: string) => {
+    toast.info('Match Jobs', { description: `Finding matching jobs for ${candidateName}...` })
+  }
+
+  const handleAdvanceStage = (candidateName: string) => {
+    toast.success('Advance Stage', { description: `${candidateName} has been advanced to the next stage` })
   }
 
   return (
@@ -994,11 +1040,11 @@ export default function RecruitmentClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{jobs.length}</p>
+                      <p className="text-3xl font-bold">{filteredJobs.length}</p>
                       <p className="text-blue-200 text-sm">Open Positions</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{candidates.length}</p>
+                      <p className="text-3xl font-bold">{filteredCandidates.length}</p>
                       <p className="text-blue-200 text-sm">Candidates</p>
                     </div>
                   </div>
@@ -1100,11 +1146,11 @@ export default function RecruitmentClient() {
                           <span>Recruiter: {job.recruiter}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewJob(job.title) }}>
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEditJob(job.title) }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
@@ -1128,7 +1174,7 @@ export default function RecruitmentClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{candidates.length}</p>
+                      <p className="text-3xl font-bold">{filteredCandidates.length}</p>
                       <p className="text-emerald-200 text-sm">Candidates</p>
                     </div>
                   </div>
@@ -1229,15 +1275,15 @@ export default function RecruitmentClient() {
                           <span>Applied {new Date(candidate.appliedDate).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewResume(candidate.name) }}>
                             <FileText className="w-4 h-4 mr-1" />
                             Resume
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEmailCandidate(candidate.name) }}>
                             <Mail className="w-4 h-4 mr-1" />
                             Email
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleScheduleInterview(candidate.name) }}>
                             <Calendar className="w-4 h-4 mr-1" />
                             Schedule
                           </Button>
@@ -1528,16 +1574,16 @@ export default function RecruitmentClient() {
                           Expires: {new Date(offer.expiryDate).toLocaleDateString()}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewOffer(offer.candidateName) }}>
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEditOffer(offer.candidateName) }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
                           {offer.status === 'approved' && (
-                            <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600">
+                            <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={(e) => { e.stopPropagation(); handleSendOffer(offer.candidateName) }}>
                               <Send className="w-4 h-4 mr-1" />
                               Send Offer
                             </Button>
@@ -1554,16 +1600,16 @@ export default function RecruitmentClient() {
             <TabsContent value="talent-pool" className="space-y-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleFilterTalentPool}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleImportCandidates}>
                     <Upload className="w-4 h-4 mr-2" />
                     Import
                   </Button>
                 </div>
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600">
+                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600" onClick={handleAddCandidate}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   Add Candidate
                 </Button>
@@ -1642,11 +1688,11 @@ export default function RecruitmentClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleReachOut(candidate.name)}>
                             <Mail className="w-4 h-4 mr-1" />
                             Reach Out
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleMatchJobs(candidate.name)}>
                             <Briefcase className="w-4 h-4 mr-1" />
                             Match Jobs
                           </Button>
@@ -1868,15 +1914,15 @@ export default function RecruitmentClient() {
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={() => handleViewResume(selectedCandidate.name)}>
                   <FileText className="w-4 h-4 mr-2" />
                   View Resume
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={() => handleScheduleInterview(selectedCandidate.name)}>
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule Interview
                 </Button>
-                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600">
+                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600" onClick={() => handleAdvanceStage(selectedCandidate.name)}>
                   <ChevronRight className="w-4 h-4 mr-2" />
                   Advance Stage
                 </Button>

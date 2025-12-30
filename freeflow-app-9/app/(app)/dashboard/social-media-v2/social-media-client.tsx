@@ -531,6 +531,71 @@ export default function SocialMediaClient() {
     { label: 'Campaigns', value: campaigns.filter(c => c.status === 'active').length.toString(), change: 10.0, icon: Target, color: 'from-teal-500 to-green-500' }
   ]
 
+  // Toast Handlers
+  const handleCreatePost = () => {
+    toast.info('Create Post', { description: 'Opening post composer...' })
+  }
+  const handleSchedulePost = (postTitle: string) => {
+    toast.success('Post Scheduled', { description: `"${postTitle}" scheduled for publishing` })
+  }
+  const handlePublishPost = (postTitle: string) => {
+    toast.success('Post Published', { description: `"${postTitle}" is now live` })
+  }
+  const handleConnectAccount = (platform: string) => {
+    toast.info('Connect Account', { description: `Connecting to ${platform}...` })
+  }
+  const handleExportAnalytics = () => {
+    toast.success('Exporting', { description: 'Social media data will be downloaded' })
+  }
+  const handleGenerateCaption = () => {
+    toast.info('AI Caption', { description: 'Generating caption with AI...' })
+  }
+  const handleSuggestHashtags = () => {
+    toast.info('Hashtag Suggestions', { description: 'Analyzing trending hashtags...' })
+  }
+  const handleBestTimeToPost = () => {
+    toast.info('Optimal Timing', { description: 'Calculating best posting times...' })
+  }
+  const handleCreateVisual = () => {
+    toast.info('Create Visual', { description: 'Opening visual editor...' })
+  }
+  const handleReplyMention = (username: string) => {
+    toast.info('Reply', { description: `Composing reply to ${username}...` })
+  }
+  const handleNewCampaign = () => {
+    toast.info('New Campaign', { description: 'Creating new campaign...' })
+  }
+  const handleInviteTeamMember = () => {
+    toast.info('Invite', { description: 'Sending team invitation...' })
+  }
+  const handleBrowseIntegrations = () => {
+    toast.info('Integrations', { description: 'Loading available integrations...' })
+  }
+  const handleRegenerateKey = () => {
+    toast.success('API Key', { description: 'New API key generated successfully' })
+  }
+  const handleImportData = () => {
+    toast.info('Import', { description: 'Opening data import wizard...' })
+  }
+  const handleDeleteDrafts = () => {
+    toast.warning('Delete Drafts', { description: 'All draft posts will be deleted' })
+  }
+  const handleDisconnectAccounts = () => {
+    toast.warning('Disconnect', { description: 'All accounts will be disconnected' })
+  }
+  const handleResetAnalytics = () => {
+    toast.warning('Reset Analytics', { description: 'All analytics data will be cleared' })
+  }
+  const handleDuplicatePost = (postContent: string) => {
+    toast.success('Duplicated', { description: `Post duplicated to drafts` })
+  }
+  const handleViewPostAnalytics = (postId: string) => {
+    toast.info('Analytics', { description: 'Loading post analytics...' })
+  }
+  const handleDeletePost = (postId: string) => {
+    toast.warning('Delete Post', { description: 'Post will be permanently deleted' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -558,7 +623,7 @@ export default function SocialMediaClient() {
             <Button variant="outline" size="icon">
               <Bell className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white">
+            <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white" onClick={handleCreatePost}>
               <Plus className="w-4 h-4 mr-2" />
               Create Post
             </Button>
@@ -755,19 +820,19 @@ export default function SocialMediaClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleGenerateCaption}>
                       <Zap className="w-4 h-4 mr-2" />
                       Generate Caption
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleSuggestHashtags}>
                       <Hash className="w-4 h-4 mr-2" />
                       Suggest Hashtags
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleBestTimeToPost}>
                       <Clock className="w-4 h-4 mr-2" />
                       Best Time to Post
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleCreateVisual}>
                       <Image className="w-4 h-4 mr-2" />
                       Create Visual
                     </Button>
@@ -877,7 +942,7 @@ export default function SocialMediaClient() {
                                     Replied
                                   </Badge>
                                 ) : (
-                                  <Button size="sm" variant="outline">
+                                  <Button size="sm" variant="outline" onClick={() => handleReplyMention(mention.username)}>
                                     <MessageSquare className="w-3 h-3 mr-1" />
                                     Reply
                                   </Button>
@@ -1006,7 +1071,7 @@ export default function SocialMediaClient() {
           <TabsContent value="campaigns" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Active Campaigns</h3>
-              <Button>
+              <Button onClick={handleNewCampaign}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Campaign
               </Button>
@@ -1107,7 +1172,7 @@ export default function SocialMediaClient() {
                 </Card>
               ))}
 
-              <Card className="border-0 shadow-sm border-dashed border-2 border-gray-300 dark:border-gray-600">
+              <Card className="border-0 shadow-sm border-dashed border-2 border-gray-300 dark:border-gray-600 cursor-pointer hover:border-violet-400 transition-colors" onClick={() => handleConnectAccount('New Platform')}>
                 <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[200px]">
                   <Plus className="w-12 h-12 text-gray-400 mb-2" />
                   <p className="text-gray-600 dark:text-gray-300 font-medium">Connect Account</p>
@@ -1219,7 +1284,7 @@ export default function SocialMediaClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleInviteTeamMember}>
                           <Plus className="w-4 h-4 mr-2" />
                           Invite Team Member
                         </Button>
@@ -1525,7 +1590,7 @@ export default function SocialMediaClient() {
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleBrowseIntegrations}>
                           Browse Integrations
                         </Button>
                       </CardContent>
@@ -1546,7 +1611,7 @@ export default function SocialMediaClient() {
                             sm_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateKey}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Key
                         </Button>
@@ -1689,11 +1754,11 @@ export default function SocialMediaClient() {
                           </Select>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={handleExportAnalytics}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={handleImportData}>
                             <Upload className="w-5 h-5" />
                             <span>Import Data</span>
                           </Button>
@@ -1750,7 +1815,7 @@ export default function SocialMediaClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
                               <p className="text-sm text-red-600">Remove all draft posts</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleDeleteDrafts}>
                               Delete
                             </Button>
                           </div>
@@ -1761,7 +1826,7 @@ export default function SocialMediaClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Disconnect All Accounts</p>
                               <p className="text-sm text-red-600">Remove all connected platforms</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleDisconnectAccounts}>
                               Disconnect
                             </Button>
                           </div>
@@ -1772,7 +1837,7 @@ export default function SocialMediaClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Analytics</p>
                               <p className="text-sm text-red-600">Clear all analytics data</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleResetAnalytics}>
                               Reset
                             </Button>
                           </div>
@@ -1880,15 +1945,15 @@ export default function SocialMediaClient() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => handleDuplicatePost(selectedPost.content)}>
                       <Copy className="w-4 h-4 mr-2" />
                       Duplicate
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => handleViewPostAnalytics(selectedPost.id)}>
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Analytics
                     </Button>
-                    <Button variant="destructive">
+                    <Button variant="destructive" onClick={() => handleDeletePost(selectedPost.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

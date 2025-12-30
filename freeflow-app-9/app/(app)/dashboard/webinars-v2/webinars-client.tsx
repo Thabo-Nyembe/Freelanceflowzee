@@ -508,6 +508,23 @@ export default function WebinarsClient() {
     })
   }, [searchQuery, statusFilter, typeFilter])
 
+  // Toast Handlers
+  const handleCreateWebinar = () => {
+    toast.info('Create Webinar', { description: 'Opening webinar setup...' })
+  }
+  const handleStartWebinar = (webinarName: string) => {
+    toast.success('Webinar Started', { description: `"${webinarName}" is now live` })
+  }
+  const handleEndWebinar = (webinarName: string) => {
+    toast.info('Webinar Ended', { description: `"${webinarName}" has ended` })
+  }
+  const handleRegisterAttendee = () => {
+    toast.success('Registered', { description: 'Registration confirmed' })
+  }
+  const handleExportAttendees = () => {
+    toast.success('Exporting', { description: 'Attendee list will be downloaded' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -527,11 +544,11 @@ export default function WebinarsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => toast.info('Calendar', { description: 'Opening webinar calendar view...' })}>
               <Calendar className="w-4 h-4" />
               View Calendar
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+            <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" onClick={handleCreateWebinar}>
               <Plus className="w-4 h-4" />
               Schedule Webinar
             </Button>
@@ -687,19 +704,20 @@ export default function WebinarsClient() {
             {/* Webinars Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Webinar', color: 'bg-purple-500' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500' },
-                { icon: Play, label: 'Go Live', color: 'bg-red-500' },
-                { icon: Users, label: 'Attendees', color: 'bg-green-500' },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500' },
-                { icon: Mail, label: 'Invites', color: 'bg-pink-500' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-500' }
+                { icon: Plus, label: 'New Webinar', color: 'bg-purple-500', action: () => handleCreateWebinar() },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => toast.info('Schedule', { description: 'Opening scheduling options...' }) },
+                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => toast.info('Go Live', { description: 'Starting live broadcast...' }) },
+                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => toast.info('Attendees', { description: 'Viewing attendee list...' }) },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => toast.info('Recordings', { description: 'Opening recording library...' }) },
+                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => toast.info('Invites', { description: 'Opening invite manager...' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => toast.info('Analytics', { description: 'Loading analytics dashboard...' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => toast.info('Settings', { description: 'Opening webinar settings...' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -821,21 +839,21 @@ export default function WebinarsClient() {
 
                       <div className="flex items-center gap-2">
                         {webinar.status === 'scheduled' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700">
+                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); handleStartWebinar(webinar.title) }}>
                             <Play className="w-4 h-4" />
                             Start
                           </Button>
                         )}
                         {webinar.status === 'live' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700">
+                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); toast.info('Joining Webinar', { description: `Joining "${webinar.title}"...` }) }}>
                             <Video className="w-4 h-4" />
                             Join
                           </Button>
                         )}
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Edit Webinar', { description: `Editing "${webinar.title}"...` }) }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('More Options', { description: 'Opening webinar options...' }) }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -882,19 +900,20 @@ export default function WebinarsClient() {
             {/* Registrations Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500' },
-                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500' },
-                { icon: Download, label: 'Export', color: 'bg-purple-500' },
-                { icon: Mail, label: 'Email All', color: 'bg-orange-500' },
-                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500' },
-                { icon: UserX, label: 'Decline', color: 'bg-red-500' },
-                { icon: Filter, label: 'Filter', color: 'bg-pink-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500' }
+                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegisterAttendee() },
+                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.info('Import CSV', { description: 'Opening CSV import dialog...' }) },
+                { icon: Download, label: 'Export', color: 'bg-purple-500', action: () => handleExportAttendees() },
+                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => toast.info('Email All', { description: 'Composing bulk email...' }) },
+                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => toast.success('Approve', { description: 'Selected registrations approved' }) },
+                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => toast.info('Decline', { description: 'Selected registrations declined' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => toast.info('Filter', { description: 'Opening filter options...' }) },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => toast.info('Refresh', { description: 'Refreshing registrations list...' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -922,7 +941,7 @@ export default function WebinarsClient() {
                 <option value="attended">Attended</option>
                 <option value="no_show">No Show</option>
               </select>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={handleExportAttendees}>
                 <Download className="w-4 h-4" />
                 Export
               </Button>
@@ -973,10 +992,10 @@ export default function WebinarsClient() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info('Email', { description: `Sending email to ${reg.email}...` })}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info('More Options', { description: 'Opening registration options...' })}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1026,19 +1045,20 @@ export default function WebinarsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500' },
-                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500' },
-                { icon: Users, label: 'Attendees', color: 'bg-orange-500' },
-                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500' },
-                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500' },
-                { icon: Download, label: 'Export', color: 'bg-teal-500' },
-                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500' }
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => toast.info('Reports', { description: 'Generating analytics reports...' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => toast.info('Trends', { description: 'Loading trend analysis...' }) },
+                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => toast.info('Breakdown', { description: 'Loading breakdown charts...' }) },
+                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => toast.info('Attendees', { description: 'Loading attendee analytics...' }) },
+                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => toast.info('Q&A Stats', { description: 'Loading Q&A statistics...' }) },
+                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => toast.info('Polls', { description: 'Loading poll results...' }) },
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => toast.success('Export', { description: 'Analytics report will be downloaded' }) },
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => toast.info('Date Range', { description: 'Opening date range picker...' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1208,19 +1228,20 @@ export default function WebinarsClient() {
             {/* Recordings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Play All', color: 'bg-red-500' },
-                { icon: Download, label: 'Download', color: 'bg-blue-500' },
-                { icon: Share2, label: 'Share', color: 'bg-purple-500' },
-                { icon: Upload, label: 'Upload', color: 'bg-green-500' },
-                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500' },
-                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500' },
-                { icon: Trash2, label: 'Delete', color: 'bg-gray-500' },
-                { icon: Settings, label: 'Settings', color: 'bg-indigo-500' }
+                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => toast.info('Play All', { description: 'Playing all recordings...' }) },
+                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => toast.success('Download', { description: 'Recordings will be downloaded' }) },
+                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => toast.info('Share', { description: 'Opening share options...' }) },
+                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => toast.info('Upload', { description: 'Opening upload dialog...' }) },
+                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => toast.info('Transcripts', { description: 'Loading transcripts...' }) },
+                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => toast.info('Audio Only', { description: 'Filtering audio recordings...' }) },
+                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => toast.info('Delete', { description: 'Select recordings to delete' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => toast.info('Settings', { description: 'Opening recording settings...' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1284,19 +1305,19 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2">
                           {recording.status === 'ready' && (
                             <>
-                              <Button variant="outline" size="sm" className="gap-1">
+                              <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.info('Playing', { description: `Playing "${recording.webinarTitle}"...` })}>
                                 <Play className="w-4 h-4" />
                                 Play
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.success('Downloading', { description: `Downloading "${recording.webinarTitle}"...` })}>
                                 <Download className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.info('Share', { description: 'Sharing link copied to clipboard' })}>
                                 <Share2 className="w-4 h-4" />
                               </Button>
                             </>
                           )}
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Delete', { description: `Deleting "${recording.webinarTitle}"...` })}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1344,19 +1365,20 @@ export default function WebinarsClient() {
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Template', color: 'bg-green-500' },
-                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500' },
-                { icon: Bell, label: 'Reminder', color: 'bg-purple-500' },
-                { icon: Send, label: 'Follow Up', color: 'bg-orange-500' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500' },
-                { icon: Eye, label: 'Preview', color: 'bg-indigo-500' },
-                { icon: Edit, label: 'Edit', color: 'bg-teal-500' },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-500' }
+                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => toast.info('New Template', { description: 'Creating new email template...' }) },
+                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => toast.info('Confirmation', { description: 'Editing confirmation template...' }) },
+                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => toast.info('Reminder', { description: 'Editing reminder template...' }) },
+                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => toast.info('Follow Up', { description: 'Editing follow-up template...' }) },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => toast.success('Duplicate', { description: 'Template duplicated successfully' }) },
+                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => toast.info('Preview', { description: 'Opening template preview...' }) },
+                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => toast.info('Edit', { description: 'Select a template to edit' }) },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => toast.info('Delete', { description: 'Select a template to delete' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1368,7 +1390,7 @@ export default function WebinarsClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Email Templates</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => toast.info('Create Template', { description: 'Opening template editor...' })}>
                 <Plus className="w-4 h-4" />
                 Create Template
               </Button>
@@ -1408,7 +1430,7 @@ export default function WebinarsClient() {
                           <span className="text-sm text-gray-500">{template.enabled ? 'Enabled' : 'Disabled'}</span>
                           <input type="checkbox" checked={template.enabled} className="w-5 h-5" readOnly />
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Edit Template', { description: `Editing "${template.name}"...` })}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>

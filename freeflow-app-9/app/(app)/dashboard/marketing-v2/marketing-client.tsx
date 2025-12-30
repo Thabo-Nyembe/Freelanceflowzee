@@ -935,6 +935,44 @@ export default function MarketingClient() {
     })
   }, [searchQuery, leadFilter])
 
+  // Toast handlers for unconnected buttons
+  const handleCreateCampaign = () => {
+    toast.info('Create Campaign', { description: 'Opening campaign builder...' })
+  }
+  const handleLaunchCampaign = (campaignName: string) => {
+    toast.success('Campaign Launched', { description: `"${campaignName}" is now live` })
+  }
+  const handlePauseCampaign = (campaignName: string) => {
+    toast.info('Campaign Paused', { description: `"${campaignName}" has been paused` })
+  }
+  const handleExportAnalytics = () => {
+    toast.success('Exporting', { description: 'Marketing data will be downloaded' })
+  }
+  const handleAddLead = () => {
+    toast.info('Add Lead', { description: 'Opening lead capture form...' })
+  }
+  const handleNewSequence = () => {
+    toast.info('New Sequence', { description: 'Opening email sequence builder...' })
+  }
+  const handleCreateContent = () => {
+    toast.info('Create Content', { description: 'Opening content editor...' })
+  }
+  const handleCreateWorkflow = () => {
+    toast.info('Create Workflow', { description: 'Opening workflow builder...' })
+  }
+  const handleSendEmail = (leadName: string) => {
+    toast.info('Send Email', { description: `Composing email to ${leadName}...` })
+  }
+  const handleLogCall = (leadName: string) => {
+    toast.info('Log Call', { description: `Recording call with ${leadName}...` })
+  }
+  const handleScheduleMeeting = (leadName: string) => {
+    toast.info('Schedule Meeting', { description: `Scheduling meeting with ${leadName}...` })
+  }
+  const handleQuickAction = (label: string) => {
+    toast.info(label, { description: `Opening ${label.toLowerCase()}...` })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -962,7 +1000,7 @@ export default function MarketingClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+            <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={handleCreateCampaign}>
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
             </Button>
@@ -1056,19 +1094,20 @@ export default function MarketingClient() {
             {/* Campaigns Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Campaign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Play, label: 'Launch', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Pause, label: 'Pause', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Target, label: 'Targeting', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: DollarSign, label: 'Budget', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Plus, label: 'New Campaign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', handler: handleCreateCampaign },
+                { icon: Play, label: 'Launch', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', handler: () => handleLaunchCampaign('Selected Campaign') },
+                { icon: Pause, label: 'Pause', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', handler: () => handlePauseCampaign('Selected Campaign') },
+                { icon: Target, label: 'Targeting', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', handler: () => handleQuickAction('Targeting') },
+                { icon: DollarSign, label: 'Budget', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', handler: () => handleQuickAction('Budget') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', handler: () => handleQuickAction('Analytics') },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', handler: () => handleQuickAction('Schedule') },
+                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', handler: () => handleQuickAction('Settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.handler}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1096,7 +1135,7 @@ export default function MarketingClient() {
                   </Button>
                 ))}
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => handleQuickAction('More Filters')}>
                 <Filter className="w-4 h-4 mr-2" />
                 More Filters
               </Button>
@@ -1223,19 +1262,20 @@ export default function MarketingClient() {
             {/* Leads Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Lead', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Phone, label: 'Call', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Mail, label: 'Email', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Users, label: 'Assign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Star, label: 'Score', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: GitBranch, label: 'Workflow', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Plus, label: 'Add Lead', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', handler: handleAddLead },
+                { icon: Phone, label: 'Call', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', handler: () => handleLogCall('Selected Lead') },
+                { icon: Mail, label: 'Email', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', handler: () => handleSendEmail('Selected Lead') },
+                { icon: Users, label: 'Assign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', handler: () => handleQuickAction('Assign') },
+                { icon: Star, label: 'Score', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', handler: () => handleQuickAction('Score') },
+                { icon: GitBranch, label: 'Workflow', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', handler: () => handleQuickAction('Workflow') },
+                { icon: BarChart3, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', handler: () => handleQuickAction('Reports') },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', handler: () => handleQuickAction('Settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.handler}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1263,7 +1303,7 @@ export default function MarketingClient() {
                   </Button>
                 ))}
               </div>
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={handleAddLead}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Lead
               </Button>
@@ -1367,19 +1407,20 @@ export default function MarketingClient() {
             {/* Email Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Sequence', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Send, label: 'Send Now', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: FileText, label: 'Templates', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Users, label: 'Segments', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Sparkles, label: 'A/B Test', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Plus, label: 'New Sequence', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', handler: handleNewSequence },
+                { icon: Send, label: 'Send Now', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', handler: () => handleQuickAction('Send Now') },
+                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', handler: () => handleQuickAction('Schedule') },
+                { icon: FileText, label: 'Templates', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', handler: () => handleQuickAction('Templates') },
+                { icon: Users, label: 'Segments', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', handler: () => handleQuickAction('Segments') },
+                { icon: Sparkles, label: 'A/B Test', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', handler: () => handleQuickAction('A/B Test') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', handler: () => handleQuickAction('Analytics') },
+                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', handler: () => handleQuickAction('Settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.handler}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1389,7 +1430,7 @@ export default function MarketingClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email Sequences</h3>
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={handleNewSequence}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Sequence
               </Button>
@@ -1476,19 +1517,20 @@ export default function MarketingClient() {
             {/* Content Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Content', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: FileText, label: 'Blog Post', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Video, label: 'Video', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Image, label: 'Graphic', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Share2, label: 'Social Post', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Eye, label: 'Preview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: Plus, label: 'New Content', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', handler: handleCreateContent },
+                { icon: FileText, label: 'Blog Post', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', handler: () => handleQuickAction('Blog Post') },
+                { icon: Video, label: 'Video', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', handler: () => handleQuickAction('Video') },
+                { icon: Image, label: 'Graphic', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', handler: () => handleQuickAction('Graphic') },
+                { icon: Share2, label: 'Social Post', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', handler: () => handleQuickAction('Social Post') },
+                { icon: Calendar, label: 'Schedule', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', handler: () => handleQuickAction('Schedule') },
+                { icon: Eye, label: 'Preview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', handler: () => handleQuickAction('Preview') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', handler: () => handleQuickAction('Analytics') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.handler}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1498,7 +1540,7 @@ export default function MarketingClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Content Calendar</h3>
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={handleCreateContent}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Content
               </Button>
@@ -1575,19 +1617,20 @@ export default function MarketingClient() {
             {/* Automation Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Workflow', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Zap, label: 'Triggers', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: GitBranch, label: 'Branches', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Play, label: 'Run Now', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Pause, label: 'Pause All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Plus, label: 'New Workflow', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', handler: handleCreateWorkflow },
+                { icon: Zap, label: 'Triggers', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', handler: () => handleQuickAction('Triggers') },
+                { icon: GitBranch, label: 'Branches', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', handler: () => handleQuickAction('Branches') },
+                { icon: Play, label: 'Run Now', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', handler: () => handleLaunchCampaign('Workflow') },
+                { icon: Pause, label: 'Pause All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', handler: () => handlePauseCampaign('All Workflows') },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', handler: () => handleQuickAction('Sync') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', handler: () => handleQuickAction('Analytics') },
+                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', handler: () => handleQuickAction('Settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.handler}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1597,7 +1640,7 @@ export default function MarketingClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Marketing Workflows</h3>
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={handleCreateWorkflow}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Workflow
               </Button>

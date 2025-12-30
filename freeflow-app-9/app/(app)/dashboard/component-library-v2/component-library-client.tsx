@@ -426,6 +426,59 @@ export default function ComponentLibraryClient() {
     setTimeout(() => setCopiedCode(null), 2000)
   }
 
+  // Toast handlers for unconnected buttons
+  const handleCreateComponent = () => {
+    toast.info('Create Component', { description: 'Opening component builder...' })
+  }
+  const handleCopyCode = (componentName: string) => {
+    toast.success('Copied', { description: `${componentName} code copied to clipboard` })
+  }
+  const handlePreviewComponent = (componentName: string) => {
+    toast.info('Preview', { description: `Previewing ${componentName}...` })
+  }
+  const handleExportComponent = (componentName: string) => {
+    toast.success('Exporting', { description: `Exporting ${componentName}...` })
+  }
+  const handleOpenFigma = () => {
+    toast.info('Figma', { description: 'Opening Figma design kit...' })
+  }
+  const handleOpenGitHub = () => {
+    toast.info('GitHub', { description: 'Opening GitHub repository...' })
+  }
+  const handleOpenDocs = (docType: string) => {
+    toast.info('Documentation', { description: `Opening ${docType}...` })
+  }
+  const handleDownload = (item: string) => {
+    toast.success('Download Started', { description: `Downloading ${item}...` })
+  }
+  const handleConnect = (toolName: string) => {
+    toast.info('Connect', { description: `Connecting to ${toolName}...` })
+  }
+  const handleAddWebhook = () => {
+    toast.info('Add Webhook', { description: 'Opening webhook configuration...' })
+  }
+  const handleViewApiKey = () => {
+    toast.info('API Key', { description: 'Revealing API key...' })
+  }
+  const handleCopyApiKey = () => {
+    toast.success('Copied', { description: 'API key copied to clipboard' })
+  }
+  const handleRegenerateApiKey = () => {
+    toast.warning('Regenerate API Key', { description: 'Are you sure? This will invalidate the current key.' })
+  }
+  const handleViewNpm = () => {
+    toast.info('NPM', { description: 'Opening NPM package page...' })
+  }
+  const handleClearCache = () => {
+    toast.success('Cache Cleared', { description: 'Component cache has been cleared' })
+  }
+  const handleViewAccessLogs = () => {
+    toast.info('Access Logs', { description: 'Opening access logs...' })
+  }
+  const handleDangerAction = (action: string) => {
+    toast.error('Danger Zone', { description: `${action} requires confirmation` })
+  }
+
   // Key metrics for header
   const keyMetrics = [
     { label: 'Components', value: mockComponents.length * 12, icon: Puzzle, gradient: 'from-violet-500 to-purple-500' },
@@ -455,15 +508,15 @@ export default function ComponentLibraryClient() {
                 <p className="text-white/80">Production-ready UI components • Design tokens • Documentation</p>
               </div>
               <div className="flex items-center gap-3">
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleOpenFigma}>
                   <Figma className="h-4 w-4 mr-2" />
                   Figma Kit
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleOpenGitHub}>
                   <Github className="h-4 w-4 mr-2" />
                   GitHub
                 </Button>
-                <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={handleCreateComponent}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Component
                 </Button>
@@ -752,19 +805,19 @@ export default function App() {
                     <CardTitle className="text-lg">Quick Links</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => handleOpenDocs('API Reference')}>
                       <FileText className="h-4 w-4 mr-2" />
                       API Reference
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => handleOpenDocs('Theming Guide')}>
                       <Paintbrush className="h-4 w-4 mr-2" />
                       Theming Guide
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => handleOpenDocs('Accessibility Guide')}>
                       <Accessibility className="h-4 w-4 mr-2" />
                       Accessibility
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => handleOpenDocs('Migration Guide')}>
                       <Package className="h-4 w-4 mr-2" />
                       Migration Guide
                     </Button>
@@ -776,11 +829,11 @@ export default function App() {
                     <CardTitle className="text-lg">Resources</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleOpenFigma}>
                       <Figma className="h-4 w-4 mr-2" />
                       Figma Design Kit
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleOpenGitHub}>
                       <Github className="h-4 w-4 mr-2" />
                       GitHub Repository
                     </Button>
@@ -797,7 +850,7 @@ export default function App() {
                 <h2 className="text-2xl font-bold">Changelog</h2>
                 <p className="text-gray-500">Track all library updates and changes</p>
               </div>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => handleDownload('all changelog entries')}>
                 <Download className="h-4 w-4 mr-2" />
                 Download All
               </Button>
@@ -1429,7 +1482,7 @@ export default function App() {
                             {tool.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => handleConnect(tool.name)}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1452,7 +1505,7 @@ export default function App() {
                         </div>
                         <code className="text-xs text-gray-500">https://api.yourapp.com/webhooks/components</code>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleAddWebhook}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Webhook
                       </Button>
@@ -1471,8 +1524,8 @@ export default function App() {
                         <Label className="font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="cl_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
-                          <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={handleViewApiKey}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={handleCopyApiKey}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1480,7 +1533,7 @@ export default function App() {
                           Keep your API key secret. Never expose it in client-side code.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleRegenerateApiKey}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Regenerate API Key
                       </Button>
@@ -1504,11 +1557,11 @@ export default function App() {
                         <code>npm install @kazi/ui-components@latest</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleCopyCode('npm install command')}>
                           <Copy className="h-4 w-4 mr-2" />
                           Copy
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={handleViewNpm}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View on NPM
                         </Button>
@@ -1568,27 +1621,27 @@ export default function App() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Button variant="outline" className="h-24 flex-col gap-2">
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Tokens as CSS')}>
                           <Download className="h-6 w-6" />
                           <span>Export Tokens as CSS</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2">
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Tokens as JSON')}>
                           <Download className="h-6 w-6" />
                           <span>Export Tokens as JSON</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2">
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Icons as SVG')}>
                           <Download className="h-6 w-6" />
                           <span>Export Icons as SVG</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2">
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Components')}>
                           <Download className="h-6 w-6" />
                           <span>Export Components</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2">
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Documentation')}>
                           <Download className="h-6 w-6" />
                           <span>Export Documentation</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2">
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Full Library')}>
                           <Download className="h-6 w-6" />
                           <span>Export Full Library</span>
                         </Button>
@@ -1616,7 +1669,7 @@ export default function App() {
                         </div>
                         <Progress value={35} className="h-2" />
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleClearCache}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Clear Cache
                       </Button>
@@ -1711,7 +1764,7 @@ export default function App() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleViewAccessLogs}>
                         <History className="h-4 w-4 mr-2" />
                         View Access Logs
                       </Button>
@@ -1731,15 +1784,15 @@ export default function App() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDangerAction('Delete All Components')}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All Components
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDangerAction('Reset All Settings')}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDangerAction('Disable Component Library')}>
                         <Lock className="h-4 w-4 mr-2" />
                         Disable Component Library
                       </Button>

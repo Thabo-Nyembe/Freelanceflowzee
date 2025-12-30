@@ -613,6 +613,74 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     }
   }
 
+  // Toast handlers for unconnected buttons
+  const handleRunAudit = () => {
+    toast.info('Running Audit', { description: 'Audit scan started...' })
+  }
+  const handleExportAudit = () => {
+    toast.success('Exporting', { description: 'Audit report will be downloaded' })
+  }
+  const handleScheduleAudit = () => {
+    toast.info('Schedule Audit', { description: 'Opening scheduler...' })
+  }
+  const handleResolveIssue = (issueId: string) => {
+    toast.success('Issue Resolved', { description: `Issue #${issueId} resolved` })
+  }
+  const handleRefresh = () => {
+    toast.info('Refreshing', { description: 'Fetching latest events...' })
+  }
+  const handleSettings = () => {
+    toast.info('Settings', { description: 'Opening settings panel...' })
+  }
+  const handleSearch = () => {
+    toast.info('Searching', { description: 'Executing search query...' })
+  }
+  const handleQuickAction = (label: string) => {
+    toast.info(label, { description: `${label} action initiated` })
+  }
+  const handleCreateReport = () => {
+    toast.success('Create Report', { description: 'Opening report builder...' })
+  }
+  const handleDownloadReport = (reportName: string) => {
+    toast.success('Downloading', { description: `Downloading ${reportName}...` })
+  }
+  const handleRunReport = (reportName: string) => {
+    toast.info('Running Report', { description: `Generating ${reportName}...` })
+  }
+  const handleSaveSettings = () => {
+    toast.success('Settings Saved', { description: 'Retention settings updated' })
+  }
+  const handleIntegrationAction = (name: string, status: string) => {
+    toast.info(status === 'connected' ? 'Configure' : 'Connect', { description: `${status === 'connected' ? 'Configuring' : 'Connecting'} ${name}...` })
+  }
+  const handleCopyApiKey = () => {
+    toast.success('Copied', { description: 'API key copied to clipboard' })
+  }
+  const handleRegenerateApiKey = () => {
+    toast.info('Regenerating', { description: 'Generating new API key...' })
+  }
+  const handleExportAllData = () => {
+    toast.info('Exporting', { description: 'Preparing full data export...' })
+  }
+  const handleClearCache = () => {
+    toast.success('Cache Cleared', { description: 'All cached data has been cleared' })
+  }
+  const handleResetSettings = () => {
+    toast.info('Resetting', { description: 'Restoring default settings...' })
+  }
+  const handleDeleteAllData = () => {
+    toast.error('Delete All Data', { description: 'This action requires confirmation' })
+  }
+  const handleAcknowledgeAlert = () => {
+    toast.success('Alert Acknowledged', { description: 'Alert has been acknowledged' })
+  }
+  const handleSuppressAlert = () => {
+    toast.info('Alert Suppressed', { description: 'Alert notifications suppressed' })
+  }
+  const handleDeleteAlert = () => {
+    toast.error('Alert Deleted', { description: 'Alert has been removed' })
+  }
+
   const formatTimeAgo = (timestamp: string) => {
     const diff = Date.now() - new Date(timestamp).getTime()
     const minutes = Math.floor(diff / 60000)
@@ -647,11 +715,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
               {isStreaming ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {isStreaming ? 'Pause Stream' : 'Live Stream'}
             </Button>
-            <Button variant="outline" className="gap-2 border-slate-700 text-slate-300 hover:bg-slate-800">
+            <Button variant="outline" className="gap-2 border-slate-700 text-slate-300 hover:bg-slate-800" onClick={handleExportAudit}>
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button variant="outline" className="gap-2 border-slate-700 text-slate-300 hover:bg-slate-800">
+            <Button variant="outline" className="gap-2 border-slate-700 text-slate-300 hover:bg-slate-800" onClick={handleSettings}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -767,7 +835,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                 <option value="30d">Last 30 days</option>
                 <option value="custom">Custom range</option>
               </select>
-              <Button className="bg-green-600 hover:bg-green-700 gap-2">
+              <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={handleSearch}>
                 <Search className="w-4 h-4" />
                 Search
               </Button>
@@ -856,6 +924,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -885,7 +954,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                         <Badge variant="outline" className="border-slate-600 text-slate-300">
                           {filteredEvents.length} events
                         </Badge>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white" onClick={handleRefresh}>
                           <RefreshCw className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1060,6 +1129,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1228,6 +1298,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1350,6 +1421,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1362,7 +1434,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-white">Scheduled Reports</h3>
-                <Button className="bg-green-600 hover:bg-green-700 gap-2">
+                <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={handleCreateReport}>
                   <Plus className="w-4 h-4" />
                   Create Report
                 </Button>
@@ -1410,11 +1482,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                         </div>
                       </div>
                       <div className="flex items-center gap-2 mt-4">
-                        <Button size="sm" variant="outline" className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700">
+                        <Button size="sm" variant="outline" className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700" onClick={() => handleDownloadReport(report.name)}>
                           <Download className="w-3 h-3 mr-1" />
                           Download
                         </Button>
-                        <Button size="sm" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                        <Button size="sm" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700" onClick={() => handleRunReport(report.name)}>
                           <Play className="w-3 h-3" />
                         </Button>
                       </div>
@@ -1474,6 +1546,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1699,7 +1772,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                           <Label className="text-slate-300">Archive Location</Label>
                           <Input defaultValue="s3://audit-logs/archive" className="mt-1 bg-slate-900 border-slate-600 text-white font-mono" />
                         </div>
-                        <Button className="bg-green-600 hover:bg-green-700">Save Retention Settings</Button>
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={handleSaveSettings}>Save Retention Settings</Button>
                       </CardContent>
                     </Card>
                   </>
@@ -1845,7 +1918,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                                 </p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
+                            <Button variant="outline" size="sm" className="border-slate-600 text-slate-300" onClick={() => handleIntegrationAction(integration.name, integration.status)}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>

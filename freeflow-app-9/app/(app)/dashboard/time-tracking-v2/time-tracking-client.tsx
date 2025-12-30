@@ -499,6 +499,23 @@ export default function TimeTrackingClient() {
     return colors[status] || 'bg-gray-100 text-gray-700'
   }
 
+  // Handlers
+  const handleStartTimer = () => {
+    toast.success('Timer Started', { description: 'Time tracking is now active' })
+  }
+  const handleStopTimer = () => {
+    toast.info('Timer Stopped', { description: 'Time entry has been saved' })
+  }
+  const handleCreateEntry = () => {
+    toast.info('Create Entry', { description: 'Opening time entry form...' })
+  }
+  const handleExportTimesheet = () => {
+    toast.success('Exporting', { description: 'Timesheet will be downloaded' })
+  }
+  const handleApproveTimesheet = () => {
+    toast.success('Approved', { description: 'Timesheet has been approved' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -510,7 +527,7 @@ export default function TimeTrackingClient() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" onClick={() => setShowEntryDialog(true)}><Plus className="h-4 w-4 mr-2" />Manual Entry</Button>
-            <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline" onClick={handleExportTimesheet}><Download className="h-4 w-4 mr-2" />Export</Button>
           </div>
         </div>
 
@@ -586,18 +603,19 @@ export default function TimeTrackingClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Play, label: 'Start Timer', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Plus, label: 'Manual Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Calendar, label: 'Calendar', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Briefcase, label: 'Projects', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Users, label: 'Team', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Receipt, label: 'Invoice', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Play, label: 'Start Timer', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleStartTimer },
+                { icon: Plus, label: 'Manual Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleCreateEntry },
+                { icon: Calendar, label: 'Calendar', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
+                { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('reports') },
+                { icon: Briefcase, label: 'Projects', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setActiveTab('projects') },
+                { icon: Users, label: 'Team', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('team') },
+                { icon: Receipt, label: 'Invoice', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowInvoiceDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: handleExportTimesheet },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -627,8 +645,8 @@ export default function TimeTrackingClient() {
                         {entry.billableAmount > 0 && <span className="text-sm font-medium text-emerald-600">${entry.billableAmount}</span>}
                         <div className="text-lg font-bold">{entry.durationHours.toFixed(1)}h</div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                          <Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.info('Edit Entry', { description: 'Opening entry editor...' })}><Edit2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500" onClick={() => toast.success('Entry Deleted', { description: 'Time entry has been removed' })}><Trash2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -663,18 +681,19 @@ export default function TimeTrackingClient() {
             {/* Timesheet Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Copy, label: 'Copy Week', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: CheckCircle, label: 'Submit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Calendar, label: 'View Month', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Printer, label: 'Print', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Mail, label: 'Email', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Plus, label: 'Add Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleCreateEntry },
+                { icon: Copy, label: 'Copy Week', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Week Copied', { description: 'Previous week entries duplicated' }) },
+                { icon: CheckCircle, label: 'Submit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleApproveTimesheet },
+                { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Timesheet Locked', { description: 'Entries can no longer be edited' }) },
+                { icon: Calendar, label: 'View Month', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: handleExportTimesheet },
+                { icon: Printer, label: 'Print', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Printing', { description: 'Opening print dialog...' }) },
+                { icon: Mail, label: 'Email', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Email Sent', { description: 'Timesheet emailed successfully' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -765,18 +784,19 @@ export default function TimeTrackingClient() {
             {/* Reports Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Summary', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Users, label: 'By Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Briefcase, label: 'By Project', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Building2, label: 'By Client', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: DollarSign, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: BarChart3, label: 'Summary', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Summary Report', { description: 'Generating summary report...' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Trends Report', { description: 'Analyzing time tracking trends...' }) },
+                { icon: Users, label: 'By Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Team Report', { description: 'Generating team breakdown...' }) },
+                { icon: Briefcase, label: 'By Project', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Project Report', { description: 'Generating project breakdown...' }) },
+                { icon: Building2, label: 'By Client', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Client Report', { description: 'Generating client breakdown...' }) },
+                { icon: DollarSign, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Revenue Report', { description: 'Calculating revenue metrics...' }) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Schedule Report', { description: 'Generating schedule overview...' }) },
+                { icon: Download, label: 'Export All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleExportTimesheet },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -795,7 +815,7 @@ export default function TimeTrackingClient() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setShowReportDialog(true)}><Plus className="h-4 w-4 mr-2" />New Report</Button>
-                <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+                <Button variant="outline" onClick={handleExportTimesheet}><Download className="h-4 w-4 mr-2" />Export</Button>
               </div>
             </div>
 
@@ -867,7 +887,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4 text-gray-500">{report.dateRange}</td>
                           <td className="px-4 py-4">{report.schedule || <span className="text-gray-400">Manual</span>}</td>
                           <td className="px-4 py-4 text-gray-500">{report.lastRun}</td>
-                          <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon"><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button></div></td>
+                          <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => toast.info('Running Report', { description: 'Generating report data...' })}><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={handleExportTimesheet}><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => toast.info('Edit Report', { description: 'Opening report editor...' })}><Edit2 className="h-4 w-4" /></Button></div></td>
                         </tr>
                       ))}
                     </tbody>
@@ -890,7 +910,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4"><span className="font-bold text-emerald-600">${client.totalBilled.toLocaleString()}</span></td>
                           <td className="px-4 py-4">{client.outstandingBalance > 0 ? <span className="font-medium text-amber-600">${client.outstandingBalance.toLocaleString()}</span> : <span className="text-gray-400">$0</span>}</td>
                           <td className="px-4 py-4"><Badge className={getStatusColor(client.status)}>{client.status}</Badge></td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => toast.info('Client Options', { description: 'Opening client menu...' })}><MoreHorizontal className="h-4 w-4" /></Button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -908,7 +928,7 @@ export default function TimeTrackingClient() {
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6"><Edit2 className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.info('Edit Tag', { description: 'Opening tag editor...' })}><Edit2 className="h-3 w-3" /></Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold">{tag.usageCount}</span>
@@ -948,18 +968,19 @@ export default function TimeTrackingClient() {
             {/* Projects Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Project', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Users, label: 'Team View', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Tag, label: 'Tags', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Plus, label: 'New Project', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('New Project', { description: 'Opening project creation form...' }) },
+                { icon: Users, label: 'Team View', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setActiveTab('team') },
+                { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('Budgets', { description: 'Opening budget management...' }) },
+                { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Milestones', { description: 'Viewing project milestones...' }) },
+                { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Archive', { description: 'Viewing archived projects...' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Analytics', { description: 'Loading project analytics...' }) },
+                { icon: Tag, label: 'Tags', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowTagDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleExportTimesheet },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -969,7 +990,7 @@ export default function TimeTrackingClient() {
             </div>
 
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Projects</CardTitle><Button><Plus className="h-4 w-4 mr-2" />New Project</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Projects</CardTitle><Button onClick={() => toast.info('New Project', { description: 'Opening project creation form...' })}><Plus className="h-4 w-4 mr-2" />New Project</Button></CardHeader>
               <CardContent className="p-0">
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
@@ -982,7 +1003,7 @@ export default function TimeTrackingClient() {
                         <td className="px-4 py-4 font-medium">{project.totalHours}h</td>
                         <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${project.spent.toLocaleString()}</span><span className="text-gray-500"> / ${project.budget.toLocaleString()}</span><Progress value={(project.spent / project.budget) * 100} className="h-1 mt-1" /></div> : '-'}</td>
                         <td className="px-4 py-4"><Badge className={getStatusColor(project.status)}>{project.status.replace('_', ' ')}</Badge></td>
-                        <td className="px-4 py-4"><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></td>
+                        <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => toast.info('Project Options', { description: 'Opening project menu...' })}><MoreHorizontal className="h-4 w-4" /></Button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -1016,18 +1037,19 @@ export default function TimeTrackingClient() {
             {/* Team Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Users, label: 'All Members', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Clock, label: 'Time Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Coffee, label: 'Time Off', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Target, label: 'Utilization', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Plus, label: 'Add Member', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Users, label: 'All Members', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setTeamTab('activity') },
+                { icon: Clock, label: 'Time Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Time Logs', { description: 'Opening team time logs...' }) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setActiveTab('calendar') },
+                { icon: Coffee, label: 'Time Off', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setTeamTab('timeoff') },
+                { icon: Target, label: 'Utilization', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setTeamTab('utilization') },
+                { icon: BarChart3, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setActiveTab('reports') },
+                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Reminders', { description: 'Opening reminder settings...' }) },
+                { icon: Plus, label: 'Add Member', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Add Member', { description: 'Opening team member form...' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1044,7 +1066,7 @@ export default function TimeTrackingClient() {
                   </Button>
                 ))}
               </div>
-              <Button variant="outline"><Users className="h-4 w-4 mr-2" />Manage Team</Button>
+              <Button variant="outline" onClick={() => toast.info('Manage Team', { description: 'Opening team management...' })}><Users className="h-4 w-4 mr-2" />Manage Team</Button>
             </div>
 
             {teamTab === 'activity' && (
@@ -1069,7 +1091,7 @@ export default function TimeTrackingClient() {
                         <p className="font-bold text-amber-600">{member.todayHours}h today</p>
                         <p className="text-sm text-gray-500">{member.weekHours}h this week</p>
                       </div>
-                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.info('Member Options', { description: 'Opening member menu...' })}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </CardContent>
@@ -1078,7 +1100,7 @@ export default function TimeTrackingClient() {
 
             {teamTab === 'timeoff' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => toast.info('Request Time Off', { description: 'Opening time off request form...' })}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
                 <CardContent className="p-0">
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>

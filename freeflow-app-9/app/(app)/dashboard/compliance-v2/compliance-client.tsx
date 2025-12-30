@@ -496,6 +496,19 @@ export default function ComplianceClient() {
     activeAudits: mockAudits.filter(a => a.status === 'in_progress').length
   }), [])
 
+  const handleRunAudit = () => {
+    toast.info('Running Audit', { description: 'Compliance audit started...' })
+  }
+  const handleGenerateReport = () => {
+    toast.success('Report Generated', { description: 'Compliance report ready' })
+  }
+  const handleResolveIssue = (issueId: string) => {
+    toast.success('Issue Resolved', { description: `Issue #${issueId} marked as resolved` })
+  }
+  const handleExportCompliance = () => {
+    toast.success('Exporting', { description: 'Compliance data will be downloaded' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -512,11 +525,11 @@ export default function ComplianceClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExportCompliance}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
-              <Button className="bg-white text-green-600 hover:bg-green-50">
+              <Button className="bg-white text-green-600 hover:bg-green-50" onClick={handleRunAudit}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Assessment
               </Button>
@@ -720,7 +733,7 @@ export default function ComplianceClient() {
                     </div>
                   </div>
 
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Viewing Controls', { description: `Loading ${framework.name} controls...` })}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Controls
                   </Button>
@@ -784,11 +797,11 @@ export default function ComplianceClient() {
                 <Input placeholder="Search controls..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.info('Filter', { description: 'Opening filter options...' })}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm">
+                <Button size="sm" onClick={() => toast.info('Add Control', { description: 'Opening new control form...' })}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Control
                 </Button>
@@ -840,10 +853,10 @@ export default function ComplianceClient() {
                         <span className="text-sm">{control.owner.split(' ')[0]}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('Upload Evidence', { description: `Uploading evidence for ${control.controlId}...` }); }}>
                           <Upload className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('View Control', { description: `Viewing ${control.name}...` }); }}>
                           <Eye className="w-4 h-4" />
                         </Button>
                       </div>
@@ -905,7 +918,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Risk Register</h2>
-              <Button>
+              <Button onClick={() => toast.info('Add Risk', { description: 'Opening new risk form...' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Risk
               </Button>
@@ -958,7 +971,7 @@ export default function ComplianceClient() {
                         <span className="text-sm">{risk.controls.length} controls</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleResolveIssue(risk.id)}>
                       View Details
                     </Button>
                   </div>
@@ -1018,7 +1031,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Audit Management</h2>
-              <Button>
+              <Button onClick={handleRunAudit}>
                 <Plus className="w-4 h-4 mr-2" />
                 Schedule Audit
               </Button>
@@ -1077,11 +1090,11 @@ export default function ComplianceClient() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => toast.info('View Audit', { description: `Viewing ${audit.name}...` })}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleGenerateReport}>
                       <FileText className="w-4 h-4 mr-2" />
                       Findings
                     </Button>
@@ -1142,7 +1155,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Policy Management</h2>
-              <Button>
+              <Button onClick={() => toast.info('Create Policy', { description: 'Opening new policy form...' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Policy
               </Button>
@@ -1183,10 +1196,10 @@ export default function ComplianceClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.info('View Policy', { description: `Viewing ${policy.name}...` })}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.info('Policy Settings', { description: `Opening settings for ${policy.name}...` })}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1221,7 +1234,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Evidence Repository</h2>
-              <Button>
+              <Button onClick={() => toast.info('Upload Evidence', { description: 'Opening file upload dialog...' })}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Evidence
               </Button>

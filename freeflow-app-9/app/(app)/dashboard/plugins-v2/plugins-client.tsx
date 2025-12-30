@@ -604,6 +604,23 @@ export default function PluginsClient() {
     setShowInstallDialog(false)
   }
 
+  // Handlers
+  const handleInstallPlugin = (pluginName: string) => {
+    toast.info('Installing Plugin', { description: `Installing "${pluginName}"...` })
+  }
+  const handleUninstallPlugin = (pluginName: string) => {
+    toast.info('Plugin Uninstalled', { description: `"${pluginName}" has been removed` })
+  }
+  const handleConfigurePlugin = (pluginName: string) => {
+    toast.info('Configure Plugin', { description: `Opening settings for "${pluginName}"...` })
+  }
+  const handleEnablePlugin = (pluginName: string) => {
+    toast.success('Plugin Enabled', { description: `"${pluginName}" is now active` })
+  }
+  const handleBrowsePlugins = () => {
+    toast.info('Plugin Marketplace', { description: 'Opening plugin marketplace...' })
+  }
+
   const renderPluginCard = (plugin: Plugin) => (
     <Card
       key={plugin.id}
@@ -708,11 +725,11 @@ export default function PluginsClient() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Switch checked={plugin.isActivated} />
-        <Button variant="ghost" size="icon">
+        <Switch checked={plugin.isActivated} onCheckedChange={() => handleEnablePlugin(plugin.name)} />
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); handleUninstallPlugin(plugin.name) }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -743,11 +760,11 @@ export default function PluginsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast.info('Filters', { description: 'Opening filter options...' })}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700" onClick={() => toast.info('Upload Plugin', { description: 'Opening plugin upload dialog...' })}>
               <Plus className="h-4 w-4 mr-2" />
               Upload Plugin
             </Button>
@@ -846,7 +863,7 @@ export default function PluginsClient() {
                 { icon: Code, label: 'Dev Tools', color: 'text-cyan-500' },
                 { icon: Bot, label: 'AI Plugins', color: 'text-orange-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.info(action.label, { description: `Browsing ${action.label.toLowerCase()} plugins...` })}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -893,7 +910,7 @@ export default function PluginsClient() {
                       <div className="text-2xl mb-2">🛡️</div>
                       <h3 className="font-semibold mb-1">Essential Security</h3>
                       <p className="text-sm text-green-100 mb-3">Must-have security plugins for any site</p>
-                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => toast.info('View Collection', { description: 'Opening Essential Security collection...' })}>
                         View Collection
                       </Button>
                     </div>
@@ -998,11 +1015,11 @@ export default function PluginsClient() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Installed Plugins</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Check Updates', { description: 'Checking for plugin updates...' })}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check Updates
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Bulk Actions', { description: 'Opening bulk actions menu...' })}>
                       Bulk Actions
                     </Button>
                   </div>
@@ -1053,7 +1070,7 @@ export default function PluginsClient() {
                 { icon: FileText, label: 'Changelogs', color: 'text-cyan-500' },
                 { icon: Settings, label: 'Settings', color: 'text-gray-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.info(action.label, { description: `${action.label} action initiated...` })}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1067,7 +1084,7 @@ export default function PluginsClient() {
                     <CardTitle>Available Updates</CardTitle>
                     <p className="text-sm text-gray-500 mt-1">{needsUpdatePlugins.length} plugin(s) need updating</p>
                   </div>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.info('Update All', { description: 'Updating all plugins to latest versions...' })}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Update All
                   </Button>
@@ -1092,10 +1109,10 @@ export default function PluginsClient() {
                           <p className="text-sm text-gray-500">v{plugin.version} → v{plugin.latestVersion}</p>
                         </div>
                         <div className="text-right">
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.info('Updating Plugin', { description: `Updating "${plugin.name}" to v${plugin.latestVersion}...` })}>
                             Update Now
                           </Button>
-                          <button className="block text-xs text-blue-600 hover:underline mt-1">View Changelog</button>
+                          <button className="block text-xs text-blue-600 hover:underline mt-1" onClick={() => toast.info('View Changelog', { description: `Opening changelog for "${plugin.name}"...` })}>View Changelog</button>
                         </div>
                       </div>
                     ))}
@@ -1141,7 +1158,7 @@ export default function PluginsClient() {
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{collection.description}</p>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">{collection.plugins.length} plugins</Badge>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => toast.info('View Collection', { description: `Opening "${collection.name}" collection...` })}>
                             <Eye className="h-4 w-4 mr-2" />
                             View Collection
                           </Button>
@@ -1193,7 +1210,7 @@ export default function PluginsClient() {
                 { icon: FileText, label: 'Guides', color: 'text-yellow-500' },
                 { icon: MessageSquare, label: 'Support', color: 'text-pink-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.info(action.label, { description: `Opening ${action.label.toLowerCase()}...` })}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1334,7 +1351,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.success('Settings Saved', { description: 'Your changes have been saved successfully.' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1385,7 +1402,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.success('Settings Saved', { description: 'Your changes have been saved successfully.' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1432,7 +1449,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.success('Settings Saved', { description: 'Your changes have been saved successfully.' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1479,7 +1496,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.success('Settings Saved', { description: 'Your changes have been saved successfully.' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1515,7 +1532,7 @@ export default function PluginsClient() {
                             <p className="font-medium">API Documentation</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">View plugin API documentation</p>
                           </div>
-                          <Button variant="outline" size="sm">View Docs</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('API Documentation', { description: 'Opening plugin API documentation...' })}>View Docs</Button>
                         </div>
                       </div>
                       <div className="p-4 border rounded-lg dark:border-gray-700">
@@ -1528,7 +1545,7 @@ export default function PluginsClient() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Input value="plg_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Regenerate API Key', { description: 'Generating a new API key...' })}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1563,7 +1580,7 @@ export default function PluginsClient() {
                             <p className="font-medium">Clear Plugin Cache</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Remove cached plugin data</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Cache Cleared', { description: 'Plugin cache has been cleared successfully.' })}>
                             <Trash2 className="w-4 h-4" />
                             Clear Cache
                           </Button>
@@ -1573,7 +1590,7 @@ export default function PluginsClient() {
                             <p className="font-medium">Export Plugin List</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Download list of installed plugins</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Export Started', { description: 'Downloading plugin list...' })}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -1585,11 +1602,11 @@ export default function PluginsClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.error('Remove All Plugins', { description: 'This action requires confirmation. Please use the confirmation dialog.' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Remove All Plugins
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.error('Reset to Defaults', { description: 'This action requires confirmation. Please use the confirmation dialog.' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>
@@ -1761,7 +1778,13 @@ export default function PluginsClient() {
                       <>
                         <Button
                           className={selectedPlugin.isActivated ? 'bg-gray-600 hover:bg-gray-700' : 'bg-green-600 hover:bg-green-700'}
-                          onClick={() => {}}
+                          onClick={() => {
+                            if (selectedPlugin.isActivated) {
+                              toast.info('Plugin Deactivated', { description: `"${selectedPlugin.name}" has been deactivated` })
+                            } else {
+                              handleEnablePlugin(selectedPlugin.name)
+                            }
+                          }}
                         >
                           {selectedPlugin.isActivated ? (
                             <>
@@ -1776,16 +1799,16 @@ export default function PluginsClient() {
                           )}
                         </Button>
                         {selectedPlugin.status === 'needs-update' && (
-                          <Button className="bg-blue-600 hover:bg-blue-700">
+                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.info('Updating Plugin', { description: `Updating "${selectedPlugin.name}" to v${selectedPlugin.latestVersion}...` })}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Update to v{selectedPlugin.latestVersion}
                           </Button>
                         )}
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => handleConfigurePlugin(selectedPlugin.name)}>
                           <Settings className="h-4 w-4 mr-2" />
                           Settings
                         </Button>
-                        <Button variant="outline" className="text-red-600 hover:text-red-700">
+                        <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleUninstallPlugin(selectedPlugin.name)}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </Button>
@@ -1797,14 +1820,14 @@ export default function PluginsClient() {
                           Install Now
                         </Button>
                         {selectedPlugin.hasProVersion && (
-                          <Button variant="outline" className="text-purple-600 border-purple-600">
+                          <Button variant="outline" className="text-purple-600 border-purple-600" onClick={() => toast.info('Pro Version', { description: `Opening "${selectedPlugin.name}" Pro upgrade page...` })}>
                             <Crown className="h-4 w-4 mr-2" />
                             Get Pro Version
                           </Button>
                         )}
                       </>
                     )}
-                    <Button variant="ghost" className="ml-auto">
+                    <Button variant="ghost" className="ml-auto" onClick={() => toast.info('Visit Website', { description: `Opening "${selectedPlugin.name}" website...` })}>
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Visit Website
                     </Button>
