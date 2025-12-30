@@ -558,6 +558,37 @@ export default function ReleasesClient() {
     { label: 'Rolling', value: mockStats.rollingReleases.toString(), icon: RefreshCw, change: '1 active', color: 'text-teal-600' }
   ]
 
+  // Handlers
+  const handleCreateRelease = () => {
+    toast.info('Create Release', {
+      description: 'Opening release builder...'
+    })
+  }
+
+  const handleDeployRelease = (releaseName: string) => {
+    toast.success('Deploying release', {
+      description: `"${releaseName}" deployment started`
+    })
+  }
+
+  const handleRollbackRelease = (releaseName: string) => {
+    toast.info('Rolling back', {
+      description: `Rolling back "${releaseName}"...`
+    })
+  }
+
+  const handleExportReleases = () => {
+    toast.success('Exporting releases', {
+      description: 'Release history will be downloaded'
+    })
+  }
+
+  const handlePromoteRelease = (releaseName: string) => {
+    toast.success('Promoting release', {
+      description: `"${releaseName}" promoted to production`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">

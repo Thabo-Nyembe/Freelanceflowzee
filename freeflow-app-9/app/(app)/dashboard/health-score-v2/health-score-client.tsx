@@ -694,6 +694,37 @@ export default function HealthScoreClient() {
     }
   }
 
+  // Handlers
+  const handleRefreshMetrics = () => {
+    toast.info('Refreshing metrics', {
+      description: 'Fetching latest health data...'
+    })
+  }
+
+  const handleRunDiagnostics = () => {
+    toast.info('Running diagnostics', {
+      description: 'Performing system health check...'
+    })
+  }
+
+  const handleExportHealth = () => {
+    toast.success('Exporting health report', {
+      description: 'Health metrics will be downloaded'
+    })
+  }
+
+  const handleConfigureAlerts = () => {
+    toast.info('Configure Alerts', {
+      description: 'Opening alert configuration...'
+    })
+  }
+
+  const handleViewServiceDetails = (serviceName: string) => {
+    toast.info('Service Details', {
+      description: `Loading details for "${serviceName}"...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

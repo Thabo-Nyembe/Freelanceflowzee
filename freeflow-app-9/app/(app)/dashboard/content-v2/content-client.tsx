@@ -668,6 +668,37 @@ export default function ContentClient() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  // Handlers
+  const handleCreateContent = () => {
+    toast.info('Create Content', {
+      description: 'Opening content editor...'
+    })
+  }
+
+  const handlePublishContent = (contentTitle: string) => {
+    toast.success('Publishing content', {
+      description: `"${contentTitle}" is being published...`
+    })
+  }
+
+  const handleScheduleContent = (contentTitle: string) => {
+    toast.success('Content scheduled', {
+      description: `"${contentTitle}" has been scheduled`
+    })
+  }
+
+  const handleArchiveContent = (contentTitle: string) => {
+    toast.info('Content archived', {
+      description: `"${contentTitle}" moved to archive`
+    })
+  }
+
+  const handleExportContent = () => {
+    toast.success('Exporting content', {
+      description: 'Content will be downloaded shortly'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

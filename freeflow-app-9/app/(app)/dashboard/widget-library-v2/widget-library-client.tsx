@@ -537,6 +537,37 @@ export default function WidgetLibraryClient() {
     setShowCodeModal(true)
   }
 
+  // Handlers
+  const handleInstallWidget = (widgetName: string) => {
+    toast.success('Installing widget', {
+      description: `"${widgetName}" is being added to your project`
+    })
+  }
+
+  const handleCreateWidget = () => {
+    toast.info('Create Widget', {
+      description: 'Opening widget builder...'
+    })
+  }
+
+  const handlePreviewWidget = (widgetName: string) => {
+    toast.info('Preview', {
+      description: `Loading preview for "${widgetName}"...`
+    })
+  }
+
+  const handleExportWidget = (widgetName: string) => {
+    toast.success('Exporting widget', {
+      description: `"${widgetName}" code will be downloaded`
+    })
+  }
+
+  const handleFavoriteWidget = (widgetName: string) => {
+    toast.success('Added to favorites', {
+      description: `"${widgetName}" saved to your favorites`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

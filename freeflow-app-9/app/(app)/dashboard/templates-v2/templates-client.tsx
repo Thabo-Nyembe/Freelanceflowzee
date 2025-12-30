@@ -487,6 +487,37 @@ export default function TemplatesClient() {
 
   const favoriteTemplates = mockTemplates.filter(t => t.isFavorite)
 
+  // Handlers
+  const handleCreateTemplate = () => {
+    toast.info('Create Template', {
+      description: 'Opening template builder...'
+    })
+  }
+
+  const handleUseTemplate = (templateName: string) => {
+    toast.success('Using template', {
+      description: `Creating project from "${templateName}"...`
+    })
+  }
+
+  const handleDuplicateTemplate = (templateName: string) => {
+    toast.success('Template duplicated', {
+      description: `Copy of "${templateName}" created`
+    })
+  }
+
+  const handleFavoriteTemplate = (templateName: string) => {
+    toast.success('Added to favorites', {
+      description: `"${templateName}" saved to favorites`
+    })
+  }
+
+  const handleExportTemplate = (templateName: string) => {
+    toast.success('Exporting template', {
+      description: `"${templateName}" will be downloaded`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

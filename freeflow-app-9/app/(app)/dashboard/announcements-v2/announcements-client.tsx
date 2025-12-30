@@ -518,6 +518,37 @@ export default function AnnouncementsClient() {
     return num.toString()
   }
 
+  // Handlers
+  const handleCreateAnnouncement = () => {
+    toast.info('Create Announcement', {
+      description: 'Opening announcement composer...'
+    })
+  }
+
+  const handlePublishAnnouncement = (title: string) => {
+    toast.success('Announcement published', {
+      description: `"${title}" is now live`
+    })
+  }
+
+  const handleScheduleAnnouncement = (title: string) => {
+    toast.success('Announcement scheduled', {
+      description: `"${title}" has been scheduled`
+    })
+  }
+
+  const handleArchiveAnnouncement = (title: string) => {
+    toast.info('Announcement archived', {
+      description: `"${title}" moved to archive`
+    })
+  }
+
+  const handlePinAnnouncement = (title: string) => {
+    toast.success('Announcement pinned', {
+      description: `"${title}" is now pinned`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

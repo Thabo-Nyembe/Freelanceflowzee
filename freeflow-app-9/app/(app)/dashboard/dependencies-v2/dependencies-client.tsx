@@ -456,6 +456,37 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     return 'text-red-600 dark:text-red-400'
   }
 
+  // Handlers
+  const handleUpdateDependency = (depName: string) => {
+    toast.info('Updating dependency', {
+      description: `Updating "${depName}" to latest version...`
+    })
+  }
+
+  const handleScanVulnerabilities = () => {
+    toast.info('Scanning dependencies', {
+      description: 'Running security vulnerability scan...'
+    })
+  }
+
+  const handleFixVulnerability = (vulnId: string) => {
+    toast.success('Fixing vulnerability', {
+      description: `Applying fix for ${vulnId}...`
+    })
+  }
+
+  const handleExportDependencies = () => {
+    toast.success('Exporting dependencies', {
+      description: 'Dependency report will be downloaded'
+    })
+  }
+
+  const handleGenerateSBOM = () => {
+    toast.success('Generating SBOM', {
+      description: 'Software Bill of Materials is being created...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}

@@ -524,6 +524,37 @@ export default function MotionGraphicsClient({
     { label: 'Presets', value: mockPresets.length.toString(), change: 8.3, icon: Wand2, color: 'from-teal-500 to-cyan-600' }
   ]
 
+  // Handlers
+  const handleRenderAnimation = (animationTitle: string) => {
+    toast.info('Rendering started', {
+      description: `"${animationTitle}" is being rendered...`
+    })
+  }
+
+  const handleExportAnimation = (animationTitle: string) => {
+    toast.success('Exporting animation', {
+      description: `"${animationTitle}" will be downloaded shortly`
+    })
+  }
+
+  const handleDuplicateAnimation = (animationTitle: string) => {
+    toast.success('Animation duplicated', {
+      description: `Copy of "${animationTitle}" created`
+    })
+  }
+
+  const handleApplyPreset = (presetName: string) => {
+    toast.success('Preset applied', {
+      description: `"${presetName}" effect applied to timeline`
+    })
+  }
+
+  const handleCreateProject = () => {
+    toast.info('Create Project', {
+      description: 'Opening motion graphics editor...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

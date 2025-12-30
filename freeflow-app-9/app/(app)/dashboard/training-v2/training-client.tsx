@@ -549,6 +549,37 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     return result
   }, [searchQuery, categoryFilter, difficultyFilter])
 
+  // Handlers
+  const handleEnrollCourse = (courseName: string) => {
+    toast.success('Enrolled successfully', {
+      description: `You are now enrolled in "${courseName}"`
+    })
+  }
+
+  const handleStartLesson = (lessonName: string) => {
+    toast.info('Starting lesson', {
+      description: `Loading "${lessonName}"...`
+    })
+  }
+
+  const handleDownloadCertificate = (courseName: string) => {
+    toast.success('Downloading certificate', {
+      description: `Certificate for "${courseName}" will be downloaded`
+    })
+  }
+
+  const handleBookmarkCourse = (courseName: string) => {
+    toast.success('Course bookmarked', {
+      description: `"${courseName}" saved to your learning path`
+    })
+  }
+
+  const handleCreateTrainingPath = () => {
+    toast.info('Create Training Path', {
+      description: 'Opening training path builder...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6 space-y-6">

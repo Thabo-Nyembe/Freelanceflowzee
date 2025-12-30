@@ -429,6 +429,37 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     })
   }
 
+  // Handlers
+  const handleRunTestSuite = (suiteName: string) => {
+    toast.info('Running test suite', {
+      description: `Executing all tests in "${suiteName}"...`
+    })
+  }
+
+  const handleCreateTestCase = () => {
+    toast.info('Create Test Case', {
+      description: 'Opening test case builder...'
+    })
+  }
+
+  const handleExportResults = () => {
+    toast.success('Exporting results', {
+      description: 'Test results will be downloaded shortly'
+    })
+  }
+
+  const handleRerunFailedTests = () => {
+    toast.info('Rerunning failed tests', {
+      description: 'Re-executing failed test cases...'
+    })
+  }
+
+  const handleGenerateReport = () => {
+    toast.success('Generating report', {
+      description: 'QA report is being prepared...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

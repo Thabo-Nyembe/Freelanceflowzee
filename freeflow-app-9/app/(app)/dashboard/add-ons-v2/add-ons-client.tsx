@@ -516,6 +516,37 @@ export default function AddOnsClient() {
   const installedAddOns = useMemo(() => mockAddOns.filter(a => a.status === 'installed'), [])
   const featuredAddOns = useMemo(() => mockAddOns.filter(a => a.isFeatured), [])
 
+  // Handlers
+  const handleInstallAddOn = (addOnName: string) => {
+    toast.success('Installing add-on', {
+      description: `"${addOnName}" is being installed...`
+    })
+  }
+
+  const handleUninstallAddOn = (addOnName: string) => {
+    toast.info('Uninstalling add-on', {
+      description: `Removing "${addOnName}"...`
+    })
+  }
+
+  const handleUpdateAddOn = (addOnName: string) => {
+    toast.info('Updating add-on', {
+      description: `Updating "${addOnName}" to latest version...`
+    })
+  }
+
+  const handleViewAddOnDetails = (addOnName: string) => {
+    toast.info('Loading details', {
+      description: `Opening "${addOnName}" details...`
+    })
+  }
+
+  const handlePurchaseAddOn = (addOnName: string) => {
+    toast.info('Purchase', {
+      description: `Opening checkout for "${addOnName}"...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

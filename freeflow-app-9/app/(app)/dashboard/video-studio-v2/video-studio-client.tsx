@@ -509,6 +509,37 @@ export default function VideoStudioClient() {
     { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 25.8, icon: Download, color: 'from-teal-500 to-green-500' }
   ]
 
+  // Handlers
+  const handleCreateProject = () => {
+    toast.info('Create Project', {
+      description: 'Opening video editor...'
+    })
+  }
+
+  const handleRenderVideo = (projectName: string) => {
+    toast.info('Rendering video', {
+      description: `"${projectName}" is being rendered...`
+    })
+  }
+
+  const handlePublishVideo = (projectName: string) => {
+    toast.success('Publishing video', {
+      description: `"${projectName}" is being published...`
+    })
+  }
+
+  const handleExportVideo = (projectName: string) => {
+    toast.success('Exporting video', {
+      description: `"${projectName}" will be downloaded shortly`
+    })
+  }
+
+  const handleDuplicateProject = (projectName: string) => {
+    toast.success('Project duplicated', {
+      description: `Copy of "${projectName}" created`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

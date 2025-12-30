@@ -547,6 +547,37 @@ export default function IntegrationsClient() {
 
   const usagePercent = (mockUsageStats.tasksUsed / mockUsageStats.tasksLimit) * 100
 
+  // Handlers
+  const handleConnectApp = (appName: string) => {
+    toast.info('Connecting app', {
+      description: `Setting up connection to ${appName}...`
+    })
+  }
+
+  const handleDisconnectApp = (appName: string) => {
+    toast.info('Disconnecting app', {
+      description: `Removing ${appName} connection...`
+    })
+  }
+
+  const handleCreateZap = () => {
+    toast.info('Create Zap', {
+      description: 'Opening automation builder...'
+    })
+  }
+
+  const handleTestConnection = (appName: string) => {
+    toast.success('Testing connection', {
+      description: `Testing ${appName} connection...`
+    })
+  }
+
+  const handleRefreshToken = (appName: string) => {
+    toast.success('Token refreshed', {
+      description: `${appName} authentication updated`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

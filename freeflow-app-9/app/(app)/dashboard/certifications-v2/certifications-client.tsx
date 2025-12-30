@@ -748,6 +748,37 @@ export default function CertificationsClient() {
     return num.toString()
   }
 
+  // Handlers
+  const handleStartCertification = (certName: string) => {
+    toast.info('Starting certification', {
+      description: `Beginning "${certName}" exam...`
+    })
+  }
+
+  const handleDownloadCertificate = (certName: string) => {
+    toast.success('Downloading certificate', {
+      description: `"${certName}" certificate will be downloaded`
+    })
+  }
+
+  const handleShareCertification = (certName: string) => {
+    toast.success('Sharing certification', {
+      description: `"${certName}" share link copied`
+    })
+  }
+
+  const handleRenewCertification = (certName: string) => {
+    toast.info('Renewing certification', {
+      description: `Starting renewal for "${certName}"...`
+    })
+  }
+
+  const handleViewCredential = (certName: string) => {
+    toast.info('Loading credential', {
+      description: `Opening "${certName}" details...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

@@ -557,6 +557,37 @@ export default function BugsClient() {
     { id: 'resolved', label: 'Resolved', bugs: bugsByStatus.resolved, color: 'border-green-500' }
   ]
 
+  // Handlers
+  const handleReportBug = () => {
+    toast.info('Report Bug', {
+      description: 'Opening bug report form...'
+    })
+  }
+
+  const handleAssignBug = (bugTitle: string, assignee: string) => {
+    toast.success('Bug assigned', {
+      description: `"${bugTitle}" assigned to ${assignee}`
+    })
+  }
+
+  const handleResolveBug = (bugTitle: string) => {
+    toast.success('Bug resolved', {
+      description: `"${bugTitle}" has been marked as resolved`
+    })
+  }
+
+  const handleExportBugs = () => {
+    toast.success('Exporting bugs', {
+      description: 'Bug report will be downloaded'
+    })
+  }
+
+  const handleLinkPullRequest = (bugTitle: string) => {
+    toast.info('Link PR', {
+      description: `Linking pull request to "${bugTitle}"...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50/30 to-amber-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

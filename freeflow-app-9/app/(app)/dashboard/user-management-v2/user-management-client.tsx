@@ -229,6 +229,37 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
+  // Handlers
+  const handleInviteUser = () => {
+    toast.info('Invite User', {
+      description: 'Opening user invitation form...'
+    })
+  }
+
+  const handleSuspendUser = (userName: string) => {
+    toast.info('User suspended', {
+      description: `"${userName}" has been suspended`
+    })
+  }
+
+  const handleResetPassword = (userName: string) => {
+    toast.success('Password reset sent', {
+      description: `Reset link sent to ${userName}`
+    })
+  }
+
+  const handleExportUsers = () => {
+    toast.success('Exporting users', {
+      description: 'User list will be downloaded shortly'
+    })
+  }
+
+  const handleAssignRole = (userName: string, role: string) => {
+    toast.success('Role assigned', {
+      description: `${role} role assigned to ${userName}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

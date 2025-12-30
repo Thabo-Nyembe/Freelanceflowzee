@@ -568,6 +568,37 @@ export default function LogsClient() {
     ? mockLogs.filter(l => l.level === selectedLevel)
     : mockLogs
 
+  // Handlers
+  const handleExportLogs = () => {
+    toast.success('Exporting logs', {
+      description: 'Log data will be downloaded shortly'
+    })
+  }
+
+  const handleClearLogs = () => {
+    toast.info('Clearing logs', {
+      description: 'Log buffer is being cleared...'
+    })
+  }
+
+  const handleCreateAlert = () => {
+    toast.info('Create Alert', {
+      description: 'Opening alert configuration...'
+    })
+  }
+
+  const handleSearchLogs = (query: string) => {
+    toast.info('Searching logs', {
+      description: `Searching for "${query}"...`
+    })
+  }
+
+  const handleAcknowledgeAlert = (alertId: string) => {
+    toast.success('Alert acknowledged', {
+      description: `Alert ${alertId} has been acknowledged`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

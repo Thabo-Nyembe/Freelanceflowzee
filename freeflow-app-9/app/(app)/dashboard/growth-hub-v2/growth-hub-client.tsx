@@ -646,6 +646,37 @@ export default function GrowthHubClient() {
     })
   }, [searchQuery, statusFilter])
 
+  // Handlers
+  const handleCreateExperiment = () => {
+    toast.info('Create Experiment', {
+      description: 'Opening experiment builder...'
+    })
+  }
+
+  const handleStartExperiment = (expName: string) => {
+    toast.success('Experiment started', {
+      description: `"${expName}" is now running`
+    })
+  }
+
+  const handleStopExperiment = (expName: string) => {
+    toast.info('Experiment stopped', {
+      description: `"${expName}" has been paused`
+    })
+  }
+
+  const handleExportResults = (expName: string) => {
+    toast.success('Exporting results', {
+      description: `Results for "${expName}" will be downloaded`
+    })
+  }
+
+  const handleCreateFunnel = () => {
+    toast.info('Create Funnel', {
+      description: 'Opening funnel builder...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}

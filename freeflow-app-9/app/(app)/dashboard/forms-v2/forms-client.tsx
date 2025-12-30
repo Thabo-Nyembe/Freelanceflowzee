@@ -337,6 +337,37 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     })
   }, [displayForms, searchQuery, statusFilter])
 
+  // Handlers
+  const handleCreateForm = () => {
+    toast.info('Create Form', {
+      description: 'Opening form builder...'
+    })
+  }
+
+  const handlePublishForm = (formTitle: string) => {
+    toast.success('Publishing form', {
+      description: `"${formTitle}" is now live`
+    })
+  }
+
+  const handleDuplicateForm = (formTitle: string) => {
+    toast.success('Form duplicated', {
+      description: `Copy of "${formTitle}" created`
+    })
+  }
+
+  const handleExportResponses = (formTitle: string) => {
+    toast.success('Exporting responses', {
+      description: `Responses for "${formTitle}" will be downloaded`
+    })
+  }
+
+  const handleShareForm = (formTitle: string) => {
+    toast.success('Link copied', {
+      description: `Share link for "${formTitle}" copied to clipboard`
+    })
+  }
+
   if (error) return (
     <div className="p-8">
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">

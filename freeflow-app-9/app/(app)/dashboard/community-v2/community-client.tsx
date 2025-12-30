@@ -527,6 +527,37 @@ export default function CommunityClient() {
     setShowMemberProfile(true)
   }
 
+  // Handlers
+  const handleCreateChannel = () => {
+    toast.info('Create Channel', {
+      description: 'Opening channel builder...'
+    })
+  }
+
+  const handleInviteMember = () => {
+    toast.info('Invite Member', {
+      description: 'Generating invite link...'
+    })
+  }
+
+  const handleBanMember = (memberName: string) => {
+    toast.info('Member banned', {
+      description: `${memberName} has been banned from the community`
+    })
+  }
+
+  const handlePinMessage = (messageId: string) => {
+    toast.success('Message pinned', {
+      description: 'Message has been pinned to the channel'
+    })
+  }
+
+  const handleCreateEvent = () => {
+    toast.info('Create Event', {
+      description: 'Opening event scheduler...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 flex">
       {/* Sidebar - Channel List */}

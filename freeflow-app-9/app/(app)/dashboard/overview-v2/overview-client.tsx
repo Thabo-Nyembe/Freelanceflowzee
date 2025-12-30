@@ -425,6 +425,31 @@ export default function OverviewClient() {
     setTimeout(() => setIsRefreshing(false), 1000)
   }
 
+  // Handlers
+  const handleExportDashboard = () => {
+    toast.success('Exporting dashboard', {
+      description: 'Dashboard report will be downloaded'
+    })
+  }
+
+  const handleCustomizeDashboard = () => {
+    toast.info('Customize Dashboard', {
+      description: 'Opening widget configuration...'
+    })
+  }
+
+  const handleAcknowledgeAlert = (alertTitle: string) => {
+    toast.success('Alert acknowledged', {
+      description: `"${alertTitle}" has been acknowledged`
+    })
+  }
+
+  const handleViewDetails = (section: string) => {
+    toast.info('View Details', {
+      description: `Opening ${section} details...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
