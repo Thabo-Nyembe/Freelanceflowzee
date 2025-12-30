@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useNotifications, type Notification as DBNotification, type NotificationStatus, type NotificationType, type NotificationPriority } from '@/lib/hooks/use-notifications'
+import { useNotifications, type NotificationStatus, type NotificationType, type NotificationPriority } from '@/lib/hooks/use-notifications'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +16,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Bell,
   Send,
@@ -24,18 +23,11 @@ import {
   Search,
   Filter,
   Users,
-  CheckCircle,
   CheckCircle2,
-  XCircle,
-  Clock,
   Mail,
   Smartphone,
-  Globe,
   MessageSquare,
   BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Target,
   Settings,
   Zap,
   Calendar,
@@ -46,48 +38,23 @@ import {
   Play,
   Pause,
   RefreshCw,
-  AlertTriangle,
-  ArrowRight,
-  Sparkles,
   TestTube,
   Layers,
   Split,
-  ChevronRight,
-  Activity,
   MousePointer,
   Inbox,
   Webhook,
-  Bot,
   Workflow,
-  Timer,
-  GitBranch,
-  Hash,
-  AtSign,
   Slack,
   BellRing,
-  BellOff,
-  Volume2,
-  VolumeX,
   Star,
   MoreHorizontal,
   ExternalLink,
   Download,
   Upload,
   Archive,
-  Bookmark,
-  Flag,
   Link,
-  Image,
-  FileText,
-  Code,
-  Terminal,
-  Key,
-  Shield,
   AlertOctagon,
-  Server,
-  HardDrive,
-  Cpu,
-  CreditCard,
   Sliders
 } from 'lucide-react'
 
@@ -105,10 +72,6 @@ import {
 
 import {
   notificationsAIInsights,
-  notificationsCollaborators,
-  notificationsPredictions,
-  notificationsActivities,
-  notificationsQuickActions,
 } from '@/lib/mock-data/adapters'
 
 // ============================================================================

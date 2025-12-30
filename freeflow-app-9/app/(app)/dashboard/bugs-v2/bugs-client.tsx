@@ -25,53 +25,37 @@ import {
   List,
   BarChart3,
   Settings,
-  Clock,
   AlertTriangle,
   CheckCircle,
   XCircle,
-  CircleDot,
   ArrowRight,
   ArrowUp,
   ArrowDown,
   Minus,
-  ChevronRight,
   MessageSquare,
   Paperclip,
   Link2,
   GitBranch,
   Tag,
-  Calendar,
   Users,
   Target,
   TrendingUp,
-  Activity,
-  FileText,
   Eye,
   Edit,
-  Trash2,
   Copy,
-  MoreHorizontal,
   Flag,
   Zap,
-  RefreshCw,
   Download,
   Upload,
   Layers,
-  GitPullRequest,
   AlertCircle,
   Timer,
   Play,
-  Pause,
   RotateCcw,
   Shield,
   Sliders,
   Bell,
-  Globe,
-  Database,
   Workflow,
-  Mail,
-  Webhook,
-  Terminal,
   Archive,
   History,
   Loader2
@@ -88,13 +72,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-import {
-  bugsAIInsights as _bugsAIInsights,
-  bugsCollaborators as _bugsCollaborators,
-  bugsPredictions as _bugsPredictions,
-  bugsActivities as _bugsActivities,
-  bugsQuickActions as _bugsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Database Types
 interface DbBug {
@@ -1236,7 +1215,7 @@ export default function BugsClient() {
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between mb-2">
                               <span className="text-xs font-medium text-muted-foreground">{bug.key}</span>
-                              <Badge className={getSeverityColor(bug.severity)} className="text-[10px]">{bug.severity}</Badge>
+                              <Badge className={`${getSeverityColor(bug.severity)} text-[10px]`}>{bug.severity}</Badge>
                             </div>
                             <h4 className="text-sm font-medium mb-2 line-clamp-2">{bug.title}</h4>
                             <div className="flex items-center justify-between">

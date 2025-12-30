@@ -9,19 +9,12 @@ import {
   Briefcase, Award, Star, Users, Shield, MessageSquare, Settings,
   Share2, Download, Plus, Search, Eye, Link2, TrendingUp,
   GraduationCap, Building2, FileText, Heart, ThumbsUp, Bookmark,
-  BarChart3, CheckCircle, Clock, ExternalLink, Image, Video,
-  PenTool, Zap, Target, Bell, Lock, Activity, UserPlus, UserCheck,
-  Languages, BookOpen, Lightbulb, Trophy, Medal, Network, Sparkles,
-  ArrowUpRight, ArrowDownRight, MoreHorizontal, Flag, Send,
-  Linkedin, Twitter, Github, Youtube, Instagram, Facebook,
-  Mic, Podcast, Newspaper, FileCode, FolderOpen, Hash,
-  Layers, Palette, Code, Database, Server, Cloud, Terminal,
-  Verified, Crown, Gem, AlertCircle, Info, X, ChevronRight,
-  ChevronDown, Filter, SortAsc, Grid, List, Play, Pause,
-  Volume2, Headphones, Radio, Gift, Coffee, Rocket, Flame,
-  Compass, Map, Navigation, Anchor, Scissors, Wand2, Sliders,
-  Webhook, Key, History, RefreshCw, UserCog, ShieldCheck, FileKey,
-  Trash2, HardDrive, AlertTriangle
+  BarChart3, CheckCircle, Clock, ExternalLink, Image, Video, Zap, Target, Bell, Lock, Activity, UserPlus,
+  Languages, BookOpen, Trophy, Network, Sparkles,
+  ArrowUpRight, ArrowDownRight, MoreHorizontal, Twitter, Github, Youtube,
+  Mic, Podcast, Newspaper, Hash, Database, Terminal, Crown, ChevronRight, Play, Sliders,
+  Webhook, Key, History, RefreshCw,
+  Trash2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -36,13 +29,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  profileAIInsights,
-  profileCollaborators,
-  profilePredictions,
-  profileActivities,
-  profileQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -51,7 +39,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'

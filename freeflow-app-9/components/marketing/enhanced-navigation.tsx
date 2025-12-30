@@ -29,7 +29,6 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
@@ -42,9 +41,7 @@ import {
   DollarSign,
   Sparkles,
   ArrowRight,
-  Star,
-  Gift,
-  ChevronDown
+  Gift
 } from 'lucide-react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { cn } from '@/lib/utils'

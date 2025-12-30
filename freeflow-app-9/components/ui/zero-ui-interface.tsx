@@ -1,29 +1,18 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence, useAnimation } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Mic,
   MicOff,
   Eye,
-  EyeOff,
   Hand,
   Brain,
   Zap,
-  Waves,
   Activity,
-  Pulse,
-  Focus,
-  Compass,
-  Target,
-  Volume2,
-  VolumeX,
-  Vibrate,
-  Bluetooth,
-  Wifi
+  Target
 } from 'lucide-react'
 
 // Context7 MCP Zero-UI Interface Types

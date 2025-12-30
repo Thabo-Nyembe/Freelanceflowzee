@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import { ReactNode, useState } from "react"
+import { useState } from "react"
 import {
   Sparkles,
   Brain,

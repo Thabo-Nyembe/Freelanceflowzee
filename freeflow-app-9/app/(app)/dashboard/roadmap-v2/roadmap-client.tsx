@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,13 +18,7 @@ import {
   Target,
   Calendar,
   TrendingUp,
-  CheckCircle,
-  Clock,
   Users,
-  Star,
-  Zap,
-  Flag,
-  Award,
   BarChart3,
   Plus,
   Eye,
@@ -34,32 +28,16 @@ import {
   MessageSquare,
   ThumbsUp,
   Search,
-  Filter,
-  MoreVertical,
-  ChevronRight,
-  ArrowUpRight,
   Package,
   Rocket,
   Settings,
   GanttChart,
   LayoutGrid,
   List,
-  CalendarDays,
   Play,
-  Pause,
-  AlertTriangle,
   Link2,
-  ExternalLink,
-  Tag,
-  Sparkles,
   Brain,
-  TrendingDown,
   CircleDot,
-  Timer,
-  Building2,
-  FileText,
-  Send,
-  Heart,
   Share2,
   Download,
   Upload,
@@ -67,16 +45,10 @@ import {
   Sliders,
   Bell,
   Webhook,
-  Key,
-  Database,
   Trash2,
-  Lock,
   Globe,
-  HardDrive,
   Terminal,
-  History,
-  RefreshCw,
-  Mail
+  RefreshCw
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -91,13 +63,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  roadmapAIInsights,
-  roadmapCollaborators,
-  roadmapPredictions,
-  roadmapActivities,
-  roadmapQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type InitiativeStatus = 'backlog' | 'planned' | 'in_progress' | 'review' | 'released' | 'archived'

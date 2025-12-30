@@ -9,16 +9,15 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Clock, Play, Pause, Square, Plus, Calendar, BarChart3, Settings, Download, ChevronLeft,
-  ChevronRight, DollarSign, Target, TrendingUp, Users, Briefcase, Tag, Timer, Zap, Edit2,
-  Trash2, FileText, Check, X, RefreshCw, Coffee, AlertCircle, ArrowUp, Receipt, Send,
-  CheckCircle, XCircle, Eye, MoreHorizontal, Building2, Mail, Bell, Shield, Lock, Filter,
-  Key, Webhook, AlertOctagon, Sliders, Network, HardDrive, Cpu, Globe, CreditCard, Archive, Trash2 as TrashIcon,
+  ChevronRight, DollarSign, Target, TrendingUp, Users, Briefcase, Tag, Timer, Edit2,
+  Trash2, FileText, Check, X, RefreshCw, Coffee, AlertCircle, Receipt, Send,
+  CheckCircle, Eye, MoreHorizontal, Building2, Mail, Bell, Shield, Lock,
+  Key, AlertOctagon, Sliders, Network, HardDrive, CreditCard, Archive, Trash2 as TrashIcon,
   Printer, Copy, Repeat, RefreshCcw
 } from 'lucide-react'
 

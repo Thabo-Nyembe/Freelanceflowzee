@@ -11,18 +11,18 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Receipt, DollarSign, CheckCircle, XCircle, Clock, Search, Filter,
-  Upload, Camera, CreditCard, Plane, Car, Coffee, ShoppingBag, Briefcase,
+  Receipt, DollarSign, CheckCircle, XCircle, Clock, Search,
+  Upload, Camera, CreditCard, Plane, Car, Coffee, ShoppingBag,
   Building, Globe, TrendingUp, Calendar, FileText, Download, AlertTriangle,
-  BarChart3, PieChart, Users, Send, Plus, MoreVertical, ChevronRight,
-  Banknote, MapPin, Percent, Shield, ArrowRight, Eye, Settings, Bell, Link2,
-  Key, Database, Lock, RefreshCw, Mail, Webhook, Palette, Languages, Timer,
-  Wallet, CreditCard as CreditCardIcon, Building2, UserCog
+  BarChart3, PieChart, Users, Send, Plus, ChevronRight,
+  Banknote, MapPin, Shield, ArrowRight, Settings, Bell, Link2,
+  Key, Database, RefreshCw, Mail, Webhook, Timer,
+  Wallet, Building2, UserCog
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -38,13 +38,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-import {
-  expensesAIInsights,
-  expensesCollaborators,
-  expensesPredictions,
-  expensesActivities,
-  expensesQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 // Types
 type ExpenseStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'reimbursed' | 'processing'
 type ExpenseCategory = 'travel' | 'meals' | 'transport' | 'lodging' | 'supplies' | 'software' | 'entertainment' | 'other'

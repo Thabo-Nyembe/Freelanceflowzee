@@ -3,20 +3,11 @@
 import React, { useReducer } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   ThumbsUp,
   MessageSquare,
-  Voicemail,
-  ScreenShare,
   Send,
   CheckCircle,
-  File,
-  Figma,
-  Video,
-  FileText,
-  MoreVertical,
-  ChevronDown,
   AlertCircle,
   Clock,
   Play,

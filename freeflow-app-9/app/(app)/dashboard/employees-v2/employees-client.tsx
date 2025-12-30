@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee, Employee as DBEmployee } from '@/lib/hooks/use-employees'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,18 +11,17 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Users, UserPlus, Briefcase, Award, TrendingUp, DollarSign, Eye, MessageCircle, Mail, Star,
-  Search, Filter, Calendar, Clock, Gift, Heart, Target, FileText, CheckCircle, XCircle,
-  ChevronRight, ChevronDown, Building2, MapPin, Phone, Globe, GraduationCap, Medal, Zap,
-  Settings, Download, Upload, MoreHorizontal, Edit3, Trash2, Send, Bell, BookOpen, Cake,
-  Plane, Umbrella, Coffee, Home, Video, BarChart3, PieChart, TrendingDown, ArrowUpRight,
-  UserCheck, UserMinus, Layers, Wallet, CreditCard, Percent, Shield, Lock, Key, Plus,
-  Play, Award as Trophy, BookMarked, Monitor, FileCheck, Clipboard, Activity
+  Users, UserPlus, Briefcase, DollarSign, Eye, MessageCircle, Mail, Star,
+  Search, Calendar, Clock, Heart, Target, FileText, CheckCircle, XCircle,
+  ChevronRight, ChevronDown, Building2, MapPin, Phone, GraduationCap, Zap,
+  Settings, Download, Upload, Edit3, Trash2, Bell, BookOpen, Cake,
+  Plane, Umbrella, Coffee, Home, BarChart3, TrendingDown, ArrowUpRight,
+  UserCheck, UserMinus, Layers, Wallet, Shield, Lock, Key, Plus,
+  Play, FileCheck, Clipboard, Activity
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

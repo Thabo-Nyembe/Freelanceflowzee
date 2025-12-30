@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Plug,
   Search,
@@ -32,29 +30,22 @@ import {
   RefreshCw,
   Settings,
   BarChart3,
-  GitBranch,
   Webhook,
   Key,
   Activity,
   TrendingUp,
-  Calendar,
   Mail,
   MessageSquare,
-  Database,
   Cloud,
   CreditCard,
-  ShoppingCart,
   FileText,
   Users,
   Globe,
-  Smartphone,
   Code,
   Lock,
   Trash2,
   Edit,
   Copy,
-  ExternalLink,
-  ChevronRight,
   Loader2,
   History,
   RotateCcw,
@@ -65,14 +56,13 @@ import {
   Link,
   PieChart,
   AlertCircle,
-  Workflow,
-  Sparkles
+  Workflow
 } from 'lucide-react'
 
 // Hooks
 import { useIntegrations, type Integration } from '@/lib/hooks/use-integrations'
-import { useWorkflows, type Workflow as WorkflowType, type WorkflowStats } from '@/lib/hooks/use-workflows'
-import { useWebhooks, type Webhook as WebhookType, type WebhookStats } from '@/lib/hooks/use-webhooks'
+import { useWorkflows, type Workflow as WorkflowType } from '@/lib/hooks/use-workflows'
+import { useWebhooks, type Webhook as WebhookType } from '@/lib/hooks/use-webhooks'
 
 // Enhanced & Competitive Upgrade Components
 import {

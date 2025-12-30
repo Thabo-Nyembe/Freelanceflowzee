@@ -1,36 +1,26 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   Package,
   Plus,
   Search,
   Settings,
-  BarChart3,
   Download,
   Star,
   Users,
   Code,
-  X,
   Loader2,
-  Trash2,
-  ExternalLink,
   Eye,
-  Edit,
   Copy,
-  Heart,
   Bookmark,
   BookmarkCheck,
   Grid3X3,
   List,
-  Filter,
   TrendingUp,
-  Clock,
-  Tag,
   Layers,
   Puzzle,
-  Palette,
   Zap,
   Shield,
   CheckCircle2,
@@ -38,9 +28,6 @@ import {
   Github,
   FileCode,
   Play,
-  MoreHorizontal,
-  Share2,
-  Flag,
   Award,
   Sparkles,
   Box,
@@ -48,24 +35,13 @@ import {
   Layout,
   Type,
   ToggleLeft,
-  Table2,
   PieChart,
-  LineChart,
   Image,
   MessageSquare,
-  Calendar,
-  ArrowUpRight,
   RefreshCw,
   Bell,
   Key,
-  Webhook,
-  Mail,
-  AlertOctagon,
-  Sliders,
-  Globe,
-  Lock,
-  HardDrive,
-  Trash2 as TrashIcon
+  Sliders
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -87,11 +63,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 
 // Import widget library hook
@@ -317,7 +291,7 @@ export default function WidgetLibraryClient() {
 
   // Filtered widgets
   const filteredWidgets = useMemo(() => {
-    let result = widgets.filter(widget => {
+    const result = widgets.filter(widget => {
       const matchesSearch = widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         widget.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         widget.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))

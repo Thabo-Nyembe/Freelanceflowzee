@@ -9,7 +9,7 @@
  * @date August 6, 2025
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth/hooks';
@@ -27,15 +27,12 @@ import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { fetchWithAuth } from '@/lib/fetch-utils';
 import { formatDistanceToNow, format } from 'date-fns';
 import { 
   CheckCircle2, 
-  XCircle, 
   AlertCircle, 
   Loader2, 
   RefreshCw, 
@@ -49,7 +46,6 @@ import {
   BarChart2,
   Activity,
   AlertTriangle,
-  HelpCircle,
   Info,
   Terminal,
   ArrowUpRight

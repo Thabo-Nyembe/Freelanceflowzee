@@ -14,7 +14,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWebSocket } from '@/hooks/use-websocket'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -28,8 +27,7 @@ import {
   WifiOff,
   Circle,
   X,
-  Minimize2,
-  Maximize2
+  Minimize2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createFeatureLogger } from '@/lib/logger'

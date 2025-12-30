@@ -20,7 +20,6 @@ import {
   Settings,
   Activity
 } from 'lucide-react';
-import { useVideoStatus, VideoStatus } from '@/hooks/useVideoStatus';
 
 export default function VideoStatusDemoPage() {
   const [demoVideoId, setDemoVideoId] = useState<any>('');

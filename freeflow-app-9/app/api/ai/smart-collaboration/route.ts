@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { createFeatureLogger } from '@/lib/logger'
 
@@ -7,8 +6,7 @@ const logger = createFeatureLogger('API-SmartCollaboration')
 import { SmartCollaborationAI, 
   SmartCollaborationFeatureType, 
   CollaborationContextType,
-  DocumentType,
-  AISuggestionType
+  DocumentType
 } from '@/lib/ai/smart-collaboration-ai';
 import { WebSocketServer } from '@/lib/websocket-server';
 import { rateLimit } from '@/lib/rate-limit';

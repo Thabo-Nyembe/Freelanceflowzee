@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   ChevronRight, 
   Home, 
@@ -14,7 +14,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Clock,
-  Bookmark,
   Star,
   Settings
 } from 'lucide-react'

@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -20,14 +19,10 @@ import {
 } from '@/components/ui/dialog'
 import {
   Video,
-  VideoOff,
-  Mic,
-  MicOff,
   Users,
   Calendar,
   Clock,
   Play,
-  Pause,
   Settings,
   BarChart3,
   Plus,
@@ -35,7 +30,6 @@ import {
   Mail,
   MessageSquare,
   HelpCircle,
-  Layout,
   PlayCircle,
   Download,
   Upload,
@@ -43,17 +37,12 @@ import {
   Edit,
   Copy,
   MoreHorizontal,
-  ExternalLink,
-  ChevronRight,
   Share2,
   Link,
   CheckCircle2,
-  XCircle,
-  AlertCircle,
   TrendingUp,
   Eye,
   FileText,
-  Zap,
   Bell,
   Globe,
   Lock,
@@ -62,40 +51,24 @@ import {
   UserX,
   Send,
   RefreshCw,
-  Circle,
   Radio,
-  Hand,
   MessageCircle,
   BarChart2,
   PieChart,
   Timer,
-  StopCircle,
   Filter,
-  Star,
   ThumbsUp,
-  ThumbsDown,
   ListChecks,
   Presentation,
   MonitorPlay,
   Headphones,
-  Volume2,
-  VolumeX,
-  ScreenShare,
-  ScreenShareOff,
-  Maximize2,
-  Minimize2,
-  Gift,
-  Award,
-  Target,
   Sparkles,
   Shield,
   Sliders,
   Webhook,
   Key,
   Database,
-  HardDrive,
   Terminal,
-  History,
   AlertTriangle
 } from 'lucide-react'
 

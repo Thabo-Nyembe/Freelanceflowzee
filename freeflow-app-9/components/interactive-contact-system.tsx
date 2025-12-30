@@ -10,14 +10,7 @@ import {
     MapPin,
     Calendar,
     Copy,
-    Check,
-    Clock,
-    Globe,
-    Star,
-    Shield,
-    Users,
-    ChevronRight,
-    Zap
+    Check
 } from 'lucide-react'
 import {
     Card,

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
@@ -26,13 +26,10 @@ import {
   Tag,
   Calendar,
   Settings,
-  Play,
   Pause,
   Download,
-  FileText,
   Users,
   GitCommit,
-  GitMerge,
   GitPullRequest,
   Eye,
   Edit,
@@ -43,20 +40,12 @@ import {
   Search,
   Filter,
   Plus,
-  ChevronDown,
   ChevronRight,
   RefreshCw,
   AlertTriangle,
-  Archive,
-  Star,
-  History,
   RotateCcw,
   Zap,
-  Shield,
   Server,
-  Globe,
-  Terminal,
-  FileCode,
   Activity,
   BarChart3,
   Loader2
@@ -73,13 +62,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-import {
-  releasesAIInsights,
-  releasesCollaborators,
-  releasesPredictions,
-  releasesActivities,
-  releasesQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Database Types
 interface DbRelease {

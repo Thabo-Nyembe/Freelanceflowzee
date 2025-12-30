@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,68 +8,48 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { useTickets, useTicketMutations, useTicketMessageMutations, SupportTicket as DBSupportTicket } from '@/lib/hooks/use-tickets'
+import { useTickets, useTicketMutations, useTicketMessageMutations } from '@/lib/hooks/use-tickets'
 import {
   Ticket,
   MessageSquare,
   Clock,
-  CheckCircle2,
   XCircle,
   AlertTriangle,
   Users,
-  Calendar,
-  Filter,
   Download,
   Plus,
   Search,
-  Eye,
   Mail,
   Zap,
   Award,
   TrendingUp,
   Send,
-  Paperclip,
-  MoreVertical,
   Star,
   ThumbsUp,
   ThumbsDown,
   Phone,
   Globe,
   Headphones,
-  Bot,
   ArrowUp,
-  ArrowDown,
   RefreshCw,
   Tag,
-  Flag,
   User,
   Building2,
   Shield,
   AlertCircle,
   CheckCircle,
-  XOctagon,
   Hourglass,
   Timer,
   BarChart3,
   PieChart,
-  Activity,
-  BookOpen,
-  HelpCircle,
-  FileText,
-  Link2,
-  ExternalLink,
-  Copy,
   Trash2,
-  Edit,
-  ChevronRight,
-  ChevronDown,
   UserPlus,
   ArrowRight,
   Settings,
@@ -91,13 +71,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  ticketsAIInsights,
-  ticketsCollaborators,
-  ticketsPredictions,
-  ticketsActivities,
-  ticketsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type TicketStatus = 'new' | 'open' | 'pending' | 'on-hold' | 'solved' | 'closed'

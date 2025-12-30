@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Dialog,
   DialogContent,
@@ -33,7 +32,6 @@ import {
   AlertTriangle,
   BarChart3,
   GitCommit,
-  ArrowRight,
   Calendar,
   Users,
   FileText,
@@ -59,10 +57,6 @@ import {
   StopCircle,
   RotateCcw,
   ExternalLink,
-  ChevronRight,
-  ChevronDown,
-  Layers,
-  Box,
   Database,
   Cpu,
   HardDrive,
@@ -71,19 +65,13 @@ import {
   Tag,
   Filter,
   TrendingUp,
-  TrendingDown,
-  AlertCircle,
-  Info,
-  CheckSquare,
   Circle,
-  CircleDot,
   Sliders,
   Webhook,
   Bell,
   Mail,
   Archive,
   FileCode,
-  Folder,
   History,
   GitMerge
 } from 'lucide-react'
@@ -101,13 +89,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  ciCdAIInsights,
-  ciCdCollaborators,
-  ciCdPredictions,
-  ciCdActivities,
-  ciCdQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type WorkflowStatus = 'success' | 'failure' | 'running' | 'cancelled' | 'queued' | 'pending'

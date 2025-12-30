@@ -1,8 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 import { useHotkeys } from "react-hotkeys-hook"
 
 // UI Components
@@ -32,7 +31,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   Tabs,
@@ -41,25 +39,17 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 
 // Icons
 import {
   Keyboard,
   Accessibility,
   Eye,
-  EyeOff,
   Volume2,
-  VolumeX,
-  Type,
-  Contrast,
   Palette,
   Mouse,
-  Zap,
-  HelpCircle,
   Settings,
   Command,
-  Option,
   ArrowUp,
   ArrowDown,
   ArrowLeft,
@@ -72,26 +62,7 @@ import {
   Alt,
   Escape,
   Plus,
-  Minus,
-  Save,
-  Copy,
-  Cut,
-  Undo,
-  Redo,
-  Search,
-  Filter,
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  Mic,
-  Square,
-  CirclePlay,
-  FileText,
-  MessageCircle,
-  Star,
-  Check,
-  X
+  Minus
 } from "lucide-react"
 
 // Types

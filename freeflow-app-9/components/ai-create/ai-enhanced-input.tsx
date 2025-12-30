@@ -32,7 +32,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import {
   Sparkles, Send, Loader2, Wand2, ChevronDown, ChevronUp,
-  Check, X, Copy, RefreshCw
+  Check, X, Copy
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {

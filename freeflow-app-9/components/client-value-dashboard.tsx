@@ -8,12 +8,10 @@ import {
   Award,
   Target,
   BarChart3,
-  PieChart,
   ArrowUpRight,
   ArrowDownRight,
   Calculator,
-  Download,
-  Info
+  Download
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

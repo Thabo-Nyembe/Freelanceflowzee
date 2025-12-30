@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { Shield, Lock, Award, CheckCircle, Star, Users, Globe, Zap } from 'lucide-react'
+import { Shield, Lock, Award, CheckCircle, Star, Users, Globe } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 export function TrustBadges() {

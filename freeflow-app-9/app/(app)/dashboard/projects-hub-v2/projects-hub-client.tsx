@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useProjects, Project as DbProject } from '@/lib/hooks/use-projects'
+import { useProjects } from '@/lib/hooks/use-projects'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,19 +12,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   FolderOpen, Plus, Search, Filter, DollarSign, Users, CheckCircle2, Calendar, TrendingUp,
-  Briefcase, Eye, Edit, Clock, Target, BarChart3, Settings, ArrowUpRight, Trash2, LayoutGrid,
-  List, GanttChartSquare, ChevronDown, MoreHorizontal, Flag, Tag, MessageSquare, Archive, Star,
-  Sparkles, Zap, Timer, AlertTriangle, CheckSquare, Play, Pause, Milestone, GitBranch, Layers,
-  PieChart, ArrowRight, RefreshCw, Copy, Workflow, FileText, Bell, Shield, Link, ExternalLink, Activity,
-  Key, Webhook, Database, Lock, Palette, AlertOctagon, Mail, Globe, Upload, Download,
-  BellRing, Slack, MessageCircle, Inbox, Layout, Gauge, Code, Rss, Monitor, Smartphone,
-  Package, Hash, Columns, ChevronRight
+  Briefcase, Edit, Target, BarChart3, Settings, Trash2, LayoutGrid,
+  List, GanttChartSquare, ChevronDown, MoreHorizontal, Flag, Tag, MessageSquare, Archive, Star, Zap, Timer, AlertTriangle, CheckSquare, Play, Milestone, GitBranch, Layers, ArrowRight, RefreshCw, Copy, Workflow, FileText, Bell, Shield, Link, ExternalLink, Activity,
+  Key, Webhook, Database, Lock, AlertOctagon, Mail, Globe, Upload, Download,
+  BellRing, Slack, Layout, Code, Hash, Columns, ChevronRight
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -39,8 +36,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
-import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
 
 // Centralized Mock Data - Investor-Ready
 import {

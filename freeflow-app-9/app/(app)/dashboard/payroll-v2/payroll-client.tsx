@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,26 +23,21 @@ import {
   Building2,
   PieChart,
   TrendingUp,
-  TrendingDown,
   CheckCircle2,
   AlertCircle,
   XCircle,
   PlayCircle,
-  PauseCircle,
   Search,
   Filter,
   Download,
   Upload,
   Plus,
-  MoreHorizontal,
   Eye,
   Edit,
   Trash2,
   Send,
   RefreshCw,
   ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
   Banknote,
   Receipt,
   Calculator,
@@ -52,16 +46,12 @@ import {
   Heart,
   GraduationCap,
   Plane,
-  Car,
   Home,
   Wallet,
   Settings,
   Bell,
-  HelpCircle,
   BarChart3,
-  Globe,
   Lock,
-  UserCheck,
   FileClock,
   Landmark,
   Scale,

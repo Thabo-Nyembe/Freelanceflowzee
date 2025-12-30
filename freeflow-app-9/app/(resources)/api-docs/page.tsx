@@ -1,20 +1,13 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Code,
   Copy,
-  CheckCircle,
-  AlertCircle,
-  ExternalLink
+  CheckCircle
 } from 'lucide-react'
 
 // A+++ UTILITIES

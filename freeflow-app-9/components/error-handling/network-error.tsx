@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+import { RefreshCw, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 
 export function NetworkErrorHandler() {
   const [isOnline, setIsOnline] = useState<any>(true)

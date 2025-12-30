@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { 
-  Plus, Clock, AlertCircle, CheckCircle2, Calendar, 
+  Plus, Clock, CheckCircle2, 
   Users, Target, Mail, Send, Edit3, Trash2, Bell
 } from 'lucide-react'
 

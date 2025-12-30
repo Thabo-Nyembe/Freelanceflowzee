@@ -15,9 +15,7 @@ import {
   ArrowLeft, 
   Share2, 
   BookOpen,
-  Heart,
-  MessageCircle,
-  ExternalLink
+  Heart
 } from 'lucide-react'
 
 // Mock blog data - replace with actual data fetching

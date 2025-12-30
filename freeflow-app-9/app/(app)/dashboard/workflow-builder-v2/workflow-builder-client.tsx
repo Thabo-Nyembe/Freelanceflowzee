@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,26 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-  DialogFooter, DialogTrigger
+  DialogFooter
 } from '@/components/ui/dialog'
 import {
   GitBranch, Plus, Play, Pause, Save, Settings, Zap, CheckCircle,
-  XCircle, Clock, Activity, Copy, Trash2, Loader2, Search, Filter,
-  MoreHorizontal, ChevronRight, ArrowRight, Diamond, Database, Mail,
+  XCircle, Clock, Activity, Copy, Trash2, Loader2, Search, Filter, ArrowRight, Diamond, Database, Mail,
   MessageSquare, Webhook, Calendar, FileText, Globe, Code, Terminal,
   Box, Layers, Repeat, Split, Merge, AlertTriangle, RefreshCw, Download,
-  Upload, Share2, History, Bug, Eye, ZoomIn, ZoomOut, Move, Maximize2,
-  Minimize2, LayoutGrid, Sparkles, Cpu, Lock, Unlock, Star, BarChart3,
-  MousePointer, Link2, Unlink, RotateCcw, Undo, Redo, Grid, Grip,
-  FolderOpen, Users, Key, ShieldCheck, Package, GitCommit, GitMerge,
-  GitPullRequest, Tag, Timer, TrendingUp, TrendingDown, AlertCircle,
-  Info, HelpCircle, ExternalLink, Clipboard, Check, X, MoreVertical,
-  ChevronDown, ChevronUp, Folder, FilePlus, FileCode, Workflow, Route,
-  Network, Shuffle, SlidersHorizontal, Gauge, Target, Crosshair,
-  Bell, Shield, HardDrive, Server, Sliders, AlertOctagon, CreditCard, Archive
+  Upload, Share2, History, Bug, Eye, LayoutGrid, Sparkles, Cpu, Lock, Star, RotateCcw, Users, Key, Timer, Clipboard, MoreVertical, FileCode, Workflow,
+  Network, Shuffle, SlidersHorizontal, Target,
+  Bell, Shield, Server, Sliders, AlertOctagon, Archive
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

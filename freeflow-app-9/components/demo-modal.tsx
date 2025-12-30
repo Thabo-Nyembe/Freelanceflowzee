@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { X, Play, Pause, Volume2, Maximize2 } from 'lucide-react'
+import { X, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 

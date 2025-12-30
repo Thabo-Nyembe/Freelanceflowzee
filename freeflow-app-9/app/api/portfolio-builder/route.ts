@@ -644,7 +644,7 @@ export async function POST(request: NextRequest) {
 
       case 'add-section': {
         const { portfolioId, pageId, sectionType, position } = params;
-        let portfolio = portfoliosDb.get(portfolioId) || createDefaultPortfolio(userId, 'Portfolio');
+        const portfolio = portfoliosDb.get(portfolioId) || createDefaultPortfolio(userId, 'Portfolio');
         portfolio.id = portfolioId;
 
         const page = pageId ? portfolio.pages.find(p => p.id === pageId) : portfolio.pages.find(p => p.isHomepage);

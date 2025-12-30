@@ -49,8 +49,6 @@ import {
   Box,
   GripVertical,
   RotateCcw,
-  Eye,
-  EyeOff,
   Crown,
   Target,
   Mail,
@@ -58,7 +56,6 @@ import {
   BarChart2,
   Save,
   Trash2,
-  Play,
   Bookmark,
   Star,
   CheckCircle2

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -18,13 +17,12 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   Users, Plus, Mail, Phone, DollarSign, TrendingUp, MessageSquare, UserPlus,
   Building2, Target, Search, Filter, MoreVertical, Star, Calendar, Clock,
-  ArrowRight, ChevronRight, Settings, Download, RefreshCw, Tag, Briefcase,
-  Activity, BarChart3, PieChart, Zap, Send, CheckCircle2, XCircle, Pause,
-  FileText, Link2, Globe, MapPin, Linkedin, Twitter, Award, History,
-  ArrowUpRight, ArrowDownRight, Eye, Trash2, Edit, Copy, Bell, Play,
-  GitBranch, Layers, Bot, Workflow, Sparkles, Cog, ShieldCheck, UserCog,
-  TrendingDown, Percent, Timer, AlertCircle, CheckCircle, LayoutGrid,
-  List, Kanban, FolderOpen, Archive, Heart, ThumbsUp, Share2, ExternalLink,
+  ArrowRight, Settings, Download, RefreshCw, Briefcase,
+  Activity, BarChart3, Zap, CheckCircle2,
+  FileText, Link2, Globe, MapPin, Linkedin, Award,
+  ArrowUpRight, ArrowDownRight, Trash2, Edit, Bell, Play,
+  GitBranch, Workflow, Cog, AlertCircle, CheckCircle, LayoutGrid,
+  List, Kanban, Archive,
   Loader2
 } from 'lucide-react'
 import { useSupabaseQuery, useSupabaseMutation, useRealtimeSubscription } from '@/lib/hooks/use-supabase-helpers'
@@ -32,7 +30,6 @@ import { useSupabaseQuery, useSupabaseMutation, useRealtimeSubscription } from '
 // Competitive Upgrade Components
 import {
   AIInsightsPanel,
-  Sparkline,
   CollaborationIndicator,
   PredictiveAnalytics,
 } from '@/components/ui/competitive-upgrades'
@@ -55,7 +52,6 @@ import {
   crmPredictions,
   crmQuickActions,
   crmPipelineStages,
-  companyInfo,
 } from '@/lib/mock-data/adapters'
 
 // Types

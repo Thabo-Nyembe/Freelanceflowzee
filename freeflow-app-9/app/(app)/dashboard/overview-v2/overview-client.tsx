@@ -11,19 +11,13 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
-  LayoutDashboard, TrendingUp, TrendingDown, Users, DollarSign, Activity,
-  AlertTriangle, AlertCircle, CheckCircle, XCircle, Clock, Zap, Server,
-  Database, Globe, Cpu, HardDrive, Wifi, RefreshCw, Settings, Bell, Plus,
-  Search, Filter, Calendar, ChevronRight, MoreHorizontal, Eye, Download,
-  Share2, Star, ArrowUpRight, ArrowDownRight, BarChart3, LineChart, PieChart,
-  Target, Layers, Box, GitBranch, Cloud, Shield, Lock, Play, Pause,
-  ExternalLink, Copy, Maximize2, Grid, List, MapPin, Gauge, Terminal,
-  FileText, Hash, Network, Radio, Thermometer, Droplets, Wind, Timer,
-  CircleDot, Sparkles, Rocket, TrendingUp as TrendUp,
-  Key, Webhook, Sliders, AlertOctagon, CreditCard, Archive, Trash2, Edit3, Mail,
+  LayoutDashboard, TrendingUp, TrendingDown, Activity,
+  AlertTriangle, AlertCircle, CheckCircle, XCircle, Zap, Server, Globe, Cpu, RefreshCw, Settings, Bell, Plus,
+  Search, Filter, MoreHorizontal, Download, ArrowUpRight, ArrowDownRight, BarChart3,
+  Target, Cloud, Play,
+  ExternalLink, Copy, Gauge, Timer, Webhook, Sliders, AlertOctagon, Trash2, Edit3, Mail,
   Loader2
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
@@ -33,7 +27,6 @@ import { CardDescription } from '@/components/ui/card'
 // Competitive Upgrade Components
 import {
   AIInsightsPanel,
-  Sparkline,
   CollaborationIndicator,
   PredictiveAnalytics,
 } from '@/components/ui/competitive-upgrades'
@@ -43,13 +36,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  overviewAIInsights,
-  overviewCollaborators,
-  overviewPredictions,
-  overviewActivities,
-  overviewQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // DATABASE TYPES

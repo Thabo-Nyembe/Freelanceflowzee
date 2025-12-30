@@ -16,7 +16,6 @@ import { Switch } from '@/components/ui/switch'
 import {
   Bell,
   BellRing,
-  BellOff,
   AlertTriangle,
   AlertCircle,
   AlertOctagon,
@@ -24,9 +23,7 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Calendar,
   Users,
-  User,
   UserCheck,
   Phone,
   Mail,
@@ -36,31 +33,11 @@ import {
   Filter,
   Search,
   Plus,
-  MoreHorizontal,
-  Play,
-  Pause,
   RefreshCw,
-  Zap,
   Activity,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  Shield,
   Server,
-  Database,
-  Cloud,
-  Cpu,
-  HardDrive,
-  Wifi,
-  Globe,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  Volume2,
   VolumeX,
   ArrowUp,
-  ArrowDown,
   ChevronRight,
   ExternalLink,
   Copy,
@@ -71,16 +48,10 @@ import {
   Layers,
   Target,
   Timer,
-  Siren,
-  Radio,
   PhoneCall,
   MessageCircle,
   Slack,
-  Send,
-  Key,
   Sliders,
-  Archive,
-  CreditCard,
   Download
 } from 'lucide-react'
 
@@ -96,13 +67,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  alertsAIInsights,
-  alertsCollaborators,
-  alertsPredictions,
-  alertsActivities,
-  alertsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Dialog,
   DialogContent,
@@ -36,13 +36,10 @@ import {
   Search,
   Calendar,
   Eye,
-  Lock,
-  Unlock,
   Trash2,
   Edit,
   Plus,
   LogIn,
-  LogOut,
   Globe,
   MapPin,
   Monitor,
@@ -58,31 +55,17 @@ import {
   Play,
   Pause,
   AlertCircle,
-  Info,
   Zap,
   BarChart3,
-  PieChart,
-  Users,
-  Building,
   ChevronRight,
   Copy,
   ExternalLink,
   Terminal,
   Code,
-  Layers,
   Archive,
-  FileWarning,
   ShieldCheck,
-  ShieldAlert,
-  Fingerprint,
-  Cpu,
-  HardDrive,
-  Wifi,
-  WifiOff,
   Sliders,
   Webhook,
-  Upload,
-  Mail,
   Loader2
 } from 'lucide-react'
 
@@ -99,13 +82,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  auditLogsAIInsights,
-  auditLogsCollaborators,
-  auditLogsPredictions,
-  auditLogsActivities,
-  auditLogsQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Datadog/Splunk Level Audit Logging

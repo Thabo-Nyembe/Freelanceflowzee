@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
@@ -21,13 +21,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
+
+
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Progress } from "@/components/ui/progress"
 
 // Icons
 import {
@@ -37,23 +33,17 @@ import {
   Pencil,
   Mouse,
   Activity,
-  Clock,
   Wifi,
   WifiOff,
   Circle,
-  Zap,
   Volume2,
   VolumeX,
   Bell,
-  BellOff,
-  Settings,
   User,
   Crown,
   Shield,
-  Star,
   MapPin,
   Radio,
-  Headphones,
   Monitor,
   Smartphone,
   Tablet

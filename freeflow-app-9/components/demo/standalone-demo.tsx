@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, BarChart3, Sparkles, CheckCircle, Award, DollarSign, TrendingUp, Star, ArrowRight, ShieldCheck, BrainCircuit, MessageSquare, LayoutDashboard } from 'lucide-react';
+import { Users, BarChart3, Sparkles, CheckCircle, Award, DollarSign, TrendingUp, Star, ArrowRight } from 'lucide-react';
 
 // Built-in demo data
 const demoData = {

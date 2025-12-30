@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,21 +18,15 @@ import {
   Database,
   Server,
   Cloud,
-  CloudUpload,
   Download,
-  Upload,
   Archive,
   Shield,
   ShieldCheck,
   ShieldAlert,
   Clock,
-  Calendar,
   CheckCircle2,
   XCircle,
-  AlertCircle,
-  AlertTriangle,
   Play,
-  Pause,
   RotateCw,
   RefreshCw,
   Settings,
@@ -41,24 +34,13 @@ import {
   Filter,
   Plus,
   MoreHorizontal,
-  Trash2,
   Eye,
   FileArchive,
-  FolderSync,
   Activity,
-  TrendingUp,
-  TrendingDown,
   BarChart3,
-  Zap,
   Lock,
-  Unlock,
   Copy,
-  ExternalLink,
   History,
-  Layers,
-  Box,
-  Cpu,
-  Wifi,
   Globe,
   Timer,
   Target,
@@ -67,28 +49,11 @@ import {
   Scale,
   Gavel,
   Building2,
-  Map,
-  MapPin,
-  ClipboardCheck,
-  Fingerprint,
   Key,
-  Users,
-  UserCheck,
   Bell,
-  BellRing,
-  Send,
-  MailCheck,
-  FileWarning,
-  FileClock,
   FolderLock,
-  Package,
-  Boxes,
   Network,
-  GitBranch,
-  Info,
-  HelpCircle,
   Sliders,
-  Terminal,
   Webhook
 } from 'lucide-react'
 
@@ -104,13 +69,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  backupsAIInsights,
-  backupsCollaborators,
-  backupsPredictions,
-  backupsActivities,
-  backupsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { CardDescription } from '@/components/ui/card'
 

@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useSupportTickets, SupportTicket, SupportStats } from '@/lib/hooks/use-support-tickets'
-import { createSupportTicket, deleteSupportTicket, resolveTicket, closeTicket, assignTicket, escalateTicket } from '@/app/actions/support-tickets'
+import { createSupportTicket, deleteSupportTicket, resolveTicket, escalateTicket } from '@/app/actions/support-tickets'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -16,16 +16,13 @@ import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  Ticket, Search, Filter, Plus, Clock, AlertTriangle, CheckCircle, XCircle,
-  User, Mail, Phone, MessageSquare, Send, Paperclip, Star, StarOff,
-  MoreHorizontal, ChevronRight, ChevronDown, Tag, Users, BarChart3,
-  Timer, Zap, FileText, Link2, Merge, Split, Flag, Archive, Trash2,
-  ThumbsUp, ThumbsDown, Smile, Meh, Frown, TrendingUp, TrendingDown,
-  Eye, EyeOff, Lock, Unlock, RefreshCw, Download, Upload, Settings,
-  Inbox, UserCheck, Hourglass, CheckCheck, AlertCircle, Calendar,
-  Bot, Sparkles, Copy, ExternalLink, History, MessageCircle,
-  Bell, Key, Webhook, Database, Shield, Cpu, AlertOctagon, Palette,
-  GitBranch, HelpCircle, Globe, Headphones, Code, Sliders
+  Ticket, Search, Plus, Clock, AlertTriangle, CheckCircle,
+  User, Mail, Phone, MessageSquare, Send, Paperclip, Star,
+  MoreHorizontal, ChevronRight, Users, BarChart3,
+  Timer, Zap, FileText, Link2, Merge, Flag, Trash2, Smile, TrendingUp, Lock, RefreshCw, Download, Settings,
+  Inbox, UserCheck, Hourglass, CheckCheck, AlertCircle,
+  Bot, Copy, MessageCircle,
+  Bell, Key, Webhook, Shield, Cpu, AlertOctagon, Palette, Globe, Headphones, Sliders
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -40,13 +37,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  supportTicketsAIInsights,
-  supportTicketsCollaborators,
-  supportTicketsPredictions,
-  supportTicketsActivities,
-  supportTicketsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 type TicketStatus = 'open' | 'in-progress' | 'waiting' | 'resolved' | 'closed'
 type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'

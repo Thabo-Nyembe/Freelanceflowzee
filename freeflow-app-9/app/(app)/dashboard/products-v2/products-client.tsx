@@ -8,25 +8,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Package,
-  TrendingUp,
   TrendingDown,
   Users,
   DollarSign,
-  Star,
   BarChart3,
   Settings,
   Plus,
-  Eye,
-  ShoppingCart,
-  Award,
   Zap,
   Search,
-  Filter,
   Download,
   Upload,
   Edit,
@@ -39,29 +31,18 @@ import {
   Globe,
   Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  Layers,
   Grid3X3,
   List,
   MoreHorizontal,
-  ExternalLink,
   Link2,
-  Image,
-  FileText,
   CreditCard,
   Repeat,
-  Calendar,
   Box,
   Truck,
-  Scale,
-  Hash,
   ToggleLeft,
   ToggleRight,
   ArrowUpRight,
-  ArrowDownRight,
   Target,
-  PieChart,
   Activity
 } from 'lucide-react'
 
@@ -77,13 +58,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  productsAIInsights,
-  productsCollaborators,
-  productsPredictions,
-  productsActivities,
-  productsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { useProducts, useProductStats, type Product } from '@/lib/hooks/use-products'
 

@@ -5,21 +5,17 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import {
   Play,
   Pause,
-  SkipForward,
   ArrowRight,
   ArrowLeft,
   X,
   CheckCircle,
-  Circle,
   Star,
   Zap,
   Brain,
   Users,
   Palette,
   Settings,
-  Gift,
   Sparkles,
-  Hand,
   Eye,
   Lightbulb,
   Target,
@@ -30,7 +26,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
 import { useContext7GUI } from '@/components/ui/enhanced-gui-2025'
 
 interface OnboardingStep {

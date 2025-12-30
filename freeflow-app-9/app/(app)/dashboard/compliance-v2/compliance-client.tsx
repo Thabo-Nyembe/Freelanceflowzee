@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -19,16 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   ShieldCheck, FileCheck, AlertTriangle, CheckCircle2, XCircle, Clock, Plus,
-  Search, Filter, MoreHorizontal, Eye, Upload, Download, Calendar, Users,
-  FileText, AlertCircle, TrendingUp, TrendingDown, Target, Clipboard,
-  Settings, History, ExternalLink, Lock, Unlock, BarChart3, PieChart,
-  ClipboardCheck, ClipboardList, FileWarning, Scale, Building, Globe,
-  Shield, Zap, RefreshCw, ChevronRight, X, Check, ArrowRight,
+  Search, Filter, Eye, Upload, Download, Calendar, Users,
+  FileText, Target,
+  Settings, History, Lock, BarChart3,
+  ClipboardCheck, ClipboardList, Scale, Building, Globe,
+  Shield, Zap, RefreshCw,
   Key, Webhook, Mail, Database, AlertOctagon, Trash2, Copy, Bell,
-  GitBranch, FileCode, BookOpen, Cpu, CheckCircle, Send
+  GitBranch, FileCode, Cpu, CheckCircle, Send
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

@@ -12,19 +12,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  HelpCircle, Search, BookOpen, FileText, MessageCircle, ThumbsUp, ThumbsDown,
+import { Search, FileText, MessageCircle, ThumbsUp, ThumbsDown,
   ChevronRight, ChevronDown, Plus, Eye, Clock, Star, TrendingUp, Users,
-  FolderOpen, Tag, Filter, MoreHorizontal, ExternalLink, Share2, Bookmark,
-  Edit, Trash2, AlertCircle, CheckCircle, ArrowRight, Home, Layers, Settings,
-  MessageSquare, Globe, Lock, Zap, Phone, Mail, Video, Headphones, Bot,
-  BarChart3, PieChart, FileQuestion, Ticket, Languages, History, Send,
-  Sparkles, Play, Download, Upload, RefreshCw, Bell, Archive, Copy,
-  Loader2, Check, X, AlertTriangle, Info, Link, Code, Image, Table
+  FolderOpen, Tag,
+  Edit, AlertCircle, CheckCircle, Home, Layers, Settings,
+  MessageSquare, Globe, Zap, Phone, Mail, Video, Headphones, Bot,
+  BarChart3, Ticket, Languages, History, Send, Play, Download, Upload, RefreshCw, Bell, Archive,
+  Loader2, Check, X
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

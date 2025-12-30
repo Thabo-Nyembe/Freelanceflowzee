@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -17,7 +17,6 @@ import {
   TrendingUp,
   Users,
   Eye,
-  MousePointer,
   Share2,
   Award,
   BarChart3,
@@ -41,32 +40,23 @@ import {
   Video,
   Layers,
   GitBranch,
-  ArrowRight,
   RefreshCw,
   Settings,
-  MoreHorizontal,
   ExternalLink,
   Phone,
   Building,
   MapPin,
   Activity,
   PieChart,
-  TrendingDown,
-  MessageSquare,
   Heart,
   Bookmark,
   Brain,
-  Lightbulb,
-  AlertTriangle,
 } from 'lucide-react'
 
 // Import Competitive Upgrades - Beats HubSpot, Salesforce, Monday.com
 import {
   AIInsightsPanel,
   Sparkline,
-  ProgressRing,
-  TrendIndicator,
-  MetricCard,
   CollaborationIndicator,
   PredictiveAnalytics,
   DataStory,

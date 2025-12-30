@@ -35,7 +35,6 @@ import {
   Activity,
   Cpu,
   Search,
-  Filter,
   Star,
   Plus,
   Database,
@@ -77,12 +76,9 @@ import {
 } from '@/lib/ai-create-streaming'
 import {
   saveVersion,
-  loadVersionTree,
   getAllVersions,
   compareVersions,
   rollbackToVersion,
-  enableAutoSave as enableVersionAutoSave,
-  disableAutoSave as disableVersionAutoSave,
   type ContentVersion,
   type VersionDiff
 } from '@/lib/ai-create-versions'
@@ -101,8 +97,6 @@ import {
 import {
   compareModels,
   saveComparison,
-  loadComparisons,
-  type ComparisonRequest,
   type ComparisonResult,
   type ComparisonProgress
 } from '@/lib/ai-create-comparison'
@@ -111,7 +105,6 @@ import {
   MicOff,
   GitBranch,
   BarChart,
-  Radio,
   Scale,
   Upload,
   Image as ImageIcon,

@@ -16,7 +16,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from '@/lib/auth'
-import { checkPermission } from '@/lib/rbac/rbac-service'
 
 // ============================================================================
 // TYPES

@@ -8,7 +8,6 @@
 
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
-import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
 import { createFeatureLogger } from '@/lib/logger'
 

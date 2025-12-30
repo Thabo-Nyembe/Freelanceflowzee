@@ -37,7 +37,6 @@ import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle
@@ -133,7 +132,7 @@ export function FileGallery({
   }
 
   const getFilteredAndSortedFiles = () => {
-    let filtered = files.filter(file => {
+    const filtered = files.filter(file => {
       // Search filter
       const matchesSearch = file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
       if (!matchesSearch) return false

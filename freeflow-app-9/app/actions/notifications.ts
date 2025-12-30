@@ -15,7 +15,7 @@ import {
   type ActionResult
 } from '@/lib/api/response'
 import { createFeatureLogger } from '@/lib/logger'
-import { uuidSchema, notificationTypeSchema, dateSchema } from '@/lib/validations'
+import { uuidSchema, dateSchema } from '@/lib/validations'
 
 // ============================================
 // LOGGER

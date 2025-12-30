@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   FileText,
   Plus,
@@ -25,7 +24,6 @@ import {
   Settings,
   Filter,
   Eye,
-  Trash2,
   Edit,
   Copy,
   MoreHorizontal,
@@ -38,32 +36,25 @@ import {
   AlertTriangle,
   BarChart3,
   ArrowUpRight,
-  ArrowDownRight,
   Mail,
   Phone,
   MapPin,
-  Percent,
   Calculator,
   Printer,
   Globe,
   Tag,
   List,
   Grid3X3,
-  ChevronRight,
   PieChart,
   Banknote,
   Timer,
   Users,
   Repeat,
   FileX,
-  Star,
-  ExternalLink,
   Wallet,
   Sliders,
-  Terminal,
   Webhook,
   Key,
-  Network,
   Shield,
   Bell
 } from 'lucide-react'
@@ -81,13 +72,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-import {
-  invoicingAIInsights,
-  invoicingCollaborators,
-  invoicingPredictions,
-  invoicingActivities,
-  invoicingQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'

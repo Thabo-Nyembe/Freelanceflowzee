@@ -1,19 +1,7 @@
 'use client'
 
 import { useReducer, useCallback, useEffect } from 'react'
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Users, DollarSign, Briefcase, Check, X, MoreHorizontal, PlusCircle, Filter, BarChart2 } from 'lucide-react'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, getDay, isToday } from 'date-fns'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
-import { cn } from '@/lib/utils'
 
 // Type Definitions
 type CalendarView = 'month' | 'week' | 'day'

@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCommunicationStore } from '@/lib/communication/unified-communication-service'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,44 +15,32 @@ import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Circle,
   Moon,
   Coffee,
   Phone,
-  Calendar,
   MapPin,
   Clock,
   Globe,
-  Wifi,
-  WifiOff,
   Smartphone,
   Monitor,
   Tablet,
   Settings,
   Edit,
-  Eye,
-  EyeOff,
   MessageSquare,
   Video,
   Headphones,
   Gamepad,
   Car,
   Plane,
-  Home,
-  Building,
   Users,
   Search,
-  Filter,
-  MoreHorizontal,
   ChevronDown,
-  Activity,
-  TrendingUp,
-  Zap
+  Activity
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns'
+import { format, isToday, isYesterday } from 'date-fns'
 
 // Status types and configurations
 const STATUS_TYPES = {

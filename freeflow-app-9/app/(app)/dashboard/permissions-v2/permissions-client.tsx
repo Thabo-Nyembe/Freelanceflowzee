@@ -3,20 +3,18 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useRoles, usePermissions, useRoleAssignments, useCreateRole, useUpdateRole, useDeleteRole, useCreatePermission, useCreateRoleAssignment, type Role, type Permission, type RoleLevel } from '@/lib/hooks/use-permissions'
 import {
   Lock,
@@ -25,18 +23,14 @@ import {
   Key,
   CheckCircle,
   XCircle,
-  Eye,
   Edit,
-  Trash,
   Settings,
   UserCheck,
   Crown,
-  Award,
   Plus,
   Search,
   Filter,
   Download,
-  Upload,
   RefreshCw,
   AlertTriangle,
   Clock,
@@ -46,36 +40,22 @@ import {
   Building,
   Fingerprint,
   Smartphone,
-  Laptop,
-  LogIn,
-  LogOut,
   UserPlus,
   UserMinus,
   ShieldCheck,
-  ShieldAlert,
-  ShieldOff,
   Layers,
-  GitBranch,
   FileText,
   MoreHorizontal,
   ChevronRight,
-  ChevronDown,
-  ToggleLeft,
-  ToggleRight,
   Link2,
-  Unlink,
   History,
-  Activity,
   Zap,
   KeyRound,
   LockKeyhole,
-  Unlock,
   UserCog,
   UsersRound,
   Network,
   Workflow,
-  CheckSquare,
-  Square,
   Copy,
   CreditCard
 } from 'lucide-react'

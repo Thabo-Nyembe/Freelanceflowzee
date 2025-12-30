@@ -5,21 +5,17 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   Play,
-  Pause,
   Square,
   CheckCircle2,
   XCircle,
   Clock,
   Activity,
   TrendingUp,
-  TrendingDown,
-  Calendar,
   Plus,
   Settings,
   Filter,
   Search,
   Download,
-  Upload,
   RefreshCw,
   ChevronRight,
   ChevronDown,
@@ -27,10 +23,7 @@ import {
   FolderOpen,
   FileCode,
   Monitor,
-  Smartphone,
-  Tablet,
   Globe,
-  Image as ImageIcon,
   Video,
   Camera,
   Code,
@@ -38,32 +31,16 @@ import {
   GitBranch,
   GitCommit,
   Layers,
-  Box,
-  Zap,
   AlertTriangle,
-  Info,
-  Eye,
-  EyeOff,
   BarChart3,
-  LineChart,
   PieChart,
   Target,
   Shield,
-  Lock,
-  Unlock,
-  Copy,
-  Check,
-  MoreVertical,
-  ExternalLink,
   Trash2,
-  Edit,
-  Save,
   Bug,
   Repeat,
   Timer,
-  Cpu,
   HardDrive,
-  Wifi,
   Chrome,
   CircleSlash
 } from 'lucide-react'
@@ -88,13 +65,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-import {
-  testingAIInsights,
-  testingCollaborators,
-  testingPredictions,
-  testingActivities,
-  testingQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Database Types
 interface DbTestCase {

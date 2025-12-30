@@ -11,9 +11,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useQATestCases, useQAMutations, QATestCase } from '@/lib/hooks/use-qa'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
@@ -23,12 +22,10 @@ import {
   AlertTriangle,
   Clock,
   TrendingUp,
-  TrendingDown,
   PlayCircle,
   Plus,
   Download,
   Search,
-  Filter,
   Settings,
   FileText,
   FolderOpen,
@@ -38,10 +35,8 @@ import {
   Bug,
   Layers,
   GitBranch,
-  Clipboard,
   BarChart3,
   PieChart,
-  Activity,
   Zap,
   RefreshCw,
   Eye,
@@ -52,24 +47,16 @@ import {
   ChevronRight,
   ChevronDown,
   Play,
-  Pause,
   SkipForward,
   RotateCcw,
-  CheckCheck,
   Link2,
   MessageSquare,
-  Paperclip,
   Timer,
-  ArrowUpRight,
-  ArrowDownRight,
   Code,
   Terminal,
-  History,
   Milestone,
   ListChecks,
-  TestTube,
   FlaskConical,
-  Beaker,
   Upload,
   Share2,
   Mail,
@@ -87,13 +74,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-import {
-  qaAIInsights,
-  qaCollaborators,
-  qaPredictions,
-  qaActivities,
-  qaQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // TestRail-level types
 type TestStatus = 'passed' | 'failed' | 'blocked' | 'untested' | 'retest' | 'skipped'

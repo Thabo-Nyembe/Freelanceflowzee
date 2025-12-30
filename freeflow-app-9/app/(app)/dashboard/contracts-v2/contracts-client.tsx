@@ -1,17 +1,14 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { useContracts, type Contract, type ContractStatus } from '@/lib/hooks/use-contracts'
+import { useContracts, type Contract } from '@/lib/hooks/use-contracts'
 import {
-  FileText, Send, Eye, CheckCircle2, Clock, AlertCircle, Users,
+  FileText, Send, Eye, CheckCircle2, Clock, Users,
   FileSignature, Download, Copy, MoreVertical, Search, Filter,
-  Plus, Calendar, DollarSign, Shield, History, MessageSquare,
-  Pen, Share2, Lock, Unlock, Building2, User, Mail, Phone,
-  PenTool, Stamp, ChevronRight, ArrowUpRight, XCircle, RefreshCw,
-  Settings, Zap, FileCheck, BarChart3, TrendingUp, Folder,
-  Archive, Trash2, Star, Bell, Globe, Link2, Edit2, ExternalLink,
-  Fingerprint, Key, AlertTriangle, CheckCheck, Layers, FileUp,
-  FolderOpen, Tag, UserCheck, Timer, ClipboardCheck, Briefcase
+  Plus, DollarSign, Shield, Share2, Lock, Mail, Phone,
+  PenTool, XCircle, RefreshCw,
+  Settings, FileCheck, BarChart3, TrendingUp, Folder, Trash2, Star, Bell, Globe, Edit2,
+  Fingerprint, Key, AlertTriangle, CheckCheck, Layers, FileUp, Timer, Briefcase
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -34,7 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 
 interface Envelope {

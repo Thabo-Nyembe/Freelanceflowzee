@@ -7,14 +7,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import {
   Lightbulb,
-  AlertCircle,
   CheckCircle,
   Info,
-  Star,
   Timer,
   Volume2,
   Mic,
-  Camera,
   Layout,
   Sun,
   Users

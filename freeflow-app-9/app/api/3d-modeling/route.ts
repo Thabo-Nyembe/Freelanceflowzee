@@ -671,7 +671,7 @@ export async function POST(request: NextRequest) {
 
       case 'duplicate-scene': {
         const { sceneId, newName } = params;
-        let source = scenesDb.get(sceneId) || createDefaultScene(userId, 'Source');
+        const source = scenesDb.get(sceneId) || createDefaultScene(userId, 'Source');
 
         const duplicate: Scene3D = {
           ...JSON.parse(JSON.stringify(source)),
@@ -699,7 +699,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        let scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
+        const scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
         scene.id = sceneId;
 
         const newObject: Object3D = {
@@ -765,7 +765,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        let scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
+        const scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
         scene.id = sceneId;
 
         const primitive = createPrimitive(primitiveType, name);
@@ -991,7 +991,7 @@ export async function POST(request: NextRequest) {
       case 'create-material': {
         const { sceneId, name, preset, properties } = params;
 
-        let scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
+        const scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
         scene.id = sceneId;
 
         const material = createMaterial(name || 'Material', preset);
@@ -1087,7 +1087,7 @@ export async function POST(request: NextRequest) {
       case 'add-light': {
         const { sceneId, type = 'point', name, preset, transform, properties } = params;
 
-        let scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
+        const scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
         scene.id = sceneId;
 
         const presetDef = preset ? LIGHT_PRESETS[preset] : null;
@@ -1182,7 +1182,7 @@ export async function POST(request: NextRequest) {
       case 'add-camera': {
         const { sceneId, name, type = 'perspective', transform, properties } = params;
 
-        let scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
+        const scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
         scene.id = sceneId;
 
         const camera: Camera3D = {
@@ -1577,7 +1577,7 @@ export async function POST(request: NextRequest) {
       case 'create-environment': {
         const { sceneId, type = 'hdri', settings } = params;
 
-        let scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
+        const scene = scenesDb.get(sceneId) || createDefaultScene(userId, 'Scene');
         scene.id = sceneId;
 
         scene.environment = {

@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
@@ -37,11 +36,8 @@ import {
   Video,
   Building2,
   Star,
-  Heart,
-  MessageSquare,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Filter,
   Grid3X3,
   List,
@@ -53,11 +49,7 @@ import {
   Briefcase,
   Coffee,
   Music,
-  Palette,
   Dumbbell,
-  Utensils,
-  ChevronRight,
-  ExternalLink,
   Copy,
   QrCode,
   Send,
@@ -68,14 +60,11 @@ import {
   Sliders,
   Bell,
   Lock,
-  Webhook,
   Database,
   RefreshCw,
   Trash2,
   Key,
   History,
-  Zap,
-  LayoutGrid,
   Terminal
 } from 'lucide-react'
 

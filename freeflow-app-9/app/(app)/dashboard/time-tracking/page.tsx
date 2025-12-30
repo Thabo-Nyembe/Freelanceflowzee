@@ -33,7 +33,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { archiveTimeEntry, deleteTimeEntry } from '@/lib/time-tracking-queries'
+import { archiveTimeEntry } from '@/lib/time-tracking-queries'
 
 const logger = createFeatureLogger('TimeTracking')
 

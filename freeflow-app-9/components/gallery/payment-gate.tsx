@@ -19,7 +19,6 @@ import {
   Unlock,
   CreditCard,
   Download,
-  Eye,
   Star,
   Check,
   Shield,

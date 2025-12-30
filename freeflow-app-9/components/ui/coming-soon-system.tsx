@@ -5,11 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from './button'
 import { Card } from './card'
 import {
-  Rocket, Calendar, Bell, Mail, Sparkles, Zap, Star,
-  Clock, CheckCircle, ArrowRight, X, ExternalLink,
-  Palette, Video, FileText, Users, BarChart3, Shield,
-  Globe, Brain, Wallet, Camera, Music, Code, Database,
-  Cloud, Lock, Settings, Smartphone, Monitor, Headphones
+  Rocket, Calendar, Bell, Mail, Zap, Star, CheckCircle, ArrowRight, X, ExternalLink,
+  Palette, Video, BarChart3,
+  Globe, Brain, Wallet, Music, Code, Smartphone, Monitor, Headphones
 } from 'lucide-react'
 
 interface ComingSoonFeature {

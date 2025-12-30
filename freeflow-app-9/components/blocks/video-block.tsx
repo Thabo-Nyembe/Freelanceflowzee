@@ -12,15 +12,11 @@ import {
   Maximize,
   Minimize,
   Upload,
-  Video as VideoIcon,
-  Settings
+  Video as VideoIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Slider,
-  SliderTrack,
-  SliderRange,
-  SliderThumb,
 } from '@/components/ui/slider'
 
 interface VideoBlockProps {

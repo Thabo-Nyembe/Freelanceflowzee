@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -19,8 +19,8 @@ import {
   Check, X, Sparkles, Layout, Moon, Sun, Monitor, Smartphone,
   Tablet, Zap, Shield, Clock, Users, TrendingUp, Package,
   Settings, Code, Paintbrush, Type, Layers, ChevronRight,
-  Bell, Lock, Key, Globe, RefreshCw, Upload, Link2, AlertTriangle,
-  CreditCard, Wallet, FileText, Info, Database, Server,
+  Bell, Key, Globe, RefreshCw, Upload, Link2, AlertTriangle,
+  CreditCard, FileText, Database, Server,
   Copy, Trash2, Share2, Grid3x3, Gift, Save, Archive
 } from 'lucide-react'
 

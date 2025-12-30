@@ -2,19 +2,17 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   Search, 
   X, 
   Clock, 
-  TrendingUp, 
-  Filter,
+  TrendingUp,
   ArrowRight,
   Sparkles,
   Command,
   History,
   Bookmark,
-  Tag,
   User,
   FileText,
   Image,
@@ -26,18 +24,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
+import {
+  TooltipProvider
 } from '@/components/ui/tooltip'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 

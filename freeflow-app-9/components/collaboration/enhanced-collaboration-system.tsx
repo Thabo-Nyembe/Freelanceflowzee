@@ -10,8 +10,6 @@ import {
   Users,
   MessageSquare,
   FileText,
-  Video,
-  Calendar,
   Share2,
   Settings,
 } from 'lucide-react'

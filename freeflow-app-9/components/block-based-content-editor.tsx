@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Plus,
-  Search,
   Settings,
   Eye,
   Save,

@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -26,25 +26,17 @@ import {
   Plus,
   Search,
   MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
   Play,
   Pause,
   RotateCcw,
   Flag,
-  Bell,
   Repeat,
   MessageSquare,
   Paperclip,
   Timer,
   Sun,
   Sunrise,
-  Sunset,
-  Moon,
-  Inbox,
   Star,
-  ArrowUp,
-  ArrowDown,
   Minus,
   Users,
   Edit3,
@@ -60,7 +52,6 @@ import {
   Award,
   Brain,
   ListTodo,
-  CalendarDays,
   Hash,
   Layers
 } from 'lucide-react'

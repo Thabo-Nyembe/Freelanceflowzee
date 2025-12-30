@@ -16,15 +16,12 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Rocket, CheckCircle, CheckCircle2, XCircle, Clock, Server, GitBranch, Globe, Activity,
-  RotateCcw, Play, Terminal, Eye, Link, Settings, Trash2, Copy, ExternalLink,
+  Rocket, CheckCircle2, Clock, GitBranch, Globe, Activity,
+  RotateCcw, Play, Terminal, Eye, Settings, Trash2, Copy, ExternalLink,
   GitCommit, FileCode, Zap, Shield, RefreshCw, AlertTriangle, Check, X,
-  Box, Layers, Database, Cloud, Lock, Unlock, Plus, ChevronRight, ChevronDown,
-  Search, Filter, MoreHorizontal, Download, Upload, ArrowUpRight, Timer,
-  Cpu, HardDrive, Network, TrendingUp, Calendar, User, MessageSquare,
-  Settings2, FileText, BarChart3, AlertCircle, Info, Webhook, Key, Hash,
-  Folder, File, Package, Gauge, MonitorPlay, CircleDot, Workflow, GitPullRequest,
-  Mail, Bell, AlertOctagon, Globe2
+  Box, Layers, Database, Lock, Plus, ChevronRight, ChevronDown,
+  Search, Filter, MoreHorizontal, Download, Upload, ArrowUpRight, Timer, Network, User, MessageSquare, FileText, BarChart3, AlertCircle, Webhook,
+  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

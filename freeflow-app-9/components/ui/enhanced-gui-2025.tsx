@@ -1,29 +1,12 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence, useAnimation, useInView, useMotionValue, useTransform, useSpring } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
-  Sparkles,
-  Zap,
   Brain,
-  Waves,
-  Monitor,
-  Smartphone,
-  Palette,
-  Eye,
   Hand,
-  Volume2,
-  Vibrate,
-  Layers,
-  GitBranch,
-  Cpu,
-  Fingerprint,
-  Globe,
-  Shield
+  Cpu
 } from 'lucide-react'
 
 // Context7 MCP Enhanced Type Definitions for 2025 GUI Features

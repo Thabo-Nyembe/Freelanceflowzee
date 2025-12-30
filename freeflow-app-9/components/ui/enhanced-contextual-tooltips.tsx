@@ -1,32 +1,16 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   HelpCircle, 
   Info, 
   AlertCircle, 
   CheckCircle,
   Lightbulb,
-  Zap,
-  Star,
   Keyboard,
-  Clock,
-  TrendingUp,
-  Users,
-  Shield,
-  Settings,
   ExternalLink,
-  BookOpen,
-  Video,
-  Image,
-  FileText,
-  Code,
-  Palette,
-  Target,
-  Award,
-  Sparkles,
-  Brain
+  Sparkles
 } from 'lucide-react'
 import { 
   Tooltip,

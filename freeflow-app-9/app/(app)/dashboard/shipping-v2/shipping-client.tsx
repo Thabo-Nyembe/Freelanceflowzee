@@ -7,8 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -41,21 +39,10 @@ import {
   Star,
   Zap,
   ArrowRight,
-  MoreHorizontal,
-  ChevronRight,
-  Box,
-  Scale,
-  Ruler,
   Navigation,
-  Phone,
   Mail,
-  Building,
-  User,
   Timer,
   Activity,
-  TrendingDown,
-  Plane,
-  Ship,
   Train,
   Home,
   Shield,
@@ -65,16 +52,12 @@ import {
   Key,
   Database,
   Lock,
-  HardDrive,
   Terminal,
   History,
   Trash2,
   Copy,
   Upload,
-  Workflow,
   Archive,
-  Layers,
-  Target,
   AlertTriangle
 } from 'lucide-react'
 
@@ -90,13 +73,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  shippingAIInsights,
-  shippingCollaborators,
-  shippingPredictions,
-  shippingActivities,
-  shippingQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // DATABASE TYPES

@@ -28,7 +28,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
 // DATABASE QUERIES
-import { getClientInvoices, disputeInvoice, ClientInvoice as DBInvoice } from '@/lib/client-zone-queries'
+import { disputeInvoice } from '@/lib/client-zone-queries'
 
 const logger = createFeatureLogger('ClientZoneInvoices')
 

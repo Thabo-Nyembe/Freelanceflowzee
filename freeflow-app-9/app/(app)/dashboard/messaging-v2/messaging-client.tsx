@@ -6,18 +6,12 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   MessageSquare,
   Send,
-  Inbox,
-  Archive,
   Star,
   Search,
   Paperclip,
-  MoreVertical,
-  CheckCheck,
   Clock,
   Users,
   TrendingUp,
-  Mail,
-  Reply,
   Hash,
   Lock,
   Plus,
@@ -29,53 +23,26 @@ import {
   Image,
   FileText,
   Mic,
-  Video,
-  Phone,
   Pin,
   Bookmark,
-  Edit2,
   Trash2,
-  Forward,
-  Copy,
-  Share2,
   Bell,
-  BellOff,
-  UserPlus,
   LogOut,
   Eye,
-  EyeOff,
   X,
-  Check,
-  AlertCircle,
-  Circle,
   Loader2,
-  Filter,
-  Calendar,
   Link,
   Code,
   Bold,
   Italic,
-  List,
-  ListOrdered,
-  Quote,
   MoreHorizontal,
   Headphones,
-  Volume2,
   VolumeX,
   Globe,
   Zap,
   MessageCircle,
-  Heart,
-  ThumbsUp,
-  Laugh,
-  Angry,
-  Frown,
-  PartyPopper,
-  Sparkles,
-  ArrowRight,
   Download,
-  ExternalLink,
-  PlayCircle
+  ExternalLink
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -98,14 +65,14 @@ import {
   messagingQuickActions,
 } from '@/lib/mock-data/adapters'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { useConversations, useDirectMessages, useMessagingMutations, Conversation, DirectMessage as DBDirectMessage } from '@/lib/hooks/use-messaging'
+import { useConversations, useMessagingMutations } from '@/lib/hooks/use-messaging'
 
 // ============================================================================
 // TYPE DEFINITIONS - Slack/Discord Level

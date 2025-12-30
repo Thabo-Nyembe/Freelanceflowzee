@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { format, addDays, startOfDay } from 'date-fns'
+import { format } from 'date-fns'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CalendarDays, Clock, User, Mail, Phone, CheckCircle, Check, AlertCircle } from 'lucide-react'
+import { CalendarDays, Clock, User, CheckCircle, Check, AlertCircle } from 'lucide-react'
 import { loadStripe } from '@stripe/stripe-js'
 
 interface TimeSlot {

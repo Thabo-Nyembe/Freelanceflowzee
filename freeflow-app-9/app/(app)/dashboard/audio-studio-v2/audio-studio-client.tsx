@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
@@ -30,8 +30,6 @@ import {
   Settings,
   AudioWaveform,
   Sliders,
-  Scissors,
-  Zap,
   Clock,
   Trash2,
   Plus,
@@ -40,38 +38,22 @@ import {
   Disc,
   Guitar,
   Piano,
-  Drum,
   Layers,
   Copy,
   Lock,
-  Unlock,
-  Eye,
-  EyeOff,
   MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
   Repeat,
-  Shuffle,
   Save,
   FolderOpen,
   Share2,
   Wand2,
-  Sparkles,
   TrendingUp,
-  BarChart3,
   Activity,
   Cpu,
   HardDrive,
-  Timer,
   Grid3X3,
-  Maximize2,
-  Minimize2,
   Search,
-  Shield,
   Terminal,
-  Webhook,
-  Bell,
-  Key,
   RefreshCw,
   AlertCircle
 } from 'lucide-react'

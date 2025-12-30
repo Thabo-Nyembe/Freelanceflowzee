@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useCapacity, type Capacity, type ResourceType, type CapacityStatus } from '@/lib/hooks/use-capacity'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,13 +26,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  capacityAIInsights,
-  capacityCollaborators,
-  capacityPredictions,
-  capacityActivities,
-  capacityQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Resource Guru / Float level interfaces
 interface TeamMember {

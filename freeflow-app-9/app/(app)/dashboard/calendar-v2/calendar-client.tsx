@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,19 +8,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock,
-  MapPin, Users, Video, Phone, Bell, Repeat, Tag, MoreHorizontal,
-  Search, Filter, Settings, Grid3X3, List, CalendarDays, Sun, Moon,
-  Globe, Link2, CheckCircle2, XCircle, AlertCircle, Edit2, Trash2,
-  Copy, ExternalLink, Eye, EyeOff, Palette, Download, Share2,
-  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, Star, ArrowRight,
-  Calendar, Mail, MessageSquare, Target, TrendingUp, Activity,
-  UserPlus, Send, CheckSquare, AlertTriangle, Briefcase, Coffee, Home
+  MapPin, Users, Video, Bell,
+  Search, Settings, List, CalendarDays,
+  Globe, Link2, CheckCircle2, Edit2, Trash2,
+  Copy, ExternalLink, Download, Share2,
+  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

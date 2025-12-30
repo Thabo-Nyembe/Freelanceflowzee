@@ -54,16 +54,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  inventoryAIInsights,
-  inventoryCollaborators,
-  inventoryPredictions,
-  inventoryActivities,
-  inventoryQuickActions,
-} from '@/lib/mock-data/adapters'
 
-import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
-import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
+
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {

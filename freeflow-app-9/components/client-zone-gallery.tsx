@@ -2,16 +2,13 @@
 
 import { useReducer } from 'react'
 import { 
-  Lock, Unlock, Download, Heart, Eye, CheckCircle, XCircle, Clock, Grid, List, Search,
-  CreditCard, ShieldCheck, ArrowRight
+  Lock, Grid, List, Search
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Image from 'next/image'
 
 // Type Definitions

@@ -4,10 +4,7 @@ import * as React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  BarChart3,
-  LineChart,
-  PieChart,
+import {
   TrendingUp,
   TrendingDown,
   Download,
@@ -15,7 +12,6 @@ import {
   Maximize2,
   Settings,
   Filter,
-  Calendar,
   Info,
   Eye,
   EyeOff

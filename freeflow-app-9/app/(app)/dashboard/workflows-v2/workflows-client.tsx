@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useWorkflows, Workflow as DBWorkflow } from '@/lib/hooks/use-workflows'
+import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -26,11 +25,8 @@ import {
   GitBranch,
   Play,
   Pause,
-  Square,
   CheckCircle2,
-  XCircle,
   AlertCircle,
-  Clock,
   Activity,
   ArrowRight,
   ArrowDown,
@@ -43,7 +39,6 @@ import {
   Trash2,
   Edit,
   Copy,
-  Share2,
   Folder,
   Star,
   History,
@@ -54,32 +49,20 @@ import {
   ArrowDownRight,
   Mail,
   MessageSquare,
-  FileText,
-  Database,
   Calendar,
-  Users,
-  Globe,
   Webhook,
   Code,
   Link2,
-  ExternalLink,
   Layers,
-  GitMerge,
   Sparkles,
-  Rocket,
   Timer,
   Repeat,
-  Shuffle,
-  Split,
-  Combine,
   Key,
   Lock,
   Bell,
   AlertOctagon,
-  Palette,
   Shield,
   Sliders,
-  HardDrive,
   Cpu,
   Archive,
   Download

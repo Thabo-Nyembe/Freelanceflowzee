@@ -471,7 +471,7 @@ export async function POST(request: NextRequest) {
 
       case 'add-images': {
         const { galleryId, images } = params;
-        let gallery = galleriesDb.get(galleryId) || createDefaultGallery(userId, 'Gallery');
+        const gallery = galleriesDb.get(galleryId) || createDefaultGallery(userId, 'Gallery');
         gallery.id = galleryId;
 
         const newImages = (images || []).map((img: Partial<GalleryImage>, index: number) => ({
@@ -553,7 +553,7 @@ export async function POST(request: NextRequest) {
 
       case 'create-collection': {
         const { galleryId, name, description } = params;
-        let gallery = galleriesDb.get(galleryId) || createDefaultGallery(userId, 'Gallery');
+        const gallery = galleriesDb.get(galleryId) || createDefaultGallery(userId, 'Gallery');
         gallery.id = galleryId;
 
         const collection: Collection = {

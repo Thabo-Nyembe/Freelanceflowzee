@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedInput } from '@/components/ui/enhanced-input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   FileText,
   Plus,

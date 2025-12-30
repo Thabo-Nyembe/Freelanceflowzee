@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useCloudStorage, CloudStorage } from '@/lib/hooks/use-cloud-storage'
+import { useCloudStorage } from '@/lib/hooks/use-cloud-storage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,27 +11,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Cloud,
   Upload,
   Download,
   FolderOpen,
   FileText,
-  Image,
-  Video,
-  Music,
   Share2,
   Lock,
   Search,
   Grid3X3,
   List,
   Clock,
-  Eye,
   Trash2,
   Star,
   StarOff,
@@ -40,7 +35,6 @@ import {
   Link as LinkIcon,
   ExternalLink,
   ChevronRight,
-  Home,
   Users,
   Settings,
   RefreshCw,
@@ -58,18 +52,13 @@ import {
   Presentation,
   Table,
   Filter,
-  SortAsc,
-  Calendar,
   History,
   MessageSquare,
   Send,
   Plus,
   X,
-  Check,
-  Edit,
   Move,
   Folder,
-  TrendingUp,
   Activity,
   Zap,
   Shield,
@@ -89,13 +78,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  cloudStorageAIInsights,
-  cloudStorageCollaborators,
-  cloudStoragePredictions,
-  cloudStorageActivities,
-  cloudStorageQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type FileType = 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'spreadsheet' | 'presentation' | 'folder' | 'other'

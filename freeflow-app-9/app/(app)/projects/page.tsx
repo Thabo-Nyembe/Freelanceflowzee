@@ -6,26 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import {
   Search,
-  Filter,
   Plus,
   Calendar,
   DollarSign,
   Users,
-  Clock,
   FolderOpen,
   Briefcase,
   Target,
-  TrendingUp,
-  FileText,
-  Star,
   MoreVertical,
   Eye,
   Edit,
-  Archive,
   Share2,
   CheckCircle
 } from 'lucide-react'

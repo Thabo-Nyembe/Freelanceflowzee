@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { motion, useSpring, useTransform } from 'framer-motion'
+import React, { useEffect, useState } from 'react'
+import { motion, useSpring } from 'framer-motion'
 
 interface NumberFlowProps {
   value: number

@@ -3,14 +3,12 @@
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useWebhooks, useWebhookEventTypes, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
+import { useWebhooks, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
 import {
   Webhook as WebhookIcon,
   Zap,
   CheckCircle,
-  CheckCircle2,
   AlertCircle,
-  AlertTriangle,
   Clock,
   Send,
   RefreshCw,
@@ -19,19 +17,14 @@ import {
   Code,
   Globe,
   Activity,
-  TrendingUp,
-  TrendingDown,
   Play,
   Pause,
   Plus,
   Trash2,
   Search,
-  Filter,
-  MoreHorizontal,
   Eye,
   Edit,
   Copy,
-  ExternalLink,
   Terminal,
   Key,
   Lock,
@@ -41,16 +34,10 @@ import {
   FileJson,
   ChevronRight,
   ChevronDown,
-  X,
-  ArrowRight,
-  Link2,
-  Braces,
   TestTube,
   Timer,
   Layers,
-  GitBranch,
   Workflow,
-  Box,
   Plug,
   Sparkles,
   Download,
@@ -58,7 +45,6 @@ import {
   Bell,
   HardDrive,
   AlertOctagon,
-  CreditCard,
   Sliders
 } from 'lucide-react'
 

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
-import { useLearning, useCourses, useUserProgress, useCollections, type Course as DBCourse, type LearningPath as DBLearningPath, type Collection as DBCollection } from '@/lib/hooks/use-learning'
+import { useLearning, useCourses, useUserProgress, useCollections } from '@/lib/hooks/use-learning'
 import {
   GraduationCap,
   BookOpen,
@@ -11,23 +11,19 @@ import {
   Video,
   TrendingUp,
   Settings,
-  Eye,
   Star,
   Clock,
   Users,
   Award,
-  X,
   Loader2,
   Trash2,
   Play,
   Search,
-  Filter,
   MoreVertical,
   CheckCircle2,
   Circle,
   Target,
   Bookmark,
-  BookmarkCheck,
   Flame,
   Calendar,
   BarChart3,
@@ -36,27 +32,19 @@ import {
   Lightbulb,
   Route,
   Trophy,
-  Medal,
   FileText,
   Download,
   Share2,
   Heart,
   ThumbsUp,
-  MessageSquare,
-  Pause,
-  RotateCcw,
   ChevronRight,
   ChevronDown,
   Lock,
   Unlock,
   Sparkles,
-  Layers,
   FolderOpen,
   ListChecks,
   PieChart,
-  TrendingDown,
-  ArrowUpRight,
-  ArrowRight,
   Grid3X3,
   List,
   Shield,
@@ -65,9 +53,7 @@ import {
   Webhook,
   Key,
   Database,
-  HardDrive,
   Terminal,
-  History,
   Copy,
   RefreshCw,
   AlertTriangle,
@@ -87,7 +73,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,15 +1,11 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
 import {
-  CreditCard, Receipt, DollarSign, Users, ArrowUpRight, ArrowDownRight, Plus,
-  ChevronRight, ChevronDown, Calendar, BarChart3, Settings, RefreshCw, Download,
-  CheckCircle, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye, EyeOff,
-  Zap, Package, TrendingUp, TrendingDown, ExternalLink, Copy, MoreHorizontal,
-  Building, User, Mail, Phone, Globe, Shield, Lock, CreditCard as CardIcon,
-  Tag, Percent, RotateCcw, Webhook, FileText, Filter, Search, Star, Gift,
-  BadgePercent, Wallet, Banknote, PiggyBank, Activity, ArrowRight, Timer,
-  CheckCircle2, XCircle, History, Bell, Link2, Key, Database, Palette, Languages,
-  TestTube, AlertOctagon, Fingerprint, ShieldCheck, Layers, Repeat, Send
+  CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye,
+  Zap, Package, TrendingUp, ExternalLink, Copy,
+  Building, Mail, Globe, Shield, Lock, CreditCard as CardIcon,
+  Tag, Percent, RotateCcw, Webhook, FileText, Search, Activity, Timer, History, Bell, Link2, Key, Database, Palette,
+  TestTube, AlertOctagon, ShieldCheck, Layers, Repeat, Send
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -25,23 +21,17 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-import {
-  billingAIInsights,
-  billingCollaborators,
-  billingPredictions,
-  billingActivities,
-  billingQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBilling, type BillingTransaction, type BillingStatus } from '@/lib/hooks/use-billing'

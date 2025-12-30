@@ -8,9 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Package,
   TrendingUp,
@@ -26,7 +24,6 @@ import {
   RefreshCw,
   Calendar,
   DollarSign,
-  ShoppingCart,
   Search,
   Filter,
   Eye,
@@ -40,13 +37,11 @@ import {
   Box,
   Boxes,
   ScanLine,
-  QrCode,
   Tag,
   Layers,
   Settings,
   MoreHorizontal,
   FileText,
-  ChevronRight,
   List,
   Grid3X3,
   Archive,
@@ -59,11 +54,6 @@ import {
   Zap,
   Target,
   PieChart,
-  Calculator,
-  Receipt,
-  Send,
-  PackageCheck,
-  PackageX,
   Bell,
   Mail
 } from 'lucide-react'
@@ -80,13 +70,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  stockAIInsights,
-  stockCollaborators,
-  stockPredictions,
-  stockActivities,
-  stockQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - E*Trade Level Inventory Management

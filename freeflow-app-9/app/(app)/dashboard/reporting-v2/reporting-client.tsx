@@ -18,7 +18,6 @@ import {
   LineChart,
   PieChart,
   TrendingUp,
-  TrendingDown,
   Plus,
   Download,
   Share2,
@@ -26,60 +25,33 @@ import {
   Eye,
   Edit,
   Trash2,
-  Copy,
   RefreshCw,
   Calendar,
   Clock,
   Search,
-  Filter,
   LayoutDashboard,
   Database,
   Table,
   Layers,
   Play,
-  Pause,
-  ChevronRight,
   MoreVertical,
   Grid3X3,
   Map,
   Gauge,
   Target,
   Users,
-  DollarSign,
-  ShoppingCart,
   Activity,
   Globe,
   ArrowUpRight,
   ArrowDownRight,
-  Maximize2,
-  Minimize2,
-  Move,
-  Lock,
-  Unlock,
   Star,
   StarOff,
-  FolderOpen,
-  Link,
-  ExternalLink,
-  Code,
-  Palette,
-  SlidersHorizontal,
-  Sparkles,
   Bell,
   Zap,
   FileSpreadsheet,
   AlertCircle,
   CheckCircle,
-  XCircle,
-  Lightbulb,
-  BarChart2,
-  TrendingUp as TrendUp,
-  ArrowRight,
-  Bookmark,
-  History,
-  FileBarChart,
-  PieChart as PieChartIcon,
-  AreaChart
+  XCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -94,21 +66,13 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  reportingAIInsights,
-  reportingCollaborators,
-  reportingPredictions,
-  reportingActivities,
-  reportingQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Chart types configuration
 const CHART_TYPES: { type: ChartType; label: string; icon: typeof BarChart3 }[] = [

@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCommunicationStore, useChannelMessages, useTypingUsers } from '@/lib/communication/unified-communication-service'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -31,17 +30,9 @@ import {
   Pause,
   Phone,
   VideoIcon,
-  Screen,
   Users,
   Search,
-  Filter,
   Pin,
-  Heart,
-  ThumbsUp,
-  Laugh,
-  Surprised,
-  Angry,
-  Cry,
   Bookmark
 } from 'lucide-react'
 import { cn } from '@/lib/utils'

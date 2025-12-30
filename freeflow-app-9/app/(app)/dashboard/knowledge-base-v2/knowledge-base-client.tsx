@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -25,23 +25,16 @@ import {
   Download,
   Edit,
   Users,
-  Zap,
   HelpCircle,
-  Video,
   Clock,
   MessageSquare,
   History,
   Lock,
-  Unlock,
-  ChevronRight,
-  ChevronDown,
   FolderOpen,
-  Copy,
   Share2,
   Bookmark,
   BookmarkPlus,
   Tag,
-  Home,
   Archive,
   Trash2,
   MoreVertical,
@@ -57,12 +50,9 @@ import {
   Bell,
   BellOff,
   Link as LinkIcon,
-  ExternalLink,
   Settings,
   Sliders,
-  Terminal,
   Webhook,
-  Key,
   Network,
   Shield
 } from 'lucide-react'
@@ -79,13 +69,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  knowledgeBaseAIInsights,
-  knowledgeBaseCollaborators,
-  knowledgeBasePredictions,
-  knowledgeBaseActivities,
-  knowledgeBaseQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'

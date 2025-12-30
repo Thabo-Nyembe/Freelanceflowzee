@@ -5,19 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Share2, 
-  Copy, 
-  ExternalLink,
+  Copy,
   Globe, 
-  Lock, 
-  Eye,
-  EyeOff,
+  Lock,
   Code,
   CheckCircle,
   AlertCircle,
@@ -27,10 +23,8 @@ import {
   Mail,
   Link2,
   Palette,
-  Settings,
   Shield
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface VideoSharingControlsProps {
   videoId: string;

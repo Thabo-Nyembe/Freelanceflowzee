@@ -3,10 +3,8 @@
 import { useState, useRef, useCallback } from 'react'
 import {
   Video, Sparkles, Play, Pause, Download, Share2, Heart,
-  Image as ImageIcon, Film, Wand2, Camera, Settings, Clock,
-  ChevronDown, Loader2, AlertCircle, Volume2, VolumeX,
-  Maximize, RotateCcw, Zap, Crown, Star, Upload, X,
-  RefreshCw, Scissors, Plus, Grid, List, Trash2
+  Image as ImageIcon, Film, Wand2, Camera, Clock, Loader2, AlertCircle, Volume2, VolumeX,
+  Maximize, Zap, Crown, Star, Upload, X, Plus, Grid, List
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'

@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   Brain,
   Users,
-  Clock,
   Smile,
   Meh,
   Frown,

@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   useTemplates,
   useTemplateMutations,
-  Template as DBTemplate,
   TemplateFilters
 } from '@/lib/hooks/use-templates'
 import { Badge } from '@/components/ui/badge'
@@ -14,8 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Dialog,
   DialogContent,
@@ -41,18 +38,15 @@ import {
   Copy,
   Edit,
   Trash2,
-  MoreHorizontal,
   Eye,
   Clock,
   TrendingUp,
   FolderPlus,
   Folder,
-  Filter,
   Settings,
   BarChart3,
   Palette,
   Type,
-  Sparkles,
   Wand2,
   Lock,
   Globe,
@@ -61,43 +55,16 @@ import {
   CheckCircle2,
   Calendar,
   Tag,
-  Bookmark,
-  BookmarkCheck,
-  ExternalLink,
   RefreshCw,
-  Layers,
   Instagram,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Youtube,
   Printer,
-  FileImage,
-  PenTool,
-  Maximize2,
-  ChevronRight,
-  Play,
   ImagePlus,
   LayoutGrid,
   List,
-  SlidersHorizontal,
   Bell,
-  HardDrive,
-  Shield,
-  Layers as LayersIcon,
   RefreshCcw,
-  Cloud,
-  Target,
-  MousePointer,
-  Activity,
-  Database,
-  Link,
-  Box,
-  Boxes,
   LayoutTemplate,
-  FileCode,
   Brush,
-  Megaphone,
   PenLine
 } from 'lucide-react'
 
@@ -113,13 +80,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  templatesAIInsights,
-  templatesCollaborators,
-  templatesPredictions,
-  templatesActivities,
-  templatesQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'

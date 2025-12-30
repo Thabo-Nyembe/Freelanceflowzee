@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useCampaigns, type Campaign as CampaignDB, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
+import { useCampaigns, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,33 +12,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-  DialogFooter, DialogTrigger
+  DialogFooter
 } from '@/components/ui/dialog'
 import {
   Mail, Send, BarChart3, Users, Target, Zap, Clock, TrendingUp,
-  Plus, Search, Filter, MoreVertical, Play, Pause, CheckCircle2,
-  AlertCircle, Edit2, Copy, Trash2, Eye, Calendar, DollarSign,
-  MousePointer, ArrowUpRight, Sparkles, MessageSquare, Phone,
-  Globe, Settings, FileText, Layout, Layers, GitBranch, Split,
-  FlaskConical, Inbox, UserPlus, Tag, Megaphone, ChevronRight,
-  RefreshCw, Download, Share2, BarChart2, PieChart, Activity,
-  Palette, Image, Type, Link2, Wand2, Brain, Gauge, Shield,
-  MapPin, Smartphone, Monitor, Tablet, ArrowUp, ArrowDown,
-  ThumbsUp, ThumbsDown, Star, Heart, Ban, AlertTriangle, CheckCircle,
-  XCircle, Timer, TrendingDown, MailOpen, MousePointerClick, UserMinus,
-  Unlink, ExternalLink, Hash, AtSign, Percent, LineChart, AreaChart,
-  Sliders, Webhook, Key, Database, HardDrive, Terminal, Lock, Archive,
-  Trash2 as TrashIcon, Bell, Server, Code, Folder, FileCode
+  Plus, Search, Filter, Play, Pause, CheckCircle2, Copy, Trash2, Calendar, DollarSign, Sparkles, MessageSquare,
+  Globe, Settings, Layout, Layers, GitBranch, Split, UserPlus, Tag, Megaphone, ChevronRight,
+  RefreshCw, Download, Share2, PieChart,
+  Palette, Image, Type, Wand2, Shield, Smartphone, ArrowUp, ArrowDown, AlertTriangle, CheckCircle, Timer, MailOpen, MousePointerClick, UserMinus, AreaChart,
+  Sliders, Webhook, Database, Terminal, Archive,
+  Trash2 as TrashIcon, Bell, Code
 } from 'lucide-react'
 
 // Competitive Upgrade Components
 import {
   AIInsightsPanel,
-  Sparkline,
-  CollaborationIndicator,
   PredictiveAnalytics,
 } from '@/components/ui/competitive-upgrades'
 

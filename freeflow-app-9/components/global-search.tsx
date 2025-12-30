@@ -4,12 +4,10 @@ import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Command } from 'cmdk'
 import {
-  Calculator,
   Calendar,
   CreditCard,
   File,
   Settings,
-  Smile,
   User,
   Search,
   X,

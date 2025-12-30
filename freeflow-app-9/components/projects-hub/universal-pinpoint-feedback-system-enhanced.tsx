@@ -1,38 +1,23 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "next-themes"
-import { nanoid } from "nanoid"
 import { useUser } from "@/lib/hooks/use-user"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
-import { RealtimeChannel } from "@supabase/supabase-js"
-import { useRouter } from "next/navigation"
-import { format, formatDistanceToNow } from "date-fns"
-import { cn } from "@/lib/utils"
+import { formatDistanceToNow } from "date-fns"
 import { useMediaQuery } from "@/lib/hooks/use-media-query"
-import { useLocalStorage } from "@/lib/hooks/use-local-storage"
 import { useToast } from "@/components/ui/use-toast"
-import { useHotkeys } from "react-hotkeys-hook"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism"
-import { useDebouncedCallback } from "use-debounce"
-import { useMeasure } from "react-use"
-import { PDFDocument } from "pdf-lib"
 
 // UI Components
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
@@ -41,157 +26,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+
+
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Slider } from "@/components/ui/slider"
-import { Progress } from "@/components/ui/progress"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Separator } from "@/components/ui/separator"
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
+
+
+
+
+
+
+
+
+
+
 
 // Icons
 import {
   Play,
   Pause,
   MessageCircle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Code,
   FileText,
-  ImageIcon,
-  Video,
   Mic,
-  Monitor,
-  Sparkles,
-  Filter,
-  Layers,
-  ZoomIn,
-  ZoomOut,
-  Maximize,
   Send,
-  Plus,
-  Volume2,
-  Pencil,
   Square,
-  Eraser,
-  Highlighter,
-  Share,
-  Download,
   Upload,
-  Search,
-  MoreHorizontal,
-  MoreVertical,
-  Users,
   User,
-  UserPlus,
-  Flag,
-  AlertTriangle,
   AlertCircle,
-  Tag,
-  Bookmark,
-  Star,
   ThumbsUp,
-  ThumbsDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  ChevronLeft,
   ChevronRight,
-  ChevronUp,
-  ChevronDown,
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronsUp,
-  ChevronsDown,
-  RefreshCw,
-  RotateCw,
-  Save,
-  Trash,
-  Copy,
-  Scissors,
-  Link,
-  Eye,
-  EyeOff,
-  Settings,
-  Sliders,
-  HelpCircle,
-  Info,
-  Bell,
-  BellOff,
-  Calendar,
-  ClipboardList,
   Paperclip,
   Loader2,
-  Loader,
-  Circle,
-  Triangle,
-  Hexagon,
-  PenTool,
-  Type,
-  Crop,
-  Move,
-  SlidersHorizontal,
-  Undo,
-  Redo,
-  History,
-  Award,
-  Zap,
-  Bot,
-  FileImage,
-  FileAudio,
-  FileVideo,
-  FileText as FileTextIcon,
-  FileCode,
-  FilePlus,
-  FastForward,
-  Rewind,
 } from "lucide-react"
 
 // Define types

@@ -5,19 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 // Import our 2025 GUI components
 import Context7GUIProvider, {
   LightningDarkContainer,
   Spatial3DCard,
   KineticText,
-  AdaptiveInterface,
   GestureControlZone,
   LiquidButton,
-  NeuroCard,
-  MicroInteractionButton,
-  useContext7GUI
+  MicroInteractionButton
 } from './enhanced-gui-2025'
 
 import {
@@ -28,24 +24,16 @@ import {
 } from './zero-ui-interface'
 
 import {
-  AdaptiveLayout,
-  BehavioralLearningEngine,
-  ContextualAdaptationEngine
+  AdaptiveLayout
 } from './ai-driven-personalization'
 
 import {
   Brain,
   Sparkles,
-  Zap,
   Eye,
   Hand,
   Mic,
-  Target,
   Layers3,
-  Palette,
-  Settings,
-  ArrowLeft,
-  Globe,
   Cpu
 } from 'lucide-react'
 

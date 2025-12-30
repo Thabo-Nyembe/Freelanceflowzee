@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { EscrowSystem } from '@/components/escrow-system'
 import { InvoiceCreator } from '@/components/invoice-creator'
-import {  Shield, FileText , DollarSign } from "lucide-react";
-import { GradientContainer } from "@/components/ui/gradient-container";
+import {  Shield, FileText  } from "lucide-react";
 
 interface FinancialHubProps {
   onNavigate?: (screen: string, subTab?: string) => void

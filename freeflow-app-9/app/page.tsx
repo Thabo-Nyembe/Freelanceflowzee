@@ -14,7 +14,6 @@ import {
   Play,
   CheckCircle,
   Star,
-  Zap,
   Shield,
   Globe,
   Video,

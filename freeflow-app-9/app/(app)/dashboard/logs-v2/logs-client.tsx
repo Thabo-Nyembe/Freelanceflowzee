@@ -14,23 +14,19 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-  DialogFooter, DialogTrigger
+  DialogFooter
 } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  FileText, AlertCircle, CheckCircle, Info, AlertTriangle, XCircle, Search,
-  Download, Filter, Clock, Server, Code, Database, Zap, Play, Pause, RefreshCw,
-  ChevronRight, ChevronDown, Eye, Settings, BarChart3, Activity, Layers,
-  Terminal, Hash, Tag, Bookmark, Share2, Copy, ExternalLink, Globe, Cpu,
-  HardDrive, Wifi, TrendingUp, TrendingDown, ArrowUp, ArrowDown, MoreHorizontal,
-  Plus, Trash2, Calendar, LineChart, Archive, Shield, Lock, Key, GitBranch,
-  GitMerge, Box, Package, Workflow, Route, Split, Combine, Funnel, Target,
-  PieChart, Gauge, Bell, BellRing, MailWarning, MessageSquare, Link2, Send,
-  CloudUpload, CloudDownload, FolderArchive, Sparkles, Wand2, Bug, Microscope,
-  Sliders, Webhook, Mail, Server as ServerIcon
+  FileText, AlertCircle, Info, AlertTriangle, XCircle, Search,
+  Download, Filter, Clock, Server, Code, Database, Play, Pause, RefreshCw,
+  ChevronRight, ChevronDown, Settings, BarChart3, Activity, Layers,
+  Terminal, Tag, Bookmark, Share2, Copy, ExternalLink,
+  HardDrive, TrendingUp, TrendingDown, MoreHorizontal,
+  Plus, Trash2, LineChart, Archive, Shield, Lock, Key, Workflow, Bell, BellRing, Send,
+  CloudUpload, CloudDownload, Sparkles, Wand2, Bug, Microscope,
+  Sliders, Webhook
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

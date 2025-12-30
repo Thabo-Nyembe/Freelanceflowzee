@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { CryptoPayment, CryptoPaymentIntent } from '@/lib/crypto-payment-types'
+import { CryptoPaymentIntent } from '@/lib/crypto-payment-types'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-CryptoPayment')

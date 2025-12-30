@@ -1,31 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Trophy,
   Target,
-  TrendingUp,
-  Award,
-  Star,
   Zap,
   Crown,
-  Gift,
   CheckCircle2,
   Lock,
   Sparkles,
   Flame,
-  Heart,
   Users,
   Calendar,
   FileText,
-  Video,
-  Image,
-  Clock,
-  BarChart3
+  Video
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'

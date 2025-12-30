@@ -4,7 +4,7 @@ import { SmartChaptersData } from '@/lib/types/ai'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { BookOpen, Clock, Tag } from 'lucide-react'
+import { BookOpen, Clock } from 'lucide-react'
 
 interface SmartChaptersData {
   chapters: { title: string; start: number; end: number; summary: string; keywords: string[] }[]

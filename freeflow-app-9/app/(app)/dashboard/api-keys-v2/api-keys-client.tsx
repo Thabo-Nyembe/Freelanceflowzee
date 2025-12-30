@@ -13,14 +13,12 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
-  Key, Shield, TrendingUp, AlertCircle, Plus, Copy, Eye, EyeOff,
-  RefreshCw, Settings, CheckCircle, XCircle, Clock, Lock, Trash2,
-  Search, Filter, MoreHorizontal, Globe, Webhook, Zap, Activity,
-  BarChart3, Users, Code, Terminal, Link, ExternalLink, Download,
-  AlertTriangle, Info, Database, Server, Fingerprint, ShieldCheck,
-  RotateCcw, History, FileText, Bell, Calendar, Hash, Layers,
-  ChevronRight, ArrowUpRight, ArrowDownRight, Play, Pause, Edit,
-  Cpu, Network, CircleDot, LayoutGrid, List
+  Key, Shield, TrendingUp, AlertCircle, Plus, Copy, Eye,
+  RefreshCw, Settings, CheckCircle, XCircle, Clock, Lock,
+  Search, Filter, MoreHorizontal, Webhook, Zap, Activity,
+  BarChart3, ExternalLink, Download,
+  AlertTriangle, Fingerprint, ShieldCheck,
+  RotateCcw, History, FileText, Layers, Play, LayoutGrid, List
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

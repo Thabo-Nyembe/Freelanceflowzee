@@ -278,7 +278,7 @@ export async function updatePerformanceGoal(goalId: string, data: Partial<{
     }
 
     // Calculate progress if values updated
-    let updateData: any = { ...data }
+    const updateData: any = { ...data }
     if (data.current_value !== undefined || data.target_value !== undefined) {
       const { data: currentGoal } = await supabase
         .from('performance_goals')

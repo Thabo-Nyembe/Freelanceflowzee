@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Star } from 'lucide-react'
-import { getFavorites, getRecentlyVisited } from '@/lib/admin-navigation-config'
+import { getFavorites } from '@/lib/admin-navigation-config'
 import type { NavigationItem } from '@/lib/admin-navigation-config'
 
 export function AdminFavorites() {

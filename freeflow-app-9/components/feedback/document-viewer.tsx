@@ -7,24 +7,19 @@ import {
   MessageSquare,
   Edit,
   Trash2,
-  Plus,
   FileText,
   Highlighter,
   PenTool,
   Square,
   Circle,
   ArrowRight,
-  Type,
-  Eraser,
-  Download,
-  RotateCcw
+  Eraser
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('DocumentViewer')

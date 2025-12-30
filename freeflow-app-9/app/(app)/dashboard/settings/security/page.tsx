@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle, Loader2 } from 'lucide-react'
+import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { SecuritySettings, defaultSecurity } from '@/lib/settings-utils'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Phone, Video, Mic, MicOff, VideoOff, ScreenShare, PhoneOff, Camera, CameraOff, Monitor, MonitorOff, VolumeX, Volume2, MessageCircle, MapPin, Users, Send, X } from 'lucide-react'
+import { Phone, Video, Mic, MicOff, VideoOff, ScreenShare, PhoneOff, VolumeX, Volume2, MessageCircle, MapPin, Users, Send, X } from 'lucide-react'
 
 interface User {
   id: string

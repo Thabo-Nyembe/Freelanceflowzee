@@ -6,7 +6,7 @@ import { Button } from './button'
 import { Card } from './card'
 import {
   AlertTriangle, RefreshCw, Bug, Copy, ExternalLink,
-  Shield, Zap, MessageCircle, Home, ArrowLeft
+  Shield, Zap, MessageCircle, Home
 } from 'lucide-react'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from '@/components/ui/enhanced-toast'

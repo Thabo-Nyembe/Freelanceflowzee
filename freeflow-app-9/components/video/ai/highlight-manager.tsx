@@ -16,8 +16,7 @@ import {
 } from 'lucide-react'
 import {
   HighlightDetectionService,
-  HighlightSegment,
-  KeyMoment
+  HighlightSegment
 } from '@/lib/ai/highlight-detection-service'
 
 interface HighlightManagerProps {

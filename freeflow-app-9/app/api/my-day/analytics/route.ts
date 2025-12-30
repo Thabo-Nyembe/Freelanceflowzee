@@ -3,9 +3,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import {
   WorkPatternAnalyzer,
   generateMockTaskHistory,
-  type ProductivityInsights,
-  type ScheduleOptimization,
-  type WorkPattern
+  type ScheduleOptimization
 } from '@/lib/ai/work-pattern-analyzer'
 
 const logger = createFeatureLogger('API-MyDayAnalytics')

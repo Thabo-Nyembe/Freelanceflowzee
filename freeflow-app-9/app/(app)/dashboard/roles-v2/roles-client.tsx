@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   Shield, Users, Lock, Key, Crown, UserCheck, UserX, Plus,
   Search, Filter, Download, RefreshCw, Settings, Eye, Copy,
-  Trash2, Power, PowerOff, CheckCircle, AlertCircle, XCircle,
-  Building2, Globe, Clock, Calendar, TrendingUp, BarChart3,
-  FileText, AlertTriangle, ShieldCheck, ShieldAlert, Fingerprint,
+  Trash2, CheckCircle, AlertCircle, XCircle, Globe, Clock, TrendingUp, BarChart3,
+  FileText, AlertTriangle, ShieldCheck, ShieldAlert,
   UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell, Loader2
 } from 'lucide-react'
 import { useRoles, type UserRole } from '@/lib/hooks/use-roles'
@@ -30,9 +29,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

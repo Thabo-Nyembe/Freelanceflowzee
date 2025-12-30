@@ -5,34 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { 
   Users,
   MessageSquare,
-  Bell,
-  Clock,
-  Eye,
   Edit,
   Share2,
   AtSign,
   Heart,
-  MessageCircle,
   Send,
   Paperclip,
   Smile,
   MoreHorizontal,
   Pin,
   Reply,
-  Trash2,
-  Flag,
-  CheckCircle,
   Circle,
-  UserPlus,
-  Settings,
-  Video,
-  Phone,
-  Calendar
+  UserPlus
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

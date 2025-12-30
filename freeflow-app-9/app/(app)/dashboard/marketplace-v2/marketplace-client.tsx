@@ -12,20 +12,16 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Store, Package, ShoppingCart, Users, Star, Download, TrendingUp, TrendingDown,
-  DollarSign, Search, Filter, Grid, List, Heart, Share2, ExternalLink, MoreHorizontal,
-  Plus, Settings, Eye, ShoppingBag, Truck, CreditCard, Award, Shield, Zap, Tag, Percent,
-  Clock, CheckCircle, XCircle, AlertCircle, ChevronRight, ArrowUpRight, ArrowDownRight,
-  Layers, Box, BarChart3, Globe, MessageSquare, Bookmark, BookmarkCheck, Crown, Sparkles,
-  Flame, ThumbsUp, RefreshCw, Mail, Phone, MapPin, Calendar, FileText, Receipt,
-  TrendingUp as Trending, PieChart, Activity, Target, Megaphone, Gift, Wallet, Bell,
-  Flag, ThumbsDown, Reply, Edit, Trash2, Copy, Link, Image, Video, Code, Hash, History
+  Store, Package, Users, Star, Download, TrendingUp,
+  DollarSign, Search, Filter, Grid, List, Heart, ExternalLink, MoreHorizontal,
+  Plus, Settings, Eye, CreditCard, Award, Shield, Zap, Tag, Percent,
+  Clock, CheckCircle, XCircle,
+  Layers, BarChart3, MessageSquare, Crown, Sparkles, ThumbsUp, RefreshCw, Mail, MapPin, FileText, Receipt, PieChart, Activity, Target, Megaphone, Wallet, Bell, ThumbsDown, Reply, Edit, Trash2, Copy, Code
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

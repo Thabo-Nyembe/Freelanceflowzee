@@ -31,12 +31,9 @@ import {
   Save,
   Eye,
   Settings,
-  Palette,
   AlignLeft,
   AlignCenter,
   AlignRight,
-  Move,
-  RotateCw,
   Layers,
   Sparkles
 } from 'lucide-react'

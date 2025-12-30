@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
 import { createFeatureLogger } from '@/lib/logger'
 import { uuidSchema } from '@/lib/validations'
-import { z } from 'zod'
 
 const logger = createFeatureLogger('ai-assistant')
 

@@ -21,33 +21,10 @@
  * - Usage optimization recommendations
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-import {
-  Brain, Sparkles, FileText, MessageSquare, Mail, ShoppingCart, Code2, Pen,
-  Settings, Layout, History as HistoryIcon, Copy, Download, Zap, Clock,
-  TrendingUp, Activity, Cpu, Mic, MicOff, Save, Trash2, Edit, RefreshCw,
-  FileCode, FileJson, FileImage, FileType, Globe, ChevronDown, ChevronUp,
-  BarChart3, LineChart, PieChart, Target, Award, Lightbulb, Share2, Star,
-  Bookmark, BookmarkCheck, Plus, X, Check, AlertCircle, Info, PlayCircle,
-  PauseCircle, StopCircle, FastForward, Rewind, Volume2, VolumeX, Filter,
-  Search, Calendar, Users, GitBranch, Layers, Archive, FolderOpen, Upload,
-  DollarSign, Shield, Flame, TrendingDown, ArrowUpRight, ArrowDownRight,
-  Maximize2, Minimize2, MoreVertical, Settings2, Sliders, Eye, EyeOff
+import { FileText, MessageSquare, Mail, ShoppingCart, Code2, Pen,
+  FileCode, FileJson, FileImage, FileType, Globe, Target, PlayCircle
 } from 'lucide-react'
 
 // ============================================================================

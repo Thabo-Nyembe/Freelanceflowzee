@@ -7,8 +7,7 @@ import { useCommunity } from '@/lib/hooks/use-community'
 import {
   useCommunityEvents,
   useCommunityMembers,
-  useCommunityPosts,
-  useCommunityGroups
+  useCommunityPosts
 } from '@/lib/hooks/use-community-extended'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -24,20 +23,18 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-  DialogFooter, DialogTrigger
+  DialogFooter
 } from '@/components/ui/dialog'
 import {
-  Users, Plus, MessageSquare, ThumbsUp, Share2, TrendingUp, Award, Star, Heart, Eye,
-  Hash, Volume2, Video, Settings, Bell, Pin, Smile, Send, Paperclip, AtSign,
-  Search, Filter, MoreHorizontal, ChevronDown, ChevronRight, Lock, Globe, Shield,
-  UserPlus, UserMinus, Crown, Mic, MicOff, Headphones, Phone, Camera, ScreenShare,
-  Reply, Edit3, Trash2, Flag, Bookmark, Link2, Image as ImageIcon, Gift, Sparkles,
-  Circle, CheckCircle, Clock, Zap, MessageCircle, Radio, Megaphone, Calendar,
-  AlertTriangle, Ban, Timer, Activity, BarChart3, PieChart, UserCheck, UserX,
-  VolumeX, Gavel, FileText, ExternalLink, Copy, Rocket, Gem, Palette, Folder,
-  FolderPlus, Tag, SlidersHorizontal, ShieldCheck, ShieldAlert, Mail, Bot,
-  Webhook, PuzzlePiece, Download, Upload, RefreshCw, History, Eye as EyeIcon,
-  MoreVertical, ChevronUp, X, Check, AlertCircle, Info, HelpCircle, Key, HardDrive,
+  Users, Plus, MessageSquare, TrendingUp, Star,
+  Hash, Volume2, Video, Settings, Bell, Pin, Smile,
+  Search, MoreHorizontal, ChevronDown, ChevronRight, Lock, Globe, Shield,
+  UserPlus, Crown, Mic, Headphones,
+  Reply, Image as ImageIcon, Gift,
+  Circle, CheckCircle, Clock, MessageCircle, Radio, Megaphone, Calendar,
+  AlertTriangle, Ban, BarChart3, UserX,
+  VolumeX, Gavel, FileText, ExternalLink, Rocket, Gem, ShieldCheck, ShieldAlert, Mail, Bot,
+  Webhook, Download, Key, HardDrive,
   CreditCard, Sliders
 } from 'lucide-react'
 

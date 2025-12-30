@@ -8,24 +8,16 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Key, Eye, EyeOff, Plus, Trash2, Edit, Check, X, AlertCircle,
-  Shield, DollarSign, TrendingUp, Zap, Copy, ExternalLink,
-  CheckCircle, Clock, RefreshCw, Info, HelpCircle, Lock,
-  Unlock, Settings, BarChart, FileText, Download, Upload,
-  Star, Sparkles, Award, Target, Activity, Wifi, WifiOff
+import { Eye, EyeOff, Plus, Trash2, DollarSign, Copy, ExternalLink,
+  CheckCircle, Clock, RefreshCw, Info, Lock, FileText, Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'

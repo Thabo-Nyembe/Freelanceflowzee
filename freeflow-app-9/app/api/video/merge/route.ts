@@ -427,7 +427,7 @@ export async function POST(request: NextRequest) {
         }
 
         await new Promise<void>((resolve, reject) => {
-          let command = ffmpeg()
+          const command = ffmpeg()
             .input(mainVideoPath!)
             .input(overlayVideoPath!)
 

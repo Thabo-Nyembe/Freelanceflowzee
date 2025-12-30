@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo, useRef } from 'react'
-import { useDocuments, useDocumentMutations, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
+import { useDocuments, useDocumentMutations, type Document, type DocumentType } from '@/lib/hooks/use-documents'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -21,18 +21,14 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
-  FileText, Upload, Download, Eye, Share2, CheckCircle, Clock, XCircle,
-  Plus, Search, Filter, MoreHorizontal, Folder, FolderOpen, File,
-  Star, StarOff, Lock, Users, Globe, History, MessageSquare, Link2,
-  Copy, Trash2, Edit3, ChevronRight, ChevronDown, Grid3X3, List,
-  Calendar, Table, Image as ImageIcon, Code, Type, Hash, ListTodo,
-  Quote, Minus, Sparkles, Wand2, BookOpen, FileCode, Presentation,
-  Settings, BarChart3, FileSpreadsheet, FilePlus, FolderPlus, Archive,
-  Tag, PenTool, Paperclip, FileUp, CloudUpload, HardDrive, CheckCircle2,
-  AlertCircle, FileCheck, FileX, FileLock, FileSearch, FolderTree,
-  FolderInput, FolderOutput, Timer, TrendingUp, Activity, Zap, Shield,
-  ExternalLink, RefreshCw, MoreVertical, Layers, Move, ArrowUpRight,
-  Key, Webhook, Mail, Bell, AlertOctagon, Palette, Database, GitBranch
+  FileText, Upload, Download, Share2, Clock,
+  Plus, Search, Folder, File,
+  Star, Lock, Users, Globe, MessageSquare, Link2,
+  Copy, Trash2, Edit3, Grid3X3, List, Image as ImageIcon, Sparkles, BookOpen, Presentation,
+  Settings, BarChart3, FileSpreadsheet, FilePlus, FolderPlus, Archive, CloudUpload, HardDrive,
+  AlertCircle, FolderTree, Zap, Shield,
+  ExternalLink, RefreshCw, MoreVertical, Move,
+  Key, Webhook, Mail, Bell, AlertOctagon, Palette, Database
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -47,13 +43,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  documentsAIInsights,
-  documentsCollaborators,
-  documentsPredictions,
-  documentsActivities,
-  documentsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Google Docs Level Document Platform

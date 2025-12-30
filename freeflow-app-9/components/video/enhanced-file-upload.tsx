@@ -19,7 +19,6 @@ import {
   Folder,
   Link,
   Plus,
-  Play,
   Eye
 } from 'lucide-react'
 import { toast } from 'sonner'

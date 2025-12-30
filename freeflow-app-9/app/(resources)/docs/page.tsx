@@ -12,9 +12,7 @@ import { DemoModal } from '@/components/demo-modal'
 import { 
   BookOpen, 
   Search, 
-  Star, 
-  Clock,
-  User,
+  Star,
   ArrowRight,
   FileText,
   Video,

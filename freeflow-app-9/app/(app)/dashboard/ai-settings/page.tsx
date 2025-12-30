@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-// Note: Radix Select removed due to infinite loop bug - using native HTML select instead
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
@@ -44,10 +44,7 @@ import {
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
-  getProviders,
-  updateProvider,
   APIKey,
-  getAIPreferences,
   updateAIBudget,
   updateAIRateLimits,
   updateDefaultProviders,

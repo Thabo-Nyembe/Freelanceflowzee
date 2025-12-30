@@ -35,19 +35,10 @@ import {
   Sliders,
   Bell,
   Webhook,
-  Key,
-  Database,
-  Lock,
-  Globe,
   Upload,
-  HardDrive,
   Terminal,
-  History,
   Settings,
-  Filter,
   RefreshCw,
-  Zap,
-  LayoutGrid,
   Repeat,
   PieChart,
   Target
@@ -66,13 +57,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-import {
-  transactionsAIInsights,
-  transactionsCollaborators,
-  transactionsPredictions,
-  transactionsActivities,
-  transactionsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'

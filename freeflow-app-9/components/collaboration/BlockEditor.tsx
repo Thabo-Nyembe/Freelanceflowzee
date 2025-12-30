@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import CommentPopover from './CommentPopover';
 import SuggestionActionPopover from './SuggestionActionPopover';
 import { useCollaboration } from '@/hooks/collaboration/useCollaboration';
 import { Insertion, Deletion } from '@/lib/tiptap/suggestions';

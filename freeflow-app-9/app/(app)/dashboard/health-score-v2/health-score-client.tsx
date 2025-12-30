@@ -21,29 +21,19 @@ import {
   RefreshCw,
   Play,
   Pause,
-  ChevronRight,
   ExternalLink,
   Search,
   Filter,
-  MoreVertical,
   Cpu,
   HardDrive,
-  Wifi,
   Container,
   Cloud,
   Shield,
   Eye,
   BarChart3,
-  LineChart,
-  PieChart,
-  AlertCircle,
-  Info,
-  ArrowUpRight,
-  ArrowDownRight,
   Minus,
   Calendar,
   Download,
-  Share2,
   Layers,
   GitBranch,
   Box,
@@ -52,16 +42,7 @@ import {
   Users,
   Network,
   Gauge,
-  Sparkles,
-  Rocket,
-  History,
-  Timer,
-  Workflow,
-  Cog,
-  Link,
-  Wrench,
-  Trash2,
-  Edit2
+  Trash2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -76,13 +57,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  healthScoreAIInsights,
-  healthScoreCollaborators,
-  healthScorePredictions,
-  healthScoreActivities,
-  healthScoreQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'

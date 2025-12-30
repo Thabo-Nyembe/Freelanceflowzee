@@ -17,12 +17,8 @@ import {
   LineChart,
   PieChart,
   TrendingUp,
-  TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
   DollarSign,
   Users,
-  ShoppingCart,
   Activity,
   Eye,
   Download,
@@ -31,7 +27,6 @@ import {
   Search,
   Filter,
   Calendar,
-  Clock,
   RefreshCw,
   Settings,
   FileText,
@@ -44,29 +39,18 @@ import {
   Grid3X3,
   List,
   MoreHorizontal,
-  Play,
-  Pause,
   Trash2,
-  Copy,
   Edit,
   Star,
-  StarOff,
   FolderOpen,
   Upload,
   ExternalLink,
-  Maximize2,
-  Minimize2,
-  ChevronRight,
   ChevronDown,
   Sparkles,
-  Zap,
   Target,
   Globe,
   Mail,
-  Send,
   Bell,
-  Lock,
-  Unlock,
   Key,
   Webhook,
   Shield,
@@ -88,13 +72,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  reportsAIInsights,
-  reportsCollaborators,
-  reportsPredictions,
-  reportsActivities,
-  reportsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

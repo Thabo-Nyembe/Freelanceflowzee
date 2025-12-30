@@ -20,13 +20,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Monitor, 
   Mic, 
-  MicOff, 
   Play, 
   Square, 
   Pause, 
   Download,
   Upload,
-  Settings,
   Video,
   Clock,
   HardDrive,
@@ -34,7 +32,6 @@ import {
   CheckCircle,
   Loader2
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useScreenRecorder, RecordingOptions } from '@/hooks/use-screen-recorder';
 import { formatDuration } from '@/lib/video/config';
 

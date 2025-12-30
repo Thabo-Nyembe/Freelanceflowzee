@@ -21,52 +21,31 @@ import {
   Trash2,
   Star,
   StarOff,
-  MoreVertical,
   ChevronDown,
   Zap,
   Brain,
   History,
   Users,
   Folder,
-  BookOpen,
   Search,
-  Filter,
   Download,
   Upload,
-  Play,
-  Pause,
-  Square,
   Wand2,
   Palette,
-  Calculator,
-  Globe,
   Database,
   Terminal,
   FileCode,
   PenTool,
   Lightbulb,
-  Target,
   BarChart3,
   Clock,
-  Crown,
-  Shield,
-  Eye,
-  EyeOff,
-  Edit,
   Save,
-  X,
   AlertCircle,
   CheckCircle,
-  Info,
-  ArrowUp,
-  ArrowDown,
   Loader2,
   ThumbsUp,
   ThumbsDown,
-  Share,
-  Bookmark,
-  Hash,
-  AtSign
+  Share
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -81,15 +60,10 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  aiAssistantAIInsights,
-  aiAssistantCollaborators,
-  aiAssistantPredictions,
-  aiAssistantActivities,
-  aiAssistantQuickActions,
-} from '@/lib/mock-data/adapters'
 
-import { useAIAssistant, AIConversation, AIMessage } from '@/lib/hooks/use-ai-assistant'
+
+
+import { useAIAssistant } from '@/lib/hooks/use-ai-assistant'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

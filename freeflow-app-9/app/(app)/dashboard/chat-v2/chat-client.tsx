@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -30,46 +30,25 @@ import {
   XCircle,
   Star,
   Sparkles,
-  Bot,
   Paperclip,
   Image as ImageIcon,
   Smile,
   MoreHorizontal,
-  Archive,
   Tag,
   UserPlus,
-  Filter,
   AlertCircle,
   Inbox,
   Mail,
   Phone,
   Globe,
-  Calendar,
-  History,
   Bell,
   Settings,
   Zap,
-  ThumbsUp,
-  ThumbsDown,
   RefreshCw,
   ChevronRight,
-  Circle,
-  Pin,
-  AtSign,
-  Hash,
-  Eye,
-  EyeOff,
-  Volume2,
-  VolumeX,
   Bookmark,
-  BookmarkCheck,
-  Reply,
-  Forward,
-  Copy,
   Trash2,
-  Edit,
-  BarChart3,
-  TrendingUp
+  Edit
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -92,7 +71,7 @@ import {
   chatQuickActions,
 } from '@/lib/mock-data/adapters'
 
-import { useChat, type ChatMessage, type RoomType, type ChatStatus } from '@/lib/hooks/use-chat'
+import { useChat, type ChatMessage, type RoomType } from '@/lib/hooks/use-chat'
 
 // ============================================================================
 // TYPES - INTERCOM LEVEL CHAT SYSTEM

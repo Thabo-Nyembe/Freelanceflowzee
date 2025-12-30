@@ -7,9 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -26,7 +23,6 @@ import {
   Heart,
   Share2,
   Trash2,
-  Plus,
   Search,
   Filter,
   Grid3x3,
@@ -37,43 +33,17 @@ import {
   TrendingDown,
   Copy,
   Maximize2,
-  Minimize2,
-  RotateCcw,
-  RotateCw,
-  ZoomIn,
-  ZoomOut,
-  Move,
-  Crop,
-  Sliders,
   Paintbrush,
-  Eraser,
-  Shapes,
-  Type,
-  Upload,
   FolderPlus,
-  Bookmark,
   History,
   Cpu,
-  MoreHorizontal,
-  ChevronRight,
   CheckCircle2,
-  XCircle,
-  AlertCircle,
   Lock,
   Crown,
   Lightbulb,
-  ArrowUpRight,
-  ImagePlus,
   Shuffle,
   Ratio,
   SlidersHorizontal,
-  Sun,
-  Moon,
-  Contrast,
-  Droplet,
-  Focus,
-  Aperture,
-  Film,
   Bell,
   HelpCircle
 } from 'lucide-react'
@@ -90,13 +60,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  aiDesignAIInsights,
-  aiDesignCollaborators,
-  aiDesignPredictions,
-  aiDesignActivities,
-  aiDesignQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type GenerationStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'upscaling'

@@ -541,7 +541,7 @@ export async function POST(request: NextRequest) {
 
       case 'duplicate-canvas': {
         const { canvasId, newName } = params;
-        let source = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Source');
+        const source = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Source');
 
         const duplicate: Canvas = {
           ...JSON.parse(JSON.stringify(source)),
@@ -569,7 +569,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId
@@ -608,7 +608,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -630,7 +630,7 @@ export async function POST(request: NextRequest) {
       case 'add-text': {
         const { canvasId, pageId, text, position, style, fontSize = 16, fontFamily = 'Inter' } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -675,7 +675,7 @@ export async function POST(request: NextRequest) {
       case 'add-sticky-note': {
         const { canvasId, pageId, text, position, color } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -726,7 +726,7 @@ export async function POST(request: NextRequest) {
       case 'add-image': {
         const { canvasId, pageId, src, position, size, alt } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -767,7 +767,7 @@ export async function POST(request: NextRequest) {
       case 'add-connector': {
         const { canvasId, pageId, startElementId, endElementId, lineType = 'elbow', arrowEnd = 'arrow' } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -810,7 +810,7 @@ export async function POST(request: NextRequest) {
       case 'add-frame': {
         const { canvasId, pageId, title, position, size } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -853,7 +853,7 @@ export async function POST(request: NextRequest) {
       case 'draw-path': {
         const { canvasId, pageId, points, style, closed = false } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const page = pageId ? canvas.pages.find(p => p.id === pageId) : canvas.pages[0];
@@ -1140,7 +1140,7 @@ export async function POST(request: NextRequest) {
       case 'create-page': {
         const { canvasId, name, background } = params;
 
-        let canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
+        const canvas = canvasDb.get(canvasId) || createDefaultCanvas(userId, 'Canvas');
         canvas.id = canvasId;
 
         const newPage: CanvasPage = {

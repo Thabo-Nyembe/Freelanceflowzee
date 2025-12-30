@@ -11,10 +11,8 @@ import {
   Users,
   Sparkles,
   Calendar,
-  Shield,
   FileText,
   TrendingUp,
-  LayoutDashboard,
   Settings,
   LogOut,
   Palette,
@@ -22,9 +20,6 @@ import {
   Bell,
   DollarSign,
   Zap,
-  Monitor,
-  Wallet,
-  Receipt,
   Plug,
   Key
 } from 'lucide-react'

@@ -9,9 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -24,12 +22,12 @@ import {
 } from '@/components/ui/select'
 import {
   Smartphone, Download, Star, TrendingUp, Users, Activity,
-  Package, Upload, Play, AlertCircle, CheckCircle, Clock,
-  Settings, Globe, Bell, Shield, Zap, BarChart3, Target,
-  Bug, Cpu, HardDrive, Battery, Wifi, Apple, Monitor,
-  RefreshCw, Send, Eye, MessageSquare, ChevronRight, Layers,
+  Package, Upload, Play, Clock,
+  Settings, Globe, Bell, Shield, BarChart3, Target,
+  Bug, Cpu, Apple,
+  RefreshCw, Send, ChevronRight,
   Key, Webhook, Mail, Database, Lock, AlertOctagon, Trash2,
-  Copy, Code, GitBranch, FileText, Image, Link2
+  Copy, GitBranch, Image
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -44,13 +42,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  mobileAppAIInsights,
-  mobileAppCollaborators,
-  mobileAppPredictions,
-  mobileAppActivities,
-  mobileAppQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type Platform = 'ios' | 'android' | 'all'

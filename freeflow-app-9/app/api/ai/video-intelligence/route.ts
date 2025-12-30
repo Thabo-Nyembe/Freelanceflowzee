@@ -12,17 +12,15 @@ import {
   IntegratedAISystem, 
   AIOperationType, 
   AIOperationStatus,
-  AIProvider,
-  AIEventType
+  AIProvider
 } from '@/lib/ai/integrated-ai-system';
 import { WebSocketServer } from 'ws';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { createReadStream, writeFile, mkdir } from 'fs';
+import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { pipeline } from 'stream';
-import { Readable } from 'stream';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';

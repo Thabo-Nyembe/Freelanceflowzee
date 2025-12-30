@@ -9,63 +9,41 @@ import {
   Package,
   Shield,
   ShieldAlert,
-  ShieldCheck,
   ShieldX,
   AlertTriangle,
   AlertCircle,
   CheckCircle2,
   Clock,
-  TrendingUp,
-  TrendingDown,
   Search,
-  Filter,
   RefreshCw,
   Download,
-  Upload,
   Settings,
   GitPullRequest,
   GitBranch,
-  GitMerge,
   ExternalLink,
-  Eye,
-  MoreHorizontal,
   Plus,
   ArrowUpRight,
-  ArrowDownRight,
   FileText,
   Scale,
   Lock,
-  Unlock,
   Info,
-  XCircle,
   Zap,
   Layers,
-  Box,
   Database,
-  Globe,
   Terminal,
-  ChevronRight,
-  ChevronDown,
   Bell,
-  BellOff,
-  X,
-  Check,
   Key,
   Webhook,
   Mail,
   Link2,
-  Palette,
   Copy,
   AlertOctagon,
   Trash2,
   History,
   FileCode,
   BarChart3,
-  Server,
   Cpu,
-  HardDrive,
   Cog,
-  Code2,
   Scan
 } from 'lucide-react'
 
@@ -80,13 +58,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-import {
-  dependenciesAIInsights,
-  dependenciesCollaborators,
-  dependenciesPredictions,
-  dependenciesActivities,
-  dependenciesQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -94,7 +67,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'

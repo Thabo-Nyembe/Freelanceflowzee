@@ -108,13 +108,6 @@ import {
   getSkills,
   getExperience,
   getEducation,
-  getCertifications,
-  createProject,
-  createSkill,
-  createExperience,
-  deleteProject,
-  deleteSkill,
-  deleteExperience,
   createShareLink
 } from '@/lib/cv-portfolio-queries'
 

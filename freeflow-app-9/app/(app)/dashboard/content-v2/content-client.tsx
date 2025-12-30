@@ -3,9 +3,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
@@ -14,11 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Bell, Key, Webhook, Mail, AlertTriangle, Sliders, Globe as GlobeIcon, HardDrive, Trash2 as TrashIcon, RefreshCw, Download, Plus, Settings, Shield, Database, Cloud, Code, Layers, FileText, Edit2, Archive, Calendar, Send } from 'lucide-react'
+import { Webhook, Sliders, Globe as GlobeIcon, HardDrive, Trash2 as TrashIcon, RefreshCw, Download, Plus, Settings, Cloud, Code, Layers, FileText, Edit2, Archive, Send } from 'lucide-react'
 
 // Import hooks
 import { useContent, Content, ContentType, ContentStatus } from '@/lib/hooks/use-content'
-import { useSupabaseQuery, useSupabaseMutation } from '@/lib/hooks/use-supabase-helpers'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -32,13 +30,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  contentAIInsights,
-  contentCollaborators,
-  contentPredictions,
-  contentActivities,
-  contentQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // CONTENTFUL/STRAPI-LEVEL CMS - Headless Content Management System

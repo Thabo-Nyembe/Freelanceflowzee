@@ -10,7 +10,6 @@ import {
   Volume2, 
   VolumeX, 
   Maximize,
-  Settings,
   Share,
   Loader2
 } from 'lucide-react';

@@ -1,22 +1,16 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,21 +30,14 @@ import {
   Trash2,
   MoreHorizontal,
   Search,
-  Filter,
   Grid,
   List,
   FolderOpen,
   Star,
-  Clock,
-  Users,
   Link,
   Eye,
   Edit,
-  Cloud,
   HardDrive,
-  Zap,
-  Shield,
-  TrendingUp,
   X,
   Check
 } from 'lucide-react'

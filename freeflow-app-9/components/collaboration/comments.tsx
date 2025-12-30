@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
-  MessageSquare,
   MoreVertical,
   Check,
   X,

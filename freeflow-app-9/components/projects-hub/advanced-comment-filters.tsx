@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns"
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns"
 
 // UI Components
 import {
@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
 import {
   Command,
   CommandEmpty,
@@ -56,21 +55,15 @@ import {
   Save,
   Bookmark,
   Star,
-  Clock,
   MessageCircle,
   AlertTriangle,
   CheckCircle,
-  Hash,
-  AtSign,
   FileText,
   Image,
   Video,
   Mic,
   ChevronDown,
-  ChevronUp,
-  Plus,
-  Minus,
-  Zap
+  ChevronUp
 } from "lucide-react"
 
 // Types

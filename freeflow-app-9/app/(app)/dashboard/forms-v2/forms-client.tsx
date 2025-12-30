@@ -16,15 +16,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   FileText, Plus, Search, Eye, Edit3, Copy, Trash2, Share2, Settings,
-  BarChart3, Users, Clock, CheckCircle, XCircle, ChevronRight, ChevronDown,
+  BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown,
   Type, List, Hash, Star, Calendar, Upload, ToggleLeft, AlignLeft, MessageSquare,
-  Image as ImageIcon, Link2, Mail, Phone, MapPin, CreditCard, Percent, ArrowRight,
-  Play, Pause, Archive, ExternalLink, Code, Zap, Bell, Download, Filter,
-  TrendingUp, TrendingDown, PieChart, Activity, Target, Sparkles, Wand2, Palette,
-  Layout, Grid3X3, Layers, Smartphone, Monitor, Globe, Lock, Unlock, RefreshCw,
-  MousePointer, FileQuestion, CircleDot, Square, ChevronUp, Minus, MoreVertical,
-  ArrowDownRight, ArrowUpRight, Send, Webhook, Database, GitBranch, Shuffle,
-  Timer, Gauge, ThumbsUp, ThumbsDown, Sliders, ListChecks, FileUp, Save, AlertOctagon
+  Image as ImageIcon, Link2, Mail, Phone, CreditCard,
+  Play, Pause, Archive, ExternalLink, Code, Zap, Bell, Download,
+  TrendingUp, PieChart, Activity, Target, Sparkles, Wand2, Palette,
+  Layout, Grid3X3, Smartphone, Monitor, Globe, Lock, RefreshCw,
+  MousePointer, CircleDot, MoreVertical, Send, Webhook, Database, GitBranch, Shuffle,
+  Timer, Gauge, Sliders, ListChecks, FileUp, Save, AlertOctagon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -39,13 +38,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  formsAIInsights,
-  formsCollaborators,
-  formsPredictions,
-  formsActivities,
-  formsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Typeform Level Form Builder

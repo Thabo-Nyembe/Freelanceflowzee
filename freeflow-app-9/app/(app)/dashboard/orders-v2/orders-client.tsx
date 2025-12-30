@@ -30,9 +30,7 @@ import {
   TrendingUp,
   Users,
   Search,
-  Filter,
   Download,
-  Eye,
   AlertCircle,
   RefreshCw,
   Plus,
@@ -44,39 +42,22 @@ import {
   Mail,
   Calendar,
   Tag,
-  MessageSquare,
   Printer,
   RotateCcw,
   Edit,
   Trash2,
-  Copy,
-  ExternalLink,
-  ChevronRight,
   Settings,
   BarChart3,
-  PieChart,
-  FileText,
   Box,
-  Boxes,
   Receipt,
-  Wallet,
-  Globe,
-  Building,
-  Star,
   AlertTriangle,
   PackageCheck,
-  PackageX,
-  Timer,
-  Banknote,
-  ArrowLeftRight,
   History,
   Send,
   Bell,
   Sliders,
   Terminal,
-  Webhook,
-  Shield,
-  Key
+  Shield
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -91,13 +72,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  ordersAIInsights,
-  ordersCollaborators,
-  ordersPredictions,
-  ordersActivities,
-  ordersQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Shopify Level Order Management

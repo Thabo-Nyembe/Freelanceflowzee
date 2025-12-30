@@ -9,20 +9,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
-  Zap, Link2, Plus, Search, Filter, Play, Pause, Settings, ChevronRight,
-  ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, RefreshCw, Activity,
-  Layers, GitBranch, Database, Cloud, Globe, Mail, Calendar, FileText, Users,
-  MessageSquare, BarChart3, ShoppingCart, CreditCard, Bell, Folder, Image,
-  MoreHorizontal, Edit, Trash2, Copy, Eye, History, Star, TrendingUp,
-  Webhook, Code, Terminal, Lock, Unlock, Key, Shield, AlertCircle, Download,
-  Upload, ExternalLink, ChevronDown, Workflow, CircleDot, Timer, Cpu,
-  LayoutGrid, List, Sparkles, Rocket, Target, Gauge, PieChart, Network,
-  Sliders, Archive, HardDrive, Server
+  Zap, Link2, Plus, Search, Filter, Play, Pause, Settings,
+  ArrowRight, CheckCircle, XCircle, AlertTriangle, RefreshCw, Activity,
+  Layers, Calendar, BarChart3, Bell, Folder, Edit, Trash2, Copy, Eye, History, Star, TrendingUp,
+  Webhook, Terminal, Key, Shield, AlertCircle, Download, Workflow,
+  LayoutGrid, List, Sparkles,
+  Sliders, Archive
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

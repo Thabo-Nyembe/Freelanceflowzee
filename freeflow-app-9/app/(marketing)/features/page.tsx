@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { EnhancedNavigation } from '@/components/marketing/enhanced-navigation';

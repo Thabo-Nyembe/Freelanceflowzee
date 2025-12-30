@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { useGrowthExperiments, useGrowthMetrics, useGrowthPlaybooks } from '@/lib/hooks/use-growth-extended'
-import { useCohorts, useCohortMetrics } from '@/lib/hooks/use-cohort-extended'
+import { useCohorts } from '@/lib/hooks/use-cohort-extended'
 import { useConversionFunnels, useConversionGoals } from '@/lib/hooks/use-conversion-extended'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,8 +14,6 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -33,39 +31,19 @@ import {
   BarChart3,
   Activity,
   Filter,
-  GitBranch,
   FlaskConical,
   Route,
   LayoutDashboard,
-  Calendar,
-  Clock,
-  Play,
-  Pause,
   CheckCircle2,
   XCircle,
   ArrowRight,
-  ChevronRight,
   Percent,
-  UserPlus,
-  UserMinus,
-  Eye,
-  MousePointer,
-  ShoppingCart,
-  CreditCard,
   Search,
   Download,
   Plus,
-  MoreHorizontal,
-  Settings,
-  Share2,
-  Copy,
-  Sparkles,
-  Zap,
   RefreshCw,
-  AlertCircle,
   ArrowUpRight,
   ArrowDownRight,
-  Layers,
   PieChart,
   Shield,
   Sliders,
@@ -73,13 +51,7 @@ import {
   Webhook,
   Database,
   Trash2,
-  Terminal,
-  Key,
-  History,
-  Lock,
-  Globe,
-  Mail,
-  Upload
+  Terminal
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -94,13 +66,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  growthHubAIInsights,
-  growthHubCollaborators,
-  growthHubPredictions,
-  growthHubActivities,
-  growthHubQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPES & INTERFACES

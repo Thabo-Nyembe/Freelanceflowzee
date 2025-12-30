@@ -4,8 +4,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUPSIntegration, useUPSProject, useUPSUser, useUPSComments, useUPSUI } from '@/lib/ups/integration-service'
 import { UniversalPinpointFeedbackSystemEnhanced } from './universal-pinpoint-feedback-system-enhanced'
-import { EnhancedDrawingTools } from './enhanced-drawing-tools'
-import { EnhancedDrawingCanvas } from './enhanced-drawing-canvas'
 import { AIInsightsDashboard } from './ai-insights-dashboard'
 import { AdvancedCommentFilters } from './advanced-comment-filters'
 import { CommentExportSystem } from './comment-export-system'
@@ -33,11 +31,7 @@ import {
   Minimize2,
   RefreshCw,
   AlertCircle,
-  CheckCircle,
-  Clock,
-  Zap,
-  Eye,
-  EyeOff
+  CheckCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

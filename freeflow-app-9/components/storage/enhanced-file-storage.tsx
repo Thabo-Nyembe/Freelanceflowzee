@@ -38,10 +38,8 @@ import {
   Clock,
   Download,
   Edit,
-  Eye,
   File,
   FileText,
-  Filter,
   Folder,
   Grid,
   Image,
@@ -54,7 +52,6 @@ import {
   Star,
   Trash2,
   Upload,
-  UploadCloud,
   Video,
 } from 'lucide-react'
 

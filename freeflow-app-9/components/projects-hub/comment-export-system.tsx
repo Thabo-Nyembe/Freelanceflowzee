@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useCallback, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 
@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -49,28 +48,15 @@ import {
 import {
   Download,
   FileText,
-  Image,
   Table,
   Code,
   Mail,
   Presentation,
   BarChart3,
-  Settings,
   Check,
-  X,
-  Clock,
-  User,
-  MessageCircle,
-  Tag,
-  Calendar,
-  Filter,
   Loader2,
   Archive,
-  Share,
-  Copy,
-  ExternalLink,
   FileDown,
-  Printer,
   Globe
 } from "lucide-react"
 

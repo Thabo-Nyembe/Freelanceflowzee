@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
     // Demo mode for unauthenticated users
     if (!session?.user?.id) {
       let demoFiles = getDemoFiles();
-      let demoFolders = getDemoFolders();
+      const demoFolders = getDemoFolders();
 
       if (type && type !== 'all') {
         demoFiles = demoFiles.filter(f => f.type === type);

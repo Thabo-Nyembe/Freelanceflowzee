@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion'
+import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,13 +13,8 @@ import {
   Maximize,
   Eye,
   Hand,
-  Zap,
-  Sparkles,
   Globe,
-  Orbit,
-  Shapes,
-  PenTool,
-  MousePointer2
+  Orbit
 } from 'lucide-react'
 
 // Context7 MCP Spatial Computing Interface Types

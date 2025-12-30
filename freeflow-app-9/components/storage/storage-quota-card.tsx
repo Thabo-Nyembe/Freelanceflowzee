@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { HardDrive, TrendingUp, Cloud } from 'lucide-react'
 import { useStorageData } from '@/lib/hooks/use-storage-data'

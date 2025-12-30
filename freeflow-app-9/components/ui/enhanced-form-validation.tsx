@@ -9,10 +9,7 @@ import {
   Info, 
   Eye, 
   EyeOff,
-  Save,
   Clock,
-  Zap,
-  Shield,
   HelpCircle
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'

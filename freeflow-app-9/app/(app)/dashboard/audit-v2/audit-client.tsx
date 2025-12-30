@@ -8,10 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -22,7 +21,6 @@ import {
   Eye,
   Download,
   Search,
-  Filter,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -31,37 +29,25 @@ import {
   Activity,
   Bell,
   BarChart3,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
   RefreshCw,
   Play,
   Pause,
   Terminal,
   AlertTriangle,
   XCircle,
-  Info,
   Zap,
   Calendar,
   Globe,
   Server,
-  Cpu,
   HardDrive,
-  Network,
   Key,
-  UserCheck,
-  UserX,
   LogIn,
   LogOut,
   Edit,
   Trash2,
   Plus,
-  Save,
   Share,
-  BookOpen,
-  Layout,
   Layers,
-  Target,
   Timer,
   History,
   Bookmark,
@@ -71,8 +57,6 @@ import {
   Webhook,
   Mail,
   Copy,
-  Upload,
-  Workflow,
   Archive
 } from 'lucide-react'
 
@@ -89,13 +73,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  auditAIInsights,
-  auditCollaborators,
-  auditPredictions,
-  auditActivities,
-  auditQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // Splunk-level types
 type EventSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical'

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,48 +27,34 @@ import {
   Video,
   Music,
   Archive,
-  Code,
   Type,
-  Palette,
   Box,
   Eye,
   Edit3,
   Trash2,
   MoreVertical,
   Search,
-  Filter,
   Grid3x3,
   List,
   Check,
   Clock,
   AlertCircle,
-  XCircle,
   Users,
   Lock,
   Globe,
   Link2,
-  Copy,
   Tag,
-  Calendar,
   TrendingUp,
   BarChart3,
   PieChart,
   Settings,
-  Bookmark,
   Heart,
-  MessageSquare,
-  History,
   Shield,
   Zap,
   RefreshCw,
   ExternalLink,
-  ChevronRight,
-  Info,
   Award,
   Layers,
-  FileImage,
-  FileVideo,
-  FileAudio,
   File,
   Sparkles
 } from 'lucide-react'
@@ -85,15 +71,10 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  assetsAIInsights,
-  assetsCollaborators,
-  assetsPredictions,
-  assetsActivities,
-  assetsQuickActions,
-} from '@/lib/mock-data/adapters'
 
-import { useAssets, useAssetCollections, useAssetStats, type DigitalAsset as DBDigitalAsset, type AssetCollection as DBAssetCollection } from '@/lib/hooks/use-assets'
+
+
+import { useAssets, useAssetCollections, useAssetStats } from '@/lib/hooks/use-assets'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 
 // Types

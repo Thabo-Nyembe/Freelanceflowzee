@@ -15,12 +15,9 @@ import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Tag, GitBranch, GitCommit, GitMerge, GitPullRequest, Download, FileArchive,
-  Users, MessageSquare, TrendingUp, Webhook, Settings, Calendar, Clock,
-  Star, Eye, Heart, Share2, CheckCircle, AlertCircle, AlertTriangle,
-  Package, Zap, Shield, Bug, Wrench, RefreshCw, Code, FileCode,
-  ExternalLink, Copy, Bell, Mail, Slack, Filter, Search, Plus, MoreVertical,
-  ChevronRight, ChevronDown, ArrowUpRight, Archive, Lock, Unlock, Loader2
+  Tag, GitBranch, GitCommit, Download, FileArchive,
+  Users, MessageSquare, TrendingUp, Webhook, Settings, Calendar, CheckCircle, AlertCircle, AlertTriangle,
+  Package, Shield, RefreshCw, Code, FileCode, Copy, Bell, Slack, Search, Plus, ArrowUpRight, Lock, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -36,13 +33,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  changelogAIInsights,
-  changelogCollaborators,
-  changelogPredictions,
-  changelogActivities,
-  changelogQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // GitHub Releases level interfaces
 type ReleaseType = 'stable' | 'prerelease' | 'draft' | 'rc' | 'beta' | 'alpha'

@@ -15,7 +15,6 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   CheckCircle2,
-  Circle,
   ChevronRight,
   ChevronDown,
   ChevronUp,
@@ -27,14 +26,10 @@ import {
   Briefcase,
   FolderPlus,
   Users,
-  FileText,
   Zap,
-  Bell,
-  Settings,
   Play,
   Gift,
   Rocket,
-  ArrowRight,
   X,
   Plus,
   Calendar,

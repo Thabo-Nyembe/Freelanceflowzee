@@ -16,20 +16,17 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  MessageSquare, Phone, Mail, Video, Search, Filter, Clock,
-  User, Users, Star, TrendingUp, AlertTriangle, CheckCircle,
-  XCircle, MoreVertical, Send, Paperclip, Smile, ArrowRight,
+  MessageSquare, Phone, Mail, Search, Filter, Clock,
+  User, Users, Star, TrendingUp, AlertTriangle, CheckCircle, Send, Paperclip, Smile,
   BarChart3, Target, Zap, Shield, Globe, Tag, Inbox,
-  Archive, Trash2, RefreshCw, ChevronRight, FileText, Bot,
-  Settings, Bell, Lock, Key, Link2, Database, Palette, Headphones,
-  Languages, Volume2, Calendar, Timer
+  Archive, RefreshCw, FileText, Bot,
+  Settings, Bell, Key, Link2, Database, Headphones,
+  Languages, Calendar, Timer
 } from 'lucide-react'
 
 // Competitive Upgrade Components
 import {
   AIInsightsPanel,
-  Sparkline,
-  CollaborationIndicator,
   PredictiveAnalytics,
 } from '@/components/ui/competitive-upgrades'
 
@@ -38,13 +35,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  customerSupportAIInsights,
-  customerSupportCollaborators,
-  customerSupportPredictions,
-  customerSupportActivities,
-  customerSupportQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type TicketStatus = 'new' | 'open' | 'pending' | 'on-hold' | 'solved' | 'closed'

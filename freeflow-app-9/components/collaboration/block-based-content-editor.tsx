@@ -5,15 +5,10 @@ import {
   PlusCircle,
   GripVertical,
   Trash2,
-  Heading1,
-  Heading2,
-  Heading3,
   List,
   CheckSquare,
   Image,
   Table,
-  Link,
-  Users,
   Eye,
   Settings,
   Database,
@@ -26,22 +21,11 @@ import {
   FileText,
   Video,
   Filter,
-  Save,
-  Share2,
-  Copy,
-  MoreHorizontal,
-  Edit,
-  Plus,
-  Sparkles,
   ArrowUpDown,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+
+
 import {
   DndContext,
   closestCenter,
@@ -61,8 +45,6 @@ import { CSS } from '@dnd-kit/utilities'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import NextImage from 'next/image'
 
 // Type Definitions

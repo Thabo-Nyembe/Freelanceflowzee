@@ -10,7 +10,7 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rate-limit';
 import { authenticateRequest } from '@/lib/auth';
-import { MultiModalAISystem, MultiModalOperationType, MultiModalProvider, MultiModalContentType } from '@/lib/ai/multi-modal-ai-system';
+import { MultiModalAISystem, MultiModalProvider, MultiModalContentType } from '@/lib/ai/multi-modal-ai-system';
 import { IntegratedAISystem } from '@/lib/ai/integrated-ai-system';
 import { createHash, randomBytes } from 'crypto';
 import { WebSocketServer } from 'ws';

@@ -7,9 +7,6 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  BarChart2,
-  PieChart,
-  Activity,
 } from "lucide-react"
 
 /**

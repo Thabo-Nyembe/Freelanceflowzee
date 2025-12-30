@@ -7,7 +7,6 @@ import {
   ClipboardList,
   Plus,
   Search,
-  Filter,
   MoreVertical,
   BarChart3,
   PieChart,
@@ -20,13 +19,10 @@ import {
   Edit2,
   Play,
   Pause,
-  Archive,
   CheckCircle2,
-  Circle,
   Star,
   MessageSquare,
   Image,
-  Video,
   FileText,
   Link,
   Calendar,
@@ -36,37 +32,22 @@ import {
   Settings,
   Palette,
   Zap,
-  ChevronRight,
   ChevronDown,
-  ArrowRight,
   ArrowUp,
-  ArrowDown,
-  GripVertical,
   X,
-  Check,
   AlertCircle,
   Sparkles,
   Layout,
   Type,
-  Hash,
   ToggleLeft,
   ListOrdered,
-  Smile,
-  ThumbsUp,
-  ThumbsDown,
-  Heart,
-  Percent,
   Mail,
-  ExternalLink,
   Download,
   RefreshCw,
   Target,
   Award,
-  Gift,
   Layers,
-  Workflow,
   Code,
-  Send,
   UserCheck,
   Webhook,
   Key,
@@ -90,15 +71,10 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  pollsAIInsights,
-  pollsCollaborators,
-  pollsPredictions,
-  pollsActivities,
-  pollsQuickActions,
-} from '@/lib/mock-data/adapters'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

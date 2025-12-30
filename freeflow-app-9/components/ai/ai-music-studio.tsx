@@ -1,15 +1,12 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
-  Music, Play, Pause, Download, RefreshCw, Sparkles, Mic, FileText,
-  Clock, Zap, Settings2, Volume2, SkipBack, SkipForward, Loader2,
-  Trash2, Heart, Share2, Upload, Sliders, Wand2, ListMusic, Layers,
-  Save, FolderOpen, ChevronDown, Plus, X, Copy, Star, Crown,
-  Music2, Music3, Radio, Disc, Headphones, Speaker, Repeat, Shuffle,
-  MoreHorizontal, ExternalLink, FileAudio, Waves, BookmarkPlus, User
+  Music, Play, Pause, Download, RefreshCw, Sparkles, Mic, FileText, Zap, Settings2, Volume2, SkipBack, SkipForward, Loader2,
+  Trash2, Heart, Share2, Sliders, ListMusic, Layers, ChevronDown, Plus, Crown,
+  Music2, Radio, Repeat, Shuffle, Waves, BookmarkPlus, User
 } from 'lucide-react'
-import { useSunoMusic, type SunoModel, musicPresets, promptTemplates } from '@/lib/hooks/use-suno-music'
+import { useSunoMusic, type SunoModel, promptTemplates } from '@/lib/hooks/use-suno-music'
 
 const sunoModels: { value: SunoModel; label: string; badge?: string; description: string; quality: string }[] = [
   { value: 'V5', label: 'Suno V5', badge: 'Latest', description: 'Best quality, studio sound', quality: 'Ultra' },

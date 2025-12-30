@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,18 +30,13 @@ import {
   Search,
   Filter,
   Plus,
-  MoreHorizontal,
   ExternalLink,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   Clock,
   RefreshCw,
-  Heart,
   MessageSquare,
   GitBranch,
-  Lock,
-  Unlock,
   Play,
   Pause,
   Trash2,
@@ -51,19 +45,12 @@ import {
   Globe,
   Layers,
   Database,
-  Cpu,
   Terminal,
   Palette,
   Mail,
-  Calendar,
   FileText,
   Image,
-  Video,
-  Music,
   ShoppingCart,
-  CreditCard,
-  Map,
-  Phone,
   Webhook,
   Bot,
   Sparkles,
@@ -71,9 +58,7 @@ import {
   Sliders,
   Bell,
   History,
-  Upload,
-  HardDrive,
-  Key
+  Upload
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

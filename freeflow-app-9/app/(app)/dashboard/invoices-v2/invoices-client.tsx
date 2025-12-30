@@ -4,11 +4,10 @@ import { useState, useMemo } from 'react'
 import {
   FileText, Plus, Send, Download, Clock, DollarSign, AlertCircle,
   CheckCircle2, XCircle, MoreHorizontal, Search, Filter, Calendar,
-  RefreshCw, TrendingUp, Users, CreditCard, Mail, Eye, Edit,
-  Trash2, Copy, ChevronDown, ArrowUpRight, ArrowDownRight, Sparkles,
-  Globe, Percent, Receipt, Timer, Bell, Settings, BarChart3,
-  PieChart, Zap, Crown, Star, FileSpreadsheet, Printer, Share2,
-  Webhook, Key, Shield, HardDrive, AlertOctagon, Sliders
+  RefreshCw, Users, CreditCard, Mail, Eye, Edit,
+  Trash2, Copy, ArrowUpRight, ArrowDownRight, Sparkles,
+  Globe, Percent, Receipt, Bell, Settings, Zap, FileSpreadsheet, Share2,
+  Webhook, AlertOctagon, Sliders
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -23,16 +22,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  invoicesAIInsights,
-  invoicesCollaborators,
-  invoicesPredictions,
-  invoicesActivities,
-  invoicesQuickActions,
-} from '@/lib/mock-data/adapters'
 
-import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
-import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
+
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -56,7 +48,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'

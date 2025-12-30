@@ -3,16 +3,13 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useSecurity, SecuritySettings, SecurityEvent, UserSession } from '@/lib/hooks/use-security'
+import { useSecurity, SecuritySettings } from '@/lib/hooks/use-security'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
@@ -25,15 +22,10 @@ import {
   Shield,
   ShieldCheck,
   ShieldAlert,
-  ShieldX,
-  Lock,
-  Unlock,
   Key,
   KeyRound,
   AlertTriangle,
   AlertCircle,
-  CheckCircle2,
-  XCircle,
   Eye,
   EyeOff,
   Copy,
@@ -43,27 +35,20 @@ import {
   Laptop,
   Globe,
   MapPin,
-  Clock,
-  Calendar,
-  Activity,
   History,
   RefreshCw,
   Trash2,
   Edit,
   Plus,
   Search,
-  Filter,
   MoreHorizontal,
   Settings,
   UserX,
   Users,
-  Building2,
   CreditCard,
   FileKey,
   Database,
   Server,
-  Wifi,
-  WifiOff,
   ArrowUpRight,
   ArrowDownRight,
   Download,

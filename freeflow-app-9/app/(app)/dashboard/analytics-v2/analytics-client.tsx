@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -15,22 +15,18 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
-  BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Activity,
-  Target, Users, DollarSign, Clock, Eye, MousePointer, ShoppingCart,
+  BarChart3, LineChart, PieChart, TrendingUp, Activity,
+  Target, Users, DollarSign, Eye, MousePointer, ShoppingCart,
   ArrowUpRight, ArrowDownRight, Download, RefreshCw, Settings, Plus,
   Calendar, Filter, Layers, Zap, Bell, ChevronRight, MoreVertical,
   AreaChart, Gauge, Globe, Smartphone, Monitor, Search, Play, Pause,
-  FileText, Layout, Save, Share2, Trash2, Copy, Edit3, CheckCircle,
-  AlertTriangle, XCircle, Hash, Percent, Timer, TrendingDown as TrendDown,
-  BarChart2, Database, GitBranch, Workflow, ArrowRight, Mail, Link
+  FileText, Layout, Share2, Trash2, Copy, Edit3, Database, GitBranch, Workflow, Mail
 } from 'lucide-react'
 
 // Competitive Upgrade Components
 import {
   AIInsightsPanel,
-  Sparkline,
   CollaborationIndicator,
   PredictiveAnalytics,
 } from '@/components/ui/competitive-upgrades'
@@ -52,7 +48,6 @@ import {
   analyticsPredictions,
   analyticsActivities,
   analyticsQuickActions,
-  analyticsKeyMetrics,
   analyticsRealtimeMetrics,
   companyInfo,
 } from '@/lib/mock-data/adapters'

@@ -1,14 +1,13 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useCommunicationStore, useNotifications } from '@/lib/communication/unified-communication-service'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCommunicationStore } from '@/lib/communication/unified-communication-service'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
@@ -18,37 +17,25 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Bell,
-  BellOff,
   MessageSquare,
   Phone,
-  VideoIcon,
   Users,
-  Brain,
-  AlertCircle,
   CheckCircle,
   Info,
   Star,
   Archive,
   Trash2,
   MoreHorizontal,
-  Filter,
   Search,
   Settings,
-  Mark,
   Eye,
-  EyeOff,
-  Volume2,
-  VolumeX,
-  Calendar,
-  Clock,
   Pin,
   Bookmark,
   Reply,
-  Forward,
-  Download
+  Forward
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { format, isToday, isYesterday, differenceInMinutes, formatDistanceToNow } from 'date-fns'
+import { format, isToday, isYesterday, differenceInMinutes } from 'date-fns'
 
 interface NotificationItemProps {
   notification: any

@@ -13,11 +13,6 @@ import {
   Linkedin,
   Facebook,
   Mail,
-  MoreHorizontal,
-  CreditCard,
-  Lock,
-  Eye,
-  BarChart,
   DollarSign,
   Zap,
 } from 'lucide-react'

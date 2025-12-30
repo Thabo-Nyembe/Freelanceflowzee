@@ -5,17 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Users, 
-  Activity, 
-  Clock, 
-  Target,
+import {
   ArrowUpRight,
   ArrowDownRight,
-  MoreHorizontal,
   RefreshCw,
   Settings,
   Maximize2,

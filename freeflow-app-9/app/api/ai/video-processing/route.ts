@@ -8,8 +8,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { OpenAI } from 'openai';
-import { Readable } from 'stream';
-import { WebSocketServer } from 'ws';
 import { createHash } from 'crypto';
 import { rateLimit } from '@/lib/rate-limit';
 import { authenticate } from '@/lib/auth';
@@ -22,8 +20,7 @@ import {
 } from '@/lib/assemblyai';
 import { 
   Deepgram, 
-  DeepgramTranscriptionOptions, 
-  DeepgramResponse 
+  DeepgramTranscriptionOptions 
 } from '@/lib/deepgram';
 
 // Environment configuration

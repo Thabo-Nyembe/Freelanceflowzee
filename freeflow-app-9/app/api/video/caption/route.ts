@@ -9,7 +9,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
 import {
-  transcribeVideo,
   generateCaptions,
   createCaptions,
   translateCaptions,

@@ -6,16 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Play, 
-  Pause, 
-  Scissors, 
-  RotateCcw, 
-  RotateCw,
-  Volume2,
-  VolumeX,
+  Scissors,
   ZoomIn,
   ZoomOut,
   Save,

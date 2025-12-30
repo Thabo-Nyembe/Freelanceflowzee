@@ -12,7 +12,6 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Users,
@@ -22,7 +21,6 @@ import {
   Mail,
   CheckCircle2,
   Clock,
-  AlertCircle,
   TrendingUp,
   Settings,
   Filter,
@@ -44,7 +42,6 @@ import {
   Tag,
   List,
   Grid3X3,
-  ChevronRight,
   UserCheck,
   UserX,
   Timer,
@@ -54,23 +51,17 @@ import {
   Shield,
   Utensils,
   Accessibility,
-  Copy,
-  ExternalLink,
   RefreshCw,
   MoreHorizontal,
   XCircle,
   CheckCheck,
   Loader2,
   ArrowUpRight,
-  ArrowDownRight,
-  Activity,
   Layers,
   Hash,
   Sliders,
-  Terminal,
   Webhook,
   Bell,
-  Key,
   Network
 } from 'lucide-react'
 
@@ -86,13 +77,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  registrationsAIInsights,
-  registrationsCollaborators,
-  registrationsPredictions,
-  registrationsActivities,
-  registrationsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'

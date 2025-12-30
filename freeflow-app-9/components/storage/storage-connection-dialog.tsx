@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { StorageProvider } from '@/lib/storage/providers'
-import { createStorageConnection } from '@/lib/storage/storage-queries'
-import { Cloud, CloudCog, Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { Cloud, CloudCog, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface StorageConnectionDialogProps {

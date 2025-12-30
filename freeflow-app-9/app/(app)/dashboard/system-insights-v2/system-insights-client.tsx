@@ -14,13 +14,12 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import {
-  Activity, AlertTriangle, Server, Database, Cpu, HardDrive, Network,
-  Clock, TrendingUp, TrendingDown, RefreshCw, Settings, Search, Filter,
-  Bell, Eye, Terminal, Layers, Zap, GitBranch, Box, Workflow, Globe,
-  FileText, BarChart3, ArrowUpRight, ArrowDownRight, CheckCircle, XCircle,
-  AlertCircle, Play, Pause, ChevronRight, MoreVertical, Download, Share2,
-  Plus, Trash2, Edit3, Copy, ExternalLink, Link, Mail, Webhook, Shield,
-  Key, Sliders, Archive, AlertOctagon, Users, CreditCard
+  Activity, AlertTriangle, Server, Cpu, HardDrive, TrendingUp, RefreshCw, Settings, Search,
+  Bell, Layers, Zap, GitBranch, Box, Globe,
+  FileText, BarChart3, ArrowUpRight, ArrowDownRight, CheckCircle,
+  AlertCircle, Play, Pause, Download,
+  Plus, Trash2, Edit3, Copy, ExternalLink, Mail, Webhook,
+  Key, Sliders, Archive, AlertOctagon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -35,13 +34,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  systemInsightsAIInsights,
-  systemInsightsCollaborators,
-  systemInsightsPredictions,
-  systemInsightsActivities,
-  systemInsightsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Type definitions
 interface Metric {

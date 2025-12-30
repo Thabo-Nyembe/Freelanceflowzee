@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
   AlertTriangle, RefreshCw, Home, MessageCircle,
-  Bug, Settings, Zap, Shield, ArrowLeft
+  Bug, Settings, Shield
 } from 'lucide-react'
 import { createFeatureLogger } from '@/lib/logger'
 

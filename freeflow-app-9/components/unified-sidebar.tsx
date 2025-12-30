@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
@@ -21,8 +21,6 @@ import {
   TrendingUp,
   UserCircle,
   Bell,
-  Palette,
-  Layers,
   Zap,
   Monitor,
   DollarSign

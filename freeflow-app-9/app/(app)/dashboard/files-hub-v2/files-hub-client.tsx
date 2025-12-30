@@ -11,8 +11,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -42,27 +40,16 @@ import {
   Users,
   Link2,
   Lock,
-  Unlock,
   Eye,
   Edit,
   Copy,
-  Move,
   ChevronRight,
-  ChevronDown,
-  Home,
   TrendingUp,
-  TrendingDown,
   CheckCircle2,
-  AlertCircle,
   RefreshCw,
   ExternalLink,
   History,
-  Layers,
-  Bookmark,
-  Tag,
   Bell,
-  HelpCircle,
-  Info,
   Key,
   Shield,
   Database,
@@ -73,8 +60,7 @@ import {
   Smartphone,
   Monitor,
   AlertOctagon,
-  ShieldCheck,
-  Fingerprint
+  ShieldCheck
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -89,13 +75,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  filesHubAIInsights,
-  filesHubCollaborators,
-  filesHubPredictions,
-  filesHubActivities,
-  filesHubQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type FileType = 'folder' | 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'spreadsheet' | 'presentation' | 'other'

@@ -19,18 +19,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import {
-  Users, UserPlus, Search, Filter, Star, TrendingUp, TrendingDown,
-  Mail, Phone, MapPin, DollarSign, ShoppingCart, Building2, Calendar,
-  Clock, CheckCircle, XCircle, AlertTriangle, MoreHorizontal, Edit,
-  Trash2, Eye, MessageSquare, PhoneCall, FileText, Target, Zap,
-  ArrowRight, ChevronRight, Plus, Download, Upload, RefreshCw,
-  BarChart3, PieChart, Activity, Sparkles, Globe, Link, Tag, Layers,
-  Briefcase, Award, Flag, Send, Copy, ExternalLink, History, ArrowUpRight,
-  ArrowDownRight, Hash, Percent, CircleDot, GitBranch, Workflow, Bot,
-  Gauge, TrendingUp as Forecast, Megaphone, UserCheck, UsersRound, Timer,
-  Receipt, Scale, Handshake, Trophy, AlertCircle, Inbox, Archive, Settings,
-  Lock, Unlock, Share2, Play, Pause, MoreVertical,
-  Key, Webhook, Shield, AlertOctagon, Sliders, Network, Server, HardDrive, Cpu, Bell
+  Users, UserPlus, Search,
+  Mail, Phone, MapPin, DollarSign, Building2, Calendar, CheckCircle, AlertTriangle, MoreHorizontal, Edit,
+  Trash2, MessageSquare, PhoneCall, FileText, Target, Zap, Plus, Download, Upload, RefreshCw, Activity, Layers, Award, Copy, ExternalLink, ArrowUpRight, TrendingUp as Forecast, Megaphone, Scale, Trophy, Archive, Settings,
+  Key, Shield, AlertOctagon, Sliders, Network, HardDrive, Bell
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -45,13 +37,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  customersAIInsights,
-  customersCollaborators,
-  customersPredictions,
-  customersActivities,
-  customersQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { useCustomers, useCustomerMutations, type Customer, type CustomerSegment, type CustomerStatus } from '@/lib/hooks/use-customers'
 

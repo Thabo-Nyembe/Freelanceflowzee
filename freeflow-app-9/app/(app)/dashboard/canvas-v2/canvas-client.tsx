@@ -4,22 +4,14 @@ import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import {
-  Layout, Square, Circle, Triangle, Minus, Type, Image, StickyNote,
-  MousePointer, Hand, Pencil, Eraser, PenTool, Palette, Layers,
-  Plus, Search, Filter, Grid3X3, Users, Clock, Star, Heart,
-  Folder, Tag, Settings, Zap, Play, Pause, ZoomIn, ZoomOut,
+  Layout, Square, Circle, Minus, Type, Image, StickyNote,
+  MousePointer, Hand, PenTool, Layers,
+  Plus, Search, Grid3X3, Users, Clock, Star, Settings, Zap, Play, ZoomIn, ZoomOut,
   Undo, Redo, Copy, Trash2, Edit2, Eye, Download, Share2,
-  MessageSquare, Video, Link2, Lock, Unlock, ChevronRight,
-  ArrowUpRight, CheckCircle2, MoreVertical, Move, Maximize2,
-  AlignLeft, AlignCenter, AlignRight, AlignStartVertical,
-  AlignCenterVertical, AlignEndVertical, Sparkles, FileText,
-  BarChart3, Workflow, GitBranch, Shapes, Frame, Component,
-  Table2, Calendar, Map, Code, Database, Monitor, Smartphone,
-  History, Bell, Shield, Paintbrush, MousePointer2, Layers3,
-  FolderOpen, FileImage, Figma, PaintBucket, RotateCcw,
-  FlipHorizontal, FlipVertical, Group, Ungroup, BringToFront,
-  SendToBack, AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
-  Crown, Wand2, Merge, Split, Slice, Scissors, Droplet
+  MessageSquare, Lock, ChevronRight, CheckCircle2, MoreVertical, FileText,
+  BarChart3, Workflow, Shapes, Frame, Component,
+  Table2, Monitor, Smartphone, Bell,
+  Crown, Wand2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -34,13 +26,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  canvasAIInsights,
-  canvasCollaborators,
-  canvasPredictions,
-  canvasActivities,
-  canvasQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -50,7 +37,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 
 type ToolType = 'select' | 'hand' | 'rectangle' | 'ellipse' | 'line' | 'text' | 'sticky' | 'pen' | 'frame' | 'comment' | 'image' | 'component'

@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { ADMIN_NAVIGATION, getFavorites } from '@/lib/admin-navigation-config'
-import type { NavigationItem } from '@/lib/admin-navigation-config'
 
 export function MobileAdminNav() {
   const [isOpen, setIsOpen] = useState(false)

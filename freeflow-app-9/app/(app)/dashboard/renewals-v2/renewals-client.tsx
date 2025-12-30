@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,7 +18,6 @@ import {
   TrendingDown,
   Users,
   Calendar,
-  Clock,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -31,49 +30,26 @@ import {
   Bell,
   Mail,
   Phone,
-  MessageSquare,
   FileText,
   Settings,
   Search,
-  Filter,
   MoreVertical,
   ChevronRight,
-  Star,
-  Heart,
   Zap,
   Shield,
-  Award,
-  Layers,
   GitBranch,
   Play,
-  Pause,
   Send,
-  Eye,
-  Edit3,
-  Trash2,
-  Copy,
-  ExternalLink,
   Download,
-  Upload,
-  Sparkles,
   Building2,
   UserCheck,
   CalendarDays,
   LineChart,
   Gauge,
-  AlertCircle,
-  ThumbsUp,
-  ThumbsDown,
   Handshake,
-  Receipt,
-  CreditCard,
-  Wallet,
-  Banknote,
   Sliders,
-  Terminal,
   Webhook,
-  Key,
-  Network
+  Key
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -89,13 +65,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-import {
-  renewalsAIInsights,
-  renewalsCollaborators,
-  renewalsPredictions,
-  renewalsActivities,
-  renewalsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'

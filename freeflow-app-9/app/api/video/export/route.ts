@@ -10,7 +10,6 @@ import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
 import { queueExportJob, getJobStatus } from '@/lib/video/video-queue'
 import { getVideoMetadata, checkFFmpegAvailability } from '@/lib/video/ffmpeg-processor'
-import path from 'path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoExport')

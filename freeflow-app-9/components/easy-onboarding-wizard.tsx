@@ -7,14 +7,12 @@
  * data import, and initial configuration in under 10 minutes
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  User, Mail, Briefcase, Target, Zap, Check, ArrowRight, ArrowLeft,
-  Upload, Download, Star, Sparkles, Shield, Clock, TrendingUp,
-  Users, Calendar, CreditCard, MessageSquare, CheckCircle, Play,
-  FileText, Folder, Image, Settings, HelpCircle, Info, ExternalLink,
-  Chrome, Database, Copy, Import, RefreshCw, ChevronRight
+  User, Briefcase, Target, Zap, Check, ArrowRight, ArrowLeft,
+  Upload, Star, Sparkles, Clock, TrendingUp,
+  Users, CreditCard, CheckCircle, Play, Settings, Import, ChevronRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

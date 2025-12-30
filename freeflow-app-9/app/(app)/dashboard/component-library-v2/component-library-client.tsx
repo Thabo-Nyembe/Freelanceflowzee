@@ -14,12 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress'
 import {
   Search, Code2, Eye, Palette, Settings, Box, Layers, Grid3X3, List,
-  ChevronRight, Copy, Check, ExternalLink, Accessibility, Smartphone,
-  Monitor, Moon, Sun, Play, Pause, RotateCcw, Download, Heart, MessageSquare,
-  GitBranch, FileCode, Zap, Shield, Puzzle, BookOpen, Terminal, Figma,
-  Github, Plus, Filter, CheckCircle, AlertTriangle, XCircle, Paintbrush,
-  Type, Image, LayoutGrid, History, RefreshCw, Package, Sparkles, FileText,
-  Key, Webhook, Database, Trash2, Lock, Bell, Mail, Globe, Link2,
+  ChevronRight, Copy, Check, ExternalLink, Accessibility,
+  Monitor, Moon, Sun, Play, Download, Heart, MessageSquare,
+  GitBranch, FileCode, Shield, Puzzle, BookOpen, Terminal, Figma,
+  Github, Plus, CheckCircle, AlertTriangle, Paintbrush,
+  Type, LayoutGrid, History, RefreshCw, Package, Sparkles, FileText,
+  Key, Webhook, Database, Trash2, Lock, Bell, Link2,
   Upload, AlertOctagon
 } from 'lucide-react'
 

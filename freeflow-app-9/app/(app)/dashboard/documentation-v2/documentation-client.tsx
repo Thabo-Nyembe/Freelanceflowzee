@@ -25,14 +25,11 @@ import {
   CreateDocumentationInput
 } from '@/lib/hooks/use-documentation'
 import {
-  FileText, Plus, Search, Filter, Eye, Edit, Trash2, Star, Clock, Users,
+  FileText, Plus, Search, Eye, Edit, Trash2, Star, Clock, Users,
   BookOpen, FolderOpen, ChevronRight, ChevronDown, MessageSquare, History,
-  Share2, Settings, Lock, Globe, Tag, Bookmark, ThumbsUp, ThumbsDown, Copy,
-  ExternalLink, SortAsc, Calendar, CheckCircle2, Code, GitBranch, GitCommit,
-  Zap, TrendingUp, BarChart3, Download, Upload, Sparkles, Lightbulb, Layout,
-  RefreshCw, Bell, Shield, Database, Webhook, Languages, FileCheck, Rocket,
-  ArrowUpRight, ArrowDownRight, Layers, Target, Activity, PenTool, Megaphone,
-  Loader2
+  Share2, Settings, Globe, Tag, ThumbsUp, ThumbsDown, Calendar, CheckCircle2, Code, GitBranch,
+  Zap, TrendingUp, BarChart3, Download, Upload, Sparkles, Layout,
+  RefreshCw, Bell, Shield, Database, Webhook, Languages, FileCheck, Rocket, Target, PenTool, Megaphone
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

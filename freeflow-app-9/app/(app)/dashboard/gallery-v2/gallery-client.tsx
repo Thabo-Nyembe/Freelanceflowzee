@@ -15,52 +15,31 @@ import {
   Filter,
   Download,
   Heart,
-  Share2,
-  Plus,
-  MoreHorizontal,
   Grid3X3,
   LayoutGrid,
   Camera,
   Aperture,
   MapPin,
-  Calendar,
-  Eye,
   Copy,
   Check,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Star,
   Bookmark,
   BookmarkCheck,
   Upload,
   Folder,
   FolderPlus,
   User,
-  Users,
-  TrendingUp,
-  Clock,
   Info,
   Settings,
-  ExternalLink,
   Link2,
   Tag,
-  Palette,
-  Maximize2,
-  ZoomIn,
-  Edit,
   Trash2,
-  LayoutList,
   Sliders,
   AlertOctagon,
-  Bell,
   Webhook,
   Key,
   Shield,
   HardDrive,
   Globe,
-  Mail,
   Loader2
 } from 'lucide-react'
 
@@ -76,16 +55,10 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  galleryAIInsights,
-  galleryCollaborators,
-  galleryPredictions,
-  galleryActivities,
-  galleryQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -94,7 +67,6 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Types
 type Orientation = 'all' | 'landscape' | 'portrait' | 'square'

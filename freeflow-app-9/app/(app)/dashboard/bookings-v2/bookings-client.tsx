@@ -12,11 +12,11 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Calendar, Clock, Users, DollarSign, Video, MapPin, Plus, Settings,
+  Calendar, Clock, Users, DollarSign, Video, Plus, Settings,
   ChevronLeft, ChevronRight, Search, Filter, MoreVertical, Check, X,
   Bell, Link2, Mail, Phone, Globe, Copy, ExternalLink, CreditCard,
-  Repeat, UserCheck, CalendarClock, Zap, RefreshCw, Download, Shield, Lock,
-  Key, Database, Palette, AlertTriangle, MessageSquare, Webhook, Timer, Edit,
+  Repeat, UserCheck, CalendarClock, RefreshCw, Download, Shield,
+  Key, Palette, AlertTriangle, MessageSquare, Webhook, Timer, Edit,
   Trash2, BarChart3, FileText
 } from 'lucide-react'
 
@@ -33,13 +33,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  bookingsAIInsights,
-  bookingsCollaborators,
-  bookingsPredictions,
-  bookingsActivities,
-  bookingsQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // View types
 type ViewType = 'calendar' | 'list' | 'agenda'

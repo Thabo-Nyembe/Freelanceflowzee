@@ -4,12 +4,9 @@ import React, { useState, useCallback, useRef } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
 import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
@@ -20,16 +17,10 @@ import { createFeatureLogger } from '@/lib/logger'
 // A+++ SUPABASE INTEGRATION
 import { createClient } from '@/lib/supabase/client'
 import {
-  getAssets,
   createAsset,
   createGeneration,
   updateGenerationStatus,
-  toggleFavorite,
   incrementDownloadCount,
-  getPreferences,
-  upsertPreferences,
-  getAssetStats,
-  type AICreateAsset,
   type CreativeField,
   type AssetTypeEnum,
   type AssetFormat,
@@ -52,8 +43,7 @@ import {
   Sparkles,
   Settings2,
   Layers,
-  Image as ImageIcon,
-  ChevronRight
+  Image as ImageIcon
 } from 'lucide-react'
 
 const logger = createFeatureLogger('CreativeAssetGenerator')

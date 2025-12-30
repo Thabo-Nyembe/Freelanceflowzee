@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -27,13 +27,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  certificationsAIInsights,
-  certificationsCollaborators,
-  certificationsPredictions,
-  certificationsActivities,
-  certificationsQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // CREDLY-LEVEL CERTIFICATIONS - Digital Credentialing Platform

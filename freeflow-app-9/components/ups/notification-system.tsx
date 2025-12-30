@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUPSNotifications, useUPSIntegration } from '@/hooks/use-ups-integration'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUPSNotifications } from '@/hooks/use-ups-integration'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -12,7 +12,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -31,15 +30,8 @@ import {
   MessageSquare,
   Users,
   Brain,
-  Download,
-  Calendar,
-  Clock,
   Archive,
-  Star,
-  Volume2,
-  VolumeX,
-  Eye,
-  EyeOff
+  Star
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns'

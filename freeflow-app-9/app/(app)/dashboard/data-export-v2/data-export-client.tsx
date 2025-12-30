@@ -14,11 +14,10 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import {
-  Download, CheckCircle2, XCircle, Clock, Database, HardDrive, FileSpreadsheet,
-  FileCode, FileText, Shield, Archive, Play, Pause, RefreshCw, Settings,
-  Calendar, Zap, GitBranch, ArrowRight, Filter, Layers, AlertTriangle,
+  Download, CheckCircle2, XCircle, Clock, Database, HardDrive,
+  FileCode, Shield, Archive, Play, Pause, RefreshCw, Settings, Zap, GitBranch, ArrowRight, Filter, Layers, AlertTriangle,
   BarChart3, History, Plus, Search, MoreHorizontal, Eye, Trash2, Copy,
-  Server, Cloud, Table, Key, Lock, Globe, Check, X, ChevronRight, Activity
+  Server, Cloud, Table, Key, Globe, Activity
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -33,13 +32,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  dataExportAIInsights,
-  dataExportCollaborators,
-  dataExportPredictions,
-  dataExportActivities,
-  dataExportQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // AWS DataPipeline/Fivetran level interfaces
 interface DataSource {

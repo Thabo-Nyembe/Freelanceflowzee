@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import {
   Zap,
@@ -20,31 +19,19 @@ import {
   Pause,
   Plus,
   Search,
-  Filter,
   Clock,
   CheckCircle,
   XCircle,
   AlertTriangle,
   Settings,
-  Code,
-  GitBranch,
   Webhook,
   Calendar,
-  Mail,
   MessageSquare,
-  Database,
-  Cloud,
   Globe,
-  FileText,
   Users,
-  CreditCard,
-  ShoppingCart,
   BarChart3,
-  Layers,
   Copy,
   Trash2,
-  Edit,
-  Eye,
   History,
   TestTube,
   Rocket,
@@ -59,20 +46,14 @@ import {
   Terminal,
   Lock,
   Unlock,
-  Share2,
   Key,
   Shield,
   AlertOctagon,
   Sliders,
-  HardDrive,
   Archive,
   Bell,
   Server,
-  Cpu,
-  MemoryStick,
   Network,
-  Download,
-  Upload,
   Gauge
 } from 'lucide-react'
 
@@ -89,13 +70,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  automationAIInsights,
-  automationCollaborators,
-  automationPredictions,
-  automationActivities,
-  automationQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 import { useAutomation, type Automation, type AutomationType, type AutomationStatus } from '@/lib/hooks/use-automation'
 

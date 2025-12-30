@@ -9,9 +9,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { 
-  Download, Share2, Heart, Eye, Copy, ExternalLink, QrCode, 
-  Settings, BarChart3, Users, Calendar, MapPin, Camera,
-  Grid3X3, List, Filter, Search, Play, Pause, Volume2, VolumeX
+  Download, Share2, Heart, Eye, Copy, ExternalLink, 
+  Settings, Users,
+  Grid3X3, List, Filter, Play
 } from 'lucide-react'
 
 interface GalleryItem {

@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Dialog,
   DialogContent,
@@ -20,20 +19,15 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
-  UserPlus,
   Users,
   Calendar,
-  Clock,
   CheckCircle2,
   TrendingUp,
   Plus,
   Search,
   Mail,
-  Laptop,
-  BookOpen,
   Settings,
   BarChart3,
-  AlertCircle,
   Play,
   Pause,
   Edit,
@@ -43,47 +37,32 @@ import {
   Target,
   Layers,
   MessageSquare,
-  Lightbulb,
   MousePointer,
   Maximize2,
   CheckSquare,
-  ArrowRight,
-  GitBranch,
   Filter,
   Download,
   Upload,
   Palette,
   Zap,
-  Star,
-  Globe,
-  Lock,
   RefreshCw,
   Info,
   ChevronRight,
-  ChevronDown,
   Sparkles,
-  GripVertical,
-  MoreHorizontal,
-  ExternalLink,
-  Share2,
   Flag,
   Timer,
   Activity,
   PieChart,
-  LineChart,
-  LayoutDashboard,
   UserCheck,
   UserX,
   Bell,
   Sliders,
   Webhook,
-  Key,
   Database,
   HardDrive,
   Terminal,
   Shield,
-  Archive,
-  Code
+  Archive
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

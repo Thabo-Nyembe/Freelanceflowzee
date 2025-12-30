@@ -5,10 +5,10 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   Truck, Package, MapPin, Route, Clock, CheckCircle, XCircle,
-  AlertTriangle, Plus, Search, Filter, Download, RefreshCw,
-  Settings, Eye, Play, Pause, Ship, Plane, ArrowRight, ArrowUpRight,
+  AlertTriangle, Plus, Search, Download, RefreshCw,
+  Settings, Ship, Plane, ArrowRight,
   Building2, Warehouse, Globe, DollarSign, TrendingUp, BarChart3,
-  Users, Box, FileText, Calendar, Star, Navigation, Timer,
+  Users, Box, FileText, Star, Navigation, Timer,
   Scale, Thermometer, ShieldCheck, Bell, Zap
 } from 'lucide-react'
 
@@ -40,7 +40,6 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 
 // Types

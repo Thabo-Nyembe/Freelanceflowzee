@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
@@ -13,17 +12,15 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Progress } from '@/components/ui/progress'
 import {
-  Settings, BookOpen, Users, BarChart3, Star, GraduationCap, PlayCircle,
-  FileText, Award, Bell, Key, Webhook, Mail, Shield, Lock, Cpu, Palette,
-  Globe, CreditCard, DollarSign, Percent, Clock, Calendar, Video, Image,
+  Settings, BookOpen, Users, BarChart3, GraduationCap, PlayCircle,
+  FileText, Award, Bell, Key, Webhook, Mail, Shield, Lock, Cpu, CreditCard, DollarSign, Video,
   Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
-  MessageSquare, CheckCircle, XCircle, Eye, Edit, Plus, Search, Filter, Loader2
+  MessageSquare, CheckCircle, Eye, Edit, Plus, Loader2
 } from 'lucide-react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useCourses as useCoursesExtended, useCourse, useCourseModules, useCourseStats } from '@/lib/hooks/use-courses-extended'
-import { useCreateCourse, useUpdateCourse, useDeleteCourse, type Course as DBCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
+import { useCourses as useCoursesExtended } from '@/lib/hooks/use-courses-extended'
+import { useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
 // Enhanced & Competitive Upgrade Components
 import {

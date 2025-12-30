@@ -6,13 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   BookOpen,
   FileText,
@@ -29,23 +27,16 @@ import {
   Clock,
   Users,
   Lock,
-  Unlock,
   MessageSquare,
   ThumbsUp,
   Bookmark,
   Share2,
-  Link,
   Copy,
-  MoreHorizontal,
-  ChevronRight,
-  ChevronDown,
   Home,
   History,
   Tag,
   Hash,
   Filter,
-  ArrowUp,
-  ArrowDown,
   Sparkles,
   Zap,
   TrendingUp,
@@ -54,23 +45,16 @@ import {
   FilePlus,
   FileEdit,
   Archive,
-  AlertCircle,
-  CheckCircle,
-  ExternalLink,
-  Calendar,
   Timer,
   Award,
   Lightbulb,
   Shield,
   Sliders,
   Bell,
-  Key,
   Webhook,
   Database,
   RefreshCw,
   Download,
-  Trash2 as TrashIcon,
-  Terminal,
   FileCode,
   Folder,
   GitBranch,

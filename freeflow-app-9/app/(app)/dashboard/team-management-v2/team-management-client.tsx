@@ -3,11 +3,10 @@ import { useState, useMemo } from 'react'
 import {
   Users, UserPlus, Building2, Target, Award, MessageSquare, Calendar, BarChart3,
   TrendingUp, Star, Heart, ThumbsUp, ChevronRight, ChevronDown, Search, Plus,
-  MoreHorizontal, Edit, Trash2, Filter, Download, Settings, RefreshCw, Clock,
-  CheckCircle, AlertCircle, ArrowUp, ArrowDown, Minus, GitBranch, Briefcase,
-  GraduationCap, Zap, Flag, Trophy, Medal, Crown, Sparkles, Send, Eye, Lock,
-  Bell, Key, Globe, Link2, Palette, Database, Server, Shield, FileText, Mail,
-  Smartphone, Slack, Video, Timer, UserCog, Languages, DollarSign
+  MoreHorizontal, Download, Settings, RefreshCw, Clock,
+  CheckCircle, AlertCircle, GitBranch, Send, Eye,
+  Bell, Globe, Link2, Database, Shield, Mail,
+  Smartphone, Slack, Video, UserCog, DollarSign
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -24,7 +23,6 @@ import {
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

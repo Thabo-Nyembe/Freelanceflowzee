@@ -20,7 +20,6 @@ import {
   Search,
   Download,
   RefreshCw,
-  CheckCircle,
   AlertTriangle,
   Clock,
   Terminal,
@@ -28,15 +27,12 @@ import {
   MoreHorizontal,
   ChevronRight,
   Copy,
-  Zap,
   Layers,
   Box,
   Key,
-  UserCog,
   ShieldCheck,
   BarChart3,
   Play,
-  Pause,
   RotateCcw,
   GitBranch,
   GitCommit,
@@ -46,14 +42,11 @@ import {
   ToggleRight,
   Table,
   Code,
-  Calendar,
   Timer,
   Webhook,
   PlayCircle,
   StopCircle,
-  History,
-  ArrowUpRight,
-  ArrowDownRight
+  History
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

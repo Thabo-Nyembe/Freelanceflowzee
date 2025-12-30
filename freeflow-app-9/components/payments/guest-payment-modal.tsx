@@ -6,7 +6,6 @@ import {
   CreditCard,
   Mail,
   User,
-  Lock,
   Zap,
   Check,
   X,

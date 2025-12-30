@@ -10,19 +10,14 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
-  FileText, Image, Video, Layout, Layers, Wand2, Sparkles, Plus, Search,
-  Filter, Grid3X3, List, MoreVertical, Download, Share2, Copy, Trash2,
-  Edit2, Eye, Clock, Users, Star, Folder, Tag, Settings, Zap, Upload,
-  Globe, Languages, Calendar, CheckCircle, XCircle, AlertTriangle,
-  ArrowUpRight, BarChart3, Link2, RefreshCw, History, Lock, Unlock,
-  FileCode, Database, Type, Hash, ToggleLeft, ImageIcon, Film, Music,
-  Paperclip, MapPin, User, Mail, Phone, ChevronRight, ExternalLink,
-  Archive, Send, PenTool, Palette, AlignLeft, Box, Boxes, GitBranch,
-  Shield, Sliders, Edit, Terminal, TrendingUp, Activity, Target,
-  Workflow, FileSearch, FolderOpen, Tags, BookOpen, Play
+  FileText, Plus, Search, Grid3X3, List, MoreVertical, Download, Copy, Trash2,
+  Edit2, Eye, Clock, Settings, Zap, Upload,
+  Globe, Languages, Calendar, CheckCircle, AlertTriangle, BarChart3, Link2, RefreshCw, History,
+  FileCode, Database, Type, Hash, ToggleLeft, ImageIcon, Film, Music, MapPin, ExternalLink,
+  Archive, Send, Palette, AlignLeft, Boxes, GitBranch,
+  Shield, Sliders, Edit, Terminal, Activity, Target, FileSearch, FolderOpen, Tags, BookOpen
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -37,13 +32,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  contentStudioAIInsights,
-  contentStudioCollaborators,
-  contentStudioPredictions,
-  contentStudioActivities,
-  contentStudioQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Contentful Level CMS

@@ -3,18 +3,15 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
-  useActivityLogs,
   type ActivityLog
 } from '@/lib/hooks/use-activity-logs'
 import {
   Activity,
   Search,
-  Filter,
   Download,
   Upload,
   RefreshCw,
   Clock,
-  CheckCircle,
   AlertCircle,
   AlertTriangle,
   XCircle,
@@ -23,53 +20,40 @@ import {
   MoreHorizontal,
   ChevronRight,
   ChevronDown,
-  Calendar,
   User,
   Globe,
-  Laptop,
   Smartphone,
   Server,
   Database,
   Code,
   Terminal,
-  FileJson,
   Bookmark,
   BookmarkCheck,
   Bell,
-  BellOff,
   Settings,
   Zap,
   TrendingUp,
   TrendingDown,
   BarChart3,
-  PieChart,
   LineChart,
-  ArrowUpRight,
-  ArrowDownRight,
   Play,
   Pause,
   Copy,
-  ExternalLink,
-  Hash,
   Tag,
   Layers,
   GitCommit,
   Shield,
   Lock,
-  Unlock,
   Plus,
   Minus,
-  X,
   Key,
   Webhook,
+  Link,
   Mail,
-  Cpu,
-  Palette,
   AlertOctagon,
   Trash2,
   Link2,
   HardDrive,
-  FileText,
   Sliders,
   Archive,
   History,
@@ -102,7 +86,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Progress } from '@/components/ui/progress'
 
 // Type definitions for Datadog-level logging
 type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical'

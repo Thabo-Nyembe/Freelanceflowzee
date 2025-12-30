@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -20,46 +19,28 @@ import {
   Monitor,
   Download,
   Users,
-  Zap,
   RefreshCw,
   Settings,
   Package,
   CheckCircle,
-  AlertTriangle,
   Play,
-  Pause,
-  Clock,
   Apple,
   Shield,
   Key,
   Upload,
   GitBranch,
   Terminal,
-  HardDrive,
-  Cpu,
   Activity,
   Bug,
-  FileCode,
   Archive,
   Globe,
   Lock,
-  Unlock,
   Eye,
   XCircle,
-  AlertCircle,
   TrendingUp,
-  TrendingDown,
   BarChart3,
   Search,
-  Filter,
-  MoreHorizontal,
-  ExternalLink,
-  Copy,
-  Trash2,
-  Edit,
-  ChevronRight,
-  Server,
-  Layers
+  ExternalLink
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -74,13 +55,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  desktopAppAIInsights,
-  desktopAppCollaborators,
-  desktopAppPredictions,
-  desktopAppActivities,
-  desktopAppQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type Platform = 'windows' | 'macos' | 'linux' | 'all'

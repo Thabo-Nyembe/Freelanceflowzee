@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
@@ -30,36 +30,24 @@ import {
   BarChart3,
   Search,
   Plus,
-  Filter,
-  ArrowUpDown,
   Lightbulb,
   ThumbsUp,
   MessageSquare,
-  Clock,
   Zap,
   GitBranch,
   Box,
-  Layers,
-  Link2,
-  ChevronDown,
   ExternalLink,
   Edit,
-  Trash2,
-  Copy,
   Play,
-  Pause,
   RefreshCcw,
   Code,
   Globe,
   Smartphone,
-  Monitor,
   ArrowUp,
   ArrowDown,
   Minus,
   Calendar,
-  Star,
   Activity,
-  PieChart,
   LayoutGrid,
   List,
   Kanban,
@@ -77,13 +65,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  featuresAIInsights,
-  featuresCollaborators,
-  featuresPredictions,
-  featuresActivities,
-  featuresQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type FeatureStatus = 'idea' | 'planned' | 'in_progress' | 'testing' | 'released' | 'archived'

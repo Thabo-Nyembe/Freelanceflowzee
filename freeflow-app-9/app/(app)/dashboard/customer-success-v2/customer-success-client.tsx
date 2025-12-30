@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
@@ -18,35 +18,25 @@ import {
 } from '@/components/ui/dialog'
 import {
   Heart,
-  TrendingUp,
-  TrendingDown,
   AlertTriangle,
   DollarSign,
   Users,
   Calendar,
-  Award,
-  Activity,
   Search,
   Plus,
-  Filter,
   Phone,
   Mail,
   Video,
   MessageSquare,
   Target,
   Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   RefreshCcw,
   Building2,
   Star,
   Zap,
   BarChart3,
-  PieChart,
   ArrowUp,
   ArrowDown,
-  ExternalLink,
   FileText,
   Settings,
   Bell,
@@ -54,16 +44,9 @@ import {
   Sparkles,
   Shield,
   Gauge,
-  LineChart,
   Layers,
   Download,
-  HelpCircle,
-  Globe,
-  Briefcase,
   Headphones,
-  FileCheck,
-  MailCheck,
-  UserCheck,
   Trophy,
   Gift,
   Handshake,
@@ -83,13 +66,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  customerSuccessAIInsights,
-  customerSuccessCollaborators,
-  customerSuccessPredictions,
-  customerSuccessActivities,
-  customerSuccessQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'

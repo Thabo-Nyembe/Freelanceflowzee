@@ -7,8 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -27,51 +25,27 @@ import {
   Zap,
   Clock,
   CheckCircle2,
-  XCircle,
-  AlertCircle,
   RefreshCw,
-  MoreHorizontal,
-  ChevronRight,
-  Eye,
-  Heart,
-  Share2,
   Trash2,
   Plus,
-  Power,
   PowerOff,
   ExternalLink,
   Globe,
-  Lock,
   Code,
   Palette,
   BarChart3,
   MessageSquare,
-  Users,
   CreditCard,
   Bell,
-  HelpCircle,
-  Play,
-  Pause,
   Upload,
-  FolderPlus,
-  Tag,
   Layers,
-  Workflow,
-  Wand2,
   Bot,
   Database,
-  Cloud,
   Mail,
-  Calendar,
   FileText,
-  Image,
-  Video,
-  Music,
   Gift,
   Crown,
-  Award,
-  Store,
-  ShoppingCart
+  Store
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -1889,7 +1863,7 @@ export default function AddOnsClient() {
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
-                      <Button className="flex-1" variant="outline" className="text-red-600">
+                      <Button className="flex-1 text-red-600" variant="outline">
                         <Trash2 className="w-4 h-4 mr-2" />
                         Uninstall
                       </Button>

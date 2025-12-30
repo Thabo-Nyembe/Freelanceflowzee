@@ -13,16 +13,11 @@ import {
   Redo,
   Trash2,
   Download,
-  X,
-  Minimize2,
-  Maximize2,
-  Settings
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('AnnotationOverlay')

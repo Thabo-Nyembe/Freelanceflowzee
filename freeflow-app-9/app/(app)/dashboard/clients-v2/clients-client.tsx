@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -26,45 +26,30 @@ import {
   Phone,
   DollarSign,
   TrendingUp,
-  Star,
   Settings,
-  Filter,
   Building2,
   UserPlus,
-  MessageSquare,
   Trash2,
   Edit,
   Calendar,
   Clock,
   CheckCircle2,
-  XCircle,
   MoreVertical,
   MapPin,
   Globe,
-  Linkedin,
-  Twitter,
   FileText,
   Briefcase,
   Target,
   Activity,
-  PieChart,
   BarChart3,
-  ArrowUpRight,
-  ArrowDownRight,
-  Tag,
   Zap,
-  Send,
-  History,
   Handshake,
-  Eye,
   LayoutGrid,
   List,
-  ChevronRight,
   AlertCircle,
   PhoneCall,
   Video,
   CalendarClock,
-  Award,
   UserCheck,
   Building,
   Link2,
@@ -88,13 +73,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  clientsAIInsights,
-  clientsCollaborators,
-  clientsPredictions,
-  clientsActivities,
-  clientsQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type ClientStatus = 'lead' | 'prospect' | 'opportunity' | 'customer' | 'churned' | 'inactive'

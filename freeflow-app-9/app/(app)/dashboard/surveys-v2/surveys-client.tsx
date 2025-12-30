@@ -18,7 +18,6 @@ import {
   ClipboardList,
   Search,
   Plus,
-  Filter,
   BarChart3,
   FileText,
   Settings,
@@ -28,7 +27,6 @@ import {
   Copy,
   Share2,
   ExternalLink,
-  MoreHorizontal,
   Clock,
   CheckCircle,
   Users,
@@ -37,7 +35,6 @@ import {
   Star,
   ThumbsUp,
   ThumbsDown,
-  ArrowRight,
   ChevronRight,
   Globe,
   Mail,
@@ -46,7 +43,6 @@ import {
   Play,
   Pause,
   Archive,
-  Send,
   Download,
   Upload,
   Layout,
@@ -55,7 +51,6 @@ import {
   ToggleLeft,
   List,
   Calendar,
-  Image,
   FileUp,
   Sliders,
   Zap,
@@ -64,17 +59,11 @@ import {
   PieChart,
   Target,
   Sparkles,
-  Award,
   Loader2,
   Shield,
   Bell,
   Webhook,
-  Key,
-  Database,
-  Lock,
-  HardDrive,
   Terminal,
-  History,
   RefreshCw,
   XCircle
 } from 'lucide-react'
@@ -94,13 +83,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  surveysAIInsights,
-  surveysCollaborators,
-  surveysPredictions,
-  surveysActivities,
-  surveysQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type SurveyStatus = 'draft' | 'active' | 'paused' | 'closed'

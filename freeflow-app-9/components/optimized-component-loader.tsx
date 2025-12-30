@@ -1,6 +1,6 @@
 'use client'
 
-import React, { lazy, Suspense, memo } from 'react'
+import React, { Suspense, memo } from 'react'
 import { ErrorBoundary } from './error-boundary'
 
 // Optimized component loader with error boundaries and lazy loading

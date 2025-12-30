@@ -215,7 +215,7 @@ async function getChats(
   limit: number
 ): Promise<NextResponse> {
   // Get chats where user is a member
-  let query = supabase
+  const query = supabase
     .from('chat_members')
     .select(`
       chat_id,

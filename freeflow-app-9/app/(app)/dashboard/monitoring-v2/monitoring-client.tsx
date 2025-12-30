@@ -12,8 +12,6 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Dialog,
   DialogContent,
@@ -26,18 +24,13 @@ import {
   Server,
   Cpu,
   HardDrive,
-  TrendingUp,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Zap,
   Database,
-  Globe,
   BarChart3,
-  Eye,
   Search,
   Filter,
-  Download,
   RefreshCw,
   Plus,
   ArrowUpRight,
@@ -45,40 +38,17 @@ import {
   Settings,
   Bell,
   Layers,
-  Box,
   Container,
-  Cloud,
-  Wifi,
-  WifiOff,
   Terminal,
   FileText,
   AlertCircle,
   XCircle,
-  Pause,
-  Play,
-  Timer,
-  GitBranch,
-  Network,
-  Radio,
   Gauge,
-  LineChart,
-  PieChart,
-  Target,
-  Shield,
-  Lock,
-  Key,
   Users,
   MapPin,
-  ThermometerSun,
-  Flame,
-  Snowflake,
   MemoryStick,
-  MonitorSmartphone,
-  Laptop,
-  Smartphone,
   Webhook,
   AlertOctagon,
-  CreditCard,
   Sliders,
   Mail,
   Copy
@@ -96,13 +66,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  monitoringAIInsights,
-  monitoringCollaborators,
-  monitoringPredictions,
-  monitoringActivities,
-  monitoringQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Datadog Level Infrastructure Monitoring

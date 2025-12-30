@@ -11,66 +11,46 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Headphones,
   MessageSquare,
   Clock,
   CheckCircle,
-  AlertCircle,
-  TrendingUp,
   Users,
-  Award,
   Search,
   Mail,
   Phone,
   Zap,
   Plus,
-  Filter,
   Settings,
-  Tag,
-  Link2,
-  Merge,
   Star,
-  ThumbsUp,
-  ThumbsDown,
   Send,
-  Paperclip,
-  MoreVertical,
-  Eye,
-  Calendar,
   Timer,
   AlertTriangle,
   CheckCircle2,
-  XCircle,
-  Pause,
-  Play,
   RotateCcw,
   MessageCircle,
   Inbox,
   Archive,
   Trash2,
   BarChart3,
-  PieChart,
   Activity,
   Bot,
   Sparkles,
-  ChevronRight,
   Twitter,
   Facebook,
   Globe,
   UserCheck,
   ClipboardList,
-  BookOpen,
   Key,
   Sliders,
   Webhook,
   Shield,
   HardDrive,
   Download,
-  AlertOctagon,
-  CreditCard
+  AlertOctagon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -85,13 +65,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  supportAIInsights,
-  supportCollaborators,
-  supportPredictions,
-  supportActivities,
-  supportQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'

@@ -8,8 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
@@ -20,7 +19,6 @@ import {
   TrendingUp,
   DollarSign,
   Users,
-  Target,
   Award,
   ArrowUpRight,
   ArrowDownRight,
@@ -31,18 +29,13 @@ import {
   Plus,
   Search,
   Building2,
-  Briefcase,
   FileText,
-  Eye,
   Edit,
   Share2,
-  Percent,
   CircleDollarSign,
   Wallet,
   TrendingDown,
   Scale,
-  LineChart,
-  Calculator,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -50,9 +43,7 @@ import {
   Globe,
   Mail,
   Phone,
-  ExternalLink,
   Layers,
-  GitBranch,
   Settings,
   Bell,
   Shield,
@@ -82,13 +73,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  investorMetricsAIInsights,
-  investorMetricsCollaborators,
-  investorMetricsPredictions,
-  investorMetricsActivities,
-  investorMetricsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Database types
 interface DBInvestorMetric {

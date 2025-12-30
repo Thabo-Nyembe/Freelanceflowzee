@@ -14,15 +14,14 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
-  Workflow, Play, Pause, Square, Plus, Settings, Download, Search,
-  Zap, GitBranch, ArrowRight, Clock, CheckCircle2, XCircle, Activity,
-  Code, Database, Mail, Webhook, Calendar, FileText, Users, Slack,
+  Workflow, Play, Plus, Settings, Download, Search,
+  Zap, GitBranch, Clock, CheckCircle2, XCircle, Activity,
+  Code, Database, Mail, Webhook, FileText, Users, Slack,
   Globe, ShoppingCart, CreditCard, Key, Terminal, Cloud, Bot, Sparkles,
   RotateCcw, Copy, Trash2, MoreVertical, Eye, Edit2, History, Layers,
-  Filter, ChevronRight, TrendingUp, AlertTriangle, RefreshCw, Share2,
-  Folder, Tag, Star, BarChart3, Timer, Cpu, Gauge, Network, Lock,
-  Bell, MessageSquare, ArrowUpRight, ExternalLink, PlayCircle, PauseCircle,
-  StopCircle, CheckCircle, Package, Shield, Rocket, Target, Lightbulb
+  Filter, TrendingUp, AlertTriangle, RefreshCw, Share2, Star, BarChart3, Cpu, Gauge, Network,
+  Bell, MessageSquare, ExternalLink, PlayCircle, PauseCircle,
+  StopCircle, CheckCircle, Package, Shield, Rocket
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -38,13 +37,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  automationsAIInsights,
-  automationsCollaborators,
-  automationsPredictions,
-  automationsActivities,
-  automationsQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Zapier/Make Level Automation Platform

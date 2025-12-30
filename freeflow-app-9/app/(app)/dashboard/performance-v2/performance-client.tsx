@@ -7,7 +7,6 @@ import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import {
   Gauge,
   Zap,
-  Eye,
   Shield,
   Search,
   Globe,
@@ -17,7 +16,6 @@ import {
   RefreshCw,
   Clock,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -28,31 +26,16 @@ import {
   Settings,
   Calendar,
   BarChart3,
-  LineChart,
   Target,
   Layers,
-  Image as ImageIcon,
-  FileCode,
   Server,
-  Database,
-  Wifi,
   ArrowUp,
   ArrowDown,
   Loader2,
-  ExternalLink,
   Copy,
   Check,
-  Filter,
-  MoreVertical,
-  Palette,
-  Type,
-  Link,
-  Code,
-  Box,
   FileText,
-  Lock,
   Accessibility,
-  Sparkles,
   Bell,
   Webhook,
   Key,
@@ -66,8 +49,6 @@ import {
 // Competitive Upgrade Components
 import {
   AIInsightsPanel,
-  Sparkline,
-  CollaborationIndicator,
   PredictiveAnalytics,
 } from '@/components/ui/competitive-upgrades'
 
@@ -76,13 +57,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  performanceAIInsights,
-  performanceCollaborators,
-  performancePredictions,
-  performanceActivities,
-  performanceQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -94,7 +70,6 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Types
 type DeviceType = 'mobile' | 'desktop'

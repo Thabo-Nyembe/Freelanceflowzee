@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { CheckCircle, Sparkles, Zap, Crown, Shield, Lock, Award, Globe, ArrowRight } from 'lucide-react'
+import { CheckCircle, Sparkles, Zap, Crown, Shield, Lock, Award, ArrowRight } from 'lucide-react'
 
 const plans = [
   {

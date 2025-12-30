@@ -16,27 +16,20 @@ import {
   Palette,
   Settings,
   Save,
-  Upload,
   Download,
   Share,
   Eye,
-  Scissors,
-  Volume2,
-  Sliders,
   Wand2,
   Sparkles,
   Filter,
-  ImageIcon,
   Type,
   Layers,
   Clock,
-  User,
   FileVideo,
-  PlayCircle,
   History
 } from 'lucide-react';
 import VideoTimelineEditor, { TimelineEdit } from './video-timeline-editor';
-import { Video, VideoChapter } from '@/lib/video/types';
+import { Video } from '@/lib/video/types';
 
 export interface VideoEditorProps {
   video: Video;

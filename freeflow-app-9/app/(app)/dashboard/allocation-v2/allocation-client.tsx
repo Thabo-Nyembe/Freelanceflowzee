@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useAllocations, useAllocationMutations, type Allocation as DBAllocation } from '@/lib/hooks/use-allocations'
+import { useAllocations, useAllocationMutations } from '@/lib/hooks/use-allocations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -31,14 +31,12 @@ import {
   TrendingUp,
   AlertTriangle,
   Search,
-  Filter,
   Plus,
   Settings,
   BarChart3,
   PieChart,
   DollarSign,
   UserCheck,
-  UserX,
   Building,
   MapPin,
   Mail,
@@ -54,18 +52,10 @@ import {
   ArrowDownRight,
   CalendarDays,
   CalendarRange,
-  Timer,
   Layers,
   GitBranch,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  Pause,
-  Play,
   ChevronRight,
-  Grid3X3,
-  List,
-  LayoutGrid,
   Percent,
   Award,
   Coffee,
@@ -87,13 +77,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  allocationAIInsights,
-  allocationCollaborators,
-  allocationPredictions,
-  allocationActivities,
-  allocationQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Resource Guru Level Resource Management

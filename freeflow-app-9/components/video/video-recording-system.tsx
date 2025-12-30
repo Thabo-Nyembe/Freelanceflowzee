@@ -1,20 +1,9 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { MediaStreamComposer } from '@api.video/media-stream-composer'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Slider } from '@/components/ui/slider'
-import { Switch } from '@/components/ui/switch'
 import { toast } from '@/components/ui/use-toast'
 import {
-  Camera,
-  Mic,
-  Monitor,
-  Pause,
-  Play,
-  Square,
-  Video,
   StopCircle,
 } from 'lucide-react'
 

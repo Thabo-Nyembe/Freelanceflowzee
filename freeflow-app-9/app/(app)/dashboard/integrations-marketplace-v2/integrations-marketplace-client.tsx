@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -15,8 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useMarketplaceIntegrations, MarketplaceIntegration, MarketplaceStats } from '@/lib/hooks/use-marketplace-integrations'
-import { createMarketplaceIntegration, deleteMarketplaceIntegration, connectIntegration, disconnectIntegration } from '@/app/actions/marketplace-integrations'
-import { Search, Star, Download, ExternalLink, Shield, Zap, Clock, Users, TrendingUp, CheckCircle, XCircle, Settings, Code, CreditCard, Package, Grid3X3, List, Filter, ChevronRight, Heart, Share2, Flag, MessageSquare, Plus, ArrowUpRight, Sparkles, Award, Verified, Globe, Lock, RefreshCw, Bell, Webhook, Key, HardDrive, AlertOctagon, Sliders, Mail, Copy } from 'lucide-react'
+import { Search, Star, Download, ExternalLink, Shield, Zap, Users, TrendingUp, CheckCircle, Settings, Code, CreditCard, Package, Grid3X3, List, ChevronRight, Heart, Flag, MessageSquare, Plus, Sparkles, Verified, Lock, RefreshCw, Bell, Webhook, Key, AlertOctagon, Sliders, Mail, Copy } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
 import {

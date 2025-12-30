@@ -9,15 +9,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Share2,
   Heart,
-  MessageCircle,
   TrendingUp,
   Plus,
   Send,
@@ -25,51 +24,36 @@ import {
   Clock,
   Users,
   BarChart3,
-  CheckCircle,
   RefreshCw,
   Trash2,
   Image,
   Video,
   FileText,
   Search,
-  Filter,
   MoreVertical,
   ArrowUpRight,
   ArrowDownRight,
   Calendar,
   Inbox,
   Hash,
-  AtSign,
   Bell,
   Settings,
   Target,
   Zap,
-  Globe,
-  Repeat2,
-  Bookmark,
   Link2,
   ExternalLink,
-  ThumbsUp,
   MessageSquare,
   Sparkles,
   Layers,
   PenTool,
-  Palette,
-  Music2,
   Film,
   Camera,
-  Mic,
-  AlertCircle,
   CheckCircle2,
   XCircle,
   PauseCircle,
-  PlayCircle,
   Copy,
   Download,
   Upload,
-  Folder,
-  Star,
-  Award,
   TrendingDown,
   Activity
 } from 'lucide-react'

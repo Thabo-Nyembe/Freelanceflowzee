@@ -16,13 +16,12 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   MessageSquare,
   ThumbsUp,
   Search,
-  Filter,
   Plus,
   TrendingUp,
   Users,
@@ -33,21 +32,11 @@ import {
   Sparkles,
   MessageCircle,
   ArrowUp,
-  ArrowDown,
-  Calendar,
   CheckCircle2,
-  Clock,
-  XCircle,
   Eye,
   Link2,
-  Merge,
-  Tag,
-  Star,
-  AlertTriangle,
-  ChevronRight,
   GitBranch,
   Activity,
-  PieChart,
   Send,
   Settings,
   LayoutGrid,
@@ -56,13 +45,8 @@ import {
   Award,
   Bell,
   Webhook,
-  Key,
-  Shield,
-  HardDrive,
   AlertOctagon,
-  CreditCard,
   Sliders,
-  Mail,
   Globe,
   Download,
   Copy,
@@ -81,13 +65,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  feedbackAIInsights,
-  feedbackCollaborators,
-  feedbackPredictions,
-  feedbackActivities,
-  feedbackQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type IdeaStatus = 'new' | 'under_review' | 'planned' | 'in_progress' | 'shipped' | 'declined' | 'duplicate'

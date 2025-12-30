@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Video,
@@ -17,12 +16,10 @@ import {
   Pause,
   Plus,
   Upload,
-  Camera,
   Scissors,
   Brain,
   Eye,
   Share2,
-  TrendingUp,
   Settings,
   Film,
   Wand2,
@@ -58,13 +55,9 @@ import {
   Layout,
   Monitor,
   Smartphone,
-  Tablet,
   Square,
   Star,
-  Heart,
-  MessageSquare,
   Users,
-  Calendar,
   FileVideo,
   Folder,
   HardDrive,
@@ -85,13 +78,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  videoStudioAIInsights,
-  videoStudioCollaborators,
-  videoStudioPredictions,
-  videoStudioActivities,
-  videoStudioQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // Types
 type ProjectStatus = 'draft' | 'editing' | 'rendering' | 'ready' | 'published' | 'archived'

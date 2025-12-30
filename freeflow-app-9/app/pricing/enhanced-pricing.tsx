@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Check,
-  Star,
   Zap,
   Crown,
   Sparkles,
@@ -12,23 +11,18 @@ import {
   Users,
   Shield,
   Brain,
-  Target,
-  Rocket,
   ArrowRight,
   Smartphone,
   Monitor,
   Play,
   Gift,
-  TrendingUp,
-  Infinity
+  TrendingUp
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import { Progress } from '@/components/ui/progress'
-import FeatureGate from '@/components/subscription/feature-gate'
 import GuestPaymentModal from '@/components/payments/guest-payment-modal'
 import { SUBSCRIPTION_PLANS, PlanType } from '@/lib/subscription/subscription-manager'
 

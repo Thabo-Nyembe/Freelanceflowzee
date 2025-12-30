@@ -487,7 +487,7 @@ export async function POST(request: NextRequest) {
       case 'set-availability': {
         const { weeklySchedule, timezone, bufferBetweenBookings, minimumNotice, maximumAdvance, teamMemberId } = params;
 
-        let availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
+        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
 
         if (weeklySchedule) availability.weeklySchedule = weeklySchedule;
         if (timezone) availability.timezone = timezone;

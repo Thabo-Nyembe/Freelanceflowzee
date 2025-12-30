@@ -27,10 +27,8 @@ import {
   getCodeCompletions,
   getCodeSnippets,
   createCodeSnippet,
-  deleteCodeSnippet,
   getAICodeStats,
-  type ProgrammingLanguage,
-  type CodeSnippet as DBCodeSnippet
+  type ProgrammingLanguage
 } from '@/lib/ai-code-queries'
 
 const logger = createFeatureLogger('AICodeCompletion')

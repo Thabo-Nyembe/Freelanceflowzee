@@ -1,33 +1,27 @@
 'use client'
 
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { useMessages, Message as SupabaseMessage } from '@/lib/hooks/use-messages'
+import { useMessages } from '@/lib/hooks/use-messages'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Textarea } from '@/components/ui/textarea'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import {
   MessageSquare, Plus, Search, Hash, Lock, Users, Settings, Bell, BellOff,
-  Star, StarOff, Pin, Bookmark, MoreHorizontal, Send, Smile, Paperclip,
-  AtSign, Image, FileText, Video, Phone, ChevronDown, ChevronRight, Circle,
-  Clock, Check, CheckCheck, Reply, Forward, Edit, Trash2, Copy, ExternalLink,
-  Filter, Archive, Inbox, Download, Upload, Mic, MicOff, Headphones, Volume2,
-  MoreVertical, X, Maximize2, Minimize2, MessageCircle, ThumbsUp, Heart,
-  Laugh, Frown, Eye, EyeOff, UserPlus, LogOut, Zap, Bot, Workflow, Code,
-  Link2, Calendar, AlertCircle, ArrowUpRight, ArrowDownRight, TrendingUp,
-  FolderOpen, Files, Sparkles, Globe, Moon, Sun, Palette, Shield, Key,
-  RefreshCw, Megaphone, PhoneCall, PhoneOff, ScreenShare, Layers, PlayCircle,
-  PauseCircle, StopCircle, Radio, Voicemail, BookOpen, HelpCircle, Cog,
-  Webhook, HardDrive, AlertOctagon, CreditCard, Sliders
+  Star, Pin, Bookmark, Send,
+  AtSign, Image, FileText, Video, Phone, ChevronRight,
+  Clock, CheckCheck, Reply, Forward, Trash2,
+  Filter, Archive, Inbox, Download, Upload, Headphones, MessageCircle, ThumbsUp, UserPlus, LogOut, Zap, Bot, Workflow, Code, Calendar, ArrowUpRight, ArrowDownRight,
+  FolderOpen, Files, Sparkles, Moon, Sun, Palette, Shield, Key,
+  RefreshCw, PhoneOff, ScreenShare, PlayCircle, Radio, BookOpen, HelpCircle,
+  Webhook, HardDrive, AlertOctagon, Sliders
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

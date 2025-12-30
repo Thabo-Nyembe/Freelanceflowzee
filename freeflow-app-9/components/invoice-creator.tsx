@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { FileText, Send, Download, Plus, Trash2, Eye, Palette, Layout, Settings } from "lucide-react"
+import { FileText, Send, Download, Plus, Trash2, Eye, Palette, Settings } from "lucide-react"
 import { useState } from "react"
 
 export function InvoiceCreator() {

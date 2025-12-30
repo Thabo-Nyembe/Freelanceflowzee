@@ -1,10 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 // Import our 2025 GUI components for marketing
@@ -12,9 +12,7 @@ import Context7GUIProvider, {
   LightningDarkContainer,
   Spatial3DCard,
   KineticText,
-  LiquidButton,
-  MicroInteractionButton,
-  useContext7GUI
+  LiquidButton
 } from './enhanced-gui-2025'
 
 import {

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 // UI Components
@@ -22,20 +22,15 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 
 // Icons
 import {
   Brain,
   TrendingUp,
-  TrendingDown,
   BarChart3,
-  PieChart,
   Clock,
-  Users,
   MessageCircle,
   CheckCircle,
   AlertTriangle,
@@ -47,7 +42,6 @@ import {
   RefreshCw,
   Download,
   Eye,
-  ThumbsUp,
   ThumbsDown,
   Meh,
   Smile,
@@ -61,7 +55,6 @@ import {
   AICommentAnalysis,
   CommentInsights,
   SmartRecommendation,
-  AISuggestion,
   commentAnalysisService
 } from "@/lib/ai/comment-analysis-service"
 

@@ -4,22 +4,17 @@ import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useFAQs, FAQ } from '@/lib/hooks/use-faqs'
 import {
-  HelpCircle,
   Plus,
   Search,
   Settings,
   BarChart3,
   FileText,
-  Tag,
   Eye,
   ThumbsUp,
   ThumbsDown,
-  X,
   Loader2,
   Trash2,
   Edit,
-  ChevronRight,
-  ChevronDown,
   Book,
   FolderOpen,
   Globe,
@@ -30,16 +25,11 @@ import {
   MessageSquare,
   Sparkles,
   TrendingUp,
-  ArrowRight,
   ExternalLink,
   Copy,
   MoreVertical,
-  Filter,
   Grid3X3,
   List,
-  Bookmark,
-  Share2,
-  Send,
   Languages,
   Palette,
   Layout,
@@ -55,7 +45,6 @@ import {
   PieChart,
   Target,
   Award,
-  Heart,
   MessageCircle,
   Headphones,
   Mail,
@@ -75,7 +64,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 

@@ -12,10 +12,8 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Calendar, 
   Clock, 
-  User, 
   ArrowLeft, 
   BookOpen,
-  Filter,
   Search,
   Grid,
   List

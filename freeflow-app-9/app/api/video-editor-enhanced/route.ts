@@ -631,7 +631,7 @@ export async function POST(request: NextRequest) {
 
       case 'duplicate-project': {
         const { projectId, newName } = params;
-        let source = projectsDb.get(projectId) || createDefaultProject(userId, 'Source');
+        const source = projectsDb.get(projectId) || createDefaultProject(userId, 'Source');
 
         const duplicate: VideoProject = {
           ...JSON.parse(JSON.stringify(source)),
@@ -659,7 +659,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        let project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
+        const project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
         project.id = projectId;
 
         const colors: Record<string, string> = {
@@ -741,7 +741,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        let project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
+        const project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
         project.id = projectId;
 
         const track = project.tracks.find(t => t.id === trackId);
@@ -1077,7 +1077,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ success: false, error: 'Project ID and text required' }, { status: 400 });
         }
 
-        let project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
+        const project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
         project.id = projectId;
 
         let textTrack = project.tracks.find(t => t.type === 'text');
@@ -1132,7 +1132,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ success: false, error: 'Project ID and subtitles required' }, { status: 400 });
         }
 
-        let project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
+        const project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
         project.id = projectId;
 
         let subtitleTrack = project.tracks.find(t => t.type === 'subtitle');
@@ -1220,7 +1220,7 @@ export async function POST(request: NextRequest) {
       case 'add-audio-track': {
         const { projectId, audioUrl, name, startTime = 0, volume = 1, loop = false } = params;
 
-        let project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
+        const project = projectsDb.get(projectId) || createDefaultProject(userId, 'Project');
         project.id = projectId;
 
         let audioTrack = project.tracks.find(t => t.type === 'audio' && t.clips.length === 0);

@@ -5,27 +5,24 @@
  * Complete crypto payment UI with wallet connection, currency selection, and transaction tracking
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Wallet, ChevronDown, Check, Copy, ExternalLink, RefreshCw,
+  Wallet, Check, Copy, ExternalLink, RefreshCw,
   AlertCircle, CheckCircle, Clock, TrendingUp, TrendingDown,
-  QrCode, Shield, Zap, Info, ArrowRight, X, Loader2
+  QrCode, Zap, Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
-import { TextShimmer } from '@/components/ui/text-shimmer'
 import { cn } from '@/lib/utils'
 import {
   CryptoCurrency,
   PaymentNetwork,
   WalletProvider,
-  PaymentStatus,
   CryptoPayment,
   ExchangeRate,
   WalletConnection
@@ -37,8 +34,7 @@ import {
   getTransactionUrl,
   generatePaymentQRData,
   formatPaymentStatus,
-  getRecommendedCryptos,
-  fetchExchangeRates
+  getRecommendedCryptos
 } from '@/lib/crypto-payment-utils'
 
 // ===== WALLET CONNECTION COMPONENT =====

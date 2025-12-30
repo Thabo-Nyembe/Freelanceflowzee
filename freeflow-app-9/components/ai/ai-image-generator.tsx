@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import {
   Sparkles, Download, RefreshCw, Wand2, Maximize2, Image as ImageIcon,
-  Palette, Settings2, History, Trash2, Loader2, Upload, Heart, Share2,
+  Palette, History, Trash2, Loader2, Heart, Share2,
   Copy, Zap, Grid3X3, LayoutGrid, X, Plus, ChevronDown, Star,
-  Bookmark, Filter, SlidersHorizontal, Type, Users, Layers, Eye,
-  ArrowRight, Check, ImagePlus, Lightbulb, Crown, Flame
+  Bookmark, SlidersHorizontal, Type, Users, Layers, Eye, ImagePlus, Lightbulb, Crown
 } from 'lucide-react'
-import { useNanoBanana, type ImageSize, type ImageStyle, type ImageModel, imagePresets } from '@/lib/hooks/use-nano-banana'
+import { useNanoBanana, type ImageSize, type ImageStyle, type ImageModel } from '@/lib/hooks/use-nano-banana'
 
 const imageSizes: { value: ImageSize; label: string; ratio: string; icon: string }[] = [
   { value: 'square_hd', label: 'Square HD', ratio: '1:1', icon: '⬜' },

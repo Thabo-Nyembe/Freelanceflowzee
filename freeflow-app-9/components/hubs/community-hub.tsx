@@ -2,18 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
 import {
   getMembers,
-  getPosts,
-  createPost,
-  togglePostLike,
-  type CommunityMember as DBMember,
-  type CommunityPost as DBPost
+  getPosts
 } from '@/lib/community-hub-queries'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
@@ -26,13 +21,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+
+
 import {
   Users,
   MessageSquare,
@@ -47,9 +37,7 @@ import {
   Plus,
   Calendar,
   MapPin,
-  ExternalLink,
   UserPlus,
-  Settings,
   Briefcase,
   Zap,
   Crown,

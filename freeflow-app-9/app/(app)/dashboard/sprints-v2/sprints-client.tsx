@@ -17,14 +17,12 @@ import { CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  Zap, Calendar, Target, BarChart3, Clock, Users, Flag,
-  Settings, Plus, Search, Filter, LayoutGrid, List, ChevronRight,
-  PlayCircle, PauseCircle, CheckCircle2, XCircle, AlertTriangle,
-  TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Timer,
-  Layers, Hash, GitBranch, Bug, FileText, Lightbulb, MessageSquare,
-  Activity, Eye, RefreshCw, Sparkles, Bell, Award, RotateCcw,
-  ArrowRight, GripVertical, MoreVertical, Flame, Coffee, Webhook, Key, Shield,
-  HardDrive, AlertOctagon, CreditCard, Sliders, Mail, Globe, Download, Copy, Trash2
+  Zap, Target, BarChart3, Users,
+  Settings, Plus, Search, LayoutGrid,
+  PlayCircle, CheckCircle2, AlertTriangle,
+  TrendingUp, TrendingDown,
+  Layers, GitBranch, Bug, FileText, Lightbulb, RefreshCw, Bell, Award, RotateCcw, GripVertical, Flame, Webhook, Key, Shield,
+  HardDrive, AlertOctagon, CreditCard, Sliders, Globe, Download, Copy, Trash2
 } from 'lucide-react'
 
 // Import Supabase hooks for real data operations
@@ -32,8 +30,6 @@ import {
   useSprints,
   useSprintTasks,
   useSprintMutations,
-  type Sprint as DbSprint,
-  type SprintTask as DbSprintTask,
 } from '@/lib/hooks/use-sprints'
 
 // Enhanced & Competitive Upgrade Components
@@ -48,13 +44,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  sprintsAIInsights,
-  sprintsCollaborators,
-  sprintsPredictions,
-  sprintsActivities,
-  sprintsQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPE DEFINITIONS - Jira Sprints Level Sprint Management

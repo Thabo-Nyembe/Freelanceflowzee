@@ -4,7 +4,6 @@ import * as React from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 
@@ -14,12 +13,10 @@ import {
   LightningDarkContainer,
   Spatial3DCard,
   KineticText,
-  AdaptiveInterface,
   GestureControlZone,
   LiquidButton,
   NeuroCard,
-  MicroInteractionButton,
-  useContext7GUI
+  MicroInteractionButton
 } from './enhanced-gui-2025'
 
 import {
@@ -40,32 +37,15 @@ import SpatialCanvas from './advanced-spatial-interface'
 import {
   Brain,
   Sparkles,
-  Zap,
   Eye,
-  Hand,
   Mic,
-  Target,
   Layers3,
-  Palette,
   Activity,
   TrendingUp,
   BarChart3,
-  Users,
-  Clock,
   DollarSign,
   FolderOpen,
-  MessageSquare,
-  Settings,
-  Globe,
-  Star,
-  ArrowRight,
-  Cpu,
-  Waves,
-  Focus,
-  Fingerprint,
-  Shield,
-  Headphones,
-  Volume2
+  ArrowRight
 } from 'lucide-react'
 
 // Enhanced Dashboard with 2025 GUI Features

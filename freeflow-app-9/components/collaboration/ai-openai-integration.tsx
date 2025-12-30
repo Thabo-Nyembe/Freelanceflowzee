@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
@@ -15,8 +14,6 @@ import {
 import {
   Bot,
   Sparkles,
-  MessageSquare,
-  FileText,
   RefreshCw,
   CheckCircle,
   XCircle,

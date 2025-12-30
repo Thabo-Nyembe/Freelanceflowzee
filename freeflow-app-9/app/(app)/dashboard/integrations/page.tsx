@@ -33,7 +33,7 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 const logger = createFeatureLogger('Integrations')
 
 // DATABASE QUERIES - Secure API Key Storage
-import { createIntegrationAPIKey, getIntegrationAPIKeys, deleteIntegrationAPIKey } from '@/lib/integrations-management-queries'
+import { createIntegrationAPIKey } from '@/lib/integrations-management-queries'
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS

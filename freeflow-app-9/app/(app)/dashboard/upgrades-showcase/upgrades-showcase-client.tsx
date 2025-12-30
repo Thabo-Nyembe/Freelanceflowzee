@@ -4,13 +4,10 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Brain,
   LineChart,
   Users,
-  MessageSquare,
   Target,
   Sparkles,
   Activity,
@@ -21,18 +18,12 @@ import {
   TrendingUp,
   DollarSign,
   Calendar,
-  CheckCircle,
-  AlertTriangle,
-  Lightbulb,
   Plus,
   Edit,
   FileText,
   Star,
   Rocket,
   Crown,
-  Flame,
-  Medal,
-  Award,
 } from 'lucide-react'
 
 // Import all competitive upgrade components
@@ -44,7 +35,6 @@ import {
   MetricCard,
   CollaborationIndicator,
   InlineComment,
-  DashboardWidget,
   PredictiveAnalytics,
   DataStory,
 } from '@/components/ui/competitive-upgrades'

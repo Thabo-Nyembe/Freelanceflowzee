@@ -4,12 +4,12 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
-  Wrench, Clock, CheckCircle, AlertCircle, XCircle, Server,
-  Activity, Calendar, Settings, AlertTriangle, TrendingUp, Zap,
-  BarChart3, Bell, Pause, Play, Info, Users, Plus, Search,
-  Download, RefreshCw, Eye, Trash2, FileText, Shield, Database,
-  HardDrive, Cpu, Cloud, RotateCw, Timer, Target, Layers,
-  ClipboardList, History, PenTool, Tag, MessageSquare
+  Wrench, CheckCircle, AlertCircle, Server,
+  Activity, Calendar, Settings, AlertTriangle, TrendingUp,
+  BarChart3, Bell, Pause, Users, Plus, Search,
+  Download, RefreshCw, FileText, Shield, Database,
+  HardDrive, RotateCw, Target,
+  ClipboardList
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -19,10 +19,10 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Sliders, Webhook, Key, Mail, Lock, Terminal, Globe, Archive, Workflow } from 'lucide-react'
+import { Sliders, Webhook, Mail, Lock, Terminal, Archive } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
 import {

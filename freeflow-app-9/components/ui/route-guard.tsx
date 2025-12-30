@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, Lock, AlertCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Shield, Lock } from 'lucide-react'
 import { GlowEffect } from './glow-effect'
 import { BorderTrail } from './border-trail'
 import { createFeatureLogger } from '@/lib/logger'

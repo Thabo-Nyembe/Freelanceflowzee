@@ -5,9 +5,9 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,21 +40,13 @@ import {
   List,
   Filter,
   SlidersHorizontal,
-  Play,
-  Pause,
   Eye,
-  ThumbsUp,
-  MessageSquare,
   Bookmark,
-  Send,
-  Camera,
   Video,
   FileText,
   Code,
   Music,
-  Mic,
   Globe,
-  Lock,
   Users,
   Crown,
   Gem,
@@ -62,9 +54,6 @@ import {
   Target,
   Activity,
   DollarSign,
-  ChevronRight,
-  MoreHorizontal,
-  ExternalLink,
   Maximize2,
   Square,
   RectangleHorizontal,
@@ -77,7 +66,6 @@ import {
   Mail,
   HardDrive,
   Archive,
-  Workflow,
   Shield,
   AlertTriangle,
   UploadCloud,
@@ -97,13 +85,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  aiCreateAIInsights,
-  aiCreateCollaborators,
-  aiCreatePredictions,
-  aiCreateActivities,
-  aiCreateQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 // ============================================================================
 // TYPES & INTERFACES - Midjourney Level AI Creation Platform

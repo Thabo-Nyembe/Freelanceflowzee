@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -25,16 +25,12 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
-  DollarSign, TrendingUp, TrendingDown, Users, Target, Award, Phone, Mail,
-  Calendar, CheckCircle2, XCircle, Clock, BarChart3, Plus, Search, Filter,
-  MoreHorizontal, ArrowUpRight, ArrowDownRight, Building2, Briefcase, UserPlus,
-  MessageSquare, FileText, Activity, PieChart, LineChart, Globe, MapPin, Star,
+  DollarSign, TrendingUp, Users, Target, Phone, Mail,
+  Calendar, CheckCircle2, XCircle, BarChart3, Plus, Search, ArrowUpRight, ArrowDownRight, Building2, Briefcase,
+  MessageSquare, FileText, Activity, PieChart, Globe, MapPin, Star,
   Zap, RefreshCw, Edit, Trash2, ExternalLink, ArrowRight, Settings, Package,
-  FileSignature, Receipt, Percent, Flag, ShieldCheck, AlertTriangle, Trophy,
-  Gift, Layers, Map, Navigation, Compass, LayoutGrid, Rocket, Sparkles,
-  ChevronRight, ChevronDown, Copy, Download, Upload, Share2, Eye, Heart,
-  ThumbsUp, MessageCircle, Send, Bookmark, Tag, Hash, AtSign, Link2, Loader2,
-  Webhook, Key, Shield, HardDrive, AlertOctagon, Bell, CreditCard
+  FileSignature, Trophy, Layers, Map, Sparkles, Copy, Download, Upload, Send, Loader2,
+  Webhook, Key, Shield, HardDrive, AlertOctagon, Bell
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -49,16 +45,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  salesAIInsights,
-  salesCollaborators,
-  salesPredictions,
-  salesActivities,
-  salesQuickActions,
-} from '@/lib/mock-data/adapters'
 
-import { EnhancedDashboardWidget } from '@/components/ui/enhanced-dashboard-widgets'
-import { SkeletonCard } from '@/components/ui/enhanced-loading-states'
+
+
 
 // Salesforce Sales Cloud level types
 type DealStage = 'prospecting' | 'qualification' | 'needs_analysis' | 'value_proposition' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'

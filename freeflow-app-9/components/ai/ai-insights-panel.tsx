@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RevenueInsightsWidget } from './revenue-insights-widget';
 import { GrowthActionsWidget } from './growth-actions-widget';
 import { LeadScoringWidget } from './lead-scoring-widget';
-import { Brain, X, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { Brain, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
 interface AIInsightsPanelProps {

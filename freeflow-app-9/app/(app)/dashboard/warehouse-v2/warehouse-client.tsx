@@ -8,7 +8,6 @@ import {
   TrendingUp,
   Package,
   Truck,
-  Users,
   AlertTriangle,
   CheckCircle2,
   BarChart3,
@@ -18,26 +17,17 @@ import {
   Settings,
   Box,
   Search,
-  Filter,
   Eye,
   Edit,
-  MoreHorizontal,
   ArrowUpRight,
   ArrowDownLeft,
   Clock,
-  Target,
-  Layers,
   Grid3X3,
   Move,
   Scan,
-  PackageCheck,
-  PackageX,
   RotateCcw,
-  Forklift,
   ClipboardList,
   Boxes,
-  ArrowRightLeft,
-  Calendar,
   Timer,
   Zap,
   ThermometerSnowflake,
@@ -45,23 +35,15 @@ import {
   AlertCircle,
   XCircle,
   RefreshCw,
-  FileText,
-  Tag,
   Hash,
   Shield,
   Sliders,
-  Bell,
   Webhook,
-  Key,
   Database,
   Trash2,
-  History,
-  Lock,
-  Globe,
   Printer,
   Mail,
   Upload,
-  HardDrive,
   Terminal
 } from 'lucide-react'
 
@@ -77,25 +59,18 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  warehouseAIInsights,
-  warehouseCollaborators,
-  warehousePredictions,
-  warehouseActivities,
-  warehouseQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 
 // Types
 type InventoryStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'reserved' | 'damaged' | 'quarantine'

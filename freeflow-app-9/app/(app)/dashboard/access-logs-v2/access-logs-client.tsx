@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -29,25 +29,16 @@ import {
   Tablet,
   Shield,
   ShieldAlert,
-  ShieldCheck,
   ShieldOff,
   Eye,
-  EyeOff,
-  Lock,
-  Unlock,
   User,
   Users,
-  Key,
   Database,
-  Server,
   Code,
-  Terminal,
   FileText,
   TrendingUp,
-  TrendingDown,
   BarChart3,
   PieChart,
-  Calendar,
   Bell,
   BellRing,
   Settings,
@@ -56,9 +47,6 @@ import {
   Zap,
   AlertTriangle,
   Info,
-  ChevronRight,
-  ChevronDown,
-  MoreVertical,
   Copy,
   ExternalLink,
   Bookmark,
@@ -67,13 +55,11 @@ import {
   Archive,
   Tag,
   Layers,
-  Layout,
   Grid3X3,
   List,
   Sliders,
   Webhook,
-  Mail,
-  History
+  Mail
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -89,7 +75,6 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
 
 // Types

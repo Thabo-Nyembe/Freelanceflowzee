@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -25,10 +25,7 @@ import {
 import {
   useMediaFiles,
   useMediaFolders,
-  useMediaMutations,
   useMediaStats,
-  type MediaFile,
-  type MediaFolder as MediaFolderType,
   type FileType as MediaFileType,
   type AccessLevel as MediaAccessLevel,
 } from '@/lib/hooks/use-media-library'
@@ -42,7 +39,6 @@ import {
   Grid3x3,
   List,
   Search,
-  Filter,
   Download,
   Share2,
   Trash2,
@@ -51,31 +47,18 @@ import {
   FolderPlus,
   HardDrive,
   Eye,
-  MoreVertical,
   Plus,
   Copy,
   Link2,
-  Clock,
-  Calendar,
   Tag,
   Users,
   Lock,
-  Unlock,
   Edit,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  RotateCcw,
-  Maximize2,
-  Minimize2,
-  Crop,
   Palette,
-  Layers,
   Sparkles,
   Wand2,
   History,
   Settings,
-  Cloud,
   CloudUpload,
   Globe,
   Shield,
@@ -92,10 +75,6 @@ import {
   ChevronRight,
   LayoutGrid,
   SlidersHorizontal,
-  Heart,
-  Bookmark,
-  ExternalLink,
-  Info,
   Bell,
   RefreshCw,
   Archive,
@@ -103,16 +82,12 @@ import {
   SortAsc,
   FolderTree,
   ImagePlus,
-  VideoIcon,
-  MusicIcon,
   FileUp,
   FolderSync,
   Boxes,
   Database,
   Activity,
-  PieChart,
-  LineChart,
-  AreaChart
+  PieChart
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -127,13 +102,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  mediaLibraryAIInsights,
-  mediaLibraryCollaborators,
-  mediaLibraryPredictions,
-  mediaLibraryActivities,
-  mediaLibraryQuickActions,
-} from '@/lib/mock-data/adapters'
+
+
 
 import { Switch } from '@/components/ui/switch'
 

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion'
 import {
   Smartphone,
-  Tablet,
   Monitor,
   Menu,
   X,
@@ -15,11 +14,8 @@ import {
   Eye,
   Maximize2,
   Minimize2,
-  RotateCcw,
   Settings
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import { useContext7GUI } from '@/components/ui/enhanced-gui-2025'
 

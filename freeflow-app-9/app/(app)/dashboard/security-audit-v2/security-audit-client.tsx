@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,59 +14,40 @@ import { Switch } from '@/components/ui/switch'
 import {
   Shield,
   ShieldCheck,
-  ShieldAlert,
-  ShieldX,
   Search,
   Target,
-  Activity,
   BarChart3,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   AlertCircle,
   CheckCircle2,
-  XCircle,
   Clock,
   Calendar,
   Settings,
   Play,
-  Pause,
   RefreshCw,
   Filter,
   Plus,
   MoreHorizontal,
   Download,
   FileText,
-  Eye,
   Lock,
-  Unlock,
-  Key,
   Server,
   Database,
   Cloud,
   Globe,
-  Wifi,
   HardDrive,
-  Cpu,
   Network,
   Bug,
   Scan,
-  Crosshair,
   Radar,
-  Fingerprint,
   Users,
   Building2,
-  FileWarning,
   FileCheck,
   Layers,
-  GitBranch,
-  Terminal,
-  Code,
   Webhook,
   Zap,
-  ArrowRight,
-  ExternalLink,
-  Copy
+  ExternalLink
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

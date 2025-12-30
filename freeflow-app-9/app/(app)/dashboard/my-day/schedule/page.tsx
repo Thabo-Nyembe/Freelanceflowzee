@@ -49,7 +49,6 @@ import {
 
 // DATABASE QUERIES
 import {
-  ScheduleBlock,
   getSchedule,
   createScheduleBlock,
   updateScheduleBlock,

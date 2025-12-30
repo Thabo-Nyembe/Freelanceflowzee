@@ -9,9 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Store,
   Search,
@@ -36,33 +34,23 @@ import {
   Smartphone,
   Monitor,
   Code,
-  Palette,
   BarChart3,
   DollarSign,
   Users,
   Zap,
   Award,
-  Eye,
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown,
   ChevronRight,
-  Plus,
   Sparkles,
   Crown,
   Gift,
   Tag,
-  Calendar,
   Building2,
-  Image,
   MoreHorizontal,
-  ArrowUpRight,
   Layers,
   Sliders,
   Terminal,
   Webhook,
   Bell,
-  Key,
   Network
 } from 'lucide-react'
 

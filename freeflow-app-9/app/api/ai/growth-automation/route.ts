@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { growthAutomationEngine, type Lead } from '@/lib/ai/growth-automation-engine';
+import { growthAutomationEngine } from '@/lib/ai/growth-automation-engine';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;

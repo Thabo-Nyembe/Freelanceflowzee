@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -11,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,10 +18,8 @@ import {
   Code,
   Key,
   Zap,
-  TrendingUp,
   Shield,
   Clock,
-  AlertCircle,
   CheckCircle,
   CheckCircle2,
   BarChart3,
@@ -42,62 +38,39 @@ import {
   ArrowDownRight,
   Send,
   Play,
-  Pause,
   RefreshCw,
   Download,
   Upload,
   FileJson,
   Folder,
   FolderOpen,
-  File,
   Terminal,
   Activity,
   Server,
-  Database,
   Lock,
-  Unlock,
   BookOpen,
   History,
   GitBranch,
-  Tag,
-  Link2,
-  ExternalLink,
-  Layers,
-  Box,
-  Cpu,
-  HardDrive,
-  Wifi,
-  WifiOff,
   AlertTriangle,
   XCircle,
-  Timer,
   Gauge,
   TestTube,
-  Braces,
   FileCode,
   Variable,
   Webhook,
   FlaskConical,
   ListChecks,
   RotateCcw,
-  Sparkles,
   Cog,
   Bell,
   Palette,
-  Languages,
   ShieldCheck,
   UserCog,
-  Wand2,
   FileText,
-  Bug,
-  CheckSquare,
   Square,
   PlayCircle,
   StopCircle,
-  FastForward,
   Repeat,
-  Target,
-  Workflow,
   Moon,
   Sun,
   FolderPlus,
@@ -119,8 +92,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Hooks
-import { useApiEndpoints, type ApiEndpoint as DBApiEndpoint } from '@/lib/hooks/use-api-endpoints'
-import { useApiKeys, type ApiKey as DBApiKey } from '@/lib/hooks/use-api-keys'
+import { useApiEndpoints } from '@/lib/hooks/use-api-endpoints'
+import { useApiKeys } from '@/lib/hooks/use-api-keys'
 
 // Types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { motion, useAnimation, useInView, AnimatePresence } from 'framer-motion'
+import { motion, useAnimation, useInView } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 // Enhanced motion container with stagger effects inspired by Motion primitives

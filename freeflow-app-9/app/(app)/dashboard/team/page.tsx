@@ -28,7 +28,6 @@ import {
   getTeamMembers,
   createTeamMember,
   deleteTeamMember,
-  updateTeamMember,
   TeamMember as DBTeamMember,
   DepartmentType
 } from '@/lib/team-hub-queries'

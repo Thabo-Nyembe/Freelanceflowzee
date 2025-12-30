@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 // import { EnhancedInteractiveSystem, EnhancedButton as InteractiveButton } from '@/components/ui/enhanced-interactive-system'
 import { Input } from '@/components/ui/input'
@@ -18,12 +17,9 @@ import {
   Settings,
   Paperclip,
   Smile,
-  MessageSquare,
   Circle,
   ArrowLeft,
-  Star,
-  Archive,
-  Trash2
+  Star
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

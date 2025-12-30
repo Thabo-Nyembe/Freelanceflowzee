@@ -9,25 +9,11 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import {
   Brain,
-  User,
-  Clock,
-  Eye,
-  TrendingUp,
   Zap,
   Target,
-  Palette,
-  Layout,
-  Settings,
   Activity,
-  BarChart3,
   Lightbulb,
-  Heart,
-  Fingerprint,
-  Sparkles,
   Cpu,
-  Database,
-  Network,
-  Shield,
   RefreshCw
 } from 'lucide-react'
 

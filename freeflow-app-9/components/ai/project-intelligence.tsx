@@ -14,8 +14,6 @@ import {
   AlertTriangle,
   Lightbulb,
   Target,
-  DollarSign,
-  Clock,
   Loader2
 } from 'lucide-react'
 import { analyzeProjectIntelligence } from '@/lib/ai/business-intelligence'

@@ -2,91 +2,41 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence, Reorder } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   Bell,
-  Check,
   CheckCircle,
-  ChevronDown,
   ChevronRight,
   Clock,
-  Filter,
   Flag,
   Hash,
   Inbox,
-  Layers,
   MessageSquare,
-  MoreHorizontal,
   Plus,
   Search,
   Settings,
   Sparkles,
-  Star,
   Target,
-  TrendingUp,
   User,
-  Users,
-  X,
   Zap,
   Calendar,
   ArrowRight,
-  Eye,
-  EyeOff,
   Pin,
   Archive,
   Trash2,
-  ExternalLink,
-  Copy,
-  Share2,
-  Download,
-  Upload,
   Edit,
-  Save,
   RefreshCw,
-  AlertTriangle,
-  Info,
-  HelpCircle,
-  Command,
-  Keyboard,
-  Mic,
-  MicOff,
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize2,
-  Minimize2,
-  Grid,
   List,
   LayoutGrid,
   SlidersHorizontal,
-  Bookmark,
-  Heart,
-  ThumbsUp,
   Activity,
-  BarChart3,
-  LineChart,
-  PieChart,
-  DollarSign,
-  Briefcase,
   FileText,
   FolderOpen,
-  Image,
-  Video,
-  Link,
-  Globe,
-  Mail,
-  Phone,
-  MapPin,
-  Building,
-  Award,
   Trophy,
-  Medal,
   Crown,
   Flame,
-  Rocket,
 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -94,7 +44,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 

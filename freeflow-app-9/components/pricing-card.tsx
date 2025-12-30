@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo, useState, useCallback } from 'react'
+import React, { memo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Check, X, Star, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'

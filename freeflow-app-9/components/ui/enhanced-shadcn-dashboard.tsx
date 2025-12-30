@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,15 +32,11 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import {
   BarChart3,
   TrendingUp,
   Users,
   DollarSign,
-  Activity,
-  Clock,
-  CheckCircle,
   AlertTriangle,
   Info,
   Calendar as CalendarIcon,
@@ -49,8 +44,6 @@ import {
   Settings,
   MoreHorizontal,
   Plus,
-  Filter,
-  Search,
   Download,
   RefreshCw
 } from 'lucide-react'

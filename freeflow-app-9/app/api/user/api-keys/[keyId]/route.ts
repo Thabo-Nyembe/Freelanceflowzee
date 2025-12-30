@@ -8,7 +8,7 @@ import logger from '@/lib/logger';
  */
 
 // Mock storage (replace with database)
-let userAPIKeys: any[] = []
+const userAPIKeys: any[] = []
 
 export async function DELETE(
   request: NextRequest,

@@ -18,8 +18,7 @@ import {
   DollarSign,
   CheckCircle,
   AlertCircle,
-  Loader2,
-  User
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {

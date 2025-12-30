@@ -1232,7 +1232,7 @@ Return as JSON with field: message`;
     const [startHour, startMin] = businessHours.start.split(':').map(Number);
     const [endHour, endMin] = businessHours.end.split(':').map(Number);
 
-    let currentTime = new Date(date);
+    const currentTime = new Date(date);
     currentTime.setHours(startHour, startMin, 0, 0);
 
     const endTime = new Date(date);

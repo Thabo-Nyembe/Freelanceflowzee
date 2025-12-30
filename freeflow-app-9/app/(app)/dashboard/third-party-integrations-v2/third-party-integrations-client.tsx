@@ -6,16 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -30,13 +27,11 @@ import {
   Pause,
   RefreshCcw,
   Check,
-  X,
   AlertTriangle,
   Clock,
   ArrowRight,
   ArrowDown,
   Filter,
-  ChevronRight,
   Activity,
   BarChart3,
   Shield,
@@ -47,7 +42,6 @@ import {
   Code,
   Webhook,
   Database,
-  Cloud,
   Mail,
   MessageSquare,
   Calendar,
@@ -60,11 +54,7 @@ import {
   History,
   Eye,
   Edit,
-  Trash2,
   Copy,
-  ExternalLink,
-  ChevronDown,
-  MoreVertical,
   Sparkles,
   Workflow,
   Timer,
@@ -73,7 +63,6 @@ import {
   AlertCircle,
   Bell,
   Lock,
-  RefreshCw,
   Palette,
   Info,
 } from 'lucide-react'

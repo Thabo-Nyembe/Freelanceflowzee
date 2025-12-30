@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   AlertTriangle, 
   RefreshCw, 
@@ -19,10 +19,7 @@ import {
   CheckCircle,
   X,
   AlertCircle,
-  Info,
-  Zap,
   FileText,
-  Settings,
   MessageSquare
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'

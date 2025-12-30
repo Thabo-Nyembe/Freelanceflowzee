@@ -1,31 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import {
   PredictiveAnalyticsSystem,
   CostMetricType,
   PerformanceMetricType,
   OptimizationStrategyType,
-  QueuePriority,
-  MLModelType,
   TimeWindow,
-  AlertType,
-  AlertSeverity,
-  CostAnomalyResult,
-  ProviderPerformanceScore,
-  QueueMetrics,
-  OptimizationResult,
-  MLModelEvaluationResult,
-  SystemHealthMetrics,
-  PredictionResult,
-  DashboardMetrics
+  AlertSeverity
 } from '@/lib/ai/predictive-analytics-system';
 import { WebSocketServer } from '@/lib/websocket-server';
 import { rateLimit } from '@/lib/rate-limit';
 import { validateToken } from '@/lib/auth';
 import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackMetric } from '@/lib/analytics';
-import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { createFeatureLogger } from '@/lib/logger'
 
