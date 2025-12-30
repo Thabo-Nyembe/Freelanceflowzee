@@ -332,6 +332,37 @@ export default function CrmClient() {
     { label: 'Avg Lead Score', value: stats.avgLeadScore.toFixed(0), change: 4.1, icon: Zap, gradient: 'from-blue-500 to-indigo-500' }
   ]
 
+  // Handlers
+  const handleAddContact = () => {
+    toast.info('Add Contact', {
+      description: 'Opening contact form...'
+    })
+  }
+
+  const handleCreateDeal = () => {
+    toast.info('Create Deal', {
+      description: 'Opening deal pipeline...'
+    })
+  }
+
+  const handleImportContacts = () => {
+    toast.success('Import started', {
+      description: 'Contacts are being imported'
+    })
+  }
+
+  const handleExportData = () => {
+    toast.success('Exporting data', {
+      description: 'CRM data will be downloaded'
+    })
+  }
+
+  const handleQualifyLead = (leadId: string) => {
+    toast.success('Lead qualified', {
+      description: 'Lead moved to opportunities'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

@@ -685,6 +685,37 @@ export default function MilestonesClient() {
     return [...new Map(deps.map(d => [d.id, d])).values()]
   }, [])
 
+  // Handlers
+  const handleCreateMilestone = () => {
+    toast.info('Create Milestone', {
+      description: 'Opening milestone wizard...'
+    })
+  }
+
+  const handleUpdateStatus = (milestoneId: string, status: string) => {
+    toast.success('Status updated', {
+      description: `Milestone marked as ${status}`
+    })
+  }
+
+  const handleAddDependency = (milestoneId: string) => {
+    toast.info('Add Dependency', {
+      description: 'Select a milestone to link'
+    })
+  }
+
+  const handleExportTimeline = () => {
+    toast.success('Exporting timeline', {
+      description: 'Timeline chart will be downloaded'
+    })
+  }
+
+  const handleArchiveMilestone = (milestoneId: string) => {
+    toast.info('Milestone archived', {
+      description: 'Milestone moved to archive'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

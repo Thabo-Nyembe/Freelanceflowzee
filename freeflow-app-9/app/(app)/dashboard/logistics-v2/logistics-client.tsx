@@ -608,6 +608,7 @@ export default function LogisticsClient() {
     })
   }, [searchQuery, statusFilter])
 
+  // Handlers
   const handleNewShipment = () => {
     toast.info('New Shipment', {
       description: 'Opening shipment creation form...'

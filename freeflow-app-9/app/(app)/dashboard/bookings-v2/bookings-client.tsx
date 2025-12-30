@@ -155,6 +155,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   const timeSlots = useMemo(() => generateTimeSlots(), [currentDate])
 
+  // Handlers
   const handleNewBooking = () => {
     toast.info('New Booking', {
       description: 'Opening booking form...'

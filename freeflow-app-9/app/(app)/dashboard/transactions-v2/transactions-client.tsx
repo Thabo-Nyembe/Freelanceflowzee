@@ -436,6 +436,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     return 'text-red-600'
   }
 
+  // Handlers
   const handleIssueRefund = () => {
     if (!selectedPayment) return
     toast.success(`Refund issued for ${formatCurrency(selectedPayment.amount)}`)

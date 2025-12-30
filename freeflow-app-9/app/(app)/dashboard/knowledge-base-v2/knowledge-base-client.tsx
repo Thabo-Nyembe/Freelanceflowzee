@@ -756,6 +756,7 @@ export default function KnowledgeBaseClient() {
     setShowPageDialog(true)
   }
 
+  // Handlers
   const handleCreatePage = () => {
     toast.info('Create Page', {
       description: 'Opening page editor...'

@@ -553,6 +553,7 @@ export default function MonitoringClient() {
     return { total, healthy, warning, critical, avgCpu, avgMemory, totalContainers, activeAlerts }
   }, [])
 
+  // Handlers
   const handleAddHost = () => {
     toast.info('Add Host', {
       description: 'Opening host configuration...'

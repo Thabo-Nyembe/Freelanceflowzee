@@ -480,6 +480,7 @@ export default function OnboardingClient() {
 
   const maxViews = Math.max(...mockAnalytics.map(a => a.views))
 
+  // Handlers
   const handleCreateFlow = () => {
     toast.info('Opening flow builder...')
     // In production, this would open a flow creation dialog or builder

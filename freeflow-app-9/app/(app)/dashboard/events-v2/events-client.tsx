@@ -581,6 +581,7 @@ export default function EventsClient() {
     })
   }, [searchQuery, statusFilter, typeFilter])
 
+  // Handlers
   const handleCreateEvent = () => {
     toast.info('Create Event', {
       description: 'Opening event creation wizard...'
