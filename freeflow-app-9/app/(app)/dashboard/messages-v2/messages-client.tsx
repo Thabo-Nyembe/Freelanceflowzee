@@ -331,6 +331,37 @@ export default function MessagesClient() {
     { label: 'Mentions', value: stats.mentions.toString(), change: -5.0, icon: AtSign, gradient: 'from-indigo-500 to-purple-500' }
   ]
 
+  // Handlers
+  const handleSendMessage = () => {
+    toast.success('Message sent', {
+      description: 'Your message has been delivered'
+    })
+  }
+
+  const handleCreateChannel = () => {
+    toast.info('Create Channel', {
+      description: 'Opening channel builder...'
+    })
+  }
+
+  const handleStartCall = (contactName: string) => {
+    toast.info('Starting call', {
+      description: `Calling ${contactName}...`
+    })
+  }
+
+  const handleMarkAsRead = (channelName: string) => {
+    toast.success('Marked as read', {
+      description: `All messages in #${channelName} marked as read`
+    })
+  }
+
+  const handleMuteChannel = (channelName: string) => {
+    toast.info('Channel muted', {
+      description: `#${channelName} notifications muted`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

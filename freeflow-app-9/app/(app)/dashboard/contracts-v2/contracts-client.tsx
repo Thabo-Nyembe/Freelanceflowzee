@@ -362,6 +362,37 @@ export default function ContractsClient({ initialContracts }: { initialContracts
     return colors[color] || colors.gray
   }
 
+  // Handlers
+  const handleCreateContract = () => {
+    toast.info('Create Contract', {
+      description: 'Opening contract builder...'
+    })
+  }
+
+  const handleSignContract = (contractName: string) => {
+    toast.success('Signing contract', {
+      description: `Opening signature for "${contractName}"...`
+    })
+  }
+
+  const handleSendForSignature = (contractName: string) => {
+    toast.success('Sent for signature', {
+      description: `"${contractName}" sent to recipients`
+    })
+  }
+
+  const handleDownloadContract = (contractName: string) => {
+    toast.success('Downloading contract', {
+      description: `"${contractName}" will be downloaded`
+    })
+  }
+
+  const handleArchiveContract = (contractName: string) => {
+    toast.info('Contract archived', {
+      description: `"${contractName}" moved to archive`
+    })
+  }
+
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (

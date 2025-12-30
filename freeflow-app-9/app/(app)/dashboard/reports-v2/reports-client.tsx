@@ -496,6 +496,37 @@ export default function ReportsClient() {
     )
   }
 
+  // Handlers
+  const handleCreateReport = () => {
+    toast.info('Create Report', {
+      description: 'Opening report builder...'
+    })
+  }
+
+  const handleExportReport = (reportName: string) => {
+    toast.success('Exporting report', {
+      description: `"${reportName}" will be downloaded`
+    })
+  }
+
+  const handleScheduleReport = (reportName: string) => {
+    toast.success('Report scheduled', {
+      description: `"${reportName}" delivery scheduled`
+    })
+  }
+
+  const handleShareReport = (reportName: string) => {
+    toast.success('Link copied', {
+      description: `Share link for "${reportName}" copied`
+    })
+  }
+
+  const handleDuplicateReport = (reportName: string) => {
+    toast.success('Report duplicated', {
+      description: `Copy of "${reportName}" created`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">

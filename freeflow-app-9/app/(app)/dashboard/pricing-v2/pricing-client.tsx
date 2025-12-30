@@ -472,6 +472,37 @@ export default function PricingClient({
     { label: 'Coupons Active', value: mockCoupons.filter(c => c.isActive).length.toString(), change: 25, icon: Tag, color: 'from-pink-500 to-rose-600' }
   ]
 
+  // Handlers
+  const handleCreatePlan = () => {
+    toast.info('Create Plan', {
+      description: 'Opening plan builder...'
+    })
+  }
+
+  const handleEditPlan = (planName: string) => {
+    toast.info('Edit Plan', {
+      description: `Opening "${planName}" for editing...`
+    })
+  }
+
+  const handleCreateCoupon = () => {
+    toast.info('Create Coupon', {
+      description: 'Opening coupon builder...'
+    })
+  }
+
+  const handleExportPricing = () => {
+    toast.success('Exporting pricing', {
+      description: 'Pricing data will be downloaded'
+    })
+  }
+
+  const handleArchivePlan = (planName: string) => {
+    toast.info('Plan archived', {
+      description: `"${planName}" has been archived`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

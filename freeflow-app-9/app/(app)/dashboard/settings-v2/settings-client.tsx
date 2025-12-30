@@ -372,6 +372,37 @@ export default function SettingsClient() {
     { label: 'Account Age', value: '1y 2m', change: 0, icon: Calendar, color: 'from-teal-500 to-green-500' }
   ]
 
+  // Handlers
+  const handleResetPassword = () => {
+    toast.info('Reset Password', {
+      description: 'Password reset email will be sent'
+    })
+  }
+
+  const handleEnable2FA = () => {
+    toast.success('2FA enabled', {
+      description: 'Two-factor authentication is now active'
+    })
+  }
+
+  const handleExportData = () => {
+    toast.success('Exporting data', {
+      description: 'Your account data will be downloaded'
+    })
+  }
+
+  const handleRevokeSession = (sessionId: string) => {
+    toast.info('Session revoked', {
+      description: 'Device has been logged out'
+    })
+  }
+
+  const handleDeleteAccount = () => {
+    toast.info('Delete Account', {
+      description: 'Please confirm account deletion...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

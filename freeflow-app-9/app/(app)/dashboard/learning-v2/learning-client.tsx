@@ -618,6 +618,7 @@ export default function LearningClient() {
     })
   }
 
+  // Handlers
   const handleResumeCourse = (course: Course) => {
     toast.success('Resuming course', {
       description: `Continuing ${course.title}`
@@ -633,6 +634,18 @@ export default function LearningClient() {
   const handleShareProgress = () => {
     toast.success('Progress shared', {
       description: 'Your learning progress has been shared'
+    })
+  }
+
+  const handleEnrollCourse = (courseName: string) => {
+    toast.success('Enrolled', {
+      description: `You are now enrolled in "${courseName}"`
+    })
+  }
+
+  const handleBookmarkLesson = (lessonName: string) => {
+    toast.success('Lesson bookmarked', {
+      description: `"${lessonName}" saved to bookmarks`
     })
   }
 

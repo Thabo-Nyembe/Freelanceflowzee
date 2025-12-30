@@ -801,6 +801,37 @@ export default function EmailMarketingClient({
     { label: 'Engaged Rate', value: `${stats.engagedRate.toFixed(1)}%`, change: 4.8, icon: Star, color: 'from-indigo-500 to-purple-600' }
   ]
 
+  // Handlers
+  const handleCreateCampaign = () => {
+    toast.info('Create Campaign', {
+      description: 'Opening email campaign builder...'
+    })
+  }
+
+  const handleSendCampaign = (campaignName: string) => {
+    toast.success('Sending campaign', {
+      description: `"${campaignName}" is being sent...`
+    })
+  }
+
+  const handleScheduleCampaign = (campaignName: string) => {
+    toast.success('Campaign scheduled', {
+      description: `"${campaignName}" has been scheduled`
+    })
+  }
+
+  const handleDuplicateCampaign = (campaignName: string) => {
+    toast.success('Campaign duplicated', {
+      description: `Copy of "${campaignName}" created`
+    })
+  }
+
+  const handleExportSubscribers = () => {
+    toast.success('Exporting subscribers', {
+      description: 'Subscriber list will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50/30 to-purple-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

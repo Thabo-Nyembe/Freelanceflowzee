@@ -478,6 +478,7 @@ export default function WebhooksClient({
     setShowEndpointDialog(true)
   }
 
+  // Handlers
   const handleTestWebhook = () => {
     toast.info('Test Webhook', {
       description: 'Sending test payload...'
@@ -495,6 +496,24 @@ export default function WebhooksClient({
   const handleRotateSecret = () => {
     toast.success('Secret rotated', {
       description: 'New signing secret has been generated'
+    })
+  }
+
+  const handleCreateWebhook = () => {
+    toast.info('Create Webhook', {
+      description: 'Opening webhook builder...'
+    })
+  }
+
+  const handleDisableWebhook = (webhookName: string) => {
+    toast.info('Webhook disabled', {
+      description: `"${webhookName}" has been disabled`
+    })
+  }
+
+  const handleExportWebhooks = () => {
+    toast.success('Exporting webhooks', {
+      description: 'Webhook configuration will be downloaded'
     })
   }
 

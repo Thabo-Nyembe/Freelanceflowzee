@@ -608,6 +608,7 @@ export default function PollsClient() {
     setShowCreateDialog(true)
   }
 
+  // Handlers
   const handleUseTemplate = () => {
     toast.info('Template Gallery', {
       description: 'Opening template gallery...'
@@ -624,6 +625,18 @@ export default function PollsClient() {
   const handleShareForm = () => {
     toast.success('Link copied', {
       description: 'Form share link copied to clipboard'
+    })
+  }
+
+  const handleClosePoll = (pollName: string) => {
+    toast.info('Poll closed', {
+      description: `"${pollName}" is no longer accepting responses`
+    })
+  }
+
+  const handleDuplicatePoll = (pollName: string) => {
+    toast.success('Poll duplicated', {
+      description: `Copy of "${pollName}" created`
     })
   }
 

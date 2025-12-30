@@ -557,6 +557,37 @@ export default function DesktopAppClient() {
     inProgress: mockBuilds.filter(b => ['building', 'signing', 'notarizing', 'uploading', 'queued'].includes(b.status)).length
   }
 
+  // Handlers
+  const handleStartBuild = () => {
+    toast.info('Starting build', {
+      description: 'Initiating new desktop build...'
+    })
+  }
+
+  const handleDownloadBuild = (buildVersion: string, platform: string) => {
+    toast.success('Downloading build', {
+      description: `${buildVersion} for ${platform} download starting...`
+    })
+  }
+
+  const handleCancelBuild = (buildId: string) => {
+    toast.info('Build cancelled', {
+      description: `Build ${buildId} has been cancelled`
+    })
+  }
+
+  const handleRetryBuild = (buildVersion: string) => {
+    toast.info('Retrying build', {
+      description: `Retrying ${buildVersion}...`
+    })
+  }
+
+  const handlePublishRelease = (buildVersion: string) => {
+    toast.success('Publishing release', {
+      description: `${buildVersion} is being published...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
