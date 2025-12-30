@@ -705,6 +705,7 @@ export default function InvoicingClient() {
     }
   }, [invoices])
 
+  // Handlers
   const handleViewInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice)
     setShowInvoiceDialog(true)

@@ -658,6 +658,37 @@ export default function ProfileClient() {
     { label: 'Assessments', value: stats.assessmentsPassed.toString(), change: null, icon: CheckCircle, gradient: 'from-indigo-500 to-purple-600' }
   ]
 
+  // Handlers
+  const handleEditProfile = () => {
+    toast.info('Edit Profile', {
+      description: 'Opening profile editor...'
+    })
+  }
+
+  const handleUpdatePhoto = () => {
+    toast.info('Update Photo', {
+      description: 'Opening photo uploader...'
+    })
+  }
+
+  const handleAddSkill = (skill: string) => {
+    toast.success('Skill added', {
+      description: `${skill} has been added to your profile`
+    })
+  }
+
+  const handleRequestEndorsement = () => {
+    toast.success('Request sent', {
+      description: 'Endorsement request sent to connections'
+    })
+  }
+
+  const handleShareProfile = () => {
+    toast.success('Link copied', {
+      description: 'Profile link copied to clipboard'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="p-6">

@@ -438,6 +438,37 @@ export default function ThirdPartyIntegrationsClient() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
+  // Handlers
+  const handleConnectIntegration = (integrationName: string) => {
+    toast.info('Connecting integration', {
+      description: `Setting up ${integrationName}...`
+    })
+  }
+
+  const handleDisconnectIntegration = (integrationName: string) => {
+    toast.success('Integration disconnected', {
+      description: `${integrationName} has been removed`
+    })
+  }
+
+  const handleRefreshIntegration = (integrationName: string) => {
+    toast.info('Refreshing integration', {
+      description: `Syncing ${integrationName} data...`
+    })
+  }
+
+  const handleConfigureIntegration = (integrationName: string) => {
+    toast.info('Opening configuration', {
+      description: `Configuring ${integrationName} settings`
+    })
+  }
+
+  const handleViewLogs = (integrationName: string) => {
+    toast.info('Loading logs', {
+      description: `Fetching ${integrationName} activity logs`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

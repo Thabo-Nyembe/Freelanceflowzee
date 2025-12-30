@@ -743,6 +743,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     setIsAssetDialogOpen(true)
   }
 
+  // Handlers
   const handleSync = () => {
     toast.success('Sync started', {
       description: 'Syncing assets with cloud storage...'

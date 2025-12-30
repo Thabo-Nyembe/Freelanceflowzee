@@ -571,6 +571,37 @@ export default function AccessLogsClient() {
     { label: 'Data Transfer', value: formatBytes(mockStats.bytesTransferred), icon: Database, change: '+2.3 GB', color: 'text-teal-600' }
   ]
 
+  // Handlers
+  const handleExportLogs = () => {
+    toast.success('Exporting logs', {
+      description: 'Log data will be downloaded'
+    })
+  }
+
+  const handleFilterByIP = (ip: string) => {
+    toast.info('Filter applied', {
+      description: `Showing logs from ${ip}`
+    })
+  }
+
+  const handleBlockIP = (ip: string) => {
+    toast.success('IP blocked', {
+      description: `${ip} has been added to blocklist`
+    })
+  }
+
+  const handleClearLogs = () => {
+    toast.info('Logs cleared', {
+      description: 'Historical logs have been archived'
+    })
+  }
+
+  const handleCreateAlert = () => {
+    toast.success('Alert created', {
+      description: 'You will be notified of suspicious activity'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">

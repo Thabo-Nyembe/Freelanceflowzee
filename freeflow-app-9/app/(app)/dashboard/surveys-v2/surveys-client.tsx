@@ -504,6 +504,7 @@ export default function SurveysClient() {
     }
   }, [])
 
+  // Handlers
   const handleShare = (survey: Survey) => {
     setSharingSurvey(survey)
     setShowShareDialog(true)

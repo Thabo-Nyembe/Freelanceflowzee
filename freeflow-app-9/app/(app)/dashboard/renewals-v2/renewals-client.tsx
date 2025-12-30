@@ -664,6 +664,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     setIsRenewalDialogOpen(true)
   }
 
+  // Handlers
   const handleSendProposal = () => {
     if (!selectedRenewal) return
     toast.success('Proposal sent successfully', {

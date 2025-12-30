@@ -415,7 +415,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
     }
   }, [displayBudgets, dbTransactions, txStats])
 
-  // Handler for creating a new budget
+  // Handlers
   const handleCreateBudget = useCallback(async () => {
     if (!budgetForm.name.trim()) {
       toast.error('Budget name is required')

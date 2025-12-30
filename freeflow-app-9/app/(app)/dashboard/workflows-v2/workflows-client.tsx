@@ -470,6 +470,7 @@ export default function WorkflowsClient() {
     })
   }, [searchQuery, statusFilter, folderFilter])
 
+  // Handlers
   const handleCreateWorkflow = () => {
     toast.info('Create Workflow', {
       description: 'Opening workflow builder...'

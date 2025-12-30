@@ -391,6 +391,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     })
   }, [displayWorkflows, searchQuery, workflowTypeFilter, statusFilter])
 
+  // Handlers
   const handleCreateAutomation = () => {
     toast.info('Create Automation', {
       description: 'Opening automation builder...'

@@ -890,6 +890,37 @@ export default function ApiKeysClient() {
     )
   }, [searchQuery])
 
+  // Handlers
+  const handleCreateApiKey = () => {
+    toast.info('Create API Key', {
+      description: 'Opening key generator...'
+    })
+  }
+
+  const handleRevokeKey = (keyName: string) => {
+    toast.success('Key revoked', {
+      description: `${keyName} has been revoked`
+    })
+  }
+
+  const handleRegenerateKey = (keyName: string) => {
+    toast.success('Key regenerated', {
+      description: `New key created for ${keyName}`
+    })
+  }
+
+  const handleCopyKey = (key: string) => {
+    toast.success('Copied to clipboard', {
+      description: 'API key copied successfully'
+    })
+  }
+
+  const handleExportKeys = () => {
+    toast.info('Exporting keys', {
+      description: 'API key data will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

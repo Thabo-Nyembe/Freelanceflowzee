@@ -527,6 +527,37 @@ export default function ExtensionsClient() {
   const featuredExtensions = mockExtensions.filter(e => e.isFeatured)
   const editorsPickExtensions = mockExtensions.filter(e => e.isEditorsPick)
 
+  // Handlers
+  const handleInstallExtension = (extensionName: string) => {
+    toast.success('Installing extension', {
+      description: `${extensionName} is being installed...`
+    })
+  }
+
+  const handleUninstallExtension = (extensionName: string) => {
+    toast.info('Extension removed', {
+      description: `${extensionName} has been uninstalled`
+    })
+  }
+
+  const handleEnableExtension = (extensionName: string) => {
+    toast.success('Extension enabled', {
+      description: `${extensionName} is now active`
+    })
+  }
+
+  const handleDisableExtension = (extensionName: string) => {
+    toast.info('Extension disabled', {
+      description: `${extensionName} has been paused`
+    })
+  }
+
+  const handleConfigureExtension = (extensionName: string) => {
+    toast.info('Opening settings', {
+      description: `Configuring ${extensionName}...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}

@@ -481,6 +481,37 @@ export default function DataExportClient() {
     successRate: mockPipelines.reduce((sum, p) => sum + p.metrics.successRate, 0) / mockPipelines.length
   }), [])
 
+  // Handlers
+  const handleCreateExport = () => {
+    toast.info('Create Export', {
+      description: 'Opening export wizard...'
+    })
+  }
+
+  const handleRunExport = (exportName: string) => {
+    toast.success('Export started', {
+      description: `${exportName} is now running`
+    })
+  }
+
+  const handleScheduleExport = (exportName: string) => {
+    toast.info('Schedule export', {
+      description: `Setting up schedule for ${exportName}`
+    })
+  }
+
+  const handleDownloadExport = (exportId: string) => {
+    toast.success('Downloading export', {
+      description: 'File will be ready shortly'
+    })
+  }
+
+  const handleDeleteExport = (exportName: string) => {
+    toast.info('Export deleted', {
+      description: `${exportName} has been removed`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

@@ -708,6 +708,7 @@ export default function ShippingClient() {
 
   const pendingOrders = mockOrders.filter(o => o.status === 'awaiting_shipment')
 
+  // Handlers
   const handleCreateShipment = () => {
     toast.info('Create Shipment', {
       description: 'Opening shipment form...'

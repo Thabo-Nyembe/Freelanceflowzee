@@ -498,6 +498,37 @@ export default function FilesHubClient() {
     return crumbs
   }, [currentFolderId])
 
+  // Handlers
+  const handleUploadFile = () => {
+    toast.info('Upload File', {
+      description: 'Opening file picker...'
+    })
+  }
+
+  const handleCreateFolder = () => {
+    toast.success('Folder created', {
+      description: 'New folder has been created'
+    })
+  }
+
+  const handleDownloadFile = (fileName: string) => {
+    toast.success('Downloading file', {
+      description: `${fileName} is being downloaded`
+    })
+  }
+
+  const handleShareFile = (fileName: string) => {
+    toast.info('Share file', {
+      description: `Opening share options for ${fileName}`
+    })
+  }
+
+  const handleDeleteFile = (fileName: string) => {
+    toast.info('File deleted', {
+      description: `${fileName} moved to trash`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

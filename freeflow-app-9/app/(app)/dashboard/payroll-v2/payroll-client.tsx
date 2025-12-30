@@ -656,6 +656,7 @@ export default function PayrollClient() {
     )
   }, [searchQuery])
 
+  // Handlers
   const handleExportReport = () => {
     if (!selectedPayRun) return
     toast.success(`Exporting report for ${selectedPayRun.period}...`)

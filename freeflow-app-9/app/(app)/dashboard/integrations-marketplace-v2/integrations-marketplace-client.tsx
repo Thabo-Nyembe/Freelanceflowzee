@@ -527,6 +527,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
     return count.toString()
   }
 
+  // Handlers
   const handleInstall = (app: AppListing, plan: PricingPlan) => {
     console.log(`Installing ${app.name} with plan ${plan.name}`)
     setShowInstallDialog(false)

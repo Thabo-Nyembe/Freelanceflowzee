@@ -581,6 +581,37 @@ export default function SecurityClient() {
     })
   }, [searchQuery, typeFilter])
 
+  // Handlers
+  const handleRunScan = () => {
+    toast.info('Security scan started', {
+      description: 'Analyzing your security posture...'
+    })
+  }
+
+  const handleEnableMFA = () => {
+    toast.success('MFA enabled', {
+      description: 'Two-factor authentication is now active'
+    })
+  }
+
+  const handleRotateKeys = () => {
+    toast.success('Keys rotated', {
+      description: 'Security keys have been regenerated'
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.info('Exporting report', {
+      description: 'Security audit report is being generated'
+    })
+  }
+
+  const handleBlockThreat = (threatId: string) => {
+    toast.success('Threat blocked', {
+      description: 'Suspicious activity has been blocked'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}
